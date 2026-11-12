@@ -38,3 +38,19 @@ Every division update should include: current status, completed work with links/
 
 ## Current implementation scope
 This is a documentation-and-data foundation on a feature branch. It is not yet an integrated dashboard, automated control plane, or proof that any division is launch-ready.
+
+## Local validation
+
+From the repository root, run:
+
+```sh
+python organization/tools/validate_readiness.py
+python -m unittest discover -s organization/tests -v
+```
+
+The validator checks registry references, status vocabulary, assessment structure,
+and evidence gates. It deliberately blocks `standby` or `operational` claims
+unless every required check has an explicit `passed` result with evidence and
+there are no open gaps. Missing division assessments are reported as warnings;
+they are not silently treated as ready. This is a data-integrity check, not a
+substitute for real operational testing or owner approval.
