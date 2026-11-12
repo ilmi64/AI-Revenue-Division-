@@ -1,0 +1,45 @@
+import json
+import sys
+import unittest
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
+from build_organisation_dashboard import build_dashboard
+
+
+class OrganisationDashboardTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        root = Path(__file__).resolve().parents[1]
+        cls.registry = json.loads((root / "division-registry.json").read_text(encoding="utf-8"))
+        cls.readiness = json.loads((root / "readiness-register.json").read_text(encoding="utf-8"))
+        cls.dependencies = json.loads((root / "dependency-map.json").read_text(encoding="utf-8"))
+
+    def test_dashboard_covers_all_divisions_and_never_promotes_readiness(self):
+        report = build_dashboard(self.registry, self.readiness, self.dependencies, [], [])
+        self.assertEqual(report["organisation"]["division_count"], 9)
+        self.assertEqual(report["organisation"]["verified_standby_or_operational"], 0)
+        self.assertTrue(all(x["verified_status"] not in {"standby", "operational"} for x in report["division_scorecard"]))
+
+    def test_crypto_blockers_are_visible(self):
+        report = build_dashboard(self.registry, self.readiness, self.dependencies, [], [])
+        crypto = next(x for x in report["division_scorecard"] if x["id"] == "crypto")
+        self.assertTrue(crypto["required_blockers"])
+        self.assertEqual(crypto["verified_status"], "testing")
+
+    def test_finance_and_animora_are_not_assumed_ready(self):
+        report = build_dashboard(self.registry, self.readiness, self.dependencies, [], [])
+        finance = next(x for x in report["division_scorecard"] if x["id"] == "finance")
+        animora = next(x for x in report["division_scorecard"] if x["id"] == "animora")
+        self.assertEqual(finance["verified_status"], "unassessed")
+        self.assertEqual(animora["verified_status"], "deferred")
+
+    def test_revenue_snapshot_is_embedded_read_only(self):
+        report = build_dashboard(self.registry, self.readiness, self.dependencies, [], [])
+        self.assertEqual(report["ai_revenue"]["finance_cad"]["net_cash_received_verified_by_ledger_status"], "0.00")
+        self.assertIn("risk_register", report)
+        self.assertIn("outstanding_decisions", report)
+
+
+if __name__ == "__main__":
+    unittest.main()
