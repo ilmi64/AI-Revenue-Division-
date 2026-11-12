@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "policy": "Readiness is evidence-based. A division cannot be marked standby or operational solely because a plan or repository exists.",
+  "last_reviewed": "2026-11-12",
+  "checks": [
+    {"id":"mandate-defined","name":"Mandate and boundaries documented","required_for":["standby","operational"]},
+    {"id":"responsible-owner","name":"Responsible owner and escalation route defined","required_for":["standby","operational"]},
+    {"id":"core-workflow","name":"Core workflow implemented and documented","required_for":["standby","operational"]},
+    {"id":"tests","name":"Relevant automated and manual tests passed","required_for":["standby","operational"]},
+    {"id":"failure-handling","name":"Failure, recovery, and rollback procedures tested","required_for":["standby","operational"]},
+    {"id":"security","name":"Secrets, permissions, and data-handling review completed","required_for":["standby","operational"]},
+    {"id":"dependencies","name":"Dependencies and cross-division handoffs verified","required_for":["standby","operational"]},
+    {"id":"approval-gates","name":"Owner approval gates and prohibited actions enforced","required_for":["standby","operational"]},
+    {"id":"monitoring","name":"Monitoring, reporting, and audit evidence available","required_for":["operational"]}
+  ],
+  "division_assessments": [
+    {
+      "division_id": "executive",
+      "claimed_status": "building",
+      "verified_status": "building",
+      "evidence": ["Initial organisation charter and division registry added on a development branch."],
+      "open_gaps": ["No integrated dashboard or automated reporting pipeline yet.", "Division owners and escalation contacts need formal confirmation."]
+    },
+    {
+      "division_id": "ai-revenue",
+      "claimed_status": "building",
+      "verified_status": "building",
+      "evidence": ["Repository README documents operating constraints.", "Offline listing-preflight utility, sample data, tests, and service scope are present."],
+      "open_gaps": ["Opportunity eligibility and task availability require fresh verification.", "No verified customer revenue recorded.", "No approved customer acquisition or delivery workflow yet."]
+    },
+    {
+      "division_id": "crypto",
+      "claimed_status": "testing",
+      "verified_status": "testing",
+      "evidence": ["Repository README explicitly defines paper-trading-only scope.", "Read-only market research and historical backtesting commits exist.", "Open pull requests require review."],
+      "open_gaps": ["Reconcile newer PolyBot work with the current repository's documented paper-only boundary.", "Review open pull requests and test evidence.", "No live-trading readiness claim is permitted."]
+    },
+    {
+      "division_id": "ecommerce",
+      "claimed_status": "deferred",
+      "verified_status": "deferred",
+      "evidence": ["Read-only listing CSV audit MVP exists."],
+      "open_gaps": ["Major development intentionally deferred."]
+    },
+    {
+      "division_id": "animora",
+      "claimed_status": "deferred",
+      "verified_status": "deferred",
+      "evidence": ["Long-term studio ambition recorded in strategic planning."],
+      "open_gaps": ["Expansion waits until the main organisation is successful and can fund it sustainably."]
+    }
+  ]
+}
