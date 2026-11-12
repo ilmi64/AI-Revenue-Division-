@@ -22,5 +22,7 @@ jobs:
           python-version: "3.x"
       - name: Validate organisation records
         run: python organization/tools/validate_readiness.py
-      - name: Run validator tests
+      - name: Build read-only AI Revenue snapshot
+        run: python organization/tools/build_executive_snapshot.py
+      - name: Run validator and snapshot tests
         run: python -m unittest discover -s organization/tests -v
