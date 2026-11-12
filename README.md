@@ -28,6 +28,10 @@ Identify real demand, validate opportunities before investing time, produce usef
 - `quality/`: delivery and security checks.
 - `finance/`: profitability model and revenue ledger.
 - `reports/`: weekly operating report template.
+- `portfolio/listing-preflight/`: first AI-built service demo: offline CSV listing validator, tests, sample file, and service scope.
+
+## First portfolio demo
+[Listing CSV Preflight](portfolio/listing-preflight/README.md) catches basic product-feed issues before marketplace import. It is offline and read-only; it does not connect to or modify seller accounts.
 
 ## Status vocabulary
 `research`, `verified`, `applied`, `qualified`, `in_progress`, `submitted`, `accepted`, `approved_unpaid`, `paid`, `rejected`, `closed`.
