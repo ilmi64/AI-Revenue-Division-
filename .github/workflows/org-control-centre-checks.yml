@@ -22,6 +22,8 @@ jobs:
           python-version: "3.x"
       - name: Validate organisation records
         run: python organization/tools/validate_readiness.py
+      - name: Build cross-division dependency report
+        run: python organization/tools/build_dependency_report.py
       - name: Build read-only AI Revenue snapshot
         run: python organization/tools/build_executive_snapshot.py
       - name: Run validator and snapshot tests
