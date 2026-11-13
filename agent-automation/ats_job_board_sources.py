@@ -10,7 +10,7 @@ USER_AGENT = "AI-Revenue-Division-Opportunity-Research/1.0 (read-only; source-at
 SLUG = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$")
 ENDPOINTS = {
     "greenhouse": "https://boards-api.greenhouse.io/v1/boards/{board}/jobs?content=true",
-    "lever": "https://api.{region}.lever.co/v0/postings/{board}?mode=json",
+    "lever": "https://api.lever.co/v0/postings/{board}?mode=json",
     "ashby": "https://api.ashbyhq.com/posting-api/job-board/{board}?includeCompensation=true",
 }
 
@@ -40,6 +40,8 @@ def validate_config(config: dict) -> list[dict]:
     return clean
 
 def endpoint(entry: dict) -> str:
+    if entry["provider"] == "lever" and entry["region"] == "eu":
+        return "https://api.eu.lever.co/v0/postings/" + entry["board"] + "?mode=json"
     return ENDPOINTS[entry["provider"]].format(board=entry["board"], region=entry["region"])
 
 def _record(entry: dict, job: dict) -> dict | None:
