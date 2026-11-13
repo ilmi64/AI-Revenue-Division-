@@ -44,4 +44,30 @@ class ExecutionLogTests(unittest.TestCase):
         r=build_report(self.registry,self.queue,{"events":[self.event("completed",evidence=["ref"])]})
         self.assertFalse(r["validated"])
         self.assertTrue(any("not allowed" in e for e in r["errors"]))
+
+    def test_blocked_task_can_resume_with_resolution_evidence(self):
+        queue=json.loads(json.dumps(self.queue))
+        next(t for t in queue["tasks"] if t["id"]=="TECH-001")["owner_assignment"]="owner-confirmed"
+        events=[
+            self.event("started", "2026-11-12T12:00:00-05:00"),
+            self.event("blocked", "2026-11-12T12:15:00-05:00"),
+            self.event("resumed", "2026-11-12T13:00:00-05:00", ["blocker-resolution.txt"])
+        ]
+        for i,event in enumerate(events): event["event_id"]=f"EV-B{i+1}"
+        report=build_report(self.registry,queue,{"events":events})
+        self.assertTrue(report["validated"],report["errors"])
+        self.assertEqual(report["task_state_from_events"]["TECH-001"],"in_progress")
+
+    def test_blocked_task_cannot_resume_without_resolution_evidence(self):
+        queue=json.loads(json.dumps(self.queue))
+        next(t for t in queue["tasks"] if t["id"]=="TECH-001")["owner_assignment"]="owner-confirmed"
+        events=[
+            self.event("started", "2026-11-12T12:00:00-05:00"),
+            self.event("blocked", "2026-11-12T12:15:00-05:00"),
+            self.event("resumed", "2026-11-12T13:00:00-05:00")
+        ]
+        for i,event in enumerate(events): event["event_id"]=f"EV-N{i+1}"
+        report=build_report(self.registry,queue,{"events":events})
+        self.assertFalse(report["validated"])
+        self.assertTrue(any("blocker was resolved" in error for error in report["errors"]))
 if __name__ == "__main__": unittest.main()
