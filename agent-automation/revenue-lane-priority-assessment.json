@@ -1,0 +1,185 @@
+{
+  "assessment_date": "2026-11-13",
+  "region": "Ontario, Canada",
+  "budget_cad": 0,
+  "status": "research_only",
+  "ranking_method": "Practical path to first legitimate payment, with Canada eligibility, payout access, upfront cost, screening friction, and skill barriers considered. Not a forecast or guarantee.",
+  "ranks": [
+    {
+      "rank": 1,
+      "id": "direct_client_services_contra",
+      "lane": "AI development and automation services",
+      "sources": [
+        "contra",
+        "direct_prospecting"
+      ],
+      "priority": "A",
+      "outlook": "potentially_shortest_if_client_and_deliverable_are_ready",
+      "canada_payout": "Canada CAD EFT listed; USD 1 processor fee and 0.40% CAD conversion fee shown on Contra fee page; confirm at withdrawal",
+      "barriers": [
+        "portfolio proof",
+        "client acquisition",
+        "scope and contract"
+      ],
+      "activation": "human_review_only"
+    },
+    {
+      "rank": 2,
+      "id": "outlier",
+      "lane": "AI evaluation",
+      "sources": [
+        "outlier"
+      ],
+      "priority": "A/B",
+      "outlook": "potentially_quick_after_selection_and_project_match_but_task_supply_uncertain",
+      "canada": "Canada listed in supported-country guidelines; project restrictions apply",
+      "payout": "weekly Tuesday via PayPal, AirTM or ACH per FAQ",
+      "barriers": [
+        "associate degree minimum per FAQ",
+        "screening",
+        "identity and location verification"
+      ],
+      "activation": "human_review_only"
+    },
+    {
+      "rank": 3,
+      "id": "alignerr",
+      "lane": "AI evaluation",
+      "sources": [
+        "alignerr"
+      ],
+      "priority": "B",
+      "outlook": "uncertain_application_and_matching",
+      "canada": "not conclusively verified for all Canadian applicants",
+      "payout": "Stripe Connect or PayPal depending on location",
+      "barriers": [
+        "screening",
+        "identity verification",
+        "project availability"
+      ],
+      "activation": "hold_for_canada_payout_confirmation"
+    },
+    {
+      "rank": 4,
+      "id": "upwork",
+      "lane": "freelance services",
+      "sources": [
+        "upwork"
+      ],
+      "priority": "B",
+      "outlook": "variable; portfolio and client demand determine timing",
+      "canada": "local bank payout outside US listed at USD 0.99",
+      "payout": "local bank, PayPal or Payoneer options may be available",
+      "fees": "0-15% freelancer fee per contract; Connects cost USD 0.15 each and many proposals require them",
+      "activation": "free_or_invitation_routes_only_unless_spend_approved"
+    },
+    {
+      "rank": 5,
+      "id": "security_testing",
+      "lane": "authorized security testing",
+      "sources": [
+        "bugcrowd",
+        "hackerone"
+      ],
+      "priority": "C",
+      "outlook": "uncertain_and_skill_dependent",
+      "canada": "Bugcrowd Canadian EFT minimum listed at CAD merchant level; HackerOne lists CAD bank transfer with local minimum",
+      "payout": "bank transfer and PayPal; HackerOne also lists supported crypto wallets",
+      "barriers": [
+        "security skills",
+        "strict written scope",
+        "identity and tax setup",
+        "accepted valid finding"
+      ],
+      "activation": "authorized_programs_only"
+    },
+    {
+      "rank": 6,
+      "id": "gumroad",
+      "lane": "digital products",
+      "sources": [
+        "gumroad"
+      ],
+      "priority": "C",
+      "outlook": "usually_slower_without_existing_audience_or_demand",
+      "canada": "country-specific payout method must be confirmed",
+      "fees": "10% plus USD 0.50 direct/profile; 30% Discover; processing may apply",
+      "barriers": [
+        "product creation",
+        "buyer demand",
+        "distribution"
+      ],
+      "activation": "validate_demand_before_building_or_publishing"
+    },
+    {
+      "rank": 7,
+      "id": "github_bounties",
+      "lane": "funded GitHub issues",
+      "sources": [
+        "github_public"
+      ],
+      "priority": "C",
+      "outlook": "highly_variable",
+      "canada": "verify each bounty terms and payout route",
+      "barriers": [
+        "explicit funding",
+        "maintainer acceptance",
+        "payment terms"
+      ],
+      "activation": "funded_bounties_only"
+    },
+    {
+      "rank": 8,
+      "id": "grants",
+      "lane": "grants and innovation funding",
+      "sources": [
+        "canada_benefits_finder",
+        "nrc_irap"
+      ],
+      "priority": "D",
+      "outlook": "long_lead_time_not_immediate_personal_cash",
+      "canada": "program-specific; NRC IRAP minimum criteria include incorporated Canadian for-profit business up to 500 FTE developing innovative technology",
+      "barriers": [
+        "legal applicant eligibility",
+        "project fit",
+        "eligible costs",
+        "approval and reporting"
+      ],
+      "activation": "business_funding_research_only"
+    },
+    {
+      "rank": 9,
+      "id": "remote_employment",
+      "lane": "remote employment and contracts",
+      "sources": [
+        "remote_job_feeds",
+        "employer_ats"
+      ],
+      "priority": "parallel_long_term",
+      "outlook": "often_weeks_or_months",
+      "canada": "verify Ontario/Canada eligibility per listing",
+      "barriers": [
+        "hiring cycle",
+        "competition",
+        "interviews",
+        "role eligibility"
+      ],
+      "activation": "read_only_discovery"
+    }
+  ],
+  "controls": {
+    "no_upfront_spend_without_approval": true,
+    "no_applications_or_proposals_automatically": true,
+    "no_contact_or_outreach_automatically": true,
+    "no_publishing_automatically": true,
+    "no_security_testing_outside_written_scope": true,
+    "distinguish_opportunity_from_earned_revenue": true,
+    "distinguish_earned_revenue_from_cash_received": true
+  },
+  "caveats": [
+    "No income or time-to-hire guarantee.",
+    "User skill/credential fit has not been confirmed.",
+    "Payout availability and fees can change and must be rechecked before any work.",
+    "No platform accounts were connected or activated."
+  ]
+}
