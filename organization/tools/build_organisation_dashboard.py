@@ -295,7 +295,8 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
         "division_execution_evidence": execution_report,
         "cross_division_integration": integration_report,
         "ai_revenue": revenue,
-        "risk_escalations": risk_escalations,\n        "incident_response": incident_response,
+        "risk_escalations": risk_escalations,
+        "incident_response": incident_response,
         "risk_register": {
             "records": risk_records,
             "readiness_and_dependency_warnings": risks,
@@ -316,7 +317,8 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
             "work_queue_errors": work_queue_report.get("errors", []),
             "execution_log_errors": execution_report.get("errors", []),
             "cross_division_integration_errors": integration_report.get("errors", []),
-            "governance_link_errors": governance_errors,\n            "incident_register_errors": incident_errors,
+            "governance_link_errors": governance_errors,
+            "incident_register_errors": incident_errors,
             "revenue_warnings": revenue["data_quality"]["warnings"],
             "note": "Absence of a record is not proof that work or funds do not exist outside these source files."
         }
@@ -332,7 +334,8 @@ def main():
     parser.add_argument("--work-queue", type=Path, default=Path("organization/work-queue.json"))
     parser.add_argument("--execution-log", type=Path, default=Path("organization/execution-log.json"))
     parser.add_argument("--risk-register", type=Path, default=Path("organization/risk-register.json"))
-    parser.add_argument("--decision-register", type=Path, default=Path("organization/decision-register.json"))\n    parser.add_argument("--incident-register", type=Path, default=Path("organization/incident-register.json"))
+    parser.add_argument("--decision-register", type=Path, default=Path("organization/decision-register.json"))
+    parser.add_argument("--incident-register", type=Path, default=Path("organization/incident-register.json"))
     parser.add_argument("--opportunities", type=Path, default=Path("intelligence/opportunity-tracker.csv"))
     parser.add_argument("--ledger", type=Path, default=Path("finance/revenue-ledger.csv"))
     args = parser.parse_args()
