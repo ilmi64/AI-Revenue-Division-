@@ -10,7 +10,11 @@
     "restore_target": "isolated_temporary_fixture_only",
     "rollback": "fixture_only; production rollback requires owner approval and validated backup",
     "restart": "synthetic_health_marker_only; no real service command",
-    "crypto": "paper_only; no wallet, key, signature, order or live execution"
+    "crypto": "paper_only; no wallet, key, signature, order or live execution",
+    "production_restore_and_rollback": "explicit_owner_approval_and_independent_second_review_required",
+    "approved_operators": "named_owner_approved_operators_only",
+    "access_scope": "least_privilege_time_limited_access; no standing production credentials in repository or CI",
+    "credential_handling": "credentials supplied only through an owner-approved secure mechanism; never commit, print, or persist them in artifacts"
   },
   "procedures": [
     {
