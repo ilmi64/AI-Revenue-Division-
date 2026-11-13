@@ -325,6 +325,11 @@
           "to": "research",
           "artifact": "Threat intelligence, platform-risk and source-verification questions",
           "trigger": "At risk assessment and material change review"
+        },
+        {
+          "to": "all",
+          "artifact": "Evidence-backed risk escalation notice, severity, affected scope, recommended safeguards or stop, linked tasks and owner-decision pathway",
+          "trigger": "Critical/high risk, material cross-division exposure, or independent stop recommendation"
         }
       ],
       "acceptance_criteria": [
