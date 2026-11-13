@@ -21,7 +21,8 @@ class OrganisationDashboardTests(unittest.TestCase):
         return build_dashboard(
             self.registry, self.readiness, self.dependencies, self.operating, [], [],
             work_queue if work_queue is not None else self.work_queue, execution_log,
-            risk_register, decision_register, incident_register
+            risk_register, decision_register, incident_register,
+            recovery_plan if recovery_plan is not None else json.loads((Path(__file__).resolve().parents[1] / "recovery-plan.json").read_text(encoding="utf-8"))
         )
 
     def test_dashboard_covers_all_divisions_and_never_promotes_readiness(self):
