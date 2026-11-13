@@ -203,6 +203,8 @@ class OrganisationDashboardTests(unittest.TestCase):
         self.assertEqual(len(escalation["broadcast_divisions"]), 9)
         self.assertEqual(escalation["linked_tasks"][0]["derived_execution_state"], "in_progress")
         self.assertEqual(escalation["pending_owner_decision_ids"], ["DEC-PENDING-001"])
+        self.assertEqual(escalation["description"], "Test-only critical risk")
+        self.assertEqual(escalation["risk_evidence"], ["test-fixture:evidence"])
         self.assertIn("STOP-ONLY ADVISORY", escalation["recommended_action"])
         self.assertEqual(escalation["dispatch_status"], "derived_dashboard_route_only_not_dispatched")
         self.assertEqual(report["data_quality"]["governance_link_errors"], [])
