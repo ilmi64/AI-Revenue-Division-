@@ -130,3 +130,18 @@ python organization/tools/validate_execution_log.py
 ```
 
 The validator rejects unknown task IDs, duplicate event IDs, missing actors or timestamps, timezone-free timestamps, invalid event transitions, unassigned-owner starts/completions and completion events without evidence. The dashboard reports events by division and derives task state from the event stream; it does not mutate the work queue or treat a report as independently verified fact. The log starts empty, so it does not imply that work is underway. CI runs this validator and the full test suite.
+
+
+## Incident response and corrective-action tracking
+
+`incident-register.json` is the evidence-backed incident and recovery record. It starts empty; absence of records is not evidence that no incidents occurred elsewhere. Each incident must identify its affected division, severity, detection evidence, containment recommendation and valid links to risks, tasks and owner decisions. Corrective actions remain proposed until ownership is confirmed; assignment, progress and completion are not inferred. Completed actions require completion evidence.
+
+An incident cannot be recorded as closed until post-incident review evidence exists, every corrective action is completed, and a linked owner decision is approved with outcome evidence. A deferred action linked to a pending owner decision does not satisfy closure. Critical/high incident records are surfaced in the dashboard and follow the existing Risk stop-only advisory route; this does not execute containment, rollback, notification or approval.
+
+Validate with:
+
+```sh
+python organization/tools/validate_incident_register.py
+```
+
+The dashboard reports the register and data-quality errors read-only. CI runs the validator and incident lifecycle tests.
