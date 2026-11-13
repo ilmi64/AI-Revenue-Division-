@@ -228,6 +228,30 @@ class OrganisationDashboardTests(unittest.TestCase):
         self.assertEqual(report["incident_response"]["critical_or_high_count"], 0)
         self.assertEqual(report["data_quality"]["incident_register_errors"], [])
 
+
+    def test_critical_incident_creates_stop_only_route_without_dispatch(self):
+        risk = {"records": [{
+            "id": "RISK-INC-1", "division_id": "technology", "severity": "critical",
+            "status": "open", "description": "Linked test risk", "mitigation": "Review",
+            "owner_assignment": "unassigned_pending_owner_confirmation",
+            "related_task_ids": [], "related_decision_ids": [], "evidence": ["test:risk"]
+        }]}
+        incident = {"records": [{
+            "id": "INC-CRIT-1", "summary": "Test-only incident", "severity": "critical",
+            "status": "recovering", "affected_division_id": "technology",
+            "containment_recommendation": "Pause affected workflow pending review",
+            "owner_assignment": "unassigned_pending_owner_confirmation",
+            "detection_evidence": ["test:incident"],
+            "related_risk_ids": ["RISK-INC-1"], "related_task_ids": [],
+            "related_decision_ids": [], "corrective_actions": []
+        }]}
+        report = self.build(risk_register=risk, decision_register={"records": []}, incident_register=incident)
+        escalation = report["incident_response"]["escalations"][0]
+        self.assertEqual(escalation["route"], ["risk", "executive", "technology"])
+        self.assertIn("STOP-ONLY ADVISORY", escalation["recommended_action"])
+        self.assertEqual(escalation["dispatch_status"], "dashboard_route_only_not_dispatched")
+        self.assertEqual(report["data_quality"]["incident_register_errors"], [])
+
     def test_revenue_snapshot_and_operating_framework_are_embedded(self):
         report = self.build()
         self.assertEqual(report["ai_revenue"]["finance_cad"]["net_cash_received_verified_by_ledger_status"], "0.00")
