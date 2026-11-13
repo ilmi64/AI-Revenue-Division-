@@ -25,8 +25,9 @@ class SecurityPostureTests(unittest.TestCase):
             (root / ".github/workflows/org-control-centre-checks.yml").write_text(
                 "permissions:\n  contents: read\n", encoding="utf-8"
             )
+            fake_token = "ghp_" + ("A" * 36)
             (root / "sample.py").write_text(
-                'token = "ghp_" + "A" * 36\n', encoding="utf-8"
+                f'token = "{fake_token}"\n', encoding="utf-8"
             )
             report = build_report(root)
             self.assertEqual(report["secret_scan"]["finding_count"], 1)
