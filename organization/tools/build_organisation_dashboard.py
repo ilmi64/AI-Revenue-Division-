@@ -12,6 +12,7 @@ sys.path.insert(0, str(TOOLS))
 from build_dependency_report import build_report
 from build_executive_snapshot import build_snapshot, read_csv
 from validate_readiness import validate
+from validate_operating_framework import build_report as build_operating_framework_report
 
 
 def load_json(path):
@@ -19,10 +20,11 @@ def load_json(path):
         return json.load(handle)
 
 
-def build_dashboard(registry, readiness, dependency_map, opportunities, ledger):
+def build_dashboard(registry, readiness, dependency_map, operating_framework, opportunities, ledger):
     errors, warnings = validate(registry, readiness)
     dependency_report = build_report(registry, readiness, dependency_map)
     revenue = build_snapshot(opportunities, ledger)
+    operating = build_operating_framework_report(registry, operating_framework)
 
     assessments = {a["division_id"]: a for a in readiness.get("division_assessments", [])}
     divisions = []
@@ -89,6 +91,7 @@ def build_dashboard(registry, readiness, dependency_map, opportunities, ledger):
         },
         "division_scorecard": divisions,
         "cross_division_dependencies": dependency_report,
+        "division_operating_framework": operating,
         "ai_revenue": revenue,
         "risk_register": risks,
         "outstanding_decisions": decisions,
@@ -97,6 +100,7 @@ def build_dashboard(registry, readiness, dependency_map, opportunities, ledger):
             "readiness_validation_errors": errors,
             "readiness_validation_warnings": warnings,
             "dependency_map_errors": dependency_report.get("errors", []),
+            "operating_framework_errors": operating.get("errors", []),
             "revenue_warnings": revenue["data_quality"]["warnings"],
             "note": "Absence of a record is not proof that work or funds do not exist outside these source files."
         }
@@ -108,15 +112,16 @@ def main():
     parser.add_argument("--registry", type=Path, default=Path("organization/division-registry.json"))
     parser.add_argument("--readiness", type=Path, default=Path("organization/readiness-register.json"))
     parser.add_argument("--dependencies", type=Path, default=Path("organization/dependency-map.json"))
+    parser.add_argument("--operating-framework", type=Path, default=Path("organization/operating-framework.json"))
     parser.add_argument("--opportunities", type=Path, default=Path("intelligence/opportunity-tracker.csv"))
     parser.add_argument("--ledger", type=Path, default=Path("finance/revenue-ledger.csv"))
     args = parser.parse_args()
     report = build_dashboard(
         load_json(args.registry), load_json(args.readiness), load_json(args.dependencies),
-        read_csv(args.opportunities), read_csv(args.ledger)
+        load_json(args.operating_framework), read_csv(args.opportunities), read_csv(args.ledger)
     )
     print(json.dumps(report, indent=2, ensure_ascii=False))
-    return 1 if report["data_quality"]["readiness_validation_errors"] or report["data_quality"]["dependency_map_errors"] else 0
+    return 1 if report["data_quality"]["readiness_validation_errors"] or report["data_quality"]["dependency_map_errors"] or report["data_quality"]["operating_framework_errors"] else 0
 
 
 if __name__ == "__main__":
