@@ -20,6 +20,8 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.x"
+      - name: Validate repository security posture
+        run: python organization/tools/validate_security_posture.py
       - name: Validate organisation records
         run: python organization/tools/validate_readiness.py
       - name: Build cross-division dependency report
