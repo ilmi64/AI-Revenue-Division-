@@ -1,0 +1,37 @@
+name: AI Automation Research Radar
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "23 13 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: research-radar
+  cancel-in-progress: true
+
+jobs:
+  collect-public-release-data:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run unit tests
+        working-directory: agent-automation
+        run: python -m unittest -v
+      - name: Collect public release metadata
+        run: python agent-automation/research-radar.py
+      - name: Upload research report
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-automation-research-radar
+          path: radar-output/
+          if-no-files-found: error
+          retention-days: 30
