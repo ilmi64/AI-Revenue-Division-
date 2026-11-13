@@ -60,4 +60,4 @@
   ],
   "drill_command": "python organization/tools/run_recovery_drill.py",
   "drill_result": "CI validates temporary-fixture mechanics only; no production recovery claim."
-}\n
+}
