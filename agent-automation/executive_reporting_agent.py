@@ -16,7 +16,7 @@ def load_json(path: str) -> dict | None:
 def build_report(opportunities: dict | None, triage: dict | None,
                  risk: dict | None, finance: dict | None) -> dict:
     missing = [name for name, value in (
-        ("opportunity_discovery", opportunities), ("development_triage", triage),
+        ("unified_division_intake", opportunities), ("development_triage", triage),
         ("risk_review", risk), ("finance_review", finance)) if value is None]
     discovery_count = len(opportunities.get("results", [])) if opportunities else 0
     triage_count = triage.get("lead_count", 0) if triage else 0
@@ -71,7 +71,7 @@ def main() -> int:
     parser.add_argument("--output-dir", default="executive-output")
     args = parser.parse_args()
     report = build_report(
-        load_json("opportunity-output/github-opportunities.json"),
+        load_json("opportunity-output/all-opportunities.json"),
         load_json("development-output/engineering-triage.json"),
         load_json("risk-output/risk-review.json"),
         load_json("finance-output/finance-payout-review.json"),
