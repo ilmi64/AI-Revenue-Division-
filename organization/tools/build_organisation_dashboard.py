@@ -16,6 +16,7 @@ from validate_operating_framework import build_report as build_operating_framewo
 from validate_work_queue import build_report as build_work_queue_report
 from validate_execution_log import build_report as build_execution_log_report
 from validate_division_integrations import build_report as build_division_integration_report
+from validate_incident_register import validate as validate_incident_register
 
 
 def load_json(path):
@@ -188,7 +189,7 @@ def build_risk_escalation_report(risk_register, decision_register, work_queue, e
         "records": escalations
     }
 
-def build_dashboard(registry, readiness, dependency_map, operating_framework, opportunities, ledger, work_queue=None, execution_log=None, risk_register=None, decision_register=None):
+def build_dashboard(registry, readiness, dependency_map, operating_framework, opportunities, ledger, work_queue=None, execution_log=None, risk_register=None, decision_register=None, incident_register=None):
     errors, warnings = validate(registry, readiness)
     dependency_report = build_report(registry, readiness, dependency_map)
     revenue = build_snapshot(opportunities, ledger)
@@ -200,6 +201,11 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
     risk_records = risk_register.get("records", []) if isinstance(risk_register, dict) and isinstance(risk_register.get("records", []), list) else []
     decision_records = decision_register.get("records", []) if isinstance(decision_register, dict) and isinstance(decision_register.get("records", []), list) else []
     risk_escalations = build_risk_escalation_report(risk_register, decision_register, work_queue, execution_report, operating_framework, registry)
+    incident_source = incident_register if isinstance(incident_register, dict) else {\"records\": []}
+    incident_errors = validate_incident_register(incident_source, risk_register or {\"records\": []}, decision_register or {\"records\": []}, work_queue or {\"tasks\": []}, registry)
+    incident_records = incident_source.get(\"records\", []) if isinstance(incident_source.get(\"records\", []), list) else []
+    incident_actions = [action for incident in incident_records if isinstance(incident, dict) for action in incident.get(\"corrective_actions\", []) if isinstance(incident.get(\"corrective_actions\", []), list) and isinstance(action, dict)]
+    incident_response = {\n        \"policy\": \"Incident and corrective-action states are owner-maintained evidence records. The dashboard does not contain, recover, roll back, notify, assign owners, or close incidents. Critical/high records follow the existing Risk stop-only advisory route.\",\n        \"incident_count\": len(incident_records),\n        \"critical_or_high_count\": sum(1 for row in incident_records if isinstance(row, dict) and row.get(\"severity\") in {\"critical\", \"high\"} and row.get(\"status\") not in {\"closed\", \"unassessed\"}),\n        \"corrective_action_count\": len(incident_actions),\n        \"corrective_actions_completed\": sum(1 for row in incident_actions if row.get(\"status\") == \"completed\"),\n        \"records\": incident_records\n    }
 
     assessments = {a["division_id"]: a for a in readiness.get("division_assessments", [])}
     divisions = []
@@ -271,7 +277,7 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
         "division_execution_evidence": execution_report,
         "cross_division_integration": integration_report,
         "ai_revenue": revenue,
-        "risk_escalations": risk_escalations,
+        "risk_escalations": risk_escalations,\n        "incident_response": incident_response,
         "risk_register": {
             "records": risk_records,
             "readiness_and_dependency_warnings": risks,
@@ -292,7 +298,7 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
             "work_queue_errors": work_queue_report.get("errors", []),
             "execution_log_errors": execution_report.get("errors", []),
             "cross_division_integration_errors": integration_report.get("errors", []),
-            "governance_link_errors": governance_errors,
+            "governance_link_errors": governance_errors,\n            "incident_register_errors": incident_errors,
             "revenue_warnings": revenue["data_quality"]["warnings"],
             "note": "Absence of a record is not proof that work or funds do not exist outside these source files."
         }
@@ -308,7 +314,7 @@ def main():
     parser.add_argument("--work-queue", type=Path, default=Path("organization/work-queue.json"))
     parser.add_argument("--execution-log", type=Path, default=Path("organization/execution-log.json"))
     parser.add_argument("--risk-register", type=Path, default=Path("organization/risk-register.json"))
-    parser.add_argument("--decision-register", type=Path, default=Path("organization/decision-register.json"))
+    parser.add_argument("--decision-register", type=Path, default=Path("organization/decision-register.json"))\n    parser.add_argument("--incident-register", type=Path, default=Path("organization/incident-register.json"))
     parser.add_argument("--opportunities", type=Path, default=Path("intelligence/opportunity-tracker.csv"))
     parser.add_argument("--ledger", type=Path, default=Path("finance/revenue-ledger.csv"))
     args = parser.parse_args()
@@ -319,7 +325,7 @@ def main():
         load_json(args.risk_register), load_json(args.decision_register)
     )
     print(json.dumps(report, indent=2, ensure_ascii=False))
-    return 1 if report["data_quality"]["readiness_validation_errors"] or report["data_quality"]["dependency_map_errors"] or report["data_quality"]["operating_framework_errors"] or report["data_quality"]["work_queue_errors"] or report["data_quality"]["execution_log_errors"] or report["data_quality"]["cross_division_integration_errors"] or report["data_quality"]["governance_link_errors"] else 0
+    return 1 if report["data_quality"]["readiness_validation_errors"] or report["data_quality"]["dependency_map_errors"] or report["data_quality"]["operating_framework_errors"] or report["data_quality"]["work_queue_errors"] or report["data_quality"]["execution_log_errors"] or report["data_quality"]["cross_division_integration_errors"] or report["data_quality"]["governance_link_errors"] or report["data_quality"]["incident_register_errors"] else 0
 
 
 if __name__ == "__main__":
