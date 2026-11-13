@@ -30,7 +30,7 @@ jobs:
           python-version: "3.12"
       - name: Run unit tests
         working-directory: agent-automation
-        run: python -m unittest -v
+        run: PYTHONPATH=. python -m unittest discover -s . -p 'test_*.py' -v
       - name: Collect public release metadata
         run: python agent-automation/research-radar.py
       - name: Install pinned Ollama version
