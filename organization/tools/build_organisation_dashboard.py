@@ -156,8 +156,17 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
         "division_execution_evidence": execution_report,
         "cross_division_integration": integration_report,
         "ai_revenue": revenue,
-        "risk_register": risks,
-        "outstanding_decisions": decisions,
+        "risk_register": {
+            "records": (risk_register or {"records": []}).get("records", []),
+            "readiness_and_dependency_warnings": risks,
+            "summary": governance_summary
+        },
+        "decision_register": {
+            "records": (decision_register or {"records": []}).get("records", []),
+            "readiness_gap_prompts": decisions,
+            "summary": governance_summary
+        },
+        "outstanding_decisions": decisions + (decision_register or {"records": []}).get("records", []),
         "reserved_owner_approvals": reserved_approvals,
         "data_quality": {
             "readiness_validation_errors": errors,
@@ -166,7 +175,9 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
             "operating_framework_errors": operating.get("errors", []),
             "work_queue_errors": work_queue_report.get("errors", []),
             "execution_log_errors": execution_report.get("errors", []),
-            "cross_division_integration_errors": integration_report.get("errors", []),\n            "governance_link_errors": governance_errors,
+            "cross_division_integration_errors": integration_report.get("errors", []),
+            "governance_link_errors": governance_errors,
+            "governance_link_errors": governance_errors,
             "revenue_warnings": revenue["data_quality"]["warnings"],
             "note": "Absence of a record is not proof that work or funds do not exist outside these source files."
         }
@@ -180,14 +191,19 @@ def main():
     parser.add_argument("--dependencies", type=Path, default=Path("organization/dependency-map.json"))
     parser.add_argument("--operating-framework", type=Path, default=Path("organization/operating-framework.json"))
     parser.add_argument("--work-queue", type=Path, default=Path("organization/work-queue.json"))
-    parser.add_argument("--execution-log", type=Path, default=Path("organization/execution-log.json"))\n    parser.add_argument("--risk-register", type=Path, default=Path("organization/risk-register.json"))\n    parser.add_argument("--decision-register", type=Path, default=Path("organization/decision-register.json"))
+    parser.add_argument("--execution-log", type=Path, default=Path("organization/execution-log.json"))
+    parser.add_argument("--risk-register", type=Path, default=Path("organization/risk-register.json"))
+    parser.add_argument("--decision-register", type=Path, default=Path("organization/decision-register.json"))
+    parser.add_argument("--risk-register", type=Path, default=Path("organization/risk-register.json"))
+    parser.add_argument("--decision-register", type=Path, default=Path("organization/decision-register.json"))
     parser.add_argument("--opportunities", type=Path, default=Path("intelligence/opportunity-tracker.csv"))
     parser.add_argument("--ledger", type=Path, default=Path("finance/revenue-ledger.csv"))
     args = parser.parse_args()
     report = build_dashboard(
         load_json(args.registry), load_json(args.readiness), load_json(args.dependencies),
         load_json(args.operating_framework), read_csv(args.opportunities), read_csv(args.ledger),
-        load_json(args.work_queue), load_json(args.execution_log)
+        load_json(args.work_queue), load_json(args.execution_log),
+        load_json(args.risk_register), load_json(args.decision_register)
     )
     print(json.dumps(report, indent=2, ensure_ascii=False))
     return 1 if report["data_quality"]["readiness_validation_errors"] or report["data_quality"]["dependency_map_errors"] or report["data_quality"]["operating_framework_errors"] or report["data_quality"]["work_queue_errors"] or report["data_quality"]["execution_log_errors"] or report["data_quality"]["cross_division_integration_errors"] or report["data_quality"]["governance_link_errors"] else 0
