@@ -23,13 +23,14 @@ def load_json(path):
         return json.load(handle)
 
 
-def validate_governance_links(work_queue, risk_register, decision_register):
+def validate_governance_links(work_queue, risk_register, decision_register, registry):
     """Validate governance references defensively; malformed input becomes errors, not crashes."""
     errors = []
     tasks = {
         item.get("id") for item in (work_queue or {}).get("tasks", [])
         if isinstance(item, dict) and isinstance(item.get("id"), str)
     }
+    divisions = {item.get("id") for item in registry.get("divisions", []) if isinstance(item, dict) and isinstance(item.get("id"), str)}
     risks = risk_register or {"records": []}
     decisions = decision_register or {"records": []}
     risk_rows = risks.get("records", []) if isinstance(risks, dict) else None
@@ -72,6 +73,12 @@ def validate_governance_links(work_queue, risk_register, decision_register):
         for field in ("severity", "status", "description", "division_id", "mitigation", "owner_assignment"):
             if not isinstance(row.get(field), str) or not row[field].strip():
                 errors.append(f"Risk {record_id} requires non-empty {field}.")
+        if row.get("severity") not in {"critical", "high", "medium", "low", "unassessed"}:
+            errors.append(f"Risk {record_id} has invalid severity.")
+        if row.get("status") not in {"open", "mitigating", "accepted_pending_owner_approval", "closed", "unassessed"}:
+            errors.append(f"Risk {record_id} has invalid status.")
+        if row.get("division_id") not in divisions:
+            errors.append(f"Risk {record_id} references unknown division {row.get('division_id')!r}.")
         linked_tasks.update(references(row, "related_task_ids", tasks, "Risk", record_id))
         references(row, "related_decision_ids", decision_index, "Risk", record_id)
 
@@ -90,6 +97,83 @@ def validate_governance_links(work_queue, risk_register, decision_register):
         "linked_task_count": len(linked_tasks)
     }
 
+
+def build_risk_escalation_report(risk_register, decision_register, work_queue, execution_report, operating_framework):
+    """Derive internal escalation routes; never dispatch notifications or authorise actions."""
+    risks = (risk_register or {}).get("records", [])
+    decisions = (decision_register or {}).get("records", [])
+    tasks = {
+        item.get("id"): item for item in (work_queue or {}).get("tasks", [])
+        if isinstance(item, dict) and isinstance(item.get("id"), str)
+    }
+    decision_index = {
+        item.get("id"): item for item in decisions
+        if isinstance(item, dict) and isinstance(item.get("id"), str)
+    }
+    task_states = execution_report.get("task_state_from_events", {})
+    risk_division = next(
+        (item for item in operating_framework.get("divisions", []) if item.get("id") == "risk"), {}
+    )
+    broadcast_handoff = next(
+        (item for item in risk_division.get("handoffs", [])
+         if isinstance(item, dict) and item.get("to") == "all"), None
+    )
+    escalations = []
+    for risk in risks if isinstance(risks, list) else []:
+        if not isinstance(risk, dict) or risk.get("status") in {"closed", "unassessed"}:
+            continue
+        severity = risk.get("severity")
+        if severity not in {"critical", "high", "medium", "low"}:
+            continue
+        task_ids = risk.get("related_task_ids", [])
+        decision_ids = risk.get("related_decision_ids", [])
+        linked_tasks = []
+        for task_id in task_ids if isinstance(task_ids, list) else []:
+            task = tasks.get(task_id)
+            if task:
+                linked_tasks.append({
+                    "task_id": task_id,
+                    "division_id": task.get("division_id"),
+                    "derived_execution_state": task_states.get(task_id, "no_validated_execution_event")
+                })
+        pending_decisions = [
+            decision_id for decision_id in decision_ids if decision_id in decision_index
+            and decision_index[decision_id].get("status") == "pending"
+        ] if isinstance(decision_ids, list) else []
+        urgent = severity in {"critical", "high"}
+        affected = risk.get("division_id")
+        escalations.append({
+            "risk_id": risk.get("id"),
+            "severity": severity,
+            "risk_status": risk.get("status"),
+            "affected_division": affected,
+            "escalation_tier": "immediate_independent_review" if urgent else "standard_risk_review",
+            "route": ["risk", "executive"] + ([affected] if isinstance(affected, str) and affected not in {"risk", "executive"} else []),
+            "recommended_action": (
+                "STOP-ONLY ADVISORY: recommend pausing the affected activity pending independent Risk review and Executive coordination. This is a recommendation, not an executed stop or permission to act."
+                if urgent else
+                "Route for documented Risk review and proportionate mitigation; no execution authority is created."
+            ),
+            "linked_tasks": linked_tasks,
+            "pending_owner_decision_ids": pending_decisions,
+            "owner_decision_path": (
+                "Existing linked owner decision is pending."
+                if pending_decisions else
+                "Create a scoped owner decision request only if the proposed response crosses a reserved approval boundary."
+            ),
+            "handoff_artifact": broadcast_handoff.get("artifact") if isinstance(broadcast_handoff, dict) else None,
+            "handoff_trigger": broadcast_handoff.get("trigger") if isinstance(broadcast_handoff, dict) else None,
+            "dispatch_status": "derived_dashboard_route_only_not_dispatched",
+            "authority": "Risk may independently challenge and recommend stop; only the owner can approve reserved actions. Deterministic controls remain authoritative."
+        })
+    escalations.sort(key=lambda row: (row["escalation_tier"] != "immediate_independent_review", row["risk_id"] or ""))
+    return {
+        "policy": "Escalations are derived from evidence-backed risk records. Dashboard routing does not send notifications, change task states, execute stops, close risks, or approve actions.",
+        "count": len(escalations),
+        "immediate_review_count": sum(row["escalation_tier"] == "immediate_independent_review" for row in escalations),
+        "records": escalations
+    }
+
 def build_dashboard(registry, readiness, dependency_map, operating_framework, opportunities, ledger, work_queue=None, execution_log=None, risk_register=None, decision_register=None):
     errors, warnings = validate(registry, readiness)
     dependency_report = build_report(registry, readiness, dependency_map)
@@ -98,7 +182,8 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
     work_queue_report = build_work_queue_report(registry, work_queue or {"tasks": []})
     execution_report = build_execution_log_report(registry, work_queue or {"tasks": []}, execution_log or {"events": []})
     integration_report = build_division_integration_report(registry, dependency_map, operating_framework)
-    governance_errors, governance_summary = validate_governance_links(work_queue, risk_register, decision_register)
+    governance_errors, governance_summary = validate_governance_links(work_queue, risk_register, decision_register, registry)
+    risk_escalations = build_risk_escalation_report(risk_register, decision_register, work_queue, execution_report, operating_framework)
 
     assessments = {a["division_id"]: a for a in readiness.get("division_assessments", [])}
     divisions = []
@@ -170,6 +255,7 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
         "division_execution_evidence": execution_report,
         "cross_division_integration": integration_report,
         "ai_revenue": revenue,
+        "risk_escalations": risk_escalations,
         "risk_register": {
             "records": (risk_register or {"records": []}).get("records", []),
             "readiness_and_dependency_warnings": risks,
