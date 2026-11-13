@@ -98,6 +98,11 @@
           "to": "executive",
           "artifact": "Weekly pipeline, blockers and approval requests",
           "trigger": "Weekly"
+        },
+        {
+          "to": "technology",
+          "artifact": "Tooling requirements, integration specifications and test acceptance evidence",
+          "trigger": "Before implementation or material workflow change"
         }
       ],
       "acceptance_criteria": [
@@ -199,6 +204,11 @@
           "to": "executive",
           "artifact": "Decision-focused brief with recommendation and confidence",
           "trigger": "At decision point"
+        },
+        {
+          "to": "technology",
+          "artifact": "Research data requirements, source-handling constraints and reproducible tooling needs",
+          "trigger": "Before introducing or changing research tooling"
         }
       ],
       "acceptance_criteria": [
@@ -252,6 +262,11 @@
           "to": "risk",
           "artifact": "Liquidity, fraud, concentration and counterparty concerns",
           "trigger": "On detection"
+        },
+        {
+          "to": "research",
+          "artifact": "Evidence requests for fees, terms, eligibility, currency conversion and financing assumptions",
+          "trigger": "Before financial modelling or material ledger classification"
         }
       ],
       "acceptance_criteria": [
@@ -305,6 +320,11 @@
           "to": "ai-revenue",
           "artifact": "Scam, platform and client-delivery risk review",
           "trigger": "Before external commitment"
+        },
+        {
+          "to": "research",
+          "artifact": "Threat intelligence, platform-risk and source-verification questions",
+          "trigger": "At risk assessment and material change review"
         }
       ],
       "acceptance_criteria": [
@@ -408,6 +428,11 @@
           "to": "finance",
           "artifact": "Product costs, fees, shipping and margin assumptions",
           "trigger": "Before commercial decision"
+        },
+        {
+          "to": "executive",
+          "artifact": "Commercial status, approval requests and material listing or fulfilment risks",
+          "trigger": "Before external commitment and at weekly review"
         }
       ],
       "acceptance_criteria": [
