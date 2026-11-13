@@ -31,6 +31,16 @@ class DivisionIntakeTests(unittest.TestCase):
             self.assertFalse(errors)
             self.assertEqual({x["lane"] for x in records}, {"freelance_services","github_bounties"})
 
+    def test_preserves_external_source_metadata(self):
+        item = normalize({"title":"Role","url":"https://example.com/role",
+                          "source_name":"Jobicy","lane":"remote_employment",
+                          "company":"Acme","location_text":"Canada",
+                          "eligibility_hint":"canada_or_worldwide_listed_check_full_terms",
+                          "source_attribution":"Credit Jobicy"}, "remote_employment")
+        self.assertEqual(item["company"], "Acme")
+        self.assertIn("Canada", item["location_text"])
+        self.assertEqual(item["source_attribution"], "Credit Jobicy")
+
     def test_remote_employment_lane_is_supported(self):
         item = normalize({"title":"Remote role","url":"https://example.com/role",
                           "source_name":"Job board","lane":"remote_employment"}, "remote_employment")
