@@ -15,6 +15,15 @@ class DevelopmentTaskAgentTests(unittest.TestCase):
         self.assertEqual(result["priority"], "hold")
         self.assertEqual(result["triage_score"], 0)
 
+    def test_external_source_relevance_is_only_a_review_signal(self):
+        result = triage({"title":"Python role","url":"https://jobicy.com/jobs/1",
+                         "lane":"remote_employment","source_name":"Jobicy",
+                         "signals":["source_relevance_keyword"]})
+        self.assertEqual(result["triage_score"], 1)
+        self.assertEqual(result["priority"], "review_later")
+        self.assertEqual(result["source_name"], "Jobicy")
+        self.assertFalse(result["verified_scope"])
+
     def test_report_handles_empty_results(self):
         report = build_report({"results": []})
         self.assertEqual(report["lead_count"], 0)
