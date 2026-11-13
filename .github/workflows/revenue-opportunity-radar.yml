@@ -32,8 +32,11 @@ jobs:
           PYTHONPATH=. python -m unittest test_finance_payout_agent.py -v
           PYTHONPATH=. python -m unittest test_executive_reporting_agent.py -v
           PYTHONPATH=. python -m unittest test_division_intake_agent.py -v
+          PYTHONPATH=. python -m unittest test_external_opportunity_sources.py -v
       - name: Collect public GitHub opportunity leads
         run: python agent-automation/opportunity_intelligence.py
+      - name: Fetch public remote-work feeds (read-only)
+        run: python agent-automation/external_opportunity_sources.py
       - name: Normalize all division feeds into shared opportunity intake
         run: python agent-automation/division_intake_agent.py
       - name: Prepare engineering triage briefs
@@ -52,6 +55,7 @@ jobs:
           path: |
             opportunity-output/
             division-inputs/
+            external-source-output/
             development-output/
             risk-output/
             finance-output/
