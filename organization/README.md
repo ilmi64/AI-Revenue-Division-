@@ -104,3 +104,16 @@ deferred; owner assignments that need confirmation are labelled explicitly.
 The validator checks full registry coverage, required sections and handoff
 references. The consolidated dashboard includes its validation summary, and
 the pull-request workflow runs the validator and regression tests.
+
+
+## Division work queue
+
+The proposed organisation-wide queue is in `work-queue.json`. It seeds measurable work across all nine divisions with task IDs, priority, dependencies, required evidence, acceptance criteria, ownership state, execution state and approval gates.
+
+Validate it with:
+
+```sh
+python organization/tools/validate_work_queue.py
+```
+
+The queue is a planning record, not proof that tasks have been assigned or started. All 18 initial tasks remain proposed and unassigned pending owner confirmation. Dependencies are reported as blockers until their prerequisite tasks have evidence-backed completion. A task cannot be marked completed without completion evidence and a timestamp; work cannot be marked in progress without an assigned owner. The dashboard includes the read-only queue summary, and CI checks its schema, dependency references, cycle safety and state transitions.
