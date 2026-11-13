@@ -35,6 +35,9 @@ jobs:
           PYTHONPATH=. python -m unittest test_external_opportunity_sources.py -v
           PYTHONPATH=. python -m unittest test_ats_job_board_sources.py -v
           PYTHONPATH=. python -m unittest test_validate_ats_board_candidates.py -v
+          PYTHONPATH=. python -m unittest test_validate_revenue_lane_registry.py -v
+      - name: Validate review-only revenue lane registry
+        run: PYTHONPATH=agent-automation python agent-automation/validate_revenue_lane_registry.py
       - name: Collect public GitHub opportunity leads
         run: python agent-automation/opportunity_intelligence.py
       - name: Fetch public remote-work feeds (read-only)
