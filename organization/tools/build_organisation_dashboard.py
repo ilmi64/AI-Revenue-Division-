@@ -180,7 +180,7 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
             "readiness_gap_prompts": decisions,
             "summary": governance_summary
         },
-        "outstanding_decisions": decisions + (decision_register or {"records": []}).get("records", []),
+        "outstanding_decisions": decisions + [row for row in (decision_register or {"records": []}).get("records", []) if isinstance(row, dict) and row.get("status") == "pending"],
         "reserved_owner_approvals": reserved_approvals,
         "data_quality": {
             "readiness_validation_errors": errors,
