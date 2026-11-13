@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  discover-and-report:
+  discover-and-triage:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -25,14 +25,20 @@ jobs:
           python-version: "3.12"
       - name: Run agent tests
         working-directory: agent-automation
-        run: PYTHONPATH=. python -m unittest test_opportunity_intelligence.py -v
+        run: |
+          PYTHONPATH=. python -m unittest test_opportunity_intelligence.py -v
+          PYTHONPATH=. python -m unittest test_development_task_agent.py -v
       - name: Collect public GitHub opportunity leads
         run: python agent-automation/opportunity_intelligence.py
-      - name: Upload discovery report
+      - name: Prepare engineering triage briefs
+        run: python agent-automation/development_task_agent.py
+      - name: Upload discovery and triage reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: github-revenue-opportunity-radar
-          path: opportunity-output/
+          path: |
+            opportunity-output/
+            development-output/
           if-no-files-found: warn
           retention-days: 30
