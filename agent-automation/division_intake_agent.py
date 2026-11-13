@@ -17,7 +17,8 @@ LANES = {
     "grants_sponsorships": "Open-source grants and sponsorships",
     "security_testing": "Security testing and responsible disclosure",
     "research_tasks": "Paid research and technical research tasks",
-    "github_bounties": "Public GitHub bounty and issue leads",\n    "remote_employment": "Remote employment listings from public job feeds",
+    "github_bounties": "Public GitHub bounty and issue leads",
+    "remote_employment": "Remote employment listings from public job feeds",
 }
 REQUIRED = ("title", "url", "source_name", "lane")
 
