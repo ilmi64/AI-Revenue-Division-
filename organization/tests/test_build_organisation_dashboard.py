@@ -212,6 +212,12 @@ class OrganisationDashboardTests(unittest.TestCase):
         self.assertEqual(report["risk_escalations"]["count"], 0)
         self.assertEqual(report["risk_escalations"]["immediate_review_count"], 0)
 
+
+    def test_malformed_register_roots_are_reported_without_crashing(self):
+        report = self.build(risk_register="not-an-object", decision_register=[])
+        self.assertTrue(report["data_quality"]["governance_link_errors"])
+        self.assertEqual(report["risk_escalations"]["count"], 0)
+
     def test_revenue_snapshot_and_operating_framework_are_embedded(self):
         report = self.build()
         self.assertEqual(report["ai_revenue"]["finance_cad"]["net_cash_received_verified_by_ledger_status"], "0.00")
