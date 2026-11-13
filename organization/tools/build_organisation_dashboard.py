@@ -83,7 +83,8 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
     operating = build_operating_framework_report(registry, operating_framework)
     work_queue_report = build_work_queue_report(registry, work_queue or {"tasks": []})
     execution_report = build_execution_log_report(registry, work_queue or {"tasks": []}, execution_log or {"events": []})
-    integration_report = build_division_integration_report(registry, dependency_map, operating_framework)\n    governance_errors, governance_summary = validate_governance_links(work_queue, risk_register, decision_register)
+    integration_report = build_division_integration_report(registry, dependency_map, operating_framework)
+    governance_errors, governance_summary = validate_governance_links(work_queue, risk_register, decision_register)
 
     assessments = {a["division_id"]: a for a in readiness.get("division_assessments", [])}
     divisions = []
