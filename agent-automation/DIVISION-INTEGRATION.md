@@ -15,7 +15,11 @@ Supported lanes:
 - `remote_employment`: remote employment listings from public job feeds
 
 ## Current connection state
-GitHub public issue search is the only live external discovery source in this pipeline. Other divisions are connected through a documented, testable feed interface; they are not yet connected to external platform accounts or APIs. An empty feed is not evidence that a lane has no opportunities.
+The codebase contains read-only discovery connectors for public GitHub issues, Jobicy, Remote OK, Himalayas, and Greenhouse/Lever/Ashby employer boards. Employer ATS boards are only ingested when explicitly configured in `ats-boards.json`; the 16-employer Canadian shortlist remains review-only and is not active.
+
+The review-only `revenue-lane-registry.json` maps all nine supported lanes to 12 candidate or existing source entries. It is not an account integration and does not create authenticated connections. Eight lanes have candidate or existing source mappings; `research_tasks` remains an explicit research gap. See [Revenue Lane Registry](REVENUE-LANE-REGISTRY.md).
+
+No external platform accounts, credentials, cookies or payment accounts are connected by this registry. An empty feed is not evidence that a lane has no opportunities.
 
 ## Downstream handling
 The unified lead file is `opportunity-output/all-opportunities.json`. Development triage, structural risk review and finance due diligence consume this shared file. All entries remain unverified until a human checks the original terms and eligibility.
