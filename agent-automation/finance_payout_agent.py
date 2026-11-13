@@ -23,7 +23,9 @@ def assess(item: dict) -> dict:
     findings.append("Acceptance, approval and payment are not guaranteed.")
     return {
         "title": item.get("title", "Untitled opportunity"),
-        "url": item.get("url", ""),\n        "lane": item.get("lane", "github_bounties"),\n        "source_name": item.get("source_name", "GitHub"),
+        "url": item.get("url", ""),
+                "lane": item.get("lane", "github_bounties"),
+                "source_name": item.get("source_name", "GitHub"),
         "eligibility_hint": item.get("eligibility_hint", "unknown"),
         "source_attribution": item.get("source_attribution", ""),
         "commercial_status": "unverified_lead",
