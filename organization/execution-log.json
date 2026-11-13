@@ -1,0 +1,5 @@
+{
+  "schema_version": 1,
+  "policy": "Append-only execution evidence. This log records reported events; it does not assign owners, grant approvals, or independently verify external claims.",
+  "events": []
+}
