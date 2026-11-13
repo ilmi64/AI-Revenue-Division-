@@ -199,6 +199,8 @@ class OrganisationDashboardTests(unittest.TestCase):
 
         self.assertEqual(report["risk_escalations"]["immediate_review_count"], 1)
         self.assertEqual(escalation["route"], ["risk", "executive", "technology"])
+        self.assertEqual(escalation["broadcast_scope"], "all_divisions")
+        self.assertEqual(len(escalation["broadcast_divisions"]), 9)
         self.assertEqual(escalation["linked_tasks"][0]["derived_execution_state"], "in_progress")
         self.assertEqual(escalation["pending_owner_decision_ids"], ["DEC-PENDING-001"])
         self.assertIn("STOP-ONLY ADVISORY", escalation["recommended_action"])
