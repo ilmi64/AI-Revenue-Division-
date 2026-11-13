@@ -32,6 +32,8 @@ jobs:
         run: python organization/tools/validate_work_queue.py
       - name: Validate append-only division execution evidence
         run: python organization/tools/validate_execution_log.py
+      - name: Validate incident and corrective-action records
+        run: python organization/tools/validate_incident_register.py
       - name: Build consolidated organisation dashboard
         run: python organization/tools/build_organisation_dashboard.py
       - name: Build read-only AI Revenue snapshot
