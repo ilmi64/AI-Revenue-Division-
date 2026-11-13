@@ -14,6 +14,12 @@ class FinancePayoutAgentTests(unittest.TestCase):
         self.assertEqual(report["verified_paid_opportunities"], 0)
         self.assertIn("not earnings", render_markdown(report))
 
+    def test_non_github_https_lead_is_supported(self):
+        result = assess({"title": "Contract", "url": "https://example.com/work",
+                         "lane": "freelance_services", "source_name": "Example"})
+        self.assertEqual(result["lane"], "freelance_services")
+        self.assertEqual(result["commercial_status"], "unverified_lead")
+
     def test_invalid_results_type_fails_closed(self):
         with self.assertRaises(ValueError):
             build_report({"results": {}})
