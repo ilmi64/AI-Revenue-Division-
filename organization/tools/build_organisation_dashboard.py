@@ -64,9 +64,14 @@ def validate_governance_links(work_queue, risk_register, decision_register, regi
         if not isinstance(values, list) or any(not isinstance(value, str) or not value.strip() for value in values):
             errors.append(f"{label} {record_id} field {field} must be an array of non-empty strings.")
             return []
+        target_label = {
+            "related_task_ids": "task",
+            "related_decision_ids": "decision",
+            "related_risk_ids": "risk"
+        }.get(field, field)
         for value in values:
             if value not in known:
-                errors.append(f"{label} {record_id} references unknown {field} item {value}.")
+                errors.append(f"{label} {record_id} references unknown {target_label} {value}.")
         return values
 
     for record_id, row in risk_index.items():
