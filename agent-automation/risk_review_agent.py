@@ -11,8 +11,8 @@ REQUIRED_FALSE = ("verified_scope", "verified_effort", "verified_acceptance_crit
 def review_brief(brief: dict) -> dict:
     findings = []
     url = str(brief.get("url", ""))
-    if not url.startswith("https://github.com/"):
-        findings.append({"level": "high", "code": "UNTRUSTED_OR_MISSING_SOURCE", "detail": "Source is not a GitHub issue URL."})
+    if not url.startswith("https://"):
+        findings.append({"level": "high", "code": "UNTRUSTED_OR_MISSING_SOURCE", "detail": "Source is not an HTTPS URL."})
     for field in REQUIRED_FALSE:
         if brief.get(field) is not False:
             findings.append({"level": "high", "code": "VERIFICATION_STATE_INVALID", "detail": f"{field} must remain false until a human verifies it."})
