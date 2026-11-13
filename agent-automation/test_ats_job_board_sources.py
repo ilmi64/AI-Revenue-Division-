@@ -11,6 +11,7 @@ class ATSJobBoardTests(unittest.TestCase):
     def test_endpoints_are_https_and_lever_eu_supported(self):
         self.assertEqual(endpoint({"provider":"greenhouse","board":"acme","region":"global"}),
                          "https://boards-api.greenhouse.io/v1/boards/acme/jobs?content=true")
+        self.assertIn("https://api.lever.co/", endpoint({"provider":"lever","board":"acme","region":"global"}))
         self.assertIn("api.eu.lever.co", endpoint({"provider":"lever","board":"acme","region":"eu"}))
         self.assertIn("api.ashbyhq.com", endpoint({"provider":"ashby","board":"acme","region":"global"}))
 
