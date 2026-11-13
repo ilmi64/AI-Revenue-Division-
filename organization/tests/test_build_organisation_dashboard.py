@@ -23,7 +23,7 @@ class OrganisationDashboardTests(unittest.TestCase):
         self.assertTrue(all(x["verified_status"] not in {"standby", "operational"} for x in report["division_scorecard"]))
 
     def test_crypto_blockers_are_visible(self):
-        report = build_dashboard(self.registry, self.readiness, self.dependencies, [], [])
+        report = build_dashboard(self.registry, self.readiness, self.dependencies, self.operating, [], []
         crypto = next(x for x in report["division_scorecard"] if x["id"] == "crypto")
         self.assertTrue(crypto["required_blockers"])
         self.assertEqual(crypto["verified_status"], "testing")
