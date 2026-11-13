@@ -65,13 +65,15 @@ def build_report(registry, queue, log):
             "progress": {"in_progress"},
             "blocked": {"in_progress", "not_started"},
             "paused": {"in_progress"},
-            "resumed": {"paused"},
+            "resumed": {"paused", "blocked"},
             "completed": {"in_progress"},
         }
         if kind in allowed and previous not in allowed[kind]:
             errors.append(f"{eid}: {kind} is not allowed after state {previous}")
         if kind == "completed" and not evidence:
             errors.append(f"{eid}: completed event requires evidence references")
+        if kind == "resumed" and previous == "blocked" and not evidence:
+            errors.append(f"{eid}: resuming a blocked task requires evidence that the blocker was resolved")
         if kind in {"started", "resumed"}: state[tid] = "in_progress"
         elif kind == "blocked": state[tid] = "blocked"
         elif kind == "paused": state[tid] = "paused"
