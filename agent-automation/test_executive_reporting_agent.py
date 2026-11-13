@@ -26,5 +26,16 @@ class ExecutiveReportingAgentTests(unittest.TestCase):
         self.assertIn("do not represent earnings", text)
         self.assertIn("No external action is authorized", text)
 
+    def test_lane_coverage_flows_into_executive_report(self):
+        registry = {"registry_valid": True, "source_count": 10, "lane_count": 9,
+                    "covered_lane_count": 8, "research_gap_count": 1,
+                    "external_accounts_connected": False,
+                    "coverage": [{"label": "AI evaluation", "coverage_status": "candidate_sources_listed", "source_count": 2}]}
+        report = build_report({"results": []}, {"lead_count": 0},
+                              {"reviewed_count": 0}, {"opportunities_reviewed": 0}, registry)
+        self.assertEqual(report["revenue_lane_coverage"]["covered_lane_count"], 8)
+        self.assertIn("Revenue lane coverage", render_markdown(report))
+        self.assertIn("External accounts connected by registry: no", render_markdown(report))
+
 if __name__ == "__main__":
     unittest.main()
