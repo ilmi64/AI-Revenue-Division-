@@ -145,3 +145,18 @@ python organization/tools/validate_incident_register.py
 ```
 
 The dashboard reports the register and data-quality errors read-only. CI runs the validator and incident lifecycle tests.
+
+
+## Technical backup, restore, rollback and restart recovery
+
+The proposed recovery procedures are recorded in organization/recovery-plan.json. They define evidence required for backup integrity, isolated restore, rollback validation and restart health checks. Their production state remains not tested until the relevant service, data owner, approved backup location, recovery objectives, authorization and independent evidence are recorded.
+
+Run the safe local drill with:
+
+```sh
+python organization/tools/run_recovery_drill.py
+```
+
+The drill creates disposable files in a temporary directory, verifies SHA-256 backup integrity, restores a deliberately altered fixture, rolls a fixture back to its pre-change state and checks a synthetic health marker. CI runs this drill and its regression tests.
+
+A passing result proves only that the temporary-fixture drill harness works. It does not prove production backup coverage, real application/database restore, service restart, recovery time objective (RTO), recovery point objective (RPO), or launch readiness. No production data, credentials, service commands, wallets or external systems are touched. Production recovery or rollback requires explicit owner approval and a separately validated target-specific runbook.
