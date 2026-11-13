@@ -16,27 +16,30 @@ class OrganisationDashboardTests(unittest.TestCase):
         cls.dependencies = json.loads((root / "dependency-map.json").read_text(encoding="utf-8"))
         cls.operating = json.loads((root / "operating-framework.json").read_text(encoding="utf-8"))
 
+    def build(self):
+        return build_dashboard(self.registry, self.readiness, self.dependencies, self.operating, [], [])
+
     def test_dashboard_covers_all_divisions_and_never_promotes_readiness(self):
-        report = build_dashboard(self.registry, self.readiness, self.dependencies, self.operating, [], [])
+        report = self.build()
         self.assertEqual(report["organisation"]["division_count"], 9)
         self.assertEqual(report["organisation"]["verified_standby_or_operational"], 0)
         self.assertTrue(all(x["verified_status"] not in {"standby", "operational"} for x in report["division_scorecard"]))
 
     def test_crypto_blockers_are_visible(self):
-        report = build_dashboard(self.registry, self.readiness, self.dependencies, self.operating, [], []
+        report = self.build()
         crypto = next(x for x in report["division_scorecard"] if x["id"] == "crypto")
         self.assertTrue(crypto["required_blockers"])
         self.assertEqual(crypto["verified_status"], "testing")
 
     def test_finance_and_animora_are_not_assumed_ready(self):
-        report = build_dashboard(self.registry, self.readiness, self.dependencies, [], [])
+        report = self.build()
         finance = next(x for x in report["division_scorecard"] if x["id"] == "finance")
         animora = next(x for x in report["division_scorecard"] if x["id"] == "animora")
         self.assertEqual(finance["verified_status"], "unassessed")
         self.assertEqual(animora["verified_status"], "deferred")
 
-    def test_revenue_snapshot_is_embedded_read_only(self):
-        report = build_dashboard(self.registry, self.readiness, self.dependencies, [], [])
+    def test_revenue_snapshot_and_operating_framework_are_embedded(self):
+        report = self.build()
         self.assertEqual(report["ai_revenue"]["finance_cad"]["net_cash_received_verified_by_ledger_status"], "0.00")
         self.assertTrue(report["division_operating_framework"]["validated"])
         self.assertEqual(report["division_operating_framework"]["division_count"], 9)
