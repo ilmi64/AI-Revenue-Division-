@@ -17,6 +17,7 @@ from validate_work_queue import build_report as build_work_queue_report
 from validate_execution_log import build_report as build_execution_log_report
 from validate_division_integrations import build_report as build_division_integration_report
 from validate_incident_register import validate as validate_incident_register
+from validate_security_posture import build_report as build_security_posture_report
 
 
 def load_json(path):
@@ -189,8 +190,9 @@ def build_risk_escalation_report(risk_register, decision_register, work_queue, e
         "records": escalations
     }
 
-def build_dashboard(registry, readiness, dependency_map, operating_framework, opportunities, ledger, work_queue=None, execution_log=None, risk_register=None, decision_register=None, incident_register=None, recovery_plan=None):
+def build_dashboard(registry, readiness, dependency_map, operating_framework, opportunities, ledger, work_queue=None, execution_log=None, risk_register=None, decision_register=None, incident_register=None, recovery_plan=None, security_report=None):
     errors, warnings = validate(registry, readiness)
+    security_report = security_report or build_security_posture_report(Path.cwd())
     dependency_report = build_report(registry, readiness, dependency_map)
     revenue = build_snapshot(opportunities, ledger)
     operating = build_operating_framework_report(registry, operating_framework)
@@ -321,6 +323,7 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
         "risk_escalations": risk_escalations,
         "incident_response": incident_response,
         "technical_recovery": technical_recovery,
+        "security_posture": security_report,
         "risk_register": {
             "records": risk_records,
             "readiness_and_dependency_warnings": risks,
@@ -371,7 +374,7 @@ def main():
         load_json(args.risk_register), load_json(args.decision_register), load_json(args.incident_register), load_json(args.recovery_plan)
     )
     print(json.dumps(report, indent=2, ensure_ascii=False))
-    return 1 if report["data_quality"]["readiness_validation_errors"] or report["data_quality"]["dependency_map_errors"] or report["data_quality"]["operating_framework_errors"] or report["data_quality"]["work_queue_errors"] or report["data_quality"]["execution_log_errors"] or report["data_quality"]["cross_division_integration_errors"] or report["data_quality"]["governance_link_errors"] or report["data_quality"]["incident_register_errors"] else 0
+    return 1 if report["data_quality"]["readiness_validation_errors"] or report["data_quality"]["dependency_map_errors"] or report["data_quality"]["operating_framework_errors"] or report["data_quality"]["work_queue_errors"] or report["data_quality"]["execution_log_errors"] or report["data_quality"]["cross_division_integration_errors"] or report["data_quality"]["governance_link_errors"] or report["data_quality"]["incident_register_errors"] or report["security_posture"]["errors"] else 0
 
 
 if __name__ == "__main__":
