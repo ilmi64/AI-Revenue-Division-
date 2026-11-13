@@ -26,6 +26,8 @@ jobs:
         run: python organization/tools/build_dependency_report.py
       - name: Validate division operating framework
         run: python organization/tools/validate_operating_framework.py
+      - name: Validate cross-division provider and handoff connections
+        run: python organization/tools/validate_division_integrations.py
       - name: Validate division work queue
         run: python organization/tools/validate_work_queue.py
       - name: Validate append-only division execution evidence
