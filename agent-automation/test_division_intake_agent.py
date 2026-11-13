@@ -31,6 +31,11 @@ class DivisionIntakeTests(unittest.TestCase):
             self.assertFalse(errors)
             self.assertEqual({x["lane"] for x in records}, {"freelance_services","github_bounties"})
 
+    def test_remote_employment_lane_is_supported(self):
+        item = normalize({"title":"Remote role","url":"https://example.com/role",
+                          "source_name":"Job board","lane":"remote_employment"}, "remote_employment")
+        self.assertEqual(item["lane"], "remote_employment")
+
     def test_missing_feed_is_not_an_error(self):
         with tempfile.TemporaryDirectory() as tmp:
             records, errors = ingest(tmp)
