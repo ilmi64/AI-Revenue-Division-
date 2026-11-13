@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  discover-and-triage:
+  discover-triage-risk-review:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -28,11 +28,14 @@ jobs:
         run: |
           PYTHONPATH=. python -m unittest test_opportunity_intelligence.py -v
           PYTHONPATH=. python -m unittest test_development_task_agent.py -v
+          PYTHONPATH=. python -m unittest test_risk_review_agent.py -v
       - name: Collect public GitHub opportunity leads
         run: python agent-automation/opportunity_intelligence.py
       - name: Prepare engineering triage briefs
         run: python agent-automation/development_task_agent.py
-      - name: Upload discovery and triage reports
+      - name: Run deterministic risk review
+        run: python agent-automation/risk_review_agent.py
+      - name: Upload discovery, triage and risk reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -40,5 +43,6 @@ jobs:
           path: |
             opportunity-output/
             development-output/
+            risk-output/
           if-no-files-found: warn
           retention-days: 30
