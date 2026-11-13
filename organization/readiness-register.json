@@ -145,61 +145,6 @@
       "open_gaps": [
         "Expansion waits until the main organisation is successful and can fund it sustainably."
       ]
-    },
-    {
-      "division_id": "technology",
-      "claimed_status": "building",
-      "verified_status": "building",
-      "evidence": [
-        "Organisation Control Centre validation and dashboard/report builders pass CI run 43343966117.",
-        "Paper position and specialist branches use automated GitHub Actions tests with pinned checkout/setup action references."
-      ],
-      "open_gaps": [
-        "No approved merged or deployed shared infrastructure.",
-        "No durable host, secret-management review for production, or production monitoring.",
-        "Cross-repository integration and rollback exercise remain incomplete."
-      ]
-    },
-    {
-      "division_id": "research",
-      "claimed_status": "building",
-      "verified_status": "building",
-      "evidence": [
-        "AI Revenue workflow collects public opportunity leads and read-only remote-work/employer ATS feeds; risk review and executive reporting passed run 43473069742.",
-        "Forex and Indices analysis-only specialist foundations are implemented and unit-tested in run 43474468908."
-      ],
-      "open_gaps": [
-        "Individual opportunity leads require primary-source verification before use.",
-        "Forex and Indices lack approved source adapters, data licensing review, event calendars and independent market validation.",
-        "No complete research-to-risk-to-executive handoff has been independently tested."
-      ]
-    },
-    {
-      "division_id": "finance",
-      "claimed_status": "planned",
-      "verified_status": "planned",
-      "evidence": [
-        "AI Revenue workflow includes an automated finance and payout due-diligence report stage, passing run 43473069742."
-      ],
-      "open_gaps": [
-        "Organisation-wide zero-budget cash baseline and revenue ledger schema have not been independently reviewed.",
-        "No bank/account integration or verified cash position is assumed.",
-        "Halal and fee-structure review remains required for any proposed financial product or strategy."
-      ]
-    },
-    {
-      "division_id": "risk",
-      "claimed_status": "building",
-      "verified_status": "building",
-      "evidence": [
-        "AI Revenue deterministic risk review and finance/payout risk handoff passed workflow run 43473069742.",
-        "Paper engine includes fail-closed input checks, exposure/drawdown limits, atomic fills, and state/ledger reconciliation tests."
-      ],
-      "open_gaps": [
-        "Independent Risk Division review of Crypto position/exit controls remains outstanding.",
-        "Cross-division risk register, escalation ownership and stop-only advisory procedures need operational exercises.",
-        "Incident notification and recovery procedures are documented but not yet tested in a durable operating environment."
-      ]
     }
   ]
 }
