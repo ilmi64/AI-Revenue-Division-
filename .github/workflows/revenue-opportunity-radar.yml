@@ -29,12 +29,15 @@ jobs:
           PYTHONPATH=. python -m unittest test_opportunity_intelligence.py -v
           PYTHONPATH=. python -m unittest test_development_task_agent.py -v
           PYTHONPATH=. python -m unittest test_risk_review_agent.py -v
+          PYTHONPATH=. python -m unittest test_finance_payout_agent.py -v
       - name: Collect public GitHub opportunity leads
         run: python agent-automation/opportunity_intelligence.py
       - name: Prepare engineering triage briefs
         run: python agent-automation/development_task_agent.py
       - name: Run deterministic risk review
         run: python agent-automation/risk_review_agent.py
+      - name: Prepare finance and payout due-diligence report
+        run: python agent-automation/finance_payout_agent.py
       - name: Upload discovery, triage and risk reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -44,5 +47,6 @@ jobs:
             opportunity-output/
             development-output/
             risk-output/
+            finance-output/
           if-no-files-found: warn
           retention-days: 30
