@@ -1,0 +1,38 @@
+name: GitHub Revenue Opportunity Radar
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "41 13 * * 2,5"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: github-revenue-opportunity-radar
+  cancel-in-progress: true
+
+jobs:
+  discover-and-report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run agent tests
+        working-directory: agent-automation
+        run: PYTHONPATH=. python -m unittest test_opportunity_intelligence.py -v
+      - name: Collect public GitHub opportunity leads
+        run: python agent-automation/opportunity_intelligence.py
+      - name: Upload discovery report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: github-revenue-opportunity-radar
+          path: opportunity-output/
+          if-no-files-found: warn
+          retention-days: 30
