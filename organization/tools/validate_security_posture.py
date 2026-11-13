@@ -21,6 +21,12 @@ EXCLUDED_PARTS = {".git", "__pycache__", ".venv", "venv", "node_modules"}
 
 def tracked_files(root: Path) -> list[Path]:
     try:
+        git_root = subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"], cwd=root, check=True,
+            stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True
+        ).stdout.strip()
+        if Path(git_root).resolve() != root.resolve():
+            raise subprocess.CalledProcessError(1, "git rev-parse --show-toplevel")
         result = subprocess.run(
             ["git", "ls-files", "-z"], cwd=root, check=True,
             stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
