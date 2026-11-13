@@ -201,12 +201,12 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
     risk_records = risk_register.get("records", []) if isinstance(risk_register, dict) and isinstance(risk_register.get("records", []), list) else []
     decision_records = decision_register.get("records", []) if isinstance(decision_register, dict) and isinstance(decision_register.get("records", []), list) else []
     risk_escalations = build_risk_escalation_report(risk_register, decision_register, work_queue, execution_report, operating_framework, registry)
-    incident_source = incident_register if isinstance(incident_register, dict) else {"records": []}
+    incident_source = incident_register
     incident_errors = validate_incident_register(
         incident_source, risk_register or {"records": []},
         decision_register or {"records": []}, work_queue or {"tasks": []}, registry
     )
-    incident_records = incident_source.get("records", []) if isinstance(incident_source.get("records", []), list) else []
+    incident_records = incident_source.get("records", []) if isinstance(incident_source, dict) and isinstance(incident_source.get("records", []), list) else []
     incident_actions = [
         action for incident in incident_records if isinstance(incident, dict)
         for action in incident.get("corrective_actions", [])
@@ -222,6 +222,18 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
         ),
         "corrective_action_count": len(incident_actions),
         "corrective_actions_completed": sum(1 for row in incident_actions if row.get("status") == "completed"),
+        "escalations": [
+            {
+                "incident_id": row.get("id"),
+                "severity": row.get("severity"),
+                "route": ["risk", "executive"] + ([row.get("affected_division_id")] if row.get("affected_division_id") not in {"risk", "executive"} else []),
+                "recommended_action": "STOP-ONLY ADVISORY: recommend pausing affected activity pending independent Risk review and Executive coordination; no stop is executed.",
+                "dispatch_status": "dashboard_route_only_not_dispatched"
+            }
+            for row in incident_records if isinstance(row, dict)
+            and row.get("severity") in {"critical", "high"}
+            and row.get("status") not in {"closed", "unassessed"}
+        ],
         "records": incident_records
     }
 
