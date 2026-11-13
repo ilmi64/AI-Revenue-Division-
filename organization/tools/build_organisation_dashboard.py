@@ -189,7 +189,7 @@ def build_risk_escalation_report(risk_register, decision_register, work_queue, e
         "records": escalations
     }
 
-def build_dashboard(registry, readiness, dependency_map, operating_framework, opportunities, ledger, work_queue=None, execution_log=None, risk_register=None, decision_register=None, incident_register=None):
+def build_dashboard(registry, readiness, dependency_map, operating_framework, opportunities, ledger, work_queue=None, execution_log=None, risk_register=None, decision_register=None, incident_register=None, recovery_plan=None):
     errors, warnings = validate(registry, readiness)
     dependency_report = build_report(registry, readiness, dependency_map)
     revenue = build_snapshot(opportunities, ledger)
@@ -207,6 +207,17 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
         decision_register or {"records": []}, work_queue or {"tasks": []}, registry
     )
     incident_records = incident_source.get("records", []) if isinstance(incident_source, dict) and isinstance(incident_source.get("records", []), list) else []
+    recovery_source = recovery_plan if isinstance(recovery_plan, dict) else {"procedures": []}
+    recovery_procedures = recovery_source.get("procedures", []) if isinstance(recovery_source.get("procedures", []), list) else []
+    technical_recovery = {
+        "plan_status": recovery_source.get("status", "unassessed"),
+        "scope": recovery_source.get("scope", "unassessed"),
+        "procedure_count": len(recovery_procedures),
+        "procedures": recovery_procedures,
+        "production_recovery_verified": False,
+        "drill_scope": "isolated_temporary_fixture_only; CI runs backup, restore, rollback and synthetic health checks",
+        "readiness_note": "A passing fixture drill is not production recovery evidence or launch readiness."
+    }
     incident_actions = [
         action for incident in incident_records if isinstance(incident, dict)
         for action in incident.get("corrective_actions", [])
@@ -308,7 +319,7 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
         "cross_division_integration": integration_report,
         "ai_revenue": revenue,
         "risk_escalations": risk_escalations,
-        "incident_response": incident_response,
+        "incident_response": incident_response,\n        "technical_recovery": technical_recovery,
         "risk_register": {
             "records": risk_records,
             "readiness_and_dependency_warnings": risks,
@@ -347,7 +358,7 @@ def main():
     parser.add_argument("--execution-log", type=Path, default=Path("organization/execution-log.json"))
     parser.add_argument("--risk-register", type=Path, default=Path("organization/risk-register.json"))
     parser.add_argument("--decision-register", type=Path, default=Path("organization/decision-register.json"))
-    parser.add_argument("--incident-register", type=Path, default=Path("organization/incident-register.json"))
+    parser.add_argument("--incident-register", type=Path, default=Path("organization/incident-register.json"))\n    parser.add_argument("--recovery-plan", type=Path, default=Path("organization/recovery-plan.json"))
     parser.add_argument("--opportunities", type=Path, default=Path("intelligence/opportunity-tracker.csv"))
     parser.add_argument("--ledger", type=Path, default=Path("finance/revenue-ledger.csv"))
     args = parser.parse_args()
