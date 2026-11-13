@@ -45,7 +45,9 @@
       ],
       "provides_to": [
         "executive",
-        "finance"
+        "finance",
+        "ecommerce",
+        "animora"
       ],
       "notes": "Early funding engine; zero-upfront-cost default and no external commitments without approval."
     },
