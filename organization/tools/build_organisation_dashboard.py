@@ -98,7 +98,7 @@ def validate_governance_links(work_queue, risk_register, decision_register, regi
     }
 
 
-def build_risk_escalation_report(risk_register, decision_register, work_queue, execution_report, operating_framework):
+def build_risk_escalation_report(risk_register, decision_register, work_queue, execution_report, operating_framework, registry):
     """Derive internal escalation routes; never dispatch notifications or authorise actions."""
     risks = (risk_register or {}).get("records", [])
     decisions = (decision_register or {}).get("records", [])
@@ -111,6 +111,7 @@ def build_risk_escalation_report(risk_register, decision_register, work_queue, e
         if isinstance(item, dict) and isinstance(item.get("id"), str)
     }
     task_states = execution_report.get("task_state_from_events", {})
+    all_divisions = sorted(item.get("id") for item in registry.get("divisions", []) if isinstance(item, dict) and isinstance(item.get("id"), str))
     risk_division = next(
         (item for item in operating_framework.get("divisions", []) if item.get("id") == "risk"), {}
     )
@@ -149,6 +150,8 @@ def build_risk_escalation_report(risk_register, decision_register, work_queue, e
             "affected_division": affected,
             "escalation_tier": "immediate_independent_review" if urgent else "standard_risk_review",
             "route": ["risk", "executive"] + ([affected] if isinstance(affected, str) and affected not in {"risk", "executive"} else []),
+            "broadcast_scope": "all_divisions",
+            "broadcast_divisions": all_divisions,
             "recommended_action": (
                 "STOP-ONLY ADVISORY: recommend pausing the affected activity pending independent Risk review and Executive coordination. This is a recommendation, not an executed stop or permission to act."
                 if urgent else
@@ -183,7 +186,7 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
     execution_report = build_execution_log_report(registry, work_queue or {"tasks": []}, execution_log or {"events": []})
     integration_report = build_division_integration_report(registry, dependency_map, operating_framework)
     governance_errors, governance_summary = validate_governance_links(work_queue, risk_register, decision_register, registry)
-    risk_escalations = build_risk_escalation_report(risk_register, decision_register, work_queue, execution_report, operating_framework)
+    risk_escalations = build_risk_escalation_report(risk_register, decision_register, work_queue, execution_report, operating_framework, registry)
 
     assessments = {a["division_id"]: a for a in readiness.get("division_assessments", [])}
     divisions = []
