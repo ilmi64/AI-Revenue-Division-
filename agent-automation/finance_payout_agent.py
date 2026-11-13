@@ -24,6 +24,8 @@ def assess(item: dict) -> dict:
     return {
         "title": item.get("title", "Untitled opportunity"),
         "url": item.get("url", ""),\n        "lane": item.get("lane", "github_bounties"),\n        "source_name": item.get("source_name", "GitHub"),
+        "eligibility_hint": item.get("eligibility_hint", "unknown"),
+        "source_attribution": item.get("source_attribution", ""),
         "commercial_status": "unverified_lead",
         "reward_amount": None,
         "reward_currency": None,
