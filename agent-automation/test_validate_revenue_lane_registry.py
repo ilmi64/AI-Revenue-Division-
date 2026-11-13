@@ -6,7 +6,7 @@ from validate_revenue_lane_registry import validate_registry, render_markdown
 class RevenueLaneRegistryTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.registry = json.loads(Path("agent-automation/revenue-lane-registry.json").read_text(encoding="utf-8"))
+        cls.registry = json.loads(Path("revenue-lane-registry.json").read_text(encoding="utf-8"))
 
     def test_registry_covers_all_supported_lanes_and_marks_research_gap(self):
         report, errors = validate_registry(self.registry)
