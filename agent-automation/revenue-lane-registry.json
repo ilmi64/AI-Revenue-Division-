@@ -1,0 +1,289 @@
+{
+  "purpose": "Review-only directory of potential external sources for the organisation's non-crypto revenue lanes. This is not an account connection, endorsement, eligibility decision, or promise of work or income.",
+  "region_focus": "Canada and Ontario; verify every opportunity and platform term at time of use.",
+  "policy": {
+    "default_budget_cad": 0,
+    "status": "research_only",
+    "external_accounts_connected": false,
+    "automatic_applications": false,
+    "automatic_claims": false,
+    "automatic_contact": false,
+    "automatic_submissions": false,
+    "automatic_publishing": false,
+    "automatic_purchases": false,
+    "automatic_payments": false,
+    "approval_required_for_external_actions": true,
+    "revenue_recognition": "Discovery leads, advertised rates, grants, and accepted tasks are not revenue. Record income only when earned under verified terms and separately reconcile cash received."
+  },
+  "lanes": [
+    {
+      "id": "ai_development",
+      "label": "AI development and automation services",
+      "coverage_status": "candidate_sources_listed",
+      "source_ids": [
+        "upwork",
+        "contra"
+      ],
+      "next_step": "Build a small demonstrable service portfolio and verify client demand, fees, contract terms and payment protection before any proposal."
+    },
+    {
+      "id": "freelance_services",
+      "label": "Freelance software and technical services",
+      "coverage_status": "candidate_sources_listed",
+      "source_ids": [
+        "upwork",
+        "contra"
+      ],
+      "next_step": "Match only tasks supported by demonstrable skills; verify Connects, platform fees, identity checks, payout method and dispute terms."
+    },
+    {
+      "id": "ai_evaluation",
+      "label": "AI training, evaluation and data annotation",
+      "coverage_status": "candidate_sources_listed",
+      "source_ids": [
+        "outlier",
+        "alignerr"
+      ],
+      "next_step": "Check live project availability, Canada-specific restrictions, screening requirements, time tracking and payout terms."
+    },
+    {
+      "id": "digital_products",
+      "label": "Reusable software and digital products",
+      "coverage_status": "candidate_sources_listed",
+      "source_ids": [
+        "gumroad"
+      ],
+      "next_step": "Validate demand before building; check current transaction, processing, refund, payout and tax terms."
+    },
+    {
+      "id": "grants_sponsorships",
+      "label": "Grants, innovation support and sponsorships",
+      "coverage_status": "candidate_sources_listed",
+      "source_ids": [
+        "canada_benefits_finder",
+        "nrc_irap"
+      ],
+      "next_step": "Treat funding as project support, not personal income; verify applicant legal form, incorporation, matching funds, eligible costs and reporting obligations."
+    },
+    {
+      "id": "security_testing",
+      "label": "Authorized security testing and responsible disclosure",
+      "coverage_status": "candidate_sources_listed",
+      "source_ids": [
+        "hackerone",
+        "bugcrowd"
+      ],
+      "next_step": "Only test assets explicitly in scope under a current written program policy; never probe third-party systems without authorization."
+    },
+    {
+      "id": "research_tasks",
+      "label": "Paid research and technical research tasks",
+      "coverage_status": "gap_research_required",
+      "source_ids": [],
+      "next_step": "No standalone research-task platform is enabled yet. Research Canada eligibility, real task supply, fees, KYC and withdrawal evidence before adding one."
+    },
+    {
+      "id": "github_bounties",
+      "label": "Public GitHub issue and bounty leads",
+      "coverage_status": "existing_connector",
+      "source_ids": [
+        "github_public"
+      ],
+      "next_step": "Verify that a bounty is explicitly funded, currently open, and has clear acceptance and payment terms; ordinary GitHub issues are not assumed paid."
+    },
+    {
+      "id": "remote_employment",
+      "label": "Remote employment and contract listings",
+      "coverage_status": "existing_connectors",
+      "source_ids": [
+        "remote_job_feeds",
+        "employer_ats"
+      ],
+      "next_step": "Verify that the specific role accepts Ontario/Canada applicants and review employment status, compensation, employer identity and application requirements."
+    }
+  ],
+  "sources": [
+    {
+      "id": "upwork",
+      "name": "Upwork",
+      "source_type": "freelance_marketplace",
+      "official_url": "https://www.upwork.com/",
+      "evidence_url": "https://www.upwork.com/pricing/freelancer",
+      "lanes": [
+        "ai_development",
+        "freelance_services"
+      ],
+      "canada_status": "country_and_role_check_required",
+      "cost_status": "basic_plan_listed_at_zero_monthly_cost; proposals_may_require_connects; transaction_fees_apply_check_current_terms",
+      "integration_status": "not_connected",
+      "human_review_required": true,
+      "notes": "A free Basic plan is listed, but bidding costs, Connects, service fees and payout eligibility must be checked before each use. No proposal or account action is automated."
+    },
+    {
+      "id": "contra",
+      "name": "Contra",
+      "source_type": "freelance_marketplace",
+      "official_url": "https://contra.com/",
+      "evidence_url": "https://contra.com/how-it-works/independents",
+      "lanes": [
+        "ai_development",
+        "freelance_services"
+      ],
+      "canada_status": "country_and_payout_check_required",
+      "cost_status": "free_profile_listed; platform_or_payment_fees_may_apply_under_current_terms",
+      "integration_status": "not_connected",
+      "human_review_required": true,
+      "notes": "Free profile is advertised; terms also allow platform and payout fees. Verify the exact transaction fee, payment route, client contract and payout availability."
+    },
+    {
+      "id": "outlier",
+      "name": "Outlier",
+      "source_type": "ai_evaluation_platform",
+      "official_url": "https://outlier.ai/",
+      "evidence_url": "https://outlier.ai/legal/flexible-working-guidelines",
+      "lanes": [
+        "ai_evaluation"
+      ],
+      "canada_status": "canada_listed_in_official_supported_country_guidelines; project_restrictions_apply",
+      "cost_status": "no_upfront_fee_claimed_here; identity_and_location_verification_required",
+      "integration_status": "not_connected",
+      "human_review_required": true,
+      "notes": "Official location guidelines list Canada, but projects can impose narrower restrictions. Requires identity/location checks; work supply, qualification and payout remain project-specific."
+    },
+    {
+      "id": "alignerr",
+      "name": "Alignerr",
+      "source_type": "ai_evaluation_platform",
+      "official_url": "https://www.alignerr.com/",
+      "evidence_url": "https://www.alignerr.com/process",
+      "lanes": [
+        "ai_evaluation"
+      ],
+      "canada_status": "not_verified_for_all_canadian_residents; verify_each_role",
+      "cost_status": "onboarding_includes_identity_verification_and_billing_setup; check_for_any_costs_before_proceeding",
+      "integration_status": "not_connected",
+      "human_review_required": true,
+      "notes": "Official onboarding describes applications, resume upload, identity verification and billing setup. A Canada testimonial is not proof that every Canadian applicant or project is eligible."
+    },
+    {
+      "id": "gumroad",
+      "name": "Gumroad",
+      "source_type": "digital_product_marketplace",
+      "official_url": "https://gumroad.com/",
+      "evidence_url": "https://gumroad.com/pricing",
+      "lanes": [
+        "digital_products"
+      ],
+      "canada_status": "country_specific_payout_method_and_verification_check_required",
+      "cost_status": "no_monthly_fee_listed; direct_sales_fee_and_discover_fee_apply; payment_processing_may_be_additional",
+      "integration_status": "not_connected",
+      "human_review_required": true,
+      "notes": "Current pricing page lists 10% plus $0.50 for direct/profile sales and 30% for Discover marketplace sales; processing and country-specific payout details need checking. No sales are assumed."
+    },
+    {
+      "id": "canada_benefits_finder",
+      "name": "Government of Canada Business Benefits Finder",
+      "source_type": "public_funding_directory",
+      "official_url": "https://innovation.ised-isde.canada.ca/",
+      "evidence_url": "https://www.canada.ca/en/services/business/start/support-financing.html",
+      "lanes": [
+        "grants_sponsorships"
+      ],
+      "canada_status": "canadian_program_directory; individual_program_eligibility_varies",
+      "cost_status": "public_information_directory; grants_are_not_personal_income_and_may_have_eligible_cost_or_reporting_rules",
+      "integration_status": "manual_research_only",
+      "human_review_required": true,
+      "notes": "Use to discover programs, then read each program's official eligibility, legal applicant, deadlines, matching-fund and reporting rules. Funding is not guaranteed."
+    },
+    {
+      "id": "nrc_irap",
+      "name": "NRC Industrial Research Assistance Program",
+      "source_type": "innovation_funding_program",
+      "official_url": "https://nrc.canada.ca/en/support-technology-innovation/financial-support-technology-innovation",
+      "evidence_url": "https://nrc.canada.ca/en/support-technology-innovation/financial-support-technology-innovation",
+      "lanes": [
+        "grants_sponsorships"
+      ],
+      "canada_status": "eligibility_gate_incorporated_for_profit_canadian_business_up_to_500_fte_innovative_technology_product_or_service",
+      "cost_status": "funding_is_conditional_project_support_not_unrestricted_cash; verify_program_terms",
+      "integration_status": "manual_research_only",
+      "human_review_required": true,
+      "notes": "Official minimum criteria include a Canadian incorporated for-profit business with up to 500 FTE developing and commercializing innovative technology. This is not an individual quick-income source and eligibility is not guaranteed."
+    },
+    {
+      "id": "hackerone",
+      "name": "HackerOne",
+      "source_type": "security_disclosure_marketplace",
+      "official_url": "https://www.hackerone.com/hackers/how-to-start-hacking",
+      "evidence_url": "https://www.hackerone.com/hackers/how-to-start-hacking",
+      "lanes": [
+        "security_testing"
+      ],
+      "canada_status": "program_specific_eligibility_and_identity_check_required",
+      "cost_status": "no_income_guarantee; rewards_depend_on_program_scope_and_valid_accepted_findings",
+      "integration_status": "not_connected",
+      "human_review_required": true,
+      "notes": "Read each program's scope and disclosure rules first. Identity information may be required to receive a bounty. No testing or submissions are automated."
+    },
+    {
+      "id": "bugcrowd",
+      "name": "Bugcrowd",
+      "source_type": "security_disclosure_marketplace",
+      "official_url": "https://www.bugcrowd.com/hackers/",
+      "evidence_url": "https://docs.bugcrowd.com/researchers/onboarding/becoming-a-researcher/",
+      "lanes": [
+        "security_testing"
+      ],
+      "canada_status": "public_programs_open_to_researchers_but_private_program_restrictions_and_verification_apply",
+      "cost_status": "rewards_only_for_valid_findings_under_program_terms; no_income_guarantee",
+      "integration_status": "not_connected",
+      "human_review_required": true,
+      "notes": "Public researcher signup is described, while private programs may require identity verification or other qualifications. Strictly limited to explicit program authorization and scope."
+    },
+    {
+      "id": "github_public",
+      "name": "GitHub public issue discovery",
+      "source_type": "existing_public_discovery_connector",
+      "official_url": "https://github.com/",
+      "evidence_url": "https://github.com/",
+      "lanes": [
+        "github_bounties"
+      ],
+      "canada_status": "issue_owner_and_payment_terms_must_be_verified",
+      "cost_status": "ordinary_issues_are_not_paid; bounty_funding_and_payout_are_unverified_until_confirmed",
+      "integration_status": "existing_read_only_connector",
+      "human_review_required": true,
+      "notes": "Existing connector discovers public issues; it does not prove a reward exists or that a contributor will be paid."
+    },
+    {
+      "id": "remote_job_feeds",
+      "name": "Jobicy, Remote OK and Himalayas",
+      "source_type": "existing_public_job_feed_connectors",
+      "official_url": "https://jobicy.com/",
+      "evidence_url": "https://remoteok.com/",
+      "lanes": [
+        "remote_employment"
+      ],
+      "canada_status": "verify_each_listing_for_ontario_or_canada_eligibility",
+      "cost_status": "job_feed_is_discovery_only; no employment_or_income_guarantee",
+      "integration_status": "existing_read_only_connector",
+      "human_review_required": true,
+      "notes": "Existing public feeds are normalized into intake; role freshness, employer legitimacy, location and compensation need human review."
+    },
+    {
+      "id": "employer_ats",
+      "name": "Employer Greenhouse, Lever and Ashby boards",
+      "source_type": "existing_public_employer_board_connectors",
+      "official_url": "https://www.greenhouse.com/",
+      "evidence_url": "https://developers.greenhouse.io/job-board.html",
+      "lanes": [
+        "remote_employment"
+      ],
+      "canada_status": "verify_each_role_for_ontario_or_canada_eligibility",
+      "cost_status": "job_discovery_only; no_employment_or_income_guarantee",
+      "integration_status": "read_only_connector_with_candidate_boards_pending_runtime_validation",
+      "human_review_required": true,
+      "notes": "Public employer-board connectors exist; 16 candidate employers remain a review-only shortlist and are not active until separately approved."
+    }
+  ]
+}
