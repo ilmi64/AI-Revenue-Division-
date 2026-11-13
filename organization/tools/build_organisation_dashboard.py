@@ -100,8 +100,8 @@ def validate_governance_links(work_queue, risk_register, decision_register, regi
 
 def build_risk_escalation_report(risk_register, decision_register, work_queue, execution_report, operating_framework, registry):
     """Derive internal escalation routes; never dispatch notifications or authorise actions."""
-    risks = (risk_register or {}).get("records", [])
-    decisions = (decision_register or {}).get("records", [])
+    risks = risk_register.get("records", []) if isinstance(risk_register, dict) else []
+    decisions = decision_register.get("records", []) if isinstance(decision_register, dict) else []
     tasks = {
         item.get("id"): item for item in (work_queue or {}).get("tasks", [])
         if isinstance(item, dict) and isinstance(item.get("id"), str)
@@ -130,6 +130,8 @@ def build_risk_escalation_report(risk_register, decision_register, work_queue, e
         decision_ids = risk.get("related_decision_ids", [])
         linked_tasks = []
         for task_id in task_ids if isinstance(task_ids, list) else []:
+            if not isinstance(task_id, str):
+                continue
             task = tasks.get(task_id)
             if task:
                 linked_tasks.append({
@@ -138,8 +140,8 @@ def build_risk_escalation_report(risk_register, decision_register, work_queue, e
                     "derived_execution_state": task_states.get(task_id, "no_validated_execution_event")
                 })
         pending_decisions = [
-            decision_id for decision_id in decision_ids if decision_id in decision_index
-            and decision_index[decision_id].get("status") == "pending"
+            decision_id for decision_id in decision_ids if isinstance(decision_id, str)
+            and decision_id in decision_index and decision_index[decision_id].get("status") == "pending"
         ] if isinstance(decision_ids, list) else []
         urgent = severity in {"critical", "high"}
         affected = risk.get("division_id")
@@ -186,6 +188,8 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
     execution_report = build_execution_log_report(registry, work_queue or {"tasks": []}, execution_log or {"events": []})
     integration_report = build_division_integration_report(registry, dependency_map, operating_framework)
     governance_errors, governance_summary = validate_governance_links(work_queue, risk_register, decision_register, registry)
+    risk_records = risk_register.get("records", []) if isinstance(risk_register, dict) and isinstance(risk_register.get("records", []), list) else []
+    decision_records = decision_register.get("records", []) if isinstance(decision_register, dict) and isinstance(decision_register.get("records", []), list) else []
     risk_escalations = build_risk_escalation_report(risk_register, decision_register, work_queue, execution_report, operating_framework, registry)
 
     assessments = {a["division_id"]: a for a in readiness.get("division_assessments", [])}
@@ -260,16 +264,16 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
         "ai_revenue": revenue,
         "risk_escalations": risk_escalations,
         "risk_register": {
-            "records": (risk_register or {"records": []}).get("records", []),
+            "records": risk_records,
             "readiness_and_dependency_warnings": risks,
             "summary": governance_summary
         },
         "decision_register": {
-            "records": (decision_register or {"records": []}).get("records", []),
+            "records": decision_records,
             "readiness_gap_prompts": decisions,
             "summary": governance_summary
         },
-        "outstanding_decisions": decisions + [row for row in (decision_register or {"records": []}).get("records", []) if isinstance(row, dict) and row.get("status") == "pending"],
+        "outstanding_decisions": decisions + [row for row in decision_records if isinstance(row, dict) and row.get("status") == "pending"],
         "reserved_owner_approvals": reserved_approvals,
         "data_quality": {
             "readiness_validation_errors": errors,
