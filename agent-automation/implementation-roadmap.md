@@ -7,11 +7,14 @@
 - [ ] Review this architecture and merge only after owner approval.
 
 ## Phase 1 — Use existing services first
+- [x] Add a read-only public release Research Radar workflow (weekly schedule plus manual dispatch; no LLM, credentials, or external writes).
+- [x] Add unit tests for report rendering and missing-release handling.
+- [ ] Run the workflow and inspect the first artifact.
 - [ ] Inventory existing Make scenarios, connections, schedules and execution health.
-- [ ] Keep the existing Printify Store Analyst intact; document its inputs, outputs, permissions and current AI module behavior.
-- [ ] Review the existing GitHub Actions workflow and free-minute usage.
-- [ ] Build a read-only research/reporting workflow using only confirmed free capabilities.
-- [ ] Test with synthetic or public data; keep all new scenarios inactive until reviewed.
+- [x] Inspect the existing Printify Store Analyst: on-demand trigger, AI COO analyst, five read-only Printify tools, healthy Printify connection, no incomplete executions. Preserve it unchanged.
+- [ ] Review existing GitHub Actions usage and free-minute consumption.
+- [ ] Build the first generative research/reporting agent using a verified zero-cost model.
+- [ ] Keep all new scenarios inactive and all external write actions disabled until reviewed.
 
 ## Phase 2 — Agent platform feasibility
 Evaluate Activepieces Community Edition first, then Dify Community Edition:
@@ -40,8 +43,8 @@ Evaluate Activepieces Community Edition first, then Dify Community Edition:
 - [ ] Keep all consequential actions behind explicit owner approval.
 
 ## Current blockers
-1. No confirmed zero-cost always-on host is identified.
-2. No zero-cost model inference provider has been approved.
+1. No confirmed zero-cost always-on host is identified. Activepieces' documented Docker Compose setup needs at least 2 vCPU and 4 GB RAM; the current Android device is not assumed to meet an always-on hosting requirement.
+2. No zero-cost model inference provider has been approved. The first Research Radar intentionally does not call an LLM.
 3. Make private workspace has no scenarios; the standard team has an existing Printify Store Analyst scenario that must be preserved.
 4. No new external account connection or deployment has been authorized.
 
