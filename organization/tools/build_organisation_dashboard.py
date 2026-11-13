@@ -194,8 +194,6 @@ def main():
     parser.add_argument("--execution-log", type=Path, default=Path("organization/execution-log.json"))
     parser.add_argument("--risk-register", type=Path, default=Path("organization/risk-register.json"))
     parser.add_argument("--decision-register", type=Path, default=Path("organization/decision-register.json"))
-    parser.add_argument("--risk-register", type=Path, default=Path("organization/risk-register.json"))
-    parser.add_argument("--decision-register", type=Path, default=Path("organization/decision-register.json"))
     parser.add_argument("--opportunities", type=Path, default=Path("intelligence/opportunity-tracker.csv"))
     parser.add_argument("--ledger", type=Path, default=Path("finance/revenue-ledger.csv"))
     args = parser.parse_args()
