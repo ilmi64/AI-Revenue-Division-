@@ -15,9 +15,10 @@ class OrganisationDashboardTests(unittest.TestCase):
         cls.readiness = json.loads((root / "readiness-register.json").read_text(encoding="utf-8"))
         cls.dependencies = json.loads((root / "dependency-map.json").read_text(encoding="utf-8"))
         cls.operating = json.loads((root / "operating-framework.json").read_text(encoding="utf-8"))
+        cls.work_queue = json.loads((root / "work-queue.json").read_text(encoding="utf-8"))
 
     def build(self):
-        return build_dashboard(self.registry, self.readiness, self.dependencies, self.operating, [], [])
+        return build_dashboard(self.registry, self.readiness, self.dependencies, self.operating, [], [], self.work_queue)
 
     def test_dashboard_covers_all_divisions_and_never_promotes_readiness(self):
         report = self.build()
@@ -45,6 +46,9 @@ class OrganisationDashboardTests(unittest.TestCase):
         self.assertEqual(report["division_operating_framework"]["division_count"], 9)
         self.assertIn("risk_register", report)
         self.assertIn("outstanding_decisions", report)
+        self.assertTrue(report["division_work_queue"]["validated"])
+        self.assertEqual(report["division_work_queue"]["task_count"], 18)
+        self.assertEqual(report["division_work_queue"]["completed_count"], 0)
 
 
 if __name__ == "__main__":
