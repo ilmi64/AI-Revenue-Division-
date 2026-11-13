@@ -1,6 +1,11 @@
 name: AI Automation Research Radar
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/research-radar.yml"
+      - "agent-automation/**"
   workflow_dispatch:
   schedule:
     - cron: "23 13 * * 1"
@@ -15,7 +20,7 @@ concurrency:
 jobs:
   collect-and-analyze-public-release-data:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
