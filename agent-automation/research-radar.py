@@ -64,7 +64,7 @@ def render_markdown(results: list[dict], generated_at: str) -> str:
         "## Required human review", "",
         "- Check release notes, licensing, security advisories, hosting requirements, and model costs.",
         "- Do not deploy, connect accounts, or change production systems based on this report alone.",
-        "- This workflow does not call an LLM and makes no claims about product quality or suitability.", "",
+        "- This collector does not call an LLM and makes no claims about product quality or suitability.", "",
     ])
     return "\n".join(lines)
 
