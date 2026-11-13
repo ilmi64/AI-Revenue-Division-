@@ -120,7 +120,7 @@ def main():
     loaded = [json.loads(p.read_text(encoding="utf-8")) for p in (args.incidents, args.risks, args.decisions, args.work_queue, args.registry)]
     errors = validate(*loaded)
     if errors:
-        print("\\n".join(errors))
+        print("\n".join(errors))
         return 1
     print("Incident register valid.")
     return 0
