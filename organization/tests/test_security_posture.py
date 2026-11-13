@@ -18,6 +18,13 @@ class SecurityPostureTests(unittest.TestCase):
         self.assertEqual(len(warnings), 1)
         self.assertEqual(warnings[0]["action"], "actions/checkout")
 
+    def test_verified_full_commit_sha_pins_are_accepted(self):
+        workflow = (
+            "uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2\\n"
+            "uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0\\n"
+        )
+        self.assertEqual(inspect_action_pins(workflow), [])
+
     def test_secret_scan_flags_credential_shape_and_redacts_value(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
