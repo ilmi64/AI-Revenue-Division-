@@ -20,7 +20,7 @@ class RiskReviewAgentTests(unittest.TestCase):
 
     def test_bad_source_blocks(self):
         brief = self.valid_brief()
-        brief["url"] = "https://example.com"
+        brief["url"] = "http://example.com"
         self.assertEqual(review_brief(brief)["status"], "blocked")
 
     def test_report_counts_blocked_records(self):
