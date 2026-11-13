@@ -1,4 +1,4 @@
-name: GitHub Revenue Opportunity Radar
+name: Multi-Division Revenue Intelligence Radar
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: github-revenue-opportunity-radar
+  group: multi-division-revenue-opportunity-radar
   cancel-in-progress: true
 
 jobs:
@@ -31,23 +31,27 @@ jobs:
           PYTHONPATH=. python -m unittest test_risk_review_agent.py -v
           PYTHONPATH=. python -m unittest test_finance_payout_agent.py -v
           PYTHONPATH=. python -m unittest test_executive_reporting_agent.py -v
+          PYTHONPATH=. python -m unittest test_division_intake_agent.py -v
       - name: Collect public GitHub opportunity leads
         run: python agent-automation/opportunity_intelligence.py
+      - name: Normalize all division feeds into shared opportunity intake
+        run: python agent-automation/division_intake_agent.py
       - name: Prepare engineering triage briefs
-        run: python agent-automation/development_task_agent.py
+        run: python agent-automation/development_task_agent.py --input opportunity-output/all-opportunities.json
       - name: Run deterministic risk review
         run: python agent-automation/risk_review_agent.py
       - name: Prepare finance and payout due-diligence report
-        run: python agent-automation/finance_payout_agent.py
+        run: python agent-automation/finance_payout_agent.py --input opportunity-output/all-opportunities.json
       - name: Generate executive readiness report
         run: python agent-automation/executive_reporting_agent.py
-      - name: Upload discovery, triage and risk reports
+      - name: Upload unified division, triage, risk and executive reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: github-revenue-opportunity-radar
           path: |
             opportunity-output/
+            division-inputs/
             development-output/
             risk-output/
             finance-output/
