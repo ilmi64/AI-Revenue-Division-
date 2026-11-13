@@ -260,6 +260,8 @@ class OrganisationDashboardTests(unittest.TestCase):
         recovery = report["technical_recovery"]
         self.assertEqual(recovery["procedure_count"], 4)
         self.assertFalse(recovery["production_recovery_verified"])
+        self.assertIn("security_posture", report)
+        self.assertEqual(report["security_posture"]["workflow_permissions"]["expected"], {"contents": "read"})
         self.assertIn("temporary_fixture_only", recovery["drill_scope"])
         self.assertEqual(recovery["plan_status"], "design_only_pending_owner_and_environment_confirmation")
 
