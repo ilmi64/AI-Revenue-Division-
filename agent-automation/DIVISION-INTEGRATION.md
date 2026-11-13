@@ -12,6 +12,7 @@ Supported lanes:
 - `security_testing`: authorized security testing and responsible disclosure
 - `research_tasks`: paid technical research and research tasks
 - `github_bounties`: public GitHub issue/bounty discovery
+- `remote_employment`: remote employment listings from public job feeds
 
 ## Current connection state
 GitHub public issue search is the only live external discovery source in this pipeline. Other divisions are connected through a documented, testable feed interface; they are not yet connected to external platform accounts or APIs. An empty feed is not evidence that a lane has no opportunities.
