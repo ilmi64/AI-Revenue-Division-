@@ -19,10 +19,38 @@ def validate(register, risk_register, decision_register, work_queue, registry):
     rows = register.get("records")
     if not isinstance(rows, list):
         return ["Incident register records must be an array."]
-    risks = {x.get("id") for x in (risk_register or {}).get("records", []) if isinstance(x, dict) and isinstance(x.get("id"), str)}
-    decisions = {x.get("id"): x for x in (decision_register or {}).get("records", []) if isinstance(x, dict) and isinstance(x.get("id"), str)}
-    tasks = {x.get("id") for x in (work_queue or {}).get("tasks", []) if isinstance(x, dict) and isinstance(x.get("id"), str)}
-    divisions = {x.get("id") for x in (registry or {}).get("divisions", []) if isinstance(x, dict) and isinstance(x.get("id"), str)}
+    if not isinstance(risk_register, dict):
+        errors.append("Risk register root must be an object.")
+        risk_register = {"records": []}
+    if not isinstance(decision_register, dict):
+        errors.append("Decision register root must be an object.")
+        decision_register = {"records": []}
+    if not isinstance(work_queue, dict):
+        errors.append("Work queue root must be an object.")
+        work_queue = {"tasks": []}
+    if not isinstance(registry, dict):
+        errors.append("Division registry root must be an object.")
+        registry = {"divisions": []}
+    risk_rows = risk_register.get("records", [])
+    decision_rows = decision_register.get("records", [])
+    task_rows = work_queue.get("tasks", [])
+    division_rows = registry.get("divisions", [])
+    if not isinstance(risk_rows, list):
+        errors.append("Risk register records must be an array.")
+        risk_rows = []
+    if not isinstance(decision_rows, list):
+        errors.append("Decision register records must be an array.")
+        decision_rows = []
+    if not isinstance(task_rows, list):
+        errors.append("Work queue tasks must be an array.")
+        task_rows = []
+    if not isinstance(division_rows, list):
+        errors.append("Division registry divisions must be an array.")
+        division_rows = []
+    risks = {x.get("id") for x in risk_rows if isinstance(x, dict) and isinstance(x.get("id"), str)}
+    decisions = {x.get("id"): x for x in decision_rows if isinstance(x, dict) and isinstance(x.get("id"), str)}
+    tasks = {x.get("id") for x in task_rows if isinstance(x, dict) and isinstance(x.get("id"), str)}
+    divisions = {x.get("id") for x in division_rows if isinstance(x, dict) and isinstance(x.get("id"), str)}
     seen = set()
     for i, incident in enumerate(rows):
         if not isinstance(incident, dict):
