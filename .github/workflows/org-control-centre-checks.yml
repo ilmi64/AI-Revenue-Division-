@@ -24,9 +24,11 @@ jobs:
         run: python organization/tools/validate_readiness.py
       - name: Build cross-division dependency report
         run: python organization/tools/build_dependency_report.py
+      - name: Validate division operating framework
+        run: python organization/tools/validate_operating_framework.py
       - name: Build consolidated organisation dashboard
         run: python organization/tools/build_organisation_dashboard.py
       - name: Build read-only AI Revenue snapshot
         run: python organization/tools/build_executive_snapshot.py
-      - name: Run validator and snapshot tests
+      - name: Run all organisation tests
         run: python -m unittest discover -s organization/tests -v
