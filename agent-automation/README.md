@@ -34,7 +34,7 @@ This is a narrow AI research assistant, not yet a multi-agent orchestration plat
 - [Agent charters](agent-charters.md)
 - [Security and approval policy](security-and-approval-policy.md)
 - [Implementation roadmap](implementation-roadmap.md)
-- [Research Radar collector](research-radar.py)
+- [Research Radar collector](research_radar.py)
 - [Local AI research agent](ai_research_agent.py)
 
 ## Status
