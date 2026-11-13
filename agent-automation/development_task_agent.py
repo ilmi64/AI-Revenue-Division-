@@ -21,12 +21,21 @@ def triage(item: dict) -> dict:
     if "accessibility_keyword" in signals:
         score += 1
         reasons.append("Potential accessibility signal detected")
+    if "source_relevance_keyword" in signals:
+        score += 1
+        reasons.append("Matched a technical/AI/research keyword filter; relevance is not verified")
     if not title or not url.startswith("https://"):
         score = 0
         reasons.append("Missing title or non-HTTPS source URL; manual correction required")
     return {
         "title": title or "Untitled lead",
         "url": url,
+        "lane": item.get("lane", "github_bounties"),
+        "source_name": item.get("source_name", "GitHub"),
+        "company": item.get("company", ""),
+        "location_text": item.get("location_text", ""),
+        "eligibility_hint": item.get("eligibility_hint", "unknown"),
+        "source_attribution": item.get("source_attribution", ""),
         "triage_score": score,
         "triage_reasons": reasons,
         "priority": "review_first" if score >= 4 else "review_later" if score > 0 else "hold",
