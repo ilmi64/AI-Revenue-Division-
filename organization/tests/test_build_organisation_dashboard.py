@@ -130,6 +130,31 @@ class OrganisationDashboardTests(unittest.TestCase):
 
         self.assertTrue(any("unknown task MISSING-999" in error for error in report["data_quality"]["governance_link_errors"]))
 
+
+    def test_governance_validator_reports_malformed_records_without_crashing(self):
+        report = self.build(
+            risk_register={"records": [{"id": ["not-a-string"], "related_task_ids": "TECH-001"}]},
+            decision_register={"records": [None]}
+        )
+        errors = report["data_quality"]["governance_link_errors"]
+        self.assertTrue(any("non-empty string id" in error for error in errors))
+        self.assertTrue(any("must be an object" in error for error in errors))
+
+    def test_approved_decision_requires_owner_outcome_evidence(self):
+        decision_register = {"records": [{
+            "id": "DEC-TEST-APPROVED",
+            "scope": "Test-only scope",
+            "status": "approved",
+            "impact": "No external impact",
+            "reversibility": "Reversible test fixture",
+            "requested_action": "Approve test fixture",
+            "related_risk_ids": [],
+            "related_task_ids": [],
+            "owner_outcome_evidence": []
+        }]}
+        report = self.build(decision_register=decision_register)
+        self.assertTrue(any("requires explicit owner outcome evidence" in error for error in report["data_quality"]["governance_link_errors"]))
+
     def test_revenue_snapshot_and_operating_framework_are_embedded(self):
         report = self.build()
         self.assertEqual(report["ai_revenue"]["finance_cad"]["net_cash_received_verified_by_ledger_status"], "0.00")
