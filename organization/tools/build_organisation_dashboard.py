@@ -15,6 +15,7 @@ from validate_readiness import validate
 from validate_operating_framework import build_report as build_operating_framework_report
 from validate_work_queue import build_report as build_work_queue_report
 from validate_execution_log import build_report as build_execution_log_report
+from validate_division_integrations import build_report as build_division_integration_report
 
 
 def load_json(path):
@@ -29,6 +30,7 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
     operating = build_operating_framework_report(registry, operating_framework)
     work_queue_report = build_work_queue_report(registry, work_queue or {"tasks": []})
     execution_report = build_execution_log_report(registry, work_queue or {"tasks": []}, execution_log or {"events": []})
+    integration_report = build_division_integration_report(registry, dependency_map, operating_framework)
 
     assessments = {a["division_id"]: a for a in readiness.get("division_assessments", [])}
     divisions = []
@@ -98,6 +100,7 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
         "division_operating_framework": operating,
         "division_work_queue": work_queue_report,
         "division_execution_evidence": execution_report,
+        "cross_division_integration": integration_report,
         "ai_revenue": revenue,
         "risk_register": risks,
         "outstanding_decisions": decisions,
@@ -109,6 +112,7 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
             "operating_framework_errors": operating.get("errors", []),
             "work_queue_errors": work_queue_report.get("errors", []),
             "execution_log_errors": execution_report.get("errors", []),
+            "cross_division_integration_errors": integration_report.get("errors", []),
             "revenue_warnings": revenue["data_quality"]["warnings"],
             "note": "Absence of a record is not proof that work or funds do not exist outside these source files."
         }
@@ -132,7 +136,7 @@ def main():
         load_json(args.work_queue), load_json(args.execution_log)
     )
     print(json.dumps(report, indent=2, ensure_ascii=False))
-    return 1 if report["data_quality"]["readiness_validation_errors"] or report["data_quality"]["dependency_map_errors"] or report["data_quality"]["operating_framework_errors"] or report["data_quality"]["work_queue_errors"] or report["data_quality"]["execution_log_errors"] else 0
+    return 1 if report["data_quality"]["readiness_validation_errors"] or report["data_quality"]["dependency_map_errors"] or report["data_quality"]["operating_framework_errors"] or report["data_quality"]["work_queue_errors"] or report["data_quality"]["execution_log_errors"] or report["data_quality"]["cross_division_integration_errors"] else 0
 
 
 if __name__ == "__main__":
