@@ -20,8 +20,8 @@ class SecurityPostureTests(unittest.TestCase):
 
     def test_verified_full_commit_sha_pins_are_accepted(self):
         workflow = (
-            "uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2\\n"
-            "uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0\\n"
+            "uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1\\n"
+            "uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0\\n"
         )
         self.assertEqual(inspect_action_pins(workflow), [])
 
