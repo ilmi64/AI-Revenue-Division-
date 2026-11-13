@@ -34,10 +34,13 @@ jobs:
           PYTHONPATH=. python -m unittest test_division_intake_agent.py -v
           PYTHONPATH=. python -m unittest test_external_opportunity_sources.py -v
           PYTHONPATH=. python -m unittest test_ats_job_board_sources.py -v
+          PYTHONPATH=. python -m unittest test_validate_ats_board_candidates.py -v
       - name: Collect public GitHub opportunity leads
         run: python agent-automation/opportunity_intelligence.py
       - name: Fetch public remote-work feeds (read-only)
         run: python agent-automation/external_opportunity_sources.py
+      - name: Validate review-only Canadian employer ATS candidates (read-only)
+        run: PYTHONPATH=agent-automation python agent-automation/validate_ats_board_candidates.py
       - name: Fetch configured employer ATS boards (read-only)
         run: PYTHONPATH=agent-automation python agent-automation/ats_job_board_sources.py
       - name: Normalize all division feeds into shared opportunity intake
