@@ -10,7 +10,7 @@ class DevelopmentTaskAgentTests(unittest.TestCase):
         self.assertFalse(result["verified_effort"])
 
     def test_invalid_url_is_held(self):
-        result = triage({"title": "Potential work", "url": "https://example.com/task",
+        result = triage({"title": "Potential work", "url": "http://example.com/task",
                          "signals": ["payment_keyword"]})
         self.assertEqual(result["priority"], "hold")
         self.assertEqual(result["triage_score"], 0)
