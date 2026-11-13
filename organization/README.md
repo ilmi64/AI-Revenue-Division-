@@ -117,3 +117,16 @@ python organization/tools/validate_work_queue.py
 ```
 
 The queue is a planning record, not proof that tasks have been assigned or started. All 18 initial tasks remain proposed and unassigned pending owner confirmation. Dependencies are reported as blockers until their prerequisite tasks have evidence-backed completion. A task cannot be marked completed without completion evidence and a timestamp; work cannot be marked in progress without an assigned owner. The dashboard includes the read-only queue summary, and CI checks its schema, dependency references, cycle safety and state transitions.
+
+
+## Division execution and evidence reporting
+
+`execution-log.json` is the append-only event record for task starts, progress, blockers, pauses, resumptions and completion evidence. Each event identifies the task, actor, timestamp with timezone, summary and evidence references.
+
+Validate the log with:
+
+```sh
+python organization/tools/validate_execution_log.py
+```
+
+The validator rejects unknown task IDs, duplicate event IDs, missing actors or timestamps, timezone-free timestamps, invalid event transitions, unassigned-owner starts/completions and completion events without evidence. The dashboard reports events by division and derives task state from the event stream; it does not mutate the work queue or treat a report as independently verified fact. The log starts empty, so it does not imply that work is underway. CI runs this validator and the full test suite.
