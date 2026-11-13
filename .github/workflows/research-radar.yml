@@ -32,7 +32,7 @@ jobs:
         working-directory: agent-automation
         run: PYTHONPATH=. python -m unittest discover -s . -p 'test_*.py' -v
       - name: Collect public release metadata
-        run: python agent-automation/research-radar.py
+        run: python agent-automation/research_radar.py
       - name: Install pinned Ollama version
         run: curl -fsSL https://ollama.com/install.sh | OLLAMA_VERSION=0.40.16 sh
       - name: Start local Ollama service
