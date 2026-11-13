@@ -17,8 +17,11 @@ class OrganisationDashboardTests(unittest.TestCase):
         cls.operating = json.loads((root / "operating-framework.json").read_text(encoding="utf-8"))
         cls.work_queue = json.loads((root / "work-queue.json").read_text(encoding="utf-8"))
 
-    def build(self):
-        return build_dashboard(self.registry, self.readiness, self.dependencies, self.operating, [], [], self.work_queue)
+    def build(self, work_queue=None, execution_log=None):
+        return build_dashboard(
+            self.registry, self.readiness, self.dependencies, self.operating, [], [],
+            work_queue if work_queue is not None else self.work_queue, execution_log
+        )
 
     def test_dashboard_covers_all_divisions_and_never_promotes_readiness(self):
         report = self.build()
@@ -38,6 +41,41 @@ class OrganisationDashboardTests(unittest.TestCase):
         animora = next(x for x in report["division_scorecard"] if x["id"] == "animora")
         self.assertEqual(finance["verified_status"], "unassessed")
         self.assertEqual(animora["verified_status"], "deferred")
+
+
+    def test_dashboard_uses_supplied_execution_log(self):
+        queue = json.loads(json.dumps(self.work_queue))
+        task = next(item for item in queue["tasks"] if item["id"] == "TECH-001")
+        task["owner_assignment"] = "owner-confirmed"
+        events = [
+            {
+                "event_id": "EV-START",
+                "task_id": "TECH-001",
+                "event_type": "started",
+                "timestamp": "2026-11-12T12:00:00-05:00",
+                "actor": "test-owner",
+                "summary": "Started controlled test task",
+                "evidence": []
+            },
+            {
+                "event_id": "EV-DONE",
+                "task_id": "TECH-001",
+                "event_type": "completed",
+                "timestamp": "2026-11-12T13:00:00-05:00",
+                "actor": "test-owner",
+                "summary": "Completed controlled test task",
+                "evidence": ["tests/test_evidence.txt"]
+            }
+        ]
+
+        report = self.build(queue, {"events": events})
+
+        self.assertTrue(report["division_execution_evidence"]["validated"])
+        self.assertEqual(report["division_execution_evidence"]["event_count"], 2)
+        self.assertEqual(
+            report["division_execution_evidence"]["task_state_from_events"]["TECH-001"],
+            "completed"
+        )
 
     def test_revenue_snapshot_and_operating_framework_are_embedded(self):
         report = self.build()
