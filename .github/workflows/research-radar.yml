@@ -13,9 +13,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  collect-public-release-data:
+  collect-and-analyze-public-release-data:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -28,10 +28,28 @@ jobs:
         run: python -m unittest -v
       - name: Collect public release metadata
         run: python agent-automation/research-radar.py
-      - name: Upload research report
+      - name: Install pinned Ollama version
+        run: curl -fsSL https://ollama.com/install.sh | OLLAMA_VERSION=0.40.16 sh
+      - name: Start local Ollama service
+        run: |
+          nohup ollama serve > /tmp/ollama.log 2>&1 &
+          for attempt in $(seq 1 60); do
+            if curl --silent --fail http://127.0.0.1:11434/api/version; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat /tmp/ollama.log
+          exit 1
+      - name: Download small open model
+        run: ollama pull qwen2.5:1.5b
+      - name: Generate AI research brief locally
+        run: python agent-automation/ai_research_agent.py
+      - name: Upload research reports
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ai-automation-research-radar
           path: radar-output/
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 30
