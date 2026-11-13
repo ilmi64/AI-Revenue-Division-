@@ -17,10 +17,11 @@ class OrganisationDashboardTests(unittest.TestCase):
         cls.operating = json.loads((root / "operating-framework.json").read_text(encoding="utf-8"))
         cls.work_queue = json.loads((root / "work-queue.json").read_text(encoding="utf-8"))
 
-    def build(self, work_queue=None, execution_log=None):
+    def build(self, work_queue=None, execution_log=None, risk_register=None, decision_register=None):
         return build_dashboard(
             self.registry, self.readiness, self.dependencies, self.operating, [], [],
-            work_queue if work_queue is not None else self.work_queue, execution_log
+            work_queue if work_queue is not None else self.work_queue, execution_log,
+            risk_register, decision_register
         )
 
     def test_dashboard_covers_all_divisions_and_never_promotes_readiness(self):
@@ -76,6 +77,58 @@ class OrganisationDashboardTests(unittest.TestCase):
             report["division_execution_evidence"]["task_state_from_events"]["TECH-001"],
             "completed"
         )
+
+
+    def test_risk_decision_and_work_queue_links_are_reported(self):
+        risk_register = {"records": [{
+            "id": "RISK-TEST-001",
+            "division_id": "technology",
+            "severity": "medium",
+            "status": "open",
+            "description": "Regression fixture risk",
+            "mitigation": "Run the linked validation task",
+            "owner_assignment": "unassigned_pending_owner_confirmation",
+            "related_task_ids": ["TECH-001"],
+            "related_decision_ids": ["DEC-TEST-001"],
+            "evidence": []
+        }]}
+        decision_register = {"records": [{
+            "id": "DEC-TEST-001",
+            "scope": "Test-only decision fixture",
+            "status": "pending",
+            "impact": "No external impact",
+            "reversibility": "Fully reversible; test fixture only",
+            "requested_action": "Review the test fixture",
+            "related_risk_ids": ["RISK-TEST-001"],
+            "related_task_ids": ["TECH-001"],
+            "owner_outcome_evidence": []
+        }]}
+
+        report = self.build(risk_register=risk_register, decision_register=decision_register)
+
+        self.assertEqual(report["risk_register"]["summary"]["risk_count"], 1)
+        self.assertEqual(report["decision_register"]["summary"]["decision_count"], 1)
+        self.assertEqual(report["risk_register"]["summary"]["linked_task_count"], 1)
+        self.assertEqual(report["outstanding_decisions"][-1]["id"], "DEC-TEST-001")
+        self.assertEqual(report["data_quality"]["governance_link_errors"], [])
+
+    def test_governance_links_reject_unknown_work_queue_tasks(self):
+        risk_register = {"records": [{
+            "id": "RISK-TEST-002",
+            "division_id": "technology",
+            "severity": "low",
+            "status": "open",
+            "description": "Dangling reference fixture",
+            "mitigation": "Correct the task reference",
+            "owner_assignment": "unassigned_pending_owner_confirmation",
+            "related_task_ids": ["MISSING-999"],
+            "related_decision_ids": [],
+            "evidence": []
+        }]}
+
+        report = self.build(risk_register=risk_register, decision_register={"records": []})
+
+        self.assertTrue(any("unknown task MISSING-999" in error for error in report["data_quality"]["governance_link_errors"]))
 
     def test_revenue_snapshot_and_operating_framework_are_embedded(self):
         report = self.build()
