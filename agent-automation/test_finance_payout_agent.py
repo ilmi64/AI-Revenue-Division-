@@ -20,6 +20,13 @@ class FinancePayoutAgentTests(unittest.TestCase):
         self.assertEqual(result["lane"], "freelance_services")
         self.assertEqual(result["commercial_status"], "unverified_lead")
 
+    def test_preserves_canadian_eligibility_hint_without_verifying_it(self):
+        result = assess({"title":"Role","url":"https://jobicy.com/jobs/1",
+                         "lane":"remote_employment","source_name":"Jobicy",
+                         "eligibility_hint":"canada_or_worldwide_listed_check_full_terms"})
+        self.assertEqual(result["eligibility_hint"], "canada_or_worldwide_listed_check_full_terms")
+        self.assertEqual(result["canada_eligibility"], "unverified")
+
     def test_invalid_results_type_fails_closed(self):
         with self.assertRaises(ValueError):
             build_report({"results": {}})
