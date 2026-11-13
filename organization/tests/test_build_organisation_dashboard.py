@@ -49,6 +49,8 @@ class OrganisationDashboardTests(unittest.TestCase):
         self.assertTrue(report["division_work_queue"]["validated"])
         self.assertEqual(report["division_work_queue"]["task_count"], 18)
         self.assertEqual(report["division_work_queue"]["completed_count"], 0)
+        self.assertTrue(report["division_execution_evidence"]["validated"])
+        self.assertEqual(report["division_execution_evidence"]["event_count"], 0)
 
 
 if __name__ == "__main__":
