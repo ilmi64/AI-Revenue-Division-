@@ -366,7 +366,7 @@ def main():
         load_json(args.registry), load_json(args.readiness), load_json(args.dependencies),
         load_json(args.operating_framework), read_csv(args.opportunities), read_csv(args.ledger),
         load_json(args.work_queue), load_json(args.execution_log),
-        load_json(args.risk_register), load_json(args.decision_register), load_json(args.incident_register)
+        load_json(args.risk_register), load_json(args.decision_register), load_json(args.incident_register), load_json(args.recovery_plan)
     )
     print(json.dumps(report, indent=2, ensure_ascii=False))
     return 1 if report["data_quality"]["readiness_validation_errors"] or report["data_quality"]["dependency_map_errors"] or report["data_quality"]["operating_framework_errors"] or report["data_quality"]["work_queue_errors"] or report["data_quality"]["execution_log_errors"] or report["data_quality"]["cross_division_integration_errors"] or report["data_quality"]["governance_link_errors"] or report["data_quality"]["incident_register_errors"] else 0
