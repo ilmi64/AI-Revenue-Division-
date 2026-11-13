@@ -21,9 +21,9 @@ def triage(item: dict) -> dict:
     if "accessibility_keyword" in signals:
         score += 1
         reasons.append("Potential accessibility signal detected")
-    if not title or not url.startswith("https://github.com/"):
+    if not title or not url.startswith("https://"):
         score = 0
-        reasons.append("Missing title or non-GitHub source URL; manual correction required")
+        reasons.append("Missing title or non-HTTPS source URL; manual correction required")
     return {
         "title": title or "Untitled lead",
         "url": url,
