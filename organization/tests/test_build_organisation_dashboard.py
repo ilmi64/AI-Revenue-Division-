@@ -154,6 +154,7 @@ class OrganisationDashboardTests(unittest.TestCase):
         }]}
         report = self.build(decision_register=decision_register)
         self.assertTrue(any("requires explicit owner outcome evidence" in error for error in report["data_quality"]["governance_link_errors"]))
+        self.assertFalse(any(row.get("id") == "DEC-TEST-APPROVED" for row in report["outstanding_decisions"]))
 
     def test_revenue_snapshot_and_operating_framework_are_embedded(self):
         report = self.build()
