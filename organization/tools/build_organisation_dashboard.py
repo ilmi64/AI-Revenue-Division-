@@ -14,6 +14,7 @@ from build_executive_snapshot import build_snapshot, read_csv
 from validate_readiness import validate
 from validate_operating_framework import build_report as build_operating_framework_report
 from validate_work_queue import build_report as build_work_queue_report
+from validate_execution_log import build_report as build_execution_log_report
 
 
 def load_json(path):
@@ -21,12 +22,13 @@ def load_json(path):
         return json.load(handle)
 
 
-def build_dashboard(registry, readiness, dependency_map, operating_framework, opportunities, ledger, work_queue=None):
+def build_dashboard(registry, readiness, dependency_map, operating_framework, opportunities, ledger, work_queue=None, execution_log=None):
     errors, warnings = validate(registry, readiness)
     dependency_report = build_report(registry, readiness, dependency_map)
     revenue = build_snapshot(opportunities, ledger)
     operating = build_operating_framework_report(registry, operating_framework)
     work_queue_report = build_work_queue_report(registry, work_queue or {"tasks": []})
+    execution_report = build_execution_log_report(registry, work_queue or {"tasks": []}, execution_log or {"events": []})
 
     assessments = {a["division_id"]: a for a in readiness.get("division_assessments", [])}
     divisions = []
@@ -95,6 +97,7 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
         "cross_division_dependencies": dependency_report,
         "division_operating_framework": operating,
         "division_work_queue": work_queue_report,
+        "division_execution_evidence": execution_report,
         "ai_revenue": revenue,
         "risk_register": risks,
         "outstanding_decisions": decisions,
@@ -105,6 +108,7 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
             "dependency_map_errors": dependency_report.get("errors", []),
             "operating_framework_errors": operating.get("errors", []),
             "work_queue_errors": work_queue_report.get("errors", []),
+            "execution_log_errors": execution_report.get("errors", []),
             "revenue_warnings": revenue["data_quality"]["warnings"],
             "note": "Absence of a record is not proof that work or funds do not exist outside these source files."
         }
@@ -118,6 +122,7 @@ def main():
     parser.add_argument("--dependencies", type=Path, default=Path("organization/dependency-map.json"))
     parser.add_argument("--operating-framework", type=Path, default=Path("organization/operating-framework.json"))
     parser.add_argument("--work-queue", type=Path, default=Path("organization/work-queue.json"))
+    parser.add_argument("--execution-log", type=Path, default=Path("organization/execution-log.json"))
     parser.add_argument("--opportunities", type=Path, default=Path("intelligence/opportunity-tracker.csv"))
     parser.add_argument("--ledger", type=Path, default=Path("finance/revenue-ledger.csv"))
     args = parser.parse_args()
@@ -127,7 +132,7 @@ def main():
         load_json(args.work_queue)
     )
     print(json.dumps(report, indent=2, ensure_ascii=False))
-    return 1 if report["data_quality"]["readiness_validation_errors"] or report["data_quality"]["dependency_map_errors"] or report["data_quality"]["operating_framework_errors"] or report["data_quality"]["work_queue_errors"] else 0
+    return 1 if report["data_quality"]["readiness_validation_errors"] or report["data_quality"]["dependency_map_errors"] or report["data_quality"]["operating_framework_errors"] or report["data_quality"]["work_queue_errors"] or report["data_quality"]["execution_log_errors"] else 0
 
 
 if __name__ == "__main__":
