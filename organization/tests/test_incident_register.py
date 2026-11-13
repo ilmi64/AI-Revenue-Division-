@@ -44,6 +44,19 @@ class IncidentRegisterTests(unittest.TestCase):
         errs = self.check(item)
         self.assertTrue(any("every corrective action" in e for e in errs))
         self.assertTrue(any("approved owner decision" in e for e in errs))
+
+    def test_closed_incident_passes_only_with_all_closure_evidence(self):
+        self.decisions = {"records": [{"id": "D-1", "status": "approved", "owner_outcome_evidence": ["owner:approval-evidence"]}]}
+        item = dict(self.incident)
+        item["status"] = "closed"
+        item["post_incident_review_evidence"] = ["review:post-incident"]
+        item["corrective_actions"] = [{
+            "id": "CA-1", "description": "Restore validated configuration",
+            "status": "completed", "owner_assignment": "owner-confirmed",
+            "completion_evidence": ["test:passed"]
+        }]
+        self.assertEqual(self.check(item), [])
+
     def test_malformed_register_does_not_crash(self):
         self.assertTrue(validate("bad", self.risks, self.decisions, self.queue, self.registry))
         item = dict(self.incident); item["corrective_actions"] = [None]
