@@ -84,6 +84,7 @@ def render_markdown(report: dict) -> str:
         "", "## Financial status", "",
         "- Verified paid opportunities: 0 recorded",
         "- Cash received: 0 recorded",
+        "- Discovered leads do not represent earnings, accepted work, or cash received.",
         "- These are conservative system counters, not a statement about the user's external accounts.",
         "", "## Blockers", "",
     ])
