@@ -173,8 +173,16 @@ python -m unittest organization.tests.test_security_posture -v
 
 The validator scans tracked text files for a narrow set of high-confidence credential shapes and prints only file paths and rule IDs, never matched values. It verifies that the organisation workflow declares exactly `contents: read`, inventories common dependency manifests, and warns when GitHub Actions references use mutable tags instead of full immutable commit SHAs. The dashboard includes the same read-only report.
 
-Current workflow action tags are reported for review; they are not represented as immutable pins. Pinning requires verifying each action's exact full commit SHA and reviewing its provenance before changing the workflow.
+The current workflow pins `actions/checkout` to the verified `v4.2.2` commit `11bd71901bbe5b1630ceea73d27597364c9af683` and `actions/setup-python` to the verified `v5.6.0` commit `a26af69be951a213d495a4c3e4e4022e16d87065`. The versions are retained in comments for human review; the immutable commit IDs are the references actually executed. Re-check upstream release provenance and compatibility before future upgrades.
 
 These checks do not inspect repository history, GitHub account/app permissions, secret stores, third-party vulnerabilities, or production systems. A clean scan is not proof that no secret exists or has ever been exposed. Suspected exposure should be treated as an incident and handled by the owner through the relevant provider's secure credential-rotation process.
+
+### Access review and audit-evidence procedure
+
+Before any production or live-capital launch, an owner-designated reviewer must document a read-only access review covering repository collaborators, installed GitHub Apps and OAuth authorizations, workflow token permissions, branch protections/rulesets, connected service scopes, and the location/ownership of any required secrets. Do not copy secret values or sensitive account data into this repository. Record the review date, exact scope, reviewer, evidence references, findings, exceptions, remediation owner, owner decision and independent review where required. If a surface cannot be inspected with the available permissions, record it as not assessed rather than passed.
+
+Review evidence should be retained as redacted references or provider-generated audit artifacts, with a clear distinction between observed configuration, reviewer interpretation, and owner-approved changes. Findings that could expose credentials or permit unauthorized financial actions must be escalated through the incident and risk registers. Changes to permissions, secrets, integrations, branch protections or live execution remain owner-approved actions; this documentation does not authorize them.
+
+No account-level access review has been performed by this repository validator. The current access-review status is therefore **not assessed**. These checks do not inspect repository history, GitHub account/app permissions, secret stores, third-party vulnerabilities, or production systems. A clean scan is not proof that no secret exists or has ever been exposed.
 
 Production restore or rollback requires explicit owner approval and an independent second review. Access is limited to named, owner-approved operators and should be least-privilege and time-limited. Credentials must never be committed, printed in CI logs, or persisted in drill artifacts. The automated recovery drill remains isolated to temporary fixtures.
