@@ -201,7 +201,7 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
     risk_records = risk_register.get("records", []) if isinstance(risk_register, dict) and isinstance(risk_register.get("records", []), list) else []
     decision_records = decision_register.get("records", []) if isinstance(decision_register, dict) and isinstance(decision_register.get("records", []), list) else []
     risk_escalations = build_risk_escalation_report(risk_register, decision_register, work_queue, execution_report, operating_framework, registry)
-    incident_source = {\"records\": []} if incident_register is None else incident_register
+    incident_source = {"records": []} if incident_register is None else incident_register
     incident_errors = validate_incident_register(
         incident_source, risk_register or {"records": []},
         decision_register or {"records": []}, work_queue or {"tasks": []}, registry
