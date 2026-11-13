@@ -24,57 +24,71 @@ def load_json(path):
 
 
 def validate_governance_links(work_queue, risk_register, decision_register):
-    """Validate risk/decision references without changing source records."""
+    """Validate governance references defensively; malformed input becomes errors, not crashes."""
     errors = []
-    tasks = {item.get("id") for item in (work_queue or {}).get("tasks", []) if isinstance(item, dict)}
+    tasks = {
+        item.get("id") for item in (work_queue or {}).get("tasks", [])
+        if isinstance(item, dict) and isinstance(item.get("id"), str)
+    }
     risks = risk_register or {"records": []}
     decisions = decision_register or {"records": []}
-    risk_rows = risks.get("records", [])
-    decision_rows = decisions.get("records", [])
+    risk_rows = risks.get("records", []) if isinstance(risks, dict) else None
+    decision_rows = decisions.get("records", []) if isinstance(decisions, dict) else None
     if not isinstance(risk_rows, list) or not isinstance(decision_rows, list):
-        return ["Risk and decision records must be arrays."], {"risk_count": 0, "decision_count": 0, "linked_task_count": 0}
-    risk_ids = [row.get("id") for row in risk_rows if isinstance(row, dict)]
-    decision_ids = [row.get("id") for row in decision_rows if isinstance(row, dict)]
-    if len(risk_ids) != len(risk_rows) or any(not isinstance(value, str) or not value.strip() for value in risk_ids):
-        errors.append("Every risk record must be an object with a non-empty string id.")
-    if len(decision_ids) != len(decision_rows) or any(not isinstance(value, str) or not value.strip() for value in decision_ids):
-        errors.append("Every decision record must be an object with a non-empty string id.")
-    if len(set(risk_ids)) != len(risk_ids):
-        errors.append("Risk record ids must be unique.")
-    if len(set(decision_ids)) != len(decision_ids):
-        errors.append("Decision record ids must be unique.")
-    risk_id_set, decision_id_set = set(risk_ids), set(decision_ids)
+        return ["Risk and decision records must be arrays in object registers."], {
+            "risk_count": 0, "decision_count": 0, "linked_task_count": 0
+        }
+
+    def index_records(rows, label):
+        indexed = {}
+        for position, row in enumerate(rows):
+            if not isinstance(row, dict):
+                errors.append(f"{label} record at index {position} must be an object.")
+                continue
+            record_id = row.get("id")
+            if not isinstance(record_id, str) or not record_id.strip():
+                errors.append(f"{label} record at index {position} requires a non-empty string id.")
+                continue
+            if record_id in indexed:
+                errors.append(f"{label} record ids must be unique: {record_id}.")
+            indexed[record_id] = row
+        return indexed
+
+    risk_index = index_records(risk_rows, "Risk")
+    decision_index = index_records(decision_rows, "Decision")
     linked_tasks = set()
-    for row in risk_rows:
-        if not isinstance(row, dict):
-            continue
+
+    def references(row, field, known, label, record_id):
+        values = row.get(field, [])
+        if not isinstance(values, list) or any(not isinstance(value, str) or not value.strip() for value in values):
+            errors.append(f"{label} {record_id} field {field} must be an array of non-empty strings.")
+            return []
+        for value in values:
+            if value not in known:
+                errors.append(f"{label} {record_id} references unknown {field} item {value}.")
+        return values
+
+    for record_id, row in risk_index.items():
         for field in ("severity", "status", "description", "division_id", "mitigation", "owner_assignment"):
             if not isinstance(row.get(field), str) or not row[field].strip():
-                errors.append(f"Risk {row.get('id', '<unknown>')} requires non-empty {field}.")
-        for task_id in row.get("related_task_ids", []):
-            linked_tasks.add(task_id)
-            if task_id not in tasks:
-                errors.append(f"Risk {row.get('id')} references unknown task {task_id}.")
-        for decision_id in row.get("related_decision_ids", []):
-            if decision_id not in decision_id_set:
-                errors.append(f"Risk {row.get('id')} references unknown decision {decision_id}.")
-    for row in decision_rows:
-        if not isinstance(row, dict):
-            continue
+                errors.append(f"Risk {record_id} requires non-empty {field}.")
+        linked_tasks.update(references(row, "related_task_ids", tasks, "Risk", record_id))
+        references(row, "related_decision_ids", decision_index, "Risk", record_id)
+
+    for record_id, row in decision_index.items():
         for field in ("scope", "status", "impact", "reversibility", "requested_action"):
             if not isinstance(row.get(field), str) or not row[field].strip():
-                errors.append(f"Decision {row.get('id', '<unknown>')} requires non-empty {field}.")
-        for task_id in row.get("related_task_ids", []):
-            linked_tasks.add(task_id)
-            if task_id not in tasks:
-                errors.append(f"Decision {row.get('id')} references unknown task {task_id}.")
-        for risk_id in row.get("related_risk_ids", []):
-            if risk_id not in risk_id_set:
-                errors.append(f"Decision {row.get('id')} references unknown risk {risk_id}.")
+                errors.append(f"Decision {record_id} requires non-empty {field}.")
+        linked_tasks.update(references(row, "related_task_ids", tasks, "Decision", record_id))
+        references(row, "related_risk_ids", risk_index, "Decision", record_id)
         if row.get("status") == "approved" and not row.get("owner_outcome_evidence"):
-            errors.append(f"Approved decision {row.get('id')} requires explicit owner outcome evidence.")
-    return errors, {"risk_count": len(risk_rows), "decision_count": len(decision_rows), "linked_task_count": len(linked_tasks)}
+            errors.append(f"Approved decision {record_id} requires explicit owner outcome evidence.")
 
+    return errors, {
+        "risk_count": len(risk_rows),
+        "decision_count": len(decision_rows),
+        "linked_task_count": len(linked_tasks)
+    }
 
 def build_dashboard(registry, readiness, dependency_map, operating_framework, opportunities, ledger, work_queue=None, execution_log=None, risk_register=None, decision_register=None):
     errors, warnings = validate(registry, readiness)
@@ -176,7 +190,6 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
             "work_queue_errors": work_queue_report.get("errors", []),
             "execution_log_errors": execution_report.get("errors", []),
             "cross_division_integration_errors": integration_report.get("errors", []),
-            "governance_link_errors": governance_errors,
             "governance_link_errors": governance_errors,
             "revenue_warnings": revenue["data_quality"]["warnings"],
             "note": "Absence of a record is not proof that work or funds do not exist outside these source files."
