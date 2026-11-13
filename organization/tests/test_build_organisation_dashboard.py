@@ -17,7 +17,7 @@ class OrganisationDashboardTests(unittest.TestCase):
         cls.operating = json.loads((root / "operating-framework.json").read_text(encoding="utf-8"))
         cls.work_queue = json.loads((root / "work-queue.json").read_text(encoding="utf-8"))
 
-    def build(self, work_queue=None, execution_log=None, risk_register=None, decision_register=None, incident_register=None):
+    def build(self, work_queue=None, execution_log=None, risk_register=None, decision_register=None, incident_register=None, recovery_plan=None):
         return build_dashboard(
             self.registry, self.readiness, self.dependencies, self.operating, [], [],
             work_queue if work_queue is not None else self.work_queue, execution_log,
