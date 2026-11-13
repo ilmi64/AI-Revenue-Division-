@@ -319,7 +319,8 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
         "cross_division_integration": integration_report,
         "ai_revenue": revenue,
         "risk_escalations": risk_escalations,
-        "incident_response": incident_response,\n        "technical_recovery": technical_recovery,
+        "incident_response": incident_response,
+        "technical_recovery": technical_recovery,
         "risk_register": {
             "records": risk_records,
             "readiness_and_dependency_warnings": risks,
