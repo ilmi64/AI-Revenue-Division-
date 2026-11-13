@@ -17,11 +17,11 @@ class OrganisationDashboardTests(unittest.TestCase):
         cls.operating = json.loads((root / "operating-framework.json").read_text(encoding="utf-8"))
         cls.work_queue = json.loads((root / "work-queue.json").read_text(encoding="utf-8"))
 
-    def build(self, work_queue=None, execution_log=None, risk_register=None, decision_register=None):
+    def build(self, work_queue=None, execution_log=None, risk_register=None, decision_register=None, incident_register=None):
         return build_dashboard(
             self.registry, self.readiness, self.dependencies, self.operating, [], [],
             work_queue if work_queue is not None else self.work_queue, execution_log,
-            risk_register, decision_register
+            risk_register, decision_register, incident_register
         )
 
     def test_dashboard_covers_all_divisions_and_never_promotes_readiness(self):
@@ -219,6 +219,14 @@ class OrganisationDashboardTests(unittest.TestCase):
         report = self.build(risk_register="not-an-object", decision_register=[])
         self.assertTrue(report["data_quality"]["governance_link_errors"])
         self.assertEqual(report["risk_escalations"]["count"], 0)
+
+
+    def test_dashboard_reports_empty_incident_register_without_inventing_events(self):
+        report = self.build()
+        self.assertEqual(report["incident_response"]["incident_count"], 0)
+        self.assertEqual(report["incident_response"]["corrective_action_count"], 0)
+        self.assertEqual(report["incident_response"]["critical_or_high_count"], 0)
+        self.assertEqual(report["data_quality"]["incident_register_errors"], [])
 
     def test_revenue_snapshot_and_operating_framework_are_embedded(self):
         report = self.build()
