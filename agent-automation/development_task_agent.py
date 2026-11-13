@@ -33,7 +33,7 @@ def triage(item: dict) -> dict:
         "verified_scope": False,
         "verified_effort": False,
         "verified_acceptance_criteria": False,
-        "recommended_next_step": "Open the source issue and manually inspect its full description, comments, acceptance criteria, sponsor and current status.",
+        "recommended_next_step": "Open the original source listing and manually inspect its full terms, employer, location restrictions, compensation, contract type and current status.",
         "do_not": ["Do not claim or assign the issue", "Do not contact the sponsor", "Do not submit code or a pull request", "Do not treat keywords or score as proof of payment"],
     }
 
