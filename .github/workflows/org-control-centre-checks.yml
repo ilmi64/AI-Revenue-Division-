@@ -1,0 +1,46 @@
+name: Organisation Control Centre checks
+
+on:
+  pull_request:
+    paths:
+      - "organization/**"
+      - ".github/workflows/org-control-centre-checks.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-control-centre:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.x"
+      - name: Validate repository security posture
+        run: python organization/tools/validate_security_posture.py
+      - name: Validate organisation records
+        run: python organization/tools/validate_readiness.py
+      - name: Build cross-division dependency report
+        run: python organization/tools/build_dependency_report.py
+      - name: Validate division operating framework
+        run: python organization/tools/validate_operating_framework.py
+      - name: Validate cross-division provider and handoff connections
+        run: python organization/tools/validate_division_integrations.py
+      - name: Validate division work queue
+        run: python organization/tools/validate_work_queue.py
+      - name: Validate append-only division execution evidence
+        run: python organization/tools/validate_execution_log.py
+      - name: Validate incident and corrective-action records
+        run: python organization/tools/validate_incident_register.py
+      - name: Run isolated backup restore rollback and restart drill
+        run: python organization/tools/run_recovery_drill.py
+      - name: Build consolidated organisation dashboard
+        run: python organization/tools/build_organisation_dashboard.py
+      - name: Build read-only AI Revenue snapshot
+        run: python organization/tools/build_executive_snapshot.py
+      - name: Run all organisation tests
+        run: python -m unittest discover -s organization/tests -v

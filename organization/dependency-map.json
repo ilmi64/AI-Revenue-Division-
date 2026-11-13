@@ -1,0 +1,237 @@
+{
+  "schema_version": 1,
+  "policy": "Dependencies describe capabilities a division needs from other divisions. Required dependencies block a division's standby/operational readiness until the provider is verified standby or operational. Supporting dependencies are reported but do not independently block readiness.",
+  "readiness_threshold": [
+    "standby",
+    "operational"
+  ],
+  "divisions": [
+    {
+      "division_id": "executive",
+      "depends_on": [],
+      "provides_to": [
+        "all"
+      ],
+      "notes": "Central coordination can operate manually while shared systems are being built; automation is not assumed."
+    },
+    {
+      "division_id": "ai-revenue",
+      "depends_on": [
+        {
+          "division_id": "executive",
+          "type": "required",
+          "capability": "Priorities, approval routing and executive oversight"
+        },
+        {
+          "division_id": "technology",
+          "type": "required",
+          "capability": "Secure tools, testing and delivery infrastructure"
+        },
+        {
+          "division_id": "research",
+          "type": "required",
+          "capability": "Verified opportunities, eligibility and evidence"
+        },
+        {
+          "division_id": "finance",
+          "type": "required",
+          "capability": "Revenue classification, cost controls and cash reporting"
+        },
+        {
+          "division_id": "risk",
+          "type": "required",
+          "capability": "Scam screening, security and delivery-risk review"
+        }
+      ],
+      "provides_to": [
+        "executive",
+        "finance",
+        "ecommerce",
+        "animora"
+      ],
+      "notes": "Early funding engine; zero-upfront-cost default and no external commitments without approval."
+    },
+    {
+      "division_id": "technology",
+      "depends_on": [
+        {
+          "division_id": "executive",
+          "type": "required",
+          "capability": "Priorities, scope and approval gates"
+        },
+        {
+          "division_id": "risk",
+          "type": "supporting",
+          "capability": "Security challenge and recovery review"
+        }
+      ],
+      "provides_to": [
+        "all"
+      ],
+      "notes": "Shared technical foundation; changes remain isolated until reviewed and approved."
+    },
+    {
+      "division_id": "research",
+      "depends_on": [
+        {
+          "division_id": "executive",
+          "type": "required",
+          "capability": "Research priorities and decision context"
+        },
+        {
+          "division_id": "technology",
+          "type": "supporting",
+          "capability": "Research tooling and data handling"
+        }
+      ],
+      "provides_to": [
+        "executive",
+        "ai-revenue",
+        "finance",
+        "risk",
+        "crypto"
+      ],
+      "notes": "Sourced intelligence with freshness, uncertainty and evidence recorded."
+    },
+    {
+      "division_id": "finance",
+      "depends_on": [
+        {
+          "division_id": "executive",
+          "type": "required",
+          "capability": "Budget policy and approval authority"
+        },
+        {
+          "division_id": "research",
+          "type": "required",
+          "capability": "Verified opportunity and financing evidence"
+        },
+        {
+          "division_id": "risk",
+          "type": "supporting",
+          "capability": "Fraud, liquidity and operational risk review"
+        }
+      ],
+      "provides_to": [
+        "all"
+      ],
+      "notes": "No transactions, borrowing or investment actions; halal review required where relevant."
+    },
+    {
+      "division_id": "risk",
+      "depends_on": [
+        {
+          "division_id": "executive",
+          "type": "required",
+          "capability": "Organisation-wide risk mandate and escalation"
+        },
+        {
+          "division_id": "technology",
+          "type": "supporting",
+          "capability": "System architecture, controls and security evidence"
+        },
+        {
+          "division_id": "research",
+          "type": "supporting",
+          "capability": "Threat, platform and market intelligence"
+        }
+      ],
+      "provides_to": [
+        "all"
+      ],
+      "notes": "Independent challenge and stop-only advisory authority; cannot authorise execution."
+    },
+    {
+      "division_id": "crypto",
+      "depends_on": [
+        {
+          "division_id": "executive",
+          "type": "required",
+          "capability": "Explicit scope, governance and launch approval"
+        },
+        {
+          "division_id": "technology",
+          "type": "required",
+          "capability": "Tested infrastructure and deterministic controls"
+        },
+        {
+          "division_id": "research",
+          "type": "required",
+          "capability": "Market intelligence and evidence"
+        },
+        {
+          "division_id": "finance",
+          "type": "required",
+          "capability": "Treasury, exposure and accounting controls"
+        },
+        {
+          "division_id": "risk",
+          "type": "required",
+          "capability": "Independent safety review, failure handling and stop controls"
+        }
+      ],
+      "provides_to": [
+        "executive"
+      ],
+      "notes": "Paper/research only until separate live-operation approval and full readiness evidence."
+    },
+    {
+      "division_id": "ecommerce",
+      "depends_on": [
+        {
+          "division_id": "executive",
+          "type": "required",
+          "capability": "Priority and approval oversight"
+        },
+        {
+          "division_id": "technology",
+          "type": "required",
+          "capability": "Store and automation infrastructure"
+        },
+        {
+          "division_id": "ai-revenue",
+          "type": "supporting",
+          "capability": "Commercial validation and service workflows"
+        },
+        {
+          "division_id": "finance",
+          "type": "required",
+          "capability": "Unit economics, fees and cash controls"
+        }
+      ],
+      "provides_to": [
+        "ai-revenue"
+      ],
+      "notes": "Intentionally deferred; existing assets maintained without major new spend."
+    },
+    {
+      "division_id": "animora",
+      "depends_on": [
+        {
+          "division_id": "executive",
+          "type": "required",
+          "capability": "Long-term portfolio prioritisation"
+        },
+        {
+          "division_id": "technology",
+          "type": "required",
+          "capability": "Creative production and publishing infrastructure"
+        },
+        {
+          "division_id": "ai-revenue",
+          "type": "supporting",
+          "capability": "Potential commercialisation and audience-growth support"
+        },
+        {
+          "division_id": "finance",
+          "type": "required",
+          "capability": "Sustainable funding and budget controls"
+        }
+      ],
+      "provides_to": [
+        "ai-revenue"
+      ],
+      "notes": "Future creative/media studio; no investment until the wider organisation can fund it sustainably."
+    }
+  ]
+}

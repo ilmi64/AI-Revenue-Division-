@@ -1,0 +1,89 @@
+import json, sys, unittest
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
+from validate_execution_log import build_report
+
+class ExecutionLogTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        root = Path(__file__).resolve().parents[1]
+        cls.registry = json.loads((root / "division-registry.json").read_text())
+        cls.queue = json.loads((root / "work-queue.json").read_text())
+    def event(self, kind, stamp="2026-11-12T12:00:00-05:00", evidence=None):
+        return {"event_id":"EV-1","task_id":"TECH-001","event_type":kind,"timestamp":stamp,
+                "actor":"owner-confirmed-test","summary":"Test event","evidence":evidence or []}
+    def test_empty_log_is_valid_and_reports_no_activity(self):
+        r = build_report(self.registry, self.queue, {"events":[]})
+        self.assertTrue(r["validated"], r["errors"]); self.assertEqual(r["event_count"], 0)
+        self.assertEqual(len(r["divisions"]), 9)
+    def test_started_requires_assigned_owner(self):
+        r = build_report(self.registry, self.queue, {"events":[self.event("started")]})
+        self.assertFalse(r["validated"])
+        self.assertTrue(any("requires an assigned task owner" in e for e in r["errors"]))
+    def test_completion_requires_evidence(self):
+        queue = json.loads(json.dumps(self.queue))
+        next(t for t in queue["tasks"] if t["id"]=="TECH-001")["owner_assignment"]="owner-confirmed"
+        events=[self.event("started"), self.event("completed", "2026-11-12T13:00:00-05:00")]
+        r=build_report(self.registry, queue, {"events":events})
+        self.assertFalse(r["validated"])
+        self.assertTrue(any("requires evidence" in e for e in r["errors"]))
+    def test_valid_started_progress_completion_sequence(self):
+        queue=json.loads(json.dumps(self.queue))
+        next(t for t in queue["tasks"] if t["id"]=="TECH-001")["owner_assignment"]="owner-confirmed"
+        events=[self.event("started"), self.event("progress","2026-11-12T12:30:00-05:00"),
+                self.event("completed","2026-11-12T13:00:00-05:00",["https://example.invalid/evidence"])]
+        for i,e in enumerate(events): e["event_id"]=f"EV-{i+1}"
+        r=build_report(self.registry,queue,{"events":events})
+        self.assertTrue(r["validated"],r["errors"]); self.assertEqual(r["task_state_from_events"]["TECH-001"],"completed")
+    def test_timezone_required_and_duplicate_ids_rejected(self):
+        a=self.event("started"); b=self.event("started", "2026-11-12T13:00:00-05:00")
+        r=build_report(self.registry,self.queue,{"events":[a,b]})
+        self.assertFalse(r["validated"])
+        self.assertTrue(any("unique" in e for e in r["errors"]))
+    def test_invalid_state_transition_rejected(self):
+        r=build_report(self.registry,self.queue,{"events":[self.event("completed",evidence=["ref"])]})
+        self.assertFalse(r["validated"])
+        self.assertTrue(any("not allowed" in e for e in r["errors"]))
+    def test_blocked_task_can_resume_with_resolution_evidence(self):
+        queue=json.loads(json.dumps(self.queue))
+        next(t for t in queue["tasks"] if t["id"]=="TECH-001")["owner_assignment"]="owner-confirmed"
+        events=[self.event("started","2026-11-12T12:00:00-05:00"),
+                self.event("blocked","2026-11-12T12:15:00-05:00"),
+                self.event("resumed","2026-11-12T13:00:00-05:00",["blocker-resolution.txt"])]
+        for i,event in enumerate(events): event["event_id"]=f"EV-B{i+1}"
+        report=build_report(self.registry,queue,{"events":events})
+        self.assertTrue(report["validated"],report["errors"])
+        self.assertEqual(report["task_state_from_events"]["TECH-001"],"in_progress")
+    def test_blocked_task_cannot_resume_without_resolution_evidence(self):
+        queue=json.loads(json.dumps(self.queue))
+        next(t for t in queue["tasks"] if t["id"]=="TECH-001")["owner_assignment"]="owner-confirmed"
+        events=[self.event("started","2026-11-12T12:00:00-05:00"),
+                self.event("blocked","2026-11-12T12:15:00-05:00"),
+                self.event("resumed","2026-11-12T13:00:00-05:00")]
+        for i,event in enumerate(events): event["event_id"]=f"EV-N{i+1}"
+        report=build_report(self.registry,queue,{"events":events})
+        self.assertFalse(report["validated"])
+        self.assertTrue(any("blocker was resolved" in error for error in report["errors"]))
+    def test_unhashable_identifiers_and_event_type_return_validation_errors(self):
+        for field, bad_value in (("event_id", []), ("task_id", []), ("event_type", [])):
+            with self.subTest(field=field):
+                event=self.event("started")
+                event[field]=bad_value
+                report=build_report(self.registry,self.queue,{"events":[event]})
+                self.assertFalse(report["validated"])
+                self.assertTrue(report["errors"])
+
+    def test_invalid_event_does_not_advance_derived_task_state(self):
+        queue=json.loads(json.dumps(self.queue))
+        next(t for t in queue["tasks"] if t["id"]=="TECH-001")["owner_assignment"]="owner-confirmed"
+        first=self.event("started")
+        second=self.event("completed","2026-11-12T13:00:00-05:00")
+        first["event_id"]="EV-START"
+        second["event_id"]="EV-DONE"
+        events=[first,second]
+        report=build_report(self.registry,queue,{"events":events})
+        self.assertFalse(report["validated"])
+        self.assertNotEqual(report["task_state_from_events"].get("TECH-001"),"completed")
+
+if __name__ == "__main__":
+    unittest.main()

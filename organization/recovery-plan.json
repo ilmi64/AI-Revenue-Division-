@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "status": "design_only_pending_owner_and_environment_confirmation",
+  "scope": "technology_division_recovery_control",
+  "policy": "Recovery procedures are plans until a real target, accountable owner, approved backup location, recovery point objective, recovery time objective, rollback authority and test evidence are confirmed. The repository drill is temporary-fixture-only and must never be represented as production recovery verification.",
+  "safeguards": {
+    "production_access": "prohibited_without_explicit_owner_approval",
+    "credentials_or_secrets": "never_store_in_repository_or_drill_artifacts",
+    "destructive_commands": "prohibited_in_automated_drill",
+    "restore_target": "isolated_temporary_fixture_only",
+    "rollback": "fixture_only; production rollback requires owner approval and validated backup",
+    "restart": "synthetic_health_marker_only; no real service command",
+    "crypto": "paper_only; no wallet, key, signature, order or live execution",
+    "production_restore_and_rollback": "explicit_owner_approval_and_independent_second_review_required",
+    "approved_operators": "named_owner_approved_operators_only",
+    "access_scope": "least_privilege_time_limited_access; no standing production credentials in repository or CI",
+    "credential_handling": "credentials supplied only through an owner-approved secure mechanism; never commit, print, or persist them in artifacts"
+  },
+  "procedures": [
+    {
+      "id": "REC-BACKUP-001",
+      "name": "Backup integrity verification",
+      "acceptance": [
+        "Identify owner-approved source and destination",
+        "Record backup timestamp and immutable artifact reference",
+        "Verify cryptographic hashes and completeness",
+        "Record restore test evidence"
+      ],
+      "current_state": "not_tested_for_production"
+    },
+    {
+      "id": "REC-RESTORE-001",
+      "name": "Restore validation",
+      "acceptance": [
+        "Restore to an isolated target first",
+        "Verify hashes and application-level integrity",
+        "Record data-loss window and measured recovery duration",
+        "Obtain owner approval before production restoration"
+      ],
+      "current_state": "not_tested_for_production"
+    },
+    {
+      "id": "REC-ROLLBACK-001",
+      "name": "Rollback validation",
+      "acceptance": [
+        "Capture pre-change known-good state",
+        "Document rollback trigger and authority",
+        "Validate rollback in isolated environment",
+        "Require owner approval before production rollback"
+      ],
+      "current_state": "not_tested_for_production"
+    },
+    {
+      "id": "REC-RESTART-001",
+      "name": "Restart and health verification",
+      "acceptance": [
+        "Document approved service owner and restart procedure",
+        "Restart only in a permitted test environment",
+        "Verify health endpoint and dependent services",
+        "Record evidence and owner sign-off"
+      ],
+      "current_state": "not_tested_for_production"
+    }
+  ],
+  "drill_command": "python organization/tools/run_recovery_drill.py",
+  "drill_result": "CI validates temporary-fixture mechanics only; no production recovery claim."
+}

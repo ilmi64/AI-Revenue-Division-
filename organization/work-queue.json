@@ -1,0 +1,463 @@
+{
+  "schema_version": 1,
+  "queue_status": "designed_pending_owner_confirmation",
+  "policy": "Proposed work queue only. Tasks are not assigned, started, completed, or externally authorised by appearing here. Dependencies are explicit; status and execution state change only when evidence is recorded and reviewed.",
+  "defaults": {
+    "budget_cad": 0,
+    "owner_assignment": "unassigned_pending_owner_confirmation",
+    "status": "proposed",
+    "execution_state": "not_started"
+  },
+  "status_vocabulary": {
+    "status": [
+      "proposed",
+      "ready",
+      "blocked",
+      "in_progress",
+      "completed",
+      "cancelled"
+    ],
+    "execution_state": [
+      "not_started",
+      "in_progress",
+      "done",
+      "paused"
+    ]
+  },
+  "approval_policy": [
+    "No spending or paid subscriptions without explicit owner approval.",
+    "No external applications, client contact, submissions or commitments without explicit owner approval.",
+    "No publishing, production deployment, repository merge or permission change without explicit owner approval.",
+    "No live trading, wallet connection, signing, deposits or withdrawals without separate explicit approval and readiness review.",
+    "Risk division may independently challenge and recommend stop; it cannot authorise execution."
+  ],
+  "tasks": [
+    {
+      "id": "EXEC-001",
+      "division_id": "executive",
+      "title": "Establish weekly executive review pack",
+      "objective": "Consolidate division scorecard, dependency blockers, risks, decisions and owner approvals.",
+      "priority": "high",
+      "depends_on": [],
+      "required_evidence": [
+        "Reviewed dashboard JSON",
+        "Decision and blocker summary"
+      ],
+      "acceptance_criteria": [
+        "Dashboard output is generated from current source records",
+        "Every unverified item is labelled and no division is promoted to ready"
+      ],
+      "approval_gate": "No external action; owner confirmation required for reserved decisions",
+      "owner_assignment": "unassigned_pending_owner_confirmation",
+      "status": "proposed",
+      "execution_state": "not_started",
+      "completion_evidence": [],
+      "completed_at": null
+    },
+    {
+      "id": "EXEC-002",
+      "division_id": "executive",
+      "title": "Create owner decision and approval queue",
+      "objective": "Turn outstanding owner decisions into scoped requests with evidence and explicit outcomes.",
+      "priority": "high",
+      "depends_on": [
+        "EXEC-001"
+      ],
+      "required_evidence": [
+        "Decision register with scope, impact and requested approval"
+      ],
+      "acceptance_criteria": [
+        "Each request states exact action, cost/risk and reversibility",
+        "No silent approval; unresolved requests remain pending"
+      ],
+      "approval_gate": "Owner approval required before any reserved action",
+      "owner_assignment": "unassigned_pending_owner_confirmation",
+      "status": "proposed",
+      "execution_state": "not_started",
+      "completion_evidence": [],
+      "completed_at": null
+    },
+    {
+      "id": "AIR-001",
+      "division_id": "ai-revenue",
+      "title": "Refresh zero-cost opportunity shortlist",
+      "objective": "Identify legitimate Canada-eligible opportunities and record official terms, payout rules, fees and evidence dates.",
+      "priority": "high",
+      "depends_on": [
+        "RES-001",
+        "RISK-001",
+        "FIN-001"
+      ],
+      "required_evidence": [
+        "Updated opportunity-tracker.csv",
+        "Official source links and eligibility notes"
+      ],
+      "acceptance_criteria": [
+        "Every shortlisted opportunity has official URL, eligibility state, costs and payment terms or explicit unknowns",
+        "No upfront spend is assumed"
+      ],
+      "approval_gate": "Applications, client contact, submissions and paid commitments require owner approval",
+      "owner_assignment": "unassigned_pending_owner_confirmation",
+      "status": "proposed",
+      "execution_state": "not_started",
+      "completion_evidence": [],
+      "completed_at": null
+    },
+    {
+      "id": "AIR-002",
+      "division_id": "ai-revenue",
+      "title": "Prepare one evidence-backed AI service offer",
+      "objective": "Draft a narrowly scoped service offer and sample deliverable using capabilities already available without paid tools.",
+      "priority": "medium",
+      "depends_on": [
+        "AIR-001",
+        "TECH-001"
+      ],
+      "required_evidence": [
+        "Service brief",
+        "Sample deliverable",
+        "Time and cost estimate"
+      ],
+      "acceptance_criteria": [
+        "Claims are truthful and evidence-backed",
+        "Scope, delivery time, exclusions and zero-upfront-cost assumptions are explicit"
+      ],
+      "approval_gate": "Publishing, outreach, applications and client commitments require owner approval",
+      "owner_assignment": "unassigned_pending_owner_confirmation",
+      "status": "proposed",
+      "execution_state": "not_started",
+      "completion_evidence": [],
+      "completed_at": null
+    },
+    {
+      "id": "TECH-001",
+      "division_id": "technology",
+      "title": "Create reproducible engineering quality baseline",
+      "objective": "Document repo structure, local checks, CI checks, branch policy and rollback expectations for the organisation control centre.",
+      "priority": "high",
+      "depends_on": [],
+      "required_evidence": [
+        "Engineering runbook",
+        "CI evidence link"
+      ],
+      "acceptance_criteria": [
+        "A reviewer can reproduce all checks",
+        "No secrets, production changes or permissions are introduced"
+      ],
+      "approval_gate": "Merge, deployment and permission changes require owner approval",
+      "owner_assignment": "unassigned_pending_owner_confirmation",
+      "status": "proposed",
+      "execution_state": "not_started",
+      "completion_evidence": [],
+      "completed_at": null
+    },
+    {
+      "id": "TECH-002",
+      "division_id": "technology",
+      "title": "Build task-queue and dashboard integration",
+      "objective": "Implement schema validation and read-only queue reporting with regression tests.",
+      "priority": "high",
+      "depends_on": [
+        "TECH-001"
+      ],
+      "required_evidence": [
+        "Validator",
+        "Automated tests",
+        "Dashboard integration"
+      ],
+      "acceptance_criteria": [
+        "All queue records validate and dependency cycles are rejected",
+        "Dashboard shows proposed, blocked and completed states without changing them"
+      ],
+      "approval_gate": "Feature-branch engineering only; merge requires owner approval",
+      "owner_assignment": "unassigned_pending_owner_confirmation",
+      "status": "proposed",
+      "execution_state": "not_started",
+      "completion_evidence": [],
+      "completed_at": null
+    },
+    {
+      "id": "RES-001",
+      "division_id": "research",
+      "title": "Verify current AI revenue opportunity channels",
+      "objective": "Research official platform terms, Canada access, eligibility, payment methods, fees, minimum payout and identity requirements.",
+      "priority": "high",
+      "depends_on": [],
+      "required_evidence": [
+        "Sourced opportunity brief",
+        "Tracker evidence updates"
+      ],
+      "acceptance_criteria": [
+        "Primary sources and checked dates are recorded",
+        "Unknowns and jurisdiction limits are visible"
+      ],
+      "approval_gate": "Research only; account creation, applications and attestations require owner action",
+      "owner_assignment": "unassigned_pending_owner_confirmation",
+      "status": "proposed",
+      "execution_state": "not_started",
+      "completion_evidence": [],
+      "completed_at": null
+    },
+    {
+      "id": "RES-002",
+      "division_id": "research",
+      "title": "Maintain technical and crypto intelligence brief",
+      "objective": "Track material technical, market-data and simulation risks relevant to paper-only PolyBot work.",
+      "priority": "medium",
+      "depends_on": [
+        "TECH-001"
+      ],
+      "required_evidence": [
+        "Research brief with sources, confidence and refresh triggers"
+      ],
+      "acceptance_criteria": [
+        "Facts, assumptions and opinions are separated",
+        "No live trading recommendation is treated as authorisation"
+      ],
+      "approval_gate": "No wallet access, deposits, withdrawals or live execution",
+      "owner_assignment": "unassigned_pending_owner_confirmation",
+      "status": "proposed",
+      "execution_state": "not_started",
+      "completion_evidence": [],
+      "completed_at": null
+    },
+    {
+      "id": "FIN-001",
+      "division_id": "finance",
+      "title": "Establish zero-budget financial baseline",
+      "objective": "Define available evidence, cash classifications, approved budget default, fee tracking and CAD conversion rules.",
+      "priority": "high",
+      "depends_on": [],
+      "required_evidence": [
+        "Finance baseline note",
+        "Revenue ledger schema review"
+      ],
+      "acceptance_criteria": [
+        "Estimates, accepted earnings and cash received remain separate",
+        "Unverified balances are clearly marked; no bank access is presumed"
+      ],
+      "approval_gate": "No account access, transfers, borrowing, investments or paid commitments",
+      "owner_assignment": "unassigned_pending_owner_confirmation",
+      "status": "proposed",
+      "execution_state": "not_started",
+      "completion_evidence": [],
+      "completed_at": null
+    },
+    {
+      "id": "FIN-002",
+      "division_id": "finance",
+      "title": "Create portfolio unit-economics review",
+      "objective": "Model net cash, fees, direct costs, hours and downside for proposed revenue channels using verified inputs only.",
+      "priority": "medium",
+      "depends_on": [
+        "FIN-001",
+        "AIR-001"
+      ],
+      "required_evidence": [
+        "Unit-economics comparison",
+        "Halal/financial-structure flags where relevant"
+      ],
+      "acceptance_criteria": [
+        "Every figure has source, currency and date",
+        "Potential riba/yield concerns are flagged, not assumed compliant"
+      ],
+      "approval_gate": "Analysis only; financial transactions require explicit approval",
+      "owner_assignment": "unassigned_pending_owner_confirmation",
+      "status": "proposed",
+      "execution_state": "not_started",
+      "completion_evidence": [],
+      "completed_at": null
+    },
+    {
+      "id": "RISK-001",
+      "division_id": "risk",
+      "title": "Establish independent cross-division risk register",
+      "objective": "Define risk severity, impact, controls, owner, evidence, escalation and stop recommendation fields.",
+      "priority": "high",
+      "depends_on": [],
+      "required_evidence": [
+        "Risk register baseline",
+        "Escalation criteria"
+      ],
+      "acceptance_criteria": [
+        "Critical risks have containment and escalation guidance",
+        "Risk authority remains advisory/stop-only"
+      ],
+      "approval_gate": "Cannot authorise execution or override deterministic controls",
+      "owner_assignment": "unassigned_pending_owner_confirmation",
+      "status": "proposed",
+      "execution_state": "not_started",
+      "completion_evidence": [],
+      "completed_at": null
+    },
+    {
+      "id": "RISK-002",
+      "division_id": "risk",
+      "title": "Review paper-trading safety boundary",
+      "objective": "Independently challenge paper/live separation, order-path absence, key handling, stale-data controls and recovery assumptions.",
+      "priority": "high",
+      "depends_on": [
+        "TECH-001",
+        "RES-002"
+      ],
+      "required_evidence": [
+        "Independent risk review",
+        "Test requirements and open-gap list"
+      ],
+      "acceptance_criteria": [
+        "No live order, signing or wallet capability is present in the reviewed paper scope",
+        "Findings include evidence and unresolved gaps"
+      ],
+      "approval_gate": "No live trading, wallet connection, signing, deposits or withdrawals",
+      "owner_assignment": "unassigned_pending_owner_confirmation",
+      "status": "proposed",
+      "execution_state": "not_started",
+      "completion_evidence": [],
+      "completed_at": null
+    },
+    {
+      "id": "CRY-001",
+      "division_id": "crypto",
+      "title": "Complete deterministic position and exit-engine specification",
+      "objective": "Specify paper-only position states, sizing, stop/exit rules, fees, slippage, partial fills and restart behavior.",
+      "priority": "high",
+      "depends_on": [
+        "RES-002",
+        "FIN-001",
+        "RISK-001"
+      ],
+      "required_evidence": [
+        "Versioned position-management specification",
+        "Scenario matrix"
+      ],
+      "acceptance_criteria": [
+        "Every state transition has deterministic rules and auditable reasons",
+        "No live execution interface is specified"
+      ],
+      "approval_gate": "Paper simulation only; live scope requires separate approval",
+      "owner_assignment": "unassigned_pending_owner_confirmation",
+      "status": "proposed",
+      "execution_state": "not_started",
+      "completion_evidence": [],
+      "completed_at": null
+    },
+    {
+      "id": "CRY-002",
+      "division_id": "crypto",
+      "title": "Implement and test paper-only position lifecycle",
+      "objective": "Build isolated simulation logic and tests for entry, add/reduce, stop, exit, duplicate signals, stale data and recovery.",
+      "priority": "high",
+      "depends_on": [
+        "CRY-001",
+        "TECH-001",
+        "RISK-002"
+      ],
+      "required_evidence": [
+        "Code and test evidence",
+        "Simulation report with limitations"
+      ],
+      "acceptance_criteria": [
+        "Normal, edge, outage and restart scenarios are tested",
+        "Paper mode cannot sign or send real orders"
+      ],
+      "approval_gate": "No wallet, keys, signing, deposits, withdrawals or live orders",
+      "owner_assignment": "unassigned_pending_owner_confirmation",
+      "status": "proposed",
+      "execution_state": "not_started",
+      "completion_evidence": [],
+      "completed_at": null
+    },
+    {
+      "id": "ECOM-001",
+      "division_id": "ecommerce",
+      "title": "Preserve current store baseline",
+      "objective": "Prepare a read-only inventory of existing eBay/Printify assets, listing status, shipping, variants and known issues from available records.",
+      "priority": "low",
+      "depends_on": [],
+      "required_evidence": [
+        "Read-only store baseline report"
+      ],
+      "acceptance_criteria": [
+        "No account changes or assumptions about live listing state",
+        "Deferred status is retained"
+      ],
+      "approval_gate": "No listing, purchase, publishing or account changes",
+      "owner_assignment": "unassigned_pending_owner_confirmation",
+      "status": "proposed",
+      "execution_state": "not_started",
+      "completion_evidence": [],
+      "completed_at": null
+    },
+    {
+      "id": "ECOM-002",
+      "division_id": "ecommerce",
+      "title": "Prepare future listing preflight checklist",
+      "objective": "Define product cost, shipping, variant, price, fee, margin and scam checks for future owner-approved listings.",
+      "priority": "low",
+      "depends_on": [
+        "FIN-001",
+        "RISK-001"
+      ],
+      "required_evidence": [
+        "Listing preflight checklist"
+      ],
+      "acceptance_criteria": [
+        "Checklist catches missing cost, shipping, size and margin inputs",
+        "No listing is published"
+      ],
+      "approval_gate": "Deferred; no spending or publication",
+      "owner_assignment": "unassigned_pending_owner_confirmation",
+      "status": "proposed",
+      "execution_state": "not_started",
+      "completion_evidence": [],
+      "completed_at": null
+    },
+    {
+      "id": "ANI-001",
+      "division_id": "animora",
+      "title": "Preserve Animora brand and IP inventory",
+      "objective": "Record the existing brand direction, site references and original characters Lyra, Kaito, Miko and Solen without consuming paid credits.",
+      "priority": "low",
+      "depends_on": [],
+      "required_evidence": [
+        "Asset and IP inventory",
+        "Known-gap list"
+      ],
+      "acceptance_criteria": [
+        "Existing creative identity and character names are preserved accurately",
+        "No Lovable credits or paid services are consumed"
+      ],
+      "approval_gate": "Preservation only; no paid tool use or public changes",
+      "owner_assignment": "unassigned_pending_owner_confirmation",
+      "status": "proposed",
+      "execution_state": "not_started",
+      "completion_evidence": [],
+      "completed_at": null
+    },
+    {
+      "id": "ANI-002",
+      "division_id": "animora",
+      "title": "Outline future studio production roadmap",
+      "objective": "Prepare a future-funded roadmap for original short anime production, including a five-minute short-film production pipeline and cost categories.",
+      "priority": "low",
+      "depends_on": [
+        "ANI-001",
+        "FIN-001"
+      ],
+      "required_evidence": [
+        "Future studio roadmap",
+        "Cost-category model with unknowns labelled"
+      ],
+      "acceptance_criteria": [
+        "Roadmap is explicitly deferred until sustainable funding",
+        "No production spend or new launch is initiated"
+      ],
+      "approval_gate": "No spending, subscriptions, production or launch without approval",
+      "owner_assignment": "unassigned_pending_owner_confirmation",
+      "status": "proposed",
+      "execution_state": "not_started",
+      "completion_evidence": [],
+      "completed_at": null
+    }
+  ]
+}

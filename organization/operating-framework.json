@@ -1,0 +1,502 @@
+{
+  "schema_version": 1,
+  "framework_status": "designed_pending_owner_confirmation",
+  "policy": "This is an operating design, not proof that teams, named division leads, workflows, or service levels are staffed or active. Each division remains at its separately verified readiness status. Cadences are proposed defaults and may be adjusted by the owner.",
+  "global_rules": {
+    "accountable_executive": "Owner retains reserved approvals; Executive Management coordinates and escalates but cannot self-authorise reserved actions.",
+    "default_budget_cad": 0,
+    "reporting_timezone": "America/Toronto",
+    "evidence_standard": "Every completed deliverable must link to an artifact, test result, source record, or explicit owner decision. Planned work is not completed work.",
+    "escalation": "Safety, security, financial, legal, privacy, and live-execution concerns are escalated immediately and work is paused where appropriate.",
+    "no_silent_approval": true,
+    "approval_gates": [
+      "spending or subscriptions",
+      "borrowing or financing commitments",
+      "financial transactions",
+      "wallet connections, signatures, deposits, withdrawals or live trades",
+      "external applications, client contact or commitments",
+      "public launches or production deployments",
+      "repository merges and security or permission changes"
+    ]
+  },
+  "divisions": [
+    {
+      "id": "executive",
+      "purpose": "Set priorities, coordinate divisions, resolve cross-division blockers and maintain accountable reporting.",
+      "responsibilities": [
+        "Maintain the division registry, readiness register and organisation-wide priorities.",
+        "Review the consolidated dashboard and assign/sequence work.",
+        "Resolve conflicts, duplicated work and cross-division dependencies.",
+        "Maintain decision and approval registers; escalate owner-only decisions.",
+        "Run organisation-wide readiness reviews without promoting status absent evidence."
+      ],
+      "deliverables": [
+        "Weekly executive operating report.",
+        "Current decision, risk and dependency registers.",
+        "Monthly organisation-wide readiness review.",
+        "Documented priority and resource-allocation recommendations."
+      ],
+      "cadence": {
+        "daily": "Review urgent escalations when work is active; no unattended monitoring is implied.",
+        "weekly": "Consolidate division reports and publish the executive snapshot.",
+        "monthly": "Review readiness, portfolio balance, budget assumptions and strategic risks."
+      },
+      "handoffs": [
+        {
+          "to": "all",
+          "artifact": "Priorities, decisions, escalation outcomes and dependency assignments",
+          "trigger": "Weekly planning or material event"
+        }
+      ],
+      "acceptance_criteria": [
+        "Every active division has a current status, evidence and open-gap record.",
+        "Every owner-only decision has a scope, request date and explicit outcome; silence is never approval.",
+        "Cross-division blockers have a named responsible party or are explicitly marked awaiting owner assignment.",
+        "The executive report reconciles to source records and labels missing or unverified data."
+      ],
+      "owner_assignment": "Owner/Executive lead confirmation required",
+      "approval_boundary": "Coordination and recommendations only; reserved approvals remain with the owner."
+    },
+    {
+      "id": "ai-revenue",
+      "purpose": "Find and deliver legitimate zero-upfront-cost AI-assisted revenue opportunities while separating estimates, accepted work and cash received.",
+      "responsibilities": [
+        "Research opportunities and verify official terms, Canada eligibility, fees and payout conditions.",
+        "Prioritise work by feasibility, legitimacy, expected net return and time requirement.",
+        "Prepare drafts, prototypes and service assets for review.",
+        "Track pipeline, delivery, acceptance, fees, costs, hours and actual receipts separately.",
+        "Screen opportunities for scams, prohibited claims and hidden upfront costs."
+      ],
+      "deliverables": [
+        "Updated opportunity tracker with source and evidence date.",
+        "Weekly pipeline and unit-economics report.",
+        "Reviewed service/product drafts and delivery evidence.",
+        "Revenue ledger with payment state and CAD conversion evidence where relevant."
+      ],
+      "cadence": {
+        "weekly": "Refresh priority opportunities, record progress and report pipeline/revenue states.",
+        "per_opportunity": "Check eligibility, terms, cost, risk and approval requirements before applying or committing.",
+        "monthly": "Review channel profitability and stop low-quality or negative-return channels."
+      },
+      "handoffs": [
+        {
+          "to": "research",
+          "artifact": "Opportunity questions, platform/market evidence requests",
+          "trigger": "New or changing opportunity"
+        },
+        {
+          "to": "risk",
+          "artifact": "Scam, privacy, IP, contractual and delivery-risk review request",
+          "trigger": "Before external commitment"
+        },
+        {
+          "to": "finance",
+          "artifact": "Accepted work, fee/cost data and payment evidence",
+          "trigger": "At acceptance, invoice or receipt"
+        },
+        {
+          "to": "executive",
+          "artifact": "Weekly pipeline, blockers and approval requests",
+          "trigger": "Weekly"
+        },
+        {
+          "to": "technology",
+          "artifact": "Tooling requirements, integration specifications and test acceptance evidence",
+          "trigger": "Before implementation or material workflow change"
+        }
+      ],
+      "acceptance_criteria": [
+        "Each active opportunity has an official URL, checked date, eligibility state and recorded terms or a clear unknown marker.",
+        "No application, client contact, submission, public claim or paid commitment occurs without approval.",
+        "Estimates, accepted gross amounts and cash received are never combined.",
+        "Every recorded receipt has payment evidence reference, currency and fees/costs where known.",
+        "No opportunity requires upfront spend under the default zero-budget rule unless separately approved."
+      ],
+      "owner_assignment": "Owner to confirm delivery lead; external action remains approval-gated",
+      "approval_boundary": "Research, prepare, draft and test only; no external commitments or claims without approval."
+    },
+    {
+      "id": "technology",
+      "purpose": "Build, secure, test, document and integrate shared technical systems.",
+      "responsibilities": [
+        "Maintain repositories, architecture notes, development workflows and issue tracking.",
+        "Build on isolated branches and keep changes reviewable.",
+        "Add automated tests, static checks, data validation and failure handling.",
+        "Review secrets, permissions, dependencies, privacy and recovery risks.",
+        "Maintain reproducible build/test instructions and technical handoff documentation."
+      ],
+      "deliverables": [
+        "Reviewed technical designs and implementation PRs.",
+        "Automated test results and reproducible validation commands.",
+        "Architecture, dependency and operational runbooks.",
+        "Security and recovery findings with remediation status."
+      ],
+      "cadence": {
+        "per_change": "Run relevant tests and document impact before requesting review.",
+        "weekly": "Report engineering progress, failed checks, dependencies and security concerns.",
+        "monthly": "Review technical debt, access boundaries, recovery and dependency freshness."
+      },
+      "handoffs": [
+        {
+          "to": "executive",
+          "artifact": "Change summary, risks, test evidence and decision requests",
+          "trigger": "At PR review and weekly"
+        },
+        {
+          "to": "risk",
+          "artifact": "Architecture, threat surface, permissions and recovery evidence",
+          "trigger": "Before sensitive integration or release"
+        },
+        {
+          "to": "all",
+          "artifact": "Versioned tools, documented interfaces and runbooks",
+          "trigger": "After reviewed acceptance"
+        }
+      ],
+      "acceptance_criteria": [
+        "Changes are isolated, traceable and have a clear rollback path.",
+        "Automated tests pass and the exact run is linked; unrun tests are labelled unverified.",
+        "No secrets or private credentials are committed.",
+        "No production deployment, merge or permission change occurs without approval.",
+        "Documentation enables another reviewer to reproduce the checks."
+      ],
+      "owner_assignment": "Owner to confirm technical lead and review route",
+      "approval_boundary": "Development and testing permitted on isolated branches; merges, deployments, credential access and permission changes require approval."
+    },
+    {
+      "id": "research",
+      "purpose": "Provide sourced market, platform, technical and opportunity intelligence with uncertainty clearly labelled.",
+      "responsibilities": [
+        "Define research questions and decision relevance before investigation.",
+        "Prefer primary/official sources and record dates, jurisdiction and limitations.",
+        "Compare alternatives, identify risks and state confidence/unknowns.",
+        "Monitor material changes affecting revenue, crypto, technology and portfolio decisions.",
+        "Provide independent challenge rather than advocacy for a predetermined outcome."
+      ],
+      "deliverables": [
+        "Sourced research briefs with executive summary and evidence links.",
+        "Opportunity eligibility and terms checks for AI Revenue.",
+        "Market/technical intelligence briefs for Crypto and Technology.",
+        "Change alerts for material policy, risk or platform changes."
+      ],
+      "cadence": {
+        "weekly": "Deliver priority briefs and refresh time-sensitive sources.",
+        "event_driven": "Escalate material market, policy, platform or security changes promptly.",
+        "monthly": "Review source quality, stale assumptions and unresolved research questions."
+      },
+      "handoffs": [
+        {
+          "to": "ai-revenue",
+          "artifact": "Verified opportunity evidence and eligibility notes",
+          "trigger": "Before prioritisation"
+        },
+        {
+          "to": "crypto",
+          "artifact": "Market context, token/project evidence and uncertainty labels",
+          "trigger": "Before paper-trading research decisions"
+        },
+        {
+          "to": "finance",
+          "artifact": "Verified fees, terms, eligibility and financing research",
+          "trigger": "Before financial modelling"
+        },
+        {
+          "to": "executive",
+          "artifact": "Decision-focused brief with recommendation and confidence",
+          "trigger": "At decision point"
+        },
+        {
+          "to": "technology",
+          "artifact": "Research data requirements, source-handling constraints and reproducible tooling needs",
+          "trigger": "Before introducing or changing research tooling"
+        }
+      ],
+      "acceptance_criteria": [
+        "Material claims have traceable sources and checked dates.",
+        "Jurisdiction and Canada eligibility are explicitly checked or marked unknown.",
+        "Conflicting evidence and uncertainty are visible.",
+        "Recommendations distinguish facts, assumptions and opinion.",
+        "Time-sensitive findings include a refresh trigger."
+      ],
+      "owner_assignment": "Owner to confirm research lead",
+      "approval_boundary": "Research and recommendations only; no external commitments."
+    },
+    {
+      "id": "finance",
+      "purpose": "Maintain financial visibility, cost discipline, cash-flow models, reserves planning and finance-control recommendations.",
+      "responsibilities": [
+        "Maintain budget, revenue, cost, fee and cash classifications.",
+        "Reconcile internal records to evidence supplied by the owner; do not claim bank verification without source access.",
+        "Model unit economics, cash runway and scenarios without inventing inputs.",
+        "Assess financial proposals for fees, downside, liquidity and halal concerns where relevant.",
+        "Monitor financial approval boundaries and flag unapproved commitments."
+      ],
+      "deliverables": [
+        "Weekly finance snapshot from available records.",
+        "Monthly management accounts and cash-flow view where evidence exists.",
+        "Opportunity profitability and cost models.",
+        "Halal/financial-structure review flags and unresolved questions."
+      ],
+      "cadence": {
+        "weekly": "Update ledger-based revenue, fees, costs and outstanding payment states.",
+        "monthly": "Prepare cash-flow, budget variance and portfolio economics review.",
+        "before_commitment": "Review cost, liquidity, contractual terms and approval needs."
+      },
+      "handoffs": [
+        {
+          "to": "ai-revenue",
+          "artifact": "Cost thresholds, fee analysis and ledger classification guidance",
+          "trigger": "Opportunity review and receipt"
+        },
+        {
+          "to": "crypto",
+          "artifact": "Exposure limits, treasury assumptions and accounting requirements",
+          "trigger": "Before any separately approved live-readiness assessment"
+        },
+        {
+          "to": "executive",
+          "artifact": "Budget, cash and financial risk summary",
+          "trigger": "Weekly/monthly"
+        },
+        {
+          "to": "risk",
+          "artifact": "Liquidity, fraud, concentration and counterparty concerns",
+          "trigger": "On detection"
+        },
+        {
+          "to": "research",
+          "artifact": "Evidence requests for fees, terms, eligibility, currency conversion and financing assumptions",
+          "trigger": "Before financial modelling or material ledger classification"
+        }
+      ],
+      "acceptance_criteria": [
+        "Estimates, accepted earnings, invoices and received cash are separate.",
+        "Every reported figure has source, date, currency and calculation basis.",
+        "Unverified bank/account balances are labelled unverified.",
+        "No transfer, borrowing, investment or paid commitment is executed.",
+        "Potential riba/yield or non-compliant structures are flagged for qualified review rather than assumed halal."
+      ],
+      "owner_assignment": "Owner to confirm finance lead; account access is not presumed",
+      "approval_boundary": "Analysis and controls only; no account access or transactions without explicit approval."
+    },
+    {
+      "id": "risk",
+      "purpose": "Provide independent cross-division challenge, security review, incident response and recovery planning.",
+      "responsibilities": [
+        "Maintain organisation-wide risk register and severity/owner/status fields.",
+        "Review scams, fraud, privacy, security, contractual, operational and financial risks.",
+        "Challenge assumptions and recommend stop/pause when controls are inadequate.",
+        "Test recovery and rollback procedures with Technology.",
+        "Review high-impact workflows before external or live operation."
+      ],
+      "deliverables": [
+        "Weekly risk and control report.",
+        "Incident records and post-incident reviews.",
+        "Security/recovery review notes and remediation tracking.",
+        "Independent pre-launch challenge and stop recommendation."
+      ],
+      "cadence": {
+        "weekly": "Review material risks, control failures and overdue mitigations.",
+        "event_driven": "Escalate critical incidents immediately and recommend pause/containment.",
+        "before_release": "Review risk, rollback, approvals and monitoring evidence."
+      },
+      "handoffs": [
+        {
+          "to": "executive",
+          "artifact": "Independent risk opinion, severity and recommended action",
+          "trigger": "Material risk or weekly review"
+        },
+        {
+          "to": "technology",
+          "artifact": "Threat findings and testable remediation requirements",
+          "trigger": "Security or recovery review"
+        },
+        {
+          "to": "crypto",
+          "artifact": "Independent controls, exposure and kill-switch review",
+          "trigger": "Before any launch-readiness gate"
+        },
+        {
+          "to": "ai-revenue",
+          "artifact": "Scam, platform and client-delivery risk review",
+          "trigger": "Before external commitment"
+        },
+        {
+          "to": "research",
+          "artifact": "Threat intelligence, platform-risk and source-verification questions",
+          "trigger": "At risk assessment and material change review"
+        },
+        {
+          "to": "all",
+          "artifact": "Evidence-backed risk escalation notice, severity, affected scope, recommended safeguards or stop, linked tasks and owner-decision pathway",
+          "trigger": "Critical/high risk, material cross-division exposure, or independent stop recommendation"
+        }
+      ],
+      "acceptance_criteria": [
+        "Critical risks have an explicit severity, impact, containment recommendation and escalation record.",
+        "No high-impact workflow is treated as cleared without documented review evidence.",
+        "Stop recommendations are independent and cannot be overridden by a dashboard status.",
+        "Incident recovery/rollback is tested and evidence linked before standby/operational claims.",
+        "Risk division cannot authorise trades, financial transactions or production changes."
+      ],
+      "owner_assignment": "Owner to confirm independent risk lead or review route",
+      "approval_boundary": "Independent challenge and stop-only advisory authority; cannot authorise execution or override deterministic controls."
+    },
+    {
+      "id": "crypto",
+      "purpose": "Develop research, paper simulation, position management and risk controls with strict separation from live execution.",
+      "responsibilities": [
+        "Maintain paper-only research and simulation until separate live approval.",
+        "Build deterministic entry, position sizing, stop, exit and portfolio-risk logic for simulation.",
+        "Test stale data, slippage, fees, partial fills, outages, duplicate signals and restart recovery.",
+        "Record every simulated decision, state transition and reason for exit.",
+        "Coordinate research, technology, finance and independent risk review."
+      ],
+      "deliverables": [
+        "Versioned paper-trading strategy and position-management engine.",
+        "Reproducible backtest and simulation reports with limitations.",
+        "Position/exit decision logs and risk-control test evidence.",
+        "Launch-readiness dossier and unresolved-gap register."
+      ],
+      "cadence": {
+        "per_test_run": "Record configuration, data window, commit, results and limitations.",
+        "weekly": "Review simulation performance, failure cases and control gaps.",
+        "before_any_live_proposal": "Complete independent readiness review and seek explicit owner approval."
+      },
+      "handoffs": [
+        {
+          "to": "research",
+          "artifact": "Research hypotheses and data-quality questions",
+          "trigger": "Before strategy changes"
+        },
+        {
+          "to": "technology",
+          "artifact": "Interfaces, test requirements and deployment constraints",
+          "trigger": "At implementation review"
+        },
+        {
+          "to": "finance",
+          "artifact": "Exposure, fee, liquidity and accounting assumptions",
+          "trigger": "Before readiness assessment"
+        },
+        {
+          "to": "risk",
+          "artifact": "Threat model, failure tests, limits and stop-control evidence",
+          "trigger": "Before any live proposal"
+        },
+        {
+          "to": "executive",
+          "artifact": "Paper results, risks and explicit approval request",
+          "trigger": "Weekly and before launch gate"
+        }
+      ],
+      "acceptance_criteria": [
+        "Paper and live modes are technically separated; paper mode cannot sign or send real orders.",
+        "No wallet, private key, signing, deposit, withdrawal or live order is used during this phase.",
+        "Position state, entry thesis, stop/exit logic and all state changes are auditable.",
+        "Tests cover normal, edge, stale-data, outage and restart scenarios.",
+        "Live readiness remains blocked until every required division and owner gate is independently verified."
+      ],
+      "owner_assignment": "Owner to confirm Crypto lead and approve any live-scope change",
+      "approval_boundary": "Paper/research only; live operation requires separate explicit approval and readiness review."
+    },
+    {
+      "id": "ecommerce",
+      "purpose": "Maintain existing ecommerce assets safely and later develop validated store and listing operations.",
+      "responsibilities": [
+        "Preserve current store/listing records and monitor issues only when authorised.",
+        "Prepare read-only listing, pricing, shipping, variant and margin audits.",
+        "Validate Printify/eBay operational constraints and product economics before proposals.",
+        "Avoid listing publication, purchases, inventory changes and customer communication without approval."
+      ],
+      "deliverables": [
+        "Read-only store health and listing audit when requested.",
+        "Product margin, shipping and variant preflight reports.",
+        "Deferred activation plan with cost and approval gates."
+      ],
+      "cadence": {
+        "monthly": "Optional low-cost review of existing assets if data is available and requested.",
+        "before_reactivation": "Reassess market demand, fees, shipping, margins and available budget."
+      },
+      "handoffs": [
+        {
+          "to": "ai-revenue",
+          "artifact": "Commercial lessons and reusable listing/service workflows",
+          "trigger": "When a validated workflow is available"
+        },
+        {
+          "to": "technology",
+          "artifact": "Read-only audit requirements and integration issues",
+          "trigger": "Before automation work"
+        },
+        {
+          "to": "finance",
+          "artifact": "Product costs, fees, shipping and margin assumptions",
+          "trigger": "Before commercial decision"
+        },
+        {
+          "to": "executive",
+          "artifact": "Commercial status, approval requests and material listing or fulfilment risks",
+          "trigger": "Before external commitment and at weekly review"
+        }
+      ],
+      "acceptance_criteria": [
+        "No new spend or subscriptions by default.",
+        "Any proposed listing has verified product cost, shipping, variants, price and margin.",
+        "No listing, purchase, publishing or account change without explicit approval.",
+        "Deferred status remains visible until owner reprioritises the division."
+      ],
+      "owner_assignment": "Deferred; owner to confirm activation and accountable lead",
+      "approval_boundary": "Maintenance and read-only analysis only unless separately authorised."
+    },
+    {
+      "id": "animora",
+      "purpose": "Preserve Animora as a long-term anime discovery and original creative studio opportunity, without diverting current resources prematurely.",
+      "responsibilities": [
+        "Preserve brand, original characters and project knowledge.",
+        "Maintain a low-cost strategic backlog without consuming paid credits.",
+        "Research audience, production pipeline and monetisation options only when useful and authorised.",
+        "Prepare future studio roadmap, including original short-form anime production, for later funding."
+      ],
+      "deliverables": [
+        "Quarterly strategic preservation note when active review is requested.",
+        "Future studio roadmap and production-cost model when funding permits.",
+        "Asset and IP inventory with ownership/source notes."
+      ],
+      "cadence": {
+        "quarterly": "Lightweight strategic review only when it does not distract from active priorities.",
+        "reactivation_gate": "Reassess only after sustainable organisational revenue and explicit budget approval."
+      },
+      "handoffs": [
+        {
+          "to": "executive",
+          "artifact": "Preservation status and future investment case",
+          "trigger": "Quarterly or reactivation decision"
+        },
+        {
+          "to": "technology",
+          "artifact": "Future creative tooling requirements",
+          "trigger": "After funded reactivation"
+        },
+        {
+          "to": "ai-revenue",
+          "artifact": "Potential audience/commercial learning",
+          "trigger": "Only when a low-cost validated opportunity exists"
+        },
+        {
+          "to": "finance",
+          "artifact": "Production budget and sustainable funding model",
+          "trigger": "Before any investment proposal"
+        }
+      ],
+      "acceptance_criteria": [
+        "No Lovable credits, paid tools, domains, production costs or subscriptions are consumed without approval.",
+        "Original characters and brand direction are preserved in project documentation.",
+        "No studio expansion begins before sustainable funding and explicit owner approval.",
+        "Deferred status is not misrepresented as operational."
+      ],
+      "owner_assignment": "Deferred; owner to confirm future reactivation",
+      "approval_boundary": "Preservation and planning only; no spending or launch."
+    }
+  ]
+}
