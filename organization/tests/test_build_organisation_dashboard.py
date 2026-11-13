@@ -156,6 +156,60 @@ class OrganisationDashboardTests(unittest.TestCase):
         self.assertTrue(any("requires explicit owner outcome evidence" in error for error in report["data_quality"]["governance_link_errors"]))
         self.assertFalse(any(row.get("id") == "DEC-TEST-APPROVED" for row in report["outstanding_decisions"]))
 
+
+    def test_critical_risk_creates_stop_only_cross_division_escalation(self):
+        queue = json.loads(json.dumps(self.work_queue))
+        task = next(item for item in queue["tasks"] if item["id"] == "TECH-001")
+        task["owner_assignment"] = "owner-confirmed"
+        risk_register = {"records": [{
+            "id": "RISK-CRITICAL-001",
+            "division_id": "technology",
+            "severity": "critical",
+            "status": "mitigating",
+            "description": "Test-only critical risk",
+            "mitigation": "Pause affected activity and obtain independent review",
+            "owner_assignment": "unassigned_pending_owner_confirmation",
+            "related_task_ids": ["TECH-001"],
+            "related_decision_ids": ["DEC-PENDING-001"],
+            "evidence": ["test-fixture:evidence"]
+        }]}
+        decision_register = {"records": [{
+            "id": "DEC-PENDING-001",
+            "scope": "Test fixture only",
+            "status": "pending",
+            "impact": "No external impact",
+            "reversibility": "Reversible test fixture",
+            "requested_action": "Review the test fixture",
+            "related_risk_ids": ["RISK-CRITICAL-001"],
+            "related_task_ids": ["TECH-001"],
+            "owner_outcome_evidence": []
+        }]}
+        events = {"events": [{
+            "event_id": "EV-ESCALATION-START",
+            "task_id": "TECH-001",
+            "event_type": "started",
+            "timestamp": "2026-11-12T14:00:00-05:00",
+            "actor": "test-owner",
+            "summary": "Started test fixture task",
+            "evidence": []
+        }]}
+
+        report = self.build(queue, events, risk_register, decision_register)
+        escalation = report["risk_escalations"]["records"][0]
+
+        self.assertEqual(report["risk_escalations"]["immediate_review_count"], 1)
+        self.assertEqual(escalation["route"], ["risk", "executive", "technology"])
+        self.assertEqual(escalation["linked_tasks"][0]["derived_execution_state"], "in_progress")
+        self.assertEqual(escalation["pending_owner_decision_ids"], ["DEC-PENDING-001"])
+        self.assertIn("STOP-ONLY ADVISORY", escalation["recommended_action"])
+        self.assertEqual(escalation["dispatch_status"], "derived_dashboard_route_only_not_dispatched")
+        self.assertEqual(report["data_quality"]["governance_link_errors"], [])
+
+    def test_risk_escalation_does_not_invent_notifications_for_empty_register(self):
+        report = self.build()
+        self.assertEqual(report["risk_escalations"]["count"], 0)
+        self.assertEqual(report["risk_escalations"]["immediate_review_count"], 0)
+
     def test_revenue_snapshot_and_operating_framework_are_embedded(self):
         report = self.build()
         self.assertEqual(report["ai_revenue"]["finance_cad"]["net_cash_received_verified_by_ledger_status"], "0.00")
