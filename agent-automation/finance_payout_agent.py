@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 
 def assess(item: dict) -> dict:
     findings = []
-    if not str(item.get("url", "")).startswith("https://github.com/"):
+    if not str(item.get("url", "")).startswith("https://"):
         findings.append("Source URL is missing or invalid.")
     # Search-derived metadata is not proof of a commercial offer.
     findings.append("Named sponsor and legal contracting entity have not been verified.")
@@ -23,7 +23,7 @@ def assess(item: dict) -> dict:
     findings.append("Acceptance, approval and payment are not guaranteed.")
     return {
         "title": item.get("title", "Untitled opportunity"),
-        "url": item.get("url", ""),
+        "url": item.get("url", ""),\n        "lane": item.get("lane", "github_bounties"),\n        "source_name": item.get("source_name", "GitHub"),
         "commercial_status": "unverified_lead",
         "reward_amount": None,
         "reward_currency": None,
@@ -84,7 +84,7 @@ def render_markdown(report: dict) -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--input", default="opportunity-output/github-opportunities.json")
+    parser.add_argument("--input", default="opportunity-output/all-opportunities.json")
     parser.add_argument("--output-dir", default="finance-output")
     args = parser.parse_args()
     payload = json.loads(Path(args.input).read_text(encoding="utf-8"))
