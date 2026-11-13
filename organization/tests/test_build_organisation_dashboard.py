@@ -252,6 +252,16 @@ class OrganisationDashboardTests(unittest.TestCase):
         self.assertEqual(escalation["dispatch_status"], "dashboard_route_only_not_dispatched")
         self.assertEqual(report["data_quality"]["incident_register_errors"], [])
 
+
+    def test_dashboard_surfaces_recovery_plan_without_claiming_production_readiness(self):
+        plan = json.loads((Path(__file__).resolve().parents[1] / "recovery-plan.json").read_text(encoding="utf-8"))
+        report = self.build()
+        recovery = report["technical_recovery"]
+        self.assertEqual(recovery["procedure_count"], 4)
+        self.assertFalse(recovery["production_recovery_verified"])
+        self.assertIn("temporary_fixture_only", recovery["drill_scope"])
+        self.assertEqual(recovery["plan_status"], "design_only_pending_owner_and_environment_confirmation")
+
     def test_revenue_snapshot_and_operating_framework_are_embedded(self):
         report = self.build()
         self.assertEqual(report["ai_revenue"]["finance_cad"]["net_cash_received_verified_by_ledger_status"], "0.00")
