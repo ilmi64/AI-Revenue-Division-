@@ -14,6 +14,11 @@ class ExecutiveReportingAgentTests(unittest.TestCase):
         self.assertEqual(report["verified_paid_opportunities"], 0)
         self.assertEqual(report["cash_received"], 0)
 
+    def test_division_feed_counts_are_available(self):
+        report = build_report({"results": [{"lane": "ai_development"}]}, {"lead_count": 1},
+                              {"reviewed_count": 1}, {"opportunities_reviewed": 1})
+        self.assertEqual(report["counts"]["discovered"], 1)
+
     def test_report_never_calls_leads_earnings(self):
         report = build_report({"results": [{"title": "Lead"}]}, {"lead_count": 1},
                               {"reviewed_count": 1}, {"opportunities_reviewed": 1})
