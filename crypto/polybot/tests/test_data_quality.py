@@ -116,6 +116,13 @@ class HistoricalDataQualityTests(unittest.TestCase):
                 expected_end=END, now=NOW,
             )
 
+    def test_candle_interval_must_match_expected_grid(self):
+        wrong_interval = candle(10)
+        wrong_interval["interval"] = "15m"
+        report = self.evaluate([wrong_interval])
+        self.assertEqual(report["malformed_records"], 1)
+        self.assertFalse(report["usable_for_research"])
+
 
 if __name__ == "__main__":
     unittest.main()
