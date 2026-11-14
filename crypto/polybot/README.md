@@ -33,17 +33,39 @@ candles = get_klines("BTCUSDT", interval="1h", limit=100)
 book_snapshot = get_order_book("BTCUSDT", limit=100)
 ```
 
-## Tests
+## Historical data-quality evaluation
 
-Run without network access:
+The offline `crypto/polybot/data_quality.py` evaluator checks one source and
+one expected candle grid. It reports:
 
-```bash
-python -m unittest discover -s crypto/polybot/tests -v
+- Expected versus valid hourly candles and coverage percentage.
+- Missing timestamps grouped into contiguous gap ranges.
+- Duplicate timestamps, malformed records, incomplete candles, and records
+  outside the requested window.
+- Latest collection time, age, future timestamps, and stale-feed status.
+- Optional cross-venue return-difference flags when enough aligned comparison
+  samples are supplied.
+
+The evaluator preserves source, base asset, quote asset, and interval labels.
+It does not fill missing candles, convert USD to USDT, infer executable
+spreads, or turn divergence into a strategy signal. A feed is marked usable
+for research only when its configured coverage and quality gates pass.
+
+Example:
+
+```python
+from crypto.polybot.data_quality import evaluate_candle_quality
+
+report = evaluate_candle_quality(
+    normalized_candles,
+    expected_start="2026-11-14T10:00:00Z",
+    expected_end="2026-11-14T18:00:00Z",
+    now="2026-11-14T18:05:00Z",
+    interval_seconds=3600,
+    max_age_seconds=5400,
+)
+print(report["coverage_percent"], report["quality_flags"])
 ```
-
-This module is a data-source component only. Strategy decisions, backtesting,
-paper execution, and risk controls remain separate PolyBot components.
-
 
 ## Cross-venue research integration
 
@@ -62,3 +84,15 @@ owner-operated, public read-only data collection check.
 
 The notebook integration does not add trading, account access, wallet signing,
 or transaction functionality.
+
+## Tests
+
+Run without network access:
+
+```bash
+python -m unittest discover -s crypto/polybot/tests -v
+```
+
+This module is a data-source and data-quality component only. Strategy
+decisions, backtesting, paper execution, and risk controls remain separate
+PolyBot components.
