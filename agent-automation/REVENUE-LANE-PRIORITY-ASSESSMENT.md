@@ -45,3 +45,30 @@
 ## Next recommended build step
 
 Create a small proof-of-work portfolio around one service the user can genuinely deliver, then prepare a short, human-reviewed service listing and client-target shortlist. Do not publish or contact anyone without approval.
+
+
+## Additional candidates reviewed — 2026-11-14
+
+These candidates supplement the ranking above; they are not verified jobs, approved applications or guaranteed earnings.
+
+| Candidate | Current assessment | Main gate before effort |
+|---|---|---|
+| **YPAI** | Canada-specific contributor openings advertised for model evaluation, annotation and data collection. Advertised rates include CAD $28–40/hour for model evaluation and CAD $24–35/hour for data annotation/data collection; scripted speech openings advertised CAD $30–50/hour. | Selection, actual project availability, approved hours, quality review, payout route and current terms. The user must personally qualify and perform assigned work. |
+| **CrowdGen by Appen** | Parallel AI data collection, annotation and evaluation candidate. Official payment information describes monthly processing, generally by the 14th of the following month. | Country/project allocation, mobile verification, qualification, available payout method, minimum and fees. |
+| **gend.me Web Developer** | Ontario-based candidate advertising CAD $15 per approved developer credit plus AI Builder Tokens. | Customer approval and actual demand. Tokens are not cash; wallet cash-out is unverified, so do not count tokens or credits as withdrawable income. |
+| **BOSS** | Already integrated as read-only discovery for BOSS-marked public GitHub issues; Canada appears in official individual-earner documentation. | Verify the exact sponsor, active funding, claim state, acceptance terms and payout. Markers/bot summaries do not prove payment. Published fees need reconfirmation. |
+| **Algora** | Verify-first open-source bounty candidate. | Current funded bounty supply, Canadian eligibility, fees and payout terms were not conclusively verified. |
+| **GitHub Sponsors** | Long-term open-source sponsorship route; Canada is a supported receiving region. | Qualifying contribution history, profile trust, 2FA, banking/tax onboarding and sponsor demand. Not a quick-income route. |
+
+### Excluded option
+**BountyOS** is not the software bounty platform its name might suggest. The current product reviewed is a creator/product-placement platform for TikTok and Instagram. It is excluded from this software revenue plan; TikTok remains excluded unless the owner changes that instruction.
+
+### Updated operating priority
+1. Continue the read-only BOSS/GitHub funded-issue discovery, but manually verify every exact bounty.
+2. Screen YPAI and CrowdGen as parallel near-term AI evaluation routes; do not infer eligibility or task supply from advertised rates.
+3. Prepare one small, demonstrable AI automation/development service portfolio; consider Contra/direct client services and gend.me only after payout/cash-out terms are confirmed.
+4. Keep Outlier and Alignerr as secondary candidates subject to qualification, phone/ID and project checks.
+5. Build toward GitHub Sponsors and reusable software as longer-term assets.
+6. Keep Algora verify-first; keep grants, security testing and research tasks behind their existing eligibility/authorization gates.
+
+No account connection, application, proposal, bounty claim, outreach, security test, product publication, purchase or payment is authorized by this assessment.
