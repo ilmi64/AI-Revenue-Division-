@@ -5,6 +5,7 @@ on:
     branches: [feature/polybot-binance-public-data]
     paths:
       - "crypto/polybot/**"
+      - "Polybot_Development.ipynb"
       - ".github/workflows/polybot-public-data-tests.yml"
   pull_request:
     paths:
