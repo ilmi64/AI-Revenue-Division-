@@ -29,6 +29,11 @@ class ColabNotebookIntegrationTests(unittest.TestCase):
         self.assertIn("get_klines", integration)
         self.assertIn("normalize_coinbase_candles", integration)
         self.assertIn("normalize_binance_klines", integration)
+        self.assertIn("from crypto.polybot.data_quality import evaluate_candle_quality", integration)
+        self.assertIn("coinbase_quality = evaluate_candle_quality", integration)
+        self.assertIn("binance_quality = evaluate_candle_quality", integration)
+        self.assertIn("data_quality_hourly.csv", integration)
+        self.assertIn("Pairs with quality reports", integration)
         self.assertIn("No orders or transactions", integration)
 
 
