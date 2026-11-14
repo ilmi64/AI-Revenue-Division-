@@ -219,3 +219,115 @@ def compare_price_observations(
         "executable_spread": False,
         "interpretation": "descriptive_only; no FX conversion, fees, slippage, or synchronization guarantee",
     }
+
+
+def normalize_coinbase_candles(
+    rows: Iterable[dict[str, Any]],
+    *,
+    pair: str,
+    interval: str,
+    collected_at: str | datetime,
+) -> list[dict[str, Any]]:
+    """Normalize the existing Coinbase candle rows without changing that collector."""
+    collected = _utc(collected_at, "collected_at")
+    if not isinstance(pair, str) or pair.count("-") != 1:
+        raise MarketDataValidationError("Coinbase pair must use BASE-QUOTE notation")
+    base_asset, quote_asset = pair.split("-", 1)
+    if not base_asset or not quote_asset or not interval:
+        raise MarketDataValidationError("pair assets and interval are required")
+    normalized = []
+    seen_times: set[str] = set()
+    for index, row in enumerate(rows):
+        if not isinstance(row, dict) or "timestamp" not in row:
+            raise MarketDataValidationError(f"Coinbase row {index} is missing timestamp")
+        event_time = _utc(row["timestamp"], f"Coinbase row {index} timestamp")
+        event_key = event_time.isoformat()
+        if event_key in seen_times:
+            raise MarketDataValidationError(f"duplicate Coinbase candle time: {event_key}")
+        seen_times.add(event_key)
+        values = {
+            key: _decimal(row.get(key), key, positive=True)
+            for key in ("open", "high", "low", "close")
+        }
+        values["volume"] = _decimal(row.get("volume"), "volume")
+        if values["volume"] < 0:
+            raise MarketDataValidationError("volume cannot be negative")
+        if values["high"] < max(values["open"], values["close"], values["low"]):
+            raise MarketDataValidationError("high must be at least open, close, and low")
+        if values["low"] > min(values["open"], values["close"], values["high"]):
+            raise MarketDataValidationError("low must not exceed open, close, or high")
+        normalized.append({
+            "source": "coinbase_exchange",
+            "venue_symbol": pair,
+            "base_asset": base_asset,
+            "quote_asset": quote_asset,
+            "data_type": "candle",
+            "event_time": event_key,
+            "collected_at": collected.isoformat(),
+            "interval": interval,
+            "payload": {key: str(value) for key, value in values.items()},
+            "is_snapshot": False,
+            "is_complete": True,
+            "quality_flags": [],
+        })
+    return sorted(normalized, key=lambda item: item["event_time"])
+
+
+def compare_candle_series(
+    left: Iterable[dict[str, Any]],
+    right: Iterable[dict[str, Any]],
+    *,
+    max_time_skew_seconds: float = 60.0,
+) -> list[dict[str, Any]]:
+    """Compare aligned candle returns, never conflating USD and USDT price levels."""
+    if max_time_skew_seconds < 0:
+        raise ValueError("max_time_skew_seconds cannot be negative")
+    left_rows = list(left)
+    right_rows = list(right)
+    if not left_rows or not right_rows:
+        return []
+    left_meta, right_meta = left_rows[0], right_rows[0]
+    if left_meta.get("base_asset") != right_meta.get("base_asset"):
+        raise MarketDataValidationError("base assets must match")
+    if left_meta.get("interval") != right_meta.get("interval"):
+        raise MarketDataValidationError("candle intervals must match")
+    for row in left_rows + right_rows:
+        if row.get("data_type") != "candle" or not row.get("is_complete", False):
+            raise MarketDataValidationError("only complete candle observations can be compared")
+    left_by_time = {_utc(row["event_time"], "left event_time"): row for row in left_rows}
+    right_by_time = {_utc(row["event_time"], "right event_time"): row for row in right_rows}
+    common_times = sorted(set(left_by_time).intersection(right_by_time))
+    output = []
+    previous_left = previous_right = None
+    for event_time in common_times:
+        lrow, rrow = left_by_time[event_time], right_by_time[event_time]
+        skew = abs((_utc(lrow["event_time"], "left event_time") -
+                    _utc(rrow["event_time"], "right event_time")).total_seconds())
+        lclose = _decimal(lrow["payload"]["close"], "left close", positive=True)
+        rclose = _decimal(rrow["payload"]["close"], "right close", positive=True)
+        lreturn = rreturn = None
+        if previous_left is not None and previous_right is not None:
+            lreturn = (lclose - previous_left) / previous_left * Decimal("100")
+            rreturn = (rclose - previous_right) / previous_right * Decimal("100")
+        output.append({
+            "event_time": event_time.isoformat(),
+            "base_asset": left_meta["base_asset"],
+            "interval": left_meta["interval"],
+            "left_source": lrow["source"],
+            "left_quote_asset": lrow["quote_asset"],
+            "left_close": str(lclose),
+            "left_return_percent": str(lreturn) if lreturn is not None else None,
+            "right_source": rrow["source"],
+            "right_quote_asset": rrow["quote_asset"],
+            "right_close": str(rclose),
+            "right_return_percent": str(rreturn) if rreturn is not None else None,
+            "return_difference_percentage_points": (
+                str(rreturn - lreturn) if lreturn is not None and rreturn is not None else None
+            ),
+            "price_levels_comparable": lrow["quote_asset"] == rrow["quote_asset"],
+            "time_aligned": skew <= max_time_skew_seconds,
+            "time_skew_seconds": skew,
+            "interpretation": "aligned_return_comparison_only; no FX conversion or executable spread",
+        })
+        previous_left, previous_right = lclose, rclose
+    return output
