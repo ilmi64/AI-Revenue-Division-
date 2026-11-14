@@ -34,6 +34,7 @@ jobs:
         working-directory: agent-automation
         run: |
           PYTHONPATH=. python -m unittest test_opportunity_intelligence.py -v
+          PYTHONPATH=. python -m unittest test_boss_bounty_sources.py -v
           PYTHONPATH=. python -m unittest test_development_task_agent.py -v
           PYTHONPATH=. python -m unittest test_risk_review_agent.py -v
           PYTHONPATH=. python -m unittest test_finance_payout_agent.py -v
@@ -47,6 +48,8 @@ jobs:
         run: PYTHONPATH=agent-automation python agent-automation/validate_revenue_lane_registry.py
       - name: Collect public GitHub opportunity leads
         run: python agent-automation/opportunity_intelligence.py
+      - name: Collect BOSS-marked GitHub bounty leads (read-only)
+        run: python agent-automation/boss_bounty_sources.py
       - name: Fetch public remote-work feeds (read-only)
         run: python agent-automation/external_opportunity_sources.py
       - name: Validate review-only Canadian employer ATS candidates (read-only)
