@@ -1,5 +1,4 @@
 import unittest
-from datetime import datetime, timezone
 
 from crypto.polybot.market_normalization import (
     MarketDataValidationError,
@@ -17,7 +16,7 @@ COLLECTED = "2026-11-14T15:00:00Z"
 def candle(open_ms=1794661200000, close_ms=1794664799999, **changes):
     row = [open_ms, "100", "110", "90", "105", "12", close_ms, "0", 1, "0", "0", "0"]
     for index, value in changes.items():
-        row[index] = value
+        row[int(index)] = value
     return row
 
 
