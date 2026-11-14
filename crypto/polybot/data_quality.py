@@ -114,10 +114,10 @@ def evaluate_candle_quality(
                 source, base_asset, quote_asset, interval = metadata
             elif metadata != (source, base_asset, quote_asset, interval):
                 raise ValueError("mixed source, asset or interval provenance")
-            if interval != f"{interval_seconds // 60}m" and interval_seconds % 60 == 0:
-                # Preserve arbitrary interval labels, but reject obvious mismatches only
-                # when a conventional minute label is supplied.
-                if interval.endswith("m") and interval[:-1].isdigit() and int(interval[:-1]) * 60 != interval_seconds:
+            unit_seconds = {"s": 1, "m": 60, "h": 3600, "d": 86400, "w": 604800}
+            suffix, amount = interval[-1], interval[:-1]
+            if suffix in unit_seconds and amount.isdigit():
+                if int(amount) * unit_seconds[suffix] != interval_seconds:
                     raise ValueError("candle interval does not match evaluation grid")
             stamp = _aware_utc(row.get("event_time"), "event_time")
             collected = _aware_utc(row.get("collected_at"), "collected_at")
