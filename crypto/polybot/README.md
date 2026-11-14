@@ -82,6 +82,15 @@ reported as unavailable rather than filled or inferred. The notebook cell has
 not been run in a live Colab session yet; its first execution remains an
 owner-operated, public read-only data collection check.
 
+The notebook integration now runs the offline candle-quality evaluator for
+both normalized sources over their exact shared hourly history window. It writes
+a separate `*_data_quality_hourly.csv` report per asset, alongside the
+cross-venue return comparison CSV. The quality report preserves venue and quote
+asset, expected/valid/missing candle counts, coverage, gap ranges, duplicate
+and malformed counts, freshness, research-usability status, and divergence
+review flags. The report evaluates the same bounded overlap window for both
+venues; it does not silently extend one feed beyond the other's available data.
+
 The notebook integration does not add trading, account access, wallet signing,
 or transaction functionality.
 
