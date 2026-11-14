@@ -22,7 +22,8 @@
       "coverage_status": "candidate_sources_listed",
       "source_ids": [
         "upwork",
-        "contra"
+        "contra",
+        "gendme_web_developer"
       ],
       "next_step": "Build a small demonstrable service portfolio and verify client demand, fees, contract terms and payment protection before any proposal."
     },
@@ -32,7 +33,8 @@
       "coverage_status": "candidate_sources_listed",
       "source_ids": [
         "upwork",
-        "contra"
+        "contra",
+        "gendme_web_developer"
       ],
       "next_step": "Match only tasks supported by demonstrable skills; verify Connects, platform fees, identity checks, payout method and dispute terms."
     },
@@ -42,9 +44,11 @@
       "coverage_status": "candidate_sources_listed",
       "source_ids": [
         "outlier",
-        "alignerr"
+        "alignerr",
+        "ypai",
+        "crowdgen"
       ],
-      "next_step": "Check live project availability, Canada-specific restrictions, screening requirements, time tracking and payout terms."
+      "next_step": "Prioritize YPAI and CrowdGen for manual Canada screening alongside Outlier/Alignerr; verify live tasks, qualifications, phone/ID checks, approved work, payout method, minimums, fees and timing before any commitment."
     },
     {
       "id": "digital_products",
@@ -61,9 +65,10 @@
       "coverage_status": "candidate_sources_listed",
       "source_ids": [
         "canada_benefits_finder",
-        "nrc_irap"
+        "nrc_irap",
+        "github_sponsors"
       ],
-      "next_step": "Treat funding as project support, not personal income; verify applicant legal form, incorporation, matching funds, eligible costs and reporting obligations."
+      "next_step": "Separate project grants from individual open-source sponsorships; verify legal applicant eligibility, qualifying contribution history, fees, payout and reporting before applying or accepting."
     },
     {
       "id": "security_testing",
@@ -87,9 +92,11 @@
       "label": "Public GitHub issue and bounty leads",
       "coverage_status": "existing_connector",
       "source_ids": [
-        "github_public"
+        "github_public",
+        "boss_bounties",
+        "algora"
       ],
-      "next_step": "Verify that a bounty is explicitly funded, currently open, and has clear acceptance and payment terms; ordinary GitHub issues are not assumed paid."
+      "next_step": "Use GitHub/BOSS/Algora only as discovery candidates; verify sponsor, live funding, current claim state, acceptance terms, Canadian eligibility, fees and payout for each exact bounty."
     },
     {
       "id": "remote_employment",
@@ -284,6 +291,97 @@
       "integration_status": "read_only_connector_with_candidate_boards_pending_runtime_validation",
       "human_review_required": true,
       "notes": "Public employer-board connectors exist; 16 candidate employers remain a review-only shortlist and are not active until separately approved."
+    },
+    {
+      "id": "ypai",
+      "name": "YPAI Canadian freelance contributor openings",
+      "source_type": "ai_evaluation_platform",
+      "official_url": "https://freelancer.ypai.ai/",
+      "evidence_url": "https://freelancer.ypai.ai/jobs/openings/model-evaluator-ca",
+      "lanes": [
+        "ai_evaluation"
+      ],
+      "canada_status": "Canada-specific openings are advertised; each role, assessment and contributor eligibility must be checked",
+      "cost_status": "No contributor fee stated on reviewed opening pages; verify current contract and payout details before work",
+      "integration_status": "manual_research_only",
+      "human_review_required": true,
+      "notes": "Reviewed openings advertised CAD hourly ranges for model evaluation, annotation and data collection, with PayPal, Wise or bank transfer described. Rates are advertisements, not guaranteed work or earnings; selection, task availability, approved hours and payout terms require direct verification. User must personally qualify and perform assigned work."
+    },
+    {
+      "id": "crowdgen",
+      "name": "CrowdGen by Appen",
+      "source_type": "ai_evaluation_platform",
+      "official_url": "https://crowdgen.com/",
+      "evidence_url": "https://crowdgen.com/payments/",
+      "lanes": [
+        "ai_evaluation"
+      ],
+      "canada_status": "Project allocation and country eligibility vary; verify Ontario availability and mobile verification requirements",
+      "cost_status": "No upfront fee assumed; payout options and timing vary by country/project; verify current method and minimum",
+      "integration_status": "manual_research_only",
+      "human_review_required": true,
+      "notes": "AI data collection, annotation and evaluation candidate. Official help describes monthly payment processing, generally by the 14th of the following month, with payout methods varying by location. Project allocation, qualifications, mobile verification and Canadian payout access remain to be checked."
+    },
+    {
+      "id": "gendme_web_developer",
+      "name": "gend.me Web Developer",
+      "source_type": "developer_marketplace",
+      "official_url": "https://gend.me/",
+      "evidence_url": "https://gend.me/apply/web-developer/",
+      "lanes": [
+        "ai_development",
+        "freelance_services"
+      ],
+      "canada_status": "Ontario-based platform; confirm applicant eligibility and customer demand",
+      "cost_status": "Advertised CAD per approved developer credit plus AI tokens; tokens are not cash; verify wallet cash-out, approval and customer acceptance before counting any value",
+      "integration_status": "manual_research_only",
+      "human_review_required": true,
+      "notes": "Candidate for web development work. Advertises CAD 15 per approved developer credit and AI Builder Tokens; payment depends on customer approval. Wallet withdrawal terms and cash conversion are not yet verified. No credits or tokens are treated as cash or income."
+    },
+    {
+      "id": "boss_bounties",
+      "name": "BOSS bounty marketplace",
+      "source_type": "coding_bounty_marketplace",
+      "official_url": "https://www.boss.dev/",
+      "evidence_url": "https://www.boss.dev/doc/pricing",
+      "lanes": [
+        "github_bounties"
+      ],
+      "canada_status": "Official documentation lists Canada for individual bounty earners; verify the specific bounty and account payout eligibility",
+      "cost_status": "Advertised earning fee 5% plus USD 0.60 and possible currency conversion; confirm current terms before accepting work",
+      "integration_status": "manual_research_only",
+      "human_review_required": true,
+      "notes": "BOSS-marked public GitHub issues are discovery signals only. A marker, badge or bot summary is not proof of live funding, active sponsor authorization or payment. Verify the exact issue, sponsor, claim state, acceptance criteria, fees and withdrawal route. No claims or submissions are automated."
+    },
+    {
+      "id": "algora",
+      "name": "Algora open-source bounties",
+      "source_type": "coding_bounty_marketplace",
+      "official_url": "https://algora.io/",
+      "evidence_url": "https://algora.io/",
+      "lanes": [
+        "github_bounties"
+      ],
+      "canada_status": "Canadian access and payout eligibility not conclusively verified; check the exact bounty and account terms",
+      "cost_status": "Funding, fees and payout route require source-level verification before work",
+      "integration_status": "manual_research_only",
+      "human_review_required": true,
+      "notes": "Potential open-source bounty discovery source. Current bounty availability, sponsor funding, Canadian eligibility and payout arrangements have not been independently confirmed. Treat as verify-first; no account connection or issue claim."
+    },
+    {
+      "id": "github_sponsors",
+      "name": "GitHub Sponsors",
+      "source_type": "open_source_sponsorship_platform",
+      "official_url": "https://github.com/sponsors",
+      "evidence_url": "https://docs.github.com/en/sponsors/receiving-sponsorships-through-github-sponsors/setting-up-your-personal-account",
+      "lanes": [
+        "grants_sponsorships"
+      ],
+      "canada_status": "Canada is listed as a supported receiving region; qualification and payout onboarding requirements apply",
+      "cost_status": "No upfront fee assumed; verify current payout, tax and banking terms and eligibility requirements",
+      "integration_status": "manual_research_only",
+      "human_review_required": true,
+      "notes": "Longer-term sponsorship route. Receiving requires a qualifying contribution/profile history and account, banking, tax and two-factor setup. Sponsorships are not guaranteed and are not immediate task income."
     }
   ]
 }
