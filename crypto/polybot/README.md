@@ -43,3 +43,22 @@ python -m unittest discover -s crypto/polybot/tests -v
 
 This module is a data-source component only. Strategy decisions, backtesting,
 paper execution, and risk controls remain separate PolyBot components.
+
+
+## Cross-venue research integration
+
+The Polybot_Development.ipynb notebook keeps its original Coinbase USD hourly
+collector. A separate Phase 3B cell clones this feature branch and fetches
+bounded Binance Spot USDT hourly candles for BTC, ETH, and SOL. It normalizes
+both feeds and writes source-labelled comparison CSVs to the existing local
+and Google Drive data folders.
+
+The comparison uses only exact matching UTC candle-open timestamps. It
+compares per-venue percentage returns; USD and USDT close-price levels remain
+separate and are not FX-converted. A missing Coinbase or Binance series is
+reported as unavailable rather than filled or inferred. The notebook cell has
+not been run in a live Colab session yet; its first execution remains an
+owner-operated, public read-only data collection check.
+
+The notebook integration does not add trading, account access, wallet signing,
+or transaction functionality.
