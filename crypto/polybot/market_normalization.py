@@ -276,12 +276,9 @@ def normalize_coinbase_candles(
 def compare_candle_series(
     left: Iterable[dict[str, Any]],
     right: Iterable[dict[str, Any]],
-    *,
-    max_time_skew_seconds: float = 60.0,
 ) -> list[dict[str, Any]]:
-    """Compare aligned candle returns, never conflating USD and USDT price levels."""
-    if max_time_skew_seconds < 0:
-        raise ValueError("max_time_skew_seconds cannot be negative")
+    """Compare candles at exact matching UTC open times, without FX conversion."""
+
     left_rows = list(left)
     right_rows = list(right)
     if not left_rows or not right_rows:
@@ -301,8 +298,6 @@ def compare_candle_series(
     previous_left = previous_right = None
     for event_time in common_times:
         lrow, rrow = left_by_time[event_time], right_by_time[event_time]
-        skew = abs((_utc(lrow["event_time"], "left event_time") -
-                    _utc(rrow["event_time"], "right event_time")).total_seconds())
         lclose = _decimal(lrow["payload"]["close"], "left close", positive=True)
         rclose = _decimal(rrow["payload"]["close"], "right close", positive=True)
         lreturn = rreturn = None
@@ -325,8 +320,7 @@ def compare_candle_series(
                 str(rreturn - lreturn) if lreturn is not None and rreturn is not None else None
             ),
             "price_levels_comparable": lrow["quote_asset"] == rrow["quote_asset"],
-            "time_aligned": skew <= max_time_skew_seconds,
-            "time_skew_seconds": skew,
+            "exact_timestamp_match": True,
             "interpretation": "aligned_return_comparison_only; no FX conversion or executable spread",
         })
         previous_left, previous_right = lclose, rclose
