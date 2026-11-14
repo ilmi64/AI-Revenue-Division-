@@ -1,5 +1,5 @@
 {
-  "assessment_date": "2026-11-13",
+  "assessment_date": "2026-11-14",
   "region": "Ontario, Canada",
   "budget_cad": 0,
   "status": "research_only",
@@ -181,5 +181,99 @@
     "User skill/credential fit has not been confirmed.",
     "Payout availability and fees can change and must be rechecked before any work.",
     "No platform accounts were connected or activated."
+  ],
+  "additional_candidates": [
+    {
+      "id": "ypai",
+      "lane": "AI evaluation and data annotation",
+      "priority": "A/B",
+      "outlook": "promising Canada-specific advertised contributor openings; selection and task supply remain uncertain",
+      "canada": "Canada-specific role pages reviewed; exact project eligibility must be checked",
+      "payout": "PayPal, Wise or bank transfer advertised; confirm account-specific availability, minimums, fees and timing",
+      "barriers": [
+        "screening and selection",
+        "project/task availability",
+        "approved work and quality review"
+      ],
+      "activation": "manual_role_by_role_review_only"
+    },
+    {
+      "id": "crowdgen",
+      "lane": "AI evaluation and data annotation",
+      "priority": "B",
+      "outlook": "parallel candidate; project allocation is uncertain",
+      "canada": "country and project eligibility vary; mobile verification may be required",
+      "payout": "methods vary by location; official payment page describes monthly processing generally by the 14th of following month",
+      "barriers": [
+        "qualification and project matching",
+        "mobile/identity verification",
+        "payout method availability"
+      ],
+      "activation": "manual_review_only"
+    },
+    {
+      "id": "gendme_web_developer",
+      "lane": "AI development and freelance services",
+      "priority": "B/verify-first",
+      "outlook": "potential developer-credit work; customer approval and demand required",
+      "canada": "Ontario-based platform; applicant and payout details need confirmation",
+      "payout": "advertised CAD 15 per approved developer credit plus AI Builder Tokens; token value is not cash and wallet cash-out remains unverified",
+      "barriers": [
+        "customer demand",
+        "customer approval",
+        "wallet withdrawal verification"
+      ],
+      "activation": "do_not_count_tokens_as_cash"
+    },
+    {
+      "id": "boss_bounties",
+      "lane": "GitHub bounties",
+      "priority": "B/C",
+      "outlook": "existing read-only discovery integration; exact live bounty must be verified",
+      "canada": "official docs list Canada for individual earners",
+      "payout": "published 5% plus USD 0.60 fee and possible conversion; reconfirm current pricing",
+      "barriers": [
+        "live sponsor funding",
+        "claim state",
+        "acceptance criteria",
+        "fees and payout"
+      ],
+      "activation": "funded_issue_manual_verification_only"
+    },
+    {
+      "id": "algora",
+      "lane": "GitHub bounties",
+      "priority": "verify-first",
+      "outlook": "not enough official current evidence to rank as an active paid source",
+      "canada": "not conclusively verified",
+      "payout": "not conclusively verified",
+      "barriers": [
+        "current bounty supply",
+        "Canadian access",
+        "sponsor funding",
+        "payout terms"
+      ],
+      "activation": "manual_research_only"
+    },
+    {
+      "id": "github_sponsors",
+      "lane": "open-source sponsorships",
+      "priority": "long-term",
+      "outlook": "requires qualifying public contribution history and an audience/sponsor interest",
+      "canada": "Canada listed as a supported receiving region; onboarding requirements apply",
+      "payout": "bank/tax onboarding and current payout details must be confirmed",
+      "barriers": [
+        "qualifying contribution history",
+        "profile and project trust",
+        "sponsor acquisition"
+      ],
+      "activation": "long_term_asset_building"
+    }
+  ],
+  "exclusions": [
+    {
+      "id": "bountyos",
+      "reason": "Current product reviewed is a TikTok/Instagram creator product-placement platform, not a software bounty platform; TikTok is excluded from the organisation's content plan."
+    }
   ]
 }
