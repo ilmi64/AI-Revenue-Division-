@@ -27,7 +27,7 @@ class OrganisationDashboardTests(unittest.TestCase):
 
     def test_dashboard_covers_all_divisions_and_never_promotes_readiness(self):
         report = self.build()
-        self.assertEqual(report["organisation"]["division_count"], 10)
+        self.assertEqual(report["organisation"]["division_count"], 11)
         self.assertEqual(report["organisation"]["verified_standby_or_operational"], 0)
         self.assertTrue(all(x["verified_status"] not in {"standby", "operational"} for x in report["division_scorecard"]))
 
@@ -43,6 +43,8 @@ class OrganisationDashboardTests(unittest.TestCase):
         animora = next(x for x in report["division_scorecard"] if x["id"] == "animora")
         self.assertEqual(finance["verified_status"], "planned")
         self.assertEqual(animora["verified_status"], "deferred")
+        commercial = next(row for row in report["divisions"] if row["division_id"] == "business-commercial")
+        self.assertEqual(commercial["verified_status"], "building")
 
 
     def test_dashboard_uses_supplied_execution_log(self):
@@ -201,7 +203,7 @@ class OrganisationDashboardTests(unittest.TestCase):
         self.assertEqual(report["risk_escalations"]["immediate_review_count"], 1)
         self.assertEqual(escalation["route"], ["risk", "executive", "technology"])
         self.assertEqual(escalation["broadcast_scope"], "all_divisions")
-        self.assertEqual(len(escalation["broadcast_divisions"]), 10)
+        self.assertEqual(len(escalation["broadcast_divisions"]), 11)
         self.assertEqual(escalation["linked_tasks"][0]["derived_execution_state"], "in_progress")
         self.assertEqual(escalation["pending_owner_decision_ids"], ["DEC-PENDING-001"])
         self.assertEqual(escalation["description"], "Test-only critical risk")
@@ -273,13 +275,13 @@ class OrganisationDashboardTests(unittest.TestCase):
         self.assertIn("risk_register", report)
         self.assertIn("outstanding_decisions", report)
         self.assertTrue(report["division_work_queue"]["validated"])
-        self.assertEqual(report["division_work_queue"]["task_count"], 19)
+        self.assertEqual(report["division_work_queue"]["task_count"], 20)
         self.assertEqual(report["division_work_queue"]["completed_count"], 0)
         self.assertTrue(report["division_execution_evidence"]["validated"])
         self.assertEqual(report["division_execution_evidence"]["event_count"], 0)
         self.assertTrue(report["cross_division_integration"]["validated"])
-        self.assertEqual(report["cross_division_integration"]["dependency_edge_count"], 32)
-        self.assertEqual(report["cross_division_integration"]["connected_edge_count"], 32)
+        self.assertEqual(report["cross_division_integration"]["dependency_edge_count"], 37)
+        self.assertEqual(report["cross_division_integration"]["connected_edge_count"], 37)
 
 
 if __name__ == "__main__":
