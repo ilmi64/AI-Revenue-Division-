@@ -16,10 +16,10 @@ class ReadinessValidationTests(unittest.TestCase):
         cls.registry = json.loads((root / "division-registry.json").read_text(encoding="utf-8"))
         cls.readiness = json.loads((root / "readiness-register.json").read_text(encoding="utf-8"))
 
-    def test_current_register_is_valid_but_reports_unassessed_divisions(self):
+    def test_current_register_has_assessment_for_every_division(self):
         errors, warnings = validate(self.registry, self.readiness)
         self.assertEqual(errors, [])
-        self.assertTrue(any("No readiness assessment yet" in item for item in warnings))
+        self.assertEqual(warnings, [])
 
     def test_unknown_assessment_division_is_rejected(self):
         readiness = copy.deepcopy(self.readiness)
