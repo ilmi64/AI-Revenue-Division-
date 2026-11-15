@@ -90,7 +90,8 @@
         "finance",
         "risk",
         "crypto",
-        "tisrd"
+        "tisrd",
+        "business-commercial"
       ],
       "notes": "Sourced intelligence with freshness, uncertainty and evidence recorded."
     },
@@ -263,6 +264,43 @@
         "executive"
       ],
       "notes": "Separate Financial Group division. Produces permission-qualified research candidates and paper-replication evidence only; it cannot authorize trades or bypass specialist and risk controls."
+    },
+    {
+      "division_id": "business-commercial",
+      "depends_on": [
+        {
+          "division_id": "executive",
+          "type": "required",
+          "capability": "Portfolio priorities, owner decisions and approval routing"
+        },
+        {
+          "division_id": "research",
+          "type": "supporting",
+          "capability": "Market demand, competitor, customer and platform evidence"
+        },
+        {
+          "division_id": "technology",
+          "type": "supporting",
+          "capability": "Digital delivery tooling, secure systems and workflow feasibility"
+        },
+        {
+          "division_id": "finance",
+          "type": "required",
+          "capability": "Pricing, unit economics, costs, cash and payment controls"
+        },
+        {
+          "division_id": "risk",
+          "type": "supporting",
+          "capability": "Contract, privacy, fraud, IP and customer-delivery risk review"
+        }
+      ],
+      "provides_to": [
+        "ai-revenue",
+        "ecommerce",
+        "animora",
+        "executive"
+      ],
+      "notes": "Commercial enablement and delivery preparation; supporting work does not authorize outreach, client commitments, contracts, payments or public claims."
     }
   ]
 }
