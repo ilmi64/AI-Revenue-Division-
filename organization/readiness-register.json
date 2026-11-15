@@ -145,6 +145,22 @@
       "open_gaps": [
         "Expansion waits until the main organisation is successful and can fund it sustainably."
       ]
+    },
+    {
+      "division_id": "tisrd",
+      "claimed_status": "building",
+      "verified_status": "building",
+      "evidence": [
+        "A distinct TISRD charter and Ontario-first source qualification policy are documented in Solana-memecoins PR #39 (draft and unmerged).",
+        "The charter defines authorized replication and information-only research paths, a paper lifecycle, independent risk challenge, and no-execution boundaries."
+      ],
+      "open_gaps": [
+        "The charter is documentation-only; no production workflow, source-permission registry, connector, or strategy observation store is verified.",
+        "Platform-by-platform rights, Ontario eligibility, retention, automation and copy-trading permissions remain unverified or restricted; no unauthorized trader profiling or scraping is permitted.",
+        "No reproducible paper-replication dataset, isolated strategy ledger, out-of-sample results, or benchmark evidence is established.",
+        "Named accountable owner, escalation route, monitoring, and cross-division rehearsal evidence remain outstanding.",
+        "No platform application, paid feed, wallet connection, or live execution is authorized."
+      ]
     }
   ]
 }
