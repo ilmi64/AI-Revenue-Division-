@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "policy": "Readiness is evidence-based. A division cannot be marked standby or operational solely because a plan or repository exists.",
-  "last_reviewed": "2026-11-13",
+  "last_reviewed": "2026-11-15",
   "checks": [
     {
       "id": "mandate-defined",
@@ -160,6 +160,62 @@
         "No reproducible paper-replication dataset, isolated strategy ledger, out-of-sample results, or benchmark evidence is established.",
         "Named accountable owner, escalation route, monitoring, and cross-division rehearsal evidence remain outstanding.",
         "No platform application, paid feed, wallet connection, or live execution is authorized."
+      ]
+    },
+    {
+      "division_id": "technology",
+      "claimed_status": "building",
+      "verified_status": "building",
+      "evidence": [
+        "Control Centre draft includes security-posture, readiness, dependency, work-queue, execution-log and incident validators plus isolated fixture recovery checks; latest workflow confirms these validation steps passed before the test stage.",
+        "Crypto development branches contain read-only Solana RPC, provider failover and paper-ingestion components with synthetic test coverage."
+      ],
+      "open_gaps": [
+        "No approved hosted runtime, persistent monitoring, alert routing or independently tested production failover is established.",
+        "Live RPC/provider connectivity, endpoint independence, credential governance and sustained outage/restart behaviour remain unverified.",
+        "Control Centre and Crypto changes remain draft/unmerged; no production deployment or permission changes are authorized."
+      ]
+    },
+    {
+      "division_id": "research",
+      "claimed_status": "building",
+      "verified_status": "building",
+      "evidence": [
+        "Research and source-qualification mandates are documented in the Control Centre framework and TISRD charter PR #39.",
+        "Official source reviews have identified explicit data-rights and Ontario constraints for Pump.fun, Polymarket, Kalshi and other candidate sources."
+      ],
+      "open_gaps": [
+        "No unified, operational source-permission register with accountable review ownership is implemented.",
+        "Several platform permissions, data retention rights, Ontario eligibility and automated-use rights remain restricted, unclear or unverified.",
+        "No continuously refreshed research service or independently rehearsed handoff to every division is established."
+      ]
+    },
+    {
+      "division_id": "finance",
+      "claimed_status": "planned",
+      "verified_status": "planned",
+      "evidence": [
+        "The Control Centre records CAD 0 as the default operating budget and reserves financial transactions, borrowing and paid commitments for explicit owner approval.",
+        "Crypto PR #37 documents a paper-only CAD ledger and fee-inclusive FIFO accounting/reconciliation prototype."
+      ],
+      "open_gaps": [
+        "No independently verified finance operating workflow, cash-flow record, reserve policy or reconciled bank/account evidence is connected.",
+        "No confirmed finance owner, approval ledger, tax/accounting export or full organisation-wide cost reporting is established.",
+        "No borrowing, yield, interest or investment activity is authorized; halal-sensitive structures require separate review."
+      ]
+    },
+    {
+      "division_id": "risk",
+      "claimed_status": "building",
+      "verified_status": "building",
+      "evidence": [
+        "The Control Centre draft contains risk, incident, security and recovery records plus validators and a temporary-fixture recovery drill.",
+        "Crypto PR #37 contains a recovery charter and local SQLite case-register prototype with synthetic tests."
+      ],
+      "open_gaps": [
+        "No active incident cases are recorded; the repository drill validates temporary fixtures only, not production recovery.",
+        "No production case-register RBAC, encryption, tamper-evident evidence export, authenticated case ownership or tested alert/deadline workflow is established.",
+        "Independent named risk/recovery ownership, cross-division incident rehearsals and production containment/recovery evidence remain outstanding."
       ]
     }
   ]
