@@ -41,7 +41,7 @@ class OrganisationDashboardTests(unittest.TestCase):
         report = self.build()
         finance = next(x for x in report["division_scorecard"] if x["id"] == "finance")
         animora = next(x for x in report["division_scorecard"] if x["id"] == "animora")
-        self.assertEqual(finance["verified_status"], "unassessed")
+        self.assertEqual(finance["verified_status"], "planned")
         self.assertEqual(animora["verified_status"], "deferred")
 
 
@@ -278,7 +278,7 @@ class OrganisationDashboardTests(unittest.TestCase):
         self.assertTrue(report["division_execution_evidence"]["validated"])
         self.assertEqual(report["division_execution_evidence"]["event_count"], 0)
         self.assertTrue(report["cross_division_integration"]["validated"])
-        self.assertEqual(report["cross_division_integration"]["dependency_edge_count"], 28)
+        self.assertEqual(report["cross_division_integration"]["dependency_edge_count"], 32)
         self.assertEqual(report["cross_division_integration"]["connected_edge_count"], 28)
 
 
