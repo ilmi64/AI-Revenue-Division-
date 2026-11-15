@@ -217,6 +217,19 @@
         "No production case-register RBAC, encryption, tamper-evident evidence export, authenticated case ownership or tested alert/deadline workflow is established.",
         "Independent named risk/recovery ownership, cross-division incident rehearsals and production containment/recovery evidence remain outstanding."
       ]
+    },
+    {
+      "division_id": "business-commercial",
+      "claimed_status": "building",
+      "verified_status": "building",
+      "evidence": [
+        "A distinct Business & Commercial division, support scope and approval boundary are now recorded in the Control Centre operating framework."
+      ],
+      "open_gaps": [
+        "No verified customer pipeline, commercial operating workflow, named owner or escalation route is established.",
+        "No approved client outreach, proposal submission, contract, customer delivery or revenue-recognition workflow is active.",
+        "Market demand, pricing, fulfilment capacity, contract terms and customer-acquisition costs require source-backed validation before any commercial commitment."
+      ]
     }
   ]
 }
