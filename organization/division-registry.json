@@ -21,7 +21,9 @@
       "name": "Executive Management",
       "status": "building",
       "mandate": "Set organisation-wide priorities, coordinate divisions, resolve dependencies, and maintain accountable reporting.",
-      "supports": ["all"],
+      "supports": [
+        "all"
+      ],
       "approval_boundary": "Advisory and coordination authority only; owner retains reserved approvals."
     },
     {
@@ -29,7 +31,11 @@
       "name": "AI Revenue",
       "status": "building",
       "mandate": "Validate legitimate income opportunities and deliver useful AI-assisted services and tools with a zero-upfront-cost default.",
-      "supports": ["finance", "technology", "all"],
+      "supports": [
+        "finance",
+        "technology",
+        "all"
+      ],
       "approval_boundary": "Research, draft, build, test, and prepare offers; no applications, client contact, claims, launches, or paid commitments without approval."
     },
     {
@@ -37,7 +43,9 @@
       "name": "Technology and Infrastructure",
       "status": "building",
       "mandate": "Build, secure, test, document, and integrate shared technical systems.",
-      "supports": ["all"],
+      "supports": [
+        "all"
+      ],
       "approval_boundary": "Development on isolated branches is permitted; merges, deployments, credential access, and permission changes require approval."
     },
     {
@@ -45,7 +53,12 @@
       "name": "Research and Intelligence",
       "status": "building",
       "mandate": "Provide sourced market, platform, technical, and opportunity intelligence with uncertainty clearly labelled.",
-      "supports": ["ai-revenue", "crypto", "finance", "executive"],
+      "supports": [
+        "ai-revenue",
+        "crypto",
+        "finance",
+        "executive"
+      ],
       "approval_boundary": "Research and recommendations only; no external commitments."
     },
     {
@@ -53,7 +66,9 @@
       "name": "Finance and Treasury",
       "status": "planned",
       "mandate": "Maintain financial models, cash-flow visibility, budget controls, reserves planning, and financing research.",
-      "supports": ["all"],
+      "supports": [
+        "all"
+      ],
       "approval_boundary": "No account access, transfers, borrowing, investments, or financial transactions without explicit approval; halal constraints must be assessed."
     },
     {
@@ -61,7 +76,9 @@
       "name": "Risk, Security and Recovery",
       "status": "building",
       "mandate": "Identify cross-division risks, validate safeguards, coordinate incident response, and maintain recovery plans.",
-      "supports": ["all"],
+      "supports": [
+        "all"
+      ],
       "approval_boundary": "May advise, flag, and recommend stopping unsafe activity; cannot authorise execution or override deterministic controls."
     },
     {
@@ -69,7 +86,13 @@
       "name": "Crypto and PolyBot",
       "status": "testing",
       "mandate": "Develop research, simulation, risk, and position-management capabilities with strict separation from live execution.",
-      "supports": ["research", "technology", "risk", "finance", "executive"],
+      "supports": [
+        "research",
+        "technology",
+        "risk",
+        "finance",
+        "executive"
+      ],
       "approval_boundary": "Paper/research work only unless a separate explicit live-operation approval and readiness review are completed."
     },
     {
@@ -77,7 +100,10 @@
       "name": "Ecommerce",
       "status": "deferred",
       "mandate": "Maintain existing work and later develop ecommerce automation and commercial operations.",
-      "supports": ["ai-revenue", "technology"],
+      "supports": [
+        "ai-revenue",
+        "technology"
+      ],
       "approval_boundary": "Major development deferred; no listings, purchases, publishing, or account changes without approval."
     },
     {
@@ -85,8 +111,23 @@
       "name": "Animora and Future Creative Studio",
       "status": "deferred",
       "mandate": "Preserve the long-term ambition to grow Animora into a broader independent media and creative production studio.",
-      "supports": ["ai-revenue", "technology", "finance"],
+      "supports": [
+        "ai-revenue",
+        "technology",
+        "finance"
+      ],
       "approval_boundary": "No current spending commitment; expansion follows sustainable success of the main organisation."
+    },
+    {
+      "id": "tisrd",
+      "name": "Trader Intelligence & Strategy Replication",
+      "status": "building",
+      "mandate": "Qualify legally and contractually permitted strategy sources, conduct read-only trader/strategy intelligence where allowed, and evaluate independent paper replications for Crypto and other eligible market divisions.",
+      "supports": [
+        "crypto",
+        "executive"
+      ],
+      "approval_boundary": "Read-only research and paper replication only; no prohibited scraping, individual profiling, unauthorized monitoring/copying, wallet access, live orders, paid data, or external platform applications without separate explicit approval."
     }
   ]
 }
