@@ -43,7 +43,7 @@ class OrganisationDashboardTests(unittest.TestCase):
         animora = next(x for x in report["division_scorecard"] if x["id"] == "animora")
         self.assertEqual(finance["verified_status"], "planned")
         self.assertEqual(animora["verified_status"], "deferred")
-        commercial = next(row for row in report["divisions"] if row["division_id"] == "business-commercial")
+        commercial = next(row for row in report["division_scorecard"] if row["id"] == "business-commercial")
         self.assertEqual(commercial["verified_status"], "building")
 
 
