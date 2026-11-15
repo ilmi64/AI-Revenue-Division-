@@ -484,6 +484,35 @@
       "execution_state": "not_started",
       "completion_evidence": [],
       "completed_at": null
+    },
+    {
+      "id": "BC-001",
+      "division_id": "business-commercial",
+      "title": "Prepare a zero-cost commercial offer validation pack",
+      "objective": "Draft one narrowly scoped offer hypothesis with customer problem, source-backed demand, pricing assumptions, delivery scope, exclusions, capacity, risk and approval gates.",
+      "priority": "medium",
+      "depends_on": [
+        "RES-001",
+        "FIN-001",
+        "RISK-001"
+      ],
+      "required_evidence": [
+        "Commercial offer brief",
+        "Source-backed customer/problem evidence",
+        "Pricing and delivery-cost assumptions",
+        "Risk review request and approval boundary"
+      ],
+      "acceptance_criteria": [
+        "The offer is clearly labelled a hypothesis until customer demand is independently validated.",
+        "Scope, delivery time, exclusions, costs and refund/support assumptions are explicit.",
+        "No client contact, application, proposal submission, publication or paid commitment occurs."
+      ],
+      "approval_gate": "Internal drafting only; external contact, submissions, contracts, publishing and paid commitments require explicit owner approval.",
+      "owner_assignment": "unassigned_pending_owner_confirmation",
+      "status": "proposed",
+      "execution_state": "not_started",
+      "completion_evidence": [],
+      "completed_at": null
     }
   ]
 }
