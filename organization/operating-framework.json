@@ -209,6 +209,11 @@
           "to": "technology",
           "artifact": "Research data requirements, source-handling constraints and reproducible tooling needs",
           "trigger": "Before introducing or changing research tooling"
+        },
+        {
+          "to": "tisrd",
+          "artifact": "Source terms, jurisdiction, licensing and market-evidence brief with permitted-use classification",
+          "trigger": "Before qualifying a strategy source or when source terms materially change"
         }
       ],
       "acceptance_criteria": [
@@ -388,6 +393,11 @@
           "to": "executive",
           "artifact": "Paper results, risks and explicit approval request",
           "trigger": "Weekly and before launch gate"
+        },
+        {
+          "to": "tisrd",
+          "artifact": "Strategy-replication research request, specialist constraints and eligible paper-evaluation results",
+          "trigger": "Before strategy adoption or when a new replication candidate is reviewed"
         }
       ],
       "acceptance_criteria": [
@@ -497,6 +507,65 @@
       ],
       "owner_assignment": "Deferred; owner to confirm future reactivation",
       "approval_boundary": "Preservation and planning only; no spending or launch."
+    },
+    {
+      "id": "tisrd",
+      "purpose": "Qualify permitted trader/strategy intelligence sources and independently evaluate research-only strategy replications for the Financial Group.",
+      "responsibilities": [
+        "Maintain a source-permission register covering jurisdiction, platform terms, API/data licence, retention, automation, profiling, copy-trading rights, fees and approval status.",
+        "Use only expressly permitted APIs, licensed data, user-authorized sources or opt-in sources; mark prohibited or unclear sources EXCLUDED, REVIEW_REQUIRED or MANUAL REVIEW.",
+        "Normalize permitted observations with source identity, acquisition method, timestamp, jurisdiction, provenance, freshness and retention limits.",
+        "Evaluate strategy hypotheses in isolated paper portfolios with fees, spread, slippage, liquidity, failed/partial fills, drawdown and regime coverage.",
+        "Challenge survivorship, selection, look-ahead, identity, concentration and manipulation risks without treating public visibility as permission.",
+        "Publish research candidates and evidence to the relevant PolyBot specialist; never publish executable orders or override specialist/risk controls."
+      ],
+      "deliverables": [
+        "Source-permission and jurisdiction register with checked dates and official terms.",
+        "Strategy methodology cards with evidence, invalidation, costs, halal-review flags and explicit no-trade conditions.",
+        "Reproducible paper-replication reports with benchmarks, drawdown, costs, sample size and limitations.",
+        "Research-candidate handoff to Crypto/PolyBot with provenance and REVIEW_REQUIRED states where evidence is incomplete."
+      ],
+      "cadence": {
+        "weekly": "Review source-permission changes, eligible research candidates, paper results and unresolved blockers.",
+        "event_driven": "Pause a source immediately when terms, eligibility, privacy, security or data-rights status becomes unclear or adverse.",
+        "before_promotion": "Require independent Risk review and reproducible out-of-sample paper evidence before recommending any strategy progression."
+      },
+      "handoffs": [
+        {
+          "to": "executive",
+          "artifact": "Source eligibility summary, strategy research outcomes, blockers and owner decisions required",
+          "trigger": "Weekly or material eligibility/risk change"
+        },
+        {
+          "to": "technology",
+          "artifact": "Read-only data contract, provenance requirements, retention limits and reproducible test specification",
+          "trigger": "Before any approved tooling or connector design"
+        },
+        {
+          "to": "research",
+          "artifact": "Questions requiring official source, jurisdiction, licensing or market-evidence verification",
+          "trigger": "Before source qualification or strategy review"
+        },
+        {
+          "to": "risk",
+          "artifact": "Source-permission evidence, privacy/profiling assessment, strategy risk and paper-control challenge request",
+          "trigger": "Before a source is qualified or a strategy is promoted for further paper testing"
+        },
+        {
+          "to": "crypto",
+          "artifact": "Permission-qualified strategy research candidate, methodology, source provenance, paper results and limitations",
+          "trigger": "Before specialist review; never an executable order"
+        }
+      ],
+      "acceptance_criteria": [
+        "Every source has a documented permission state, jurisdiction state, data rights, retention rule, and checked date or is excluded/review-required.",
+        "No platform UI, public leaderboard or public wallet address is treated as permission for automated collection, individual profiling, monitoring or copying.",
+        "Every strategy has reproducible point-in-time paper evaluation, costs, benchmarks, sample size, drawdown and bias controls before any promotion recommendation.",
+        "Missing, stale, conflicting or unauthorized data fails closed.",
+        "No live orders, wallet signing, deposits, withdrawals, paid services or external applications occur without separate explicit owner approval and all applicable reviews."
+      ],
+      "owner_assignment": "Owner to confirm accountable TISRD lead and independent review route",
+      "approval_boundary": "Read-only research and paper replication only. No prohibited scraping, profiling, unauthorized monitoring/copying, wallet access, live execution, paid data or external applications without separate approval."
     }
   ]
 }
