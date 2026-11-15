@@ -89,7 +89,8 @@
         "ai-revenue",
         "finance",
         "risk",
-        "crypto"
+        "crypto",
+        "tisrd"
       ],
       "notes": "Sourced intelligence with freshness, uncertainty and evidence recorded."
     },
@@ -232,6 +233,36 @@
         "ai-revenue"
       ],
       "notes": "Future creative/media studio; no investment until the wider organisation can fund it sustainably."
+    },
+    {
+      "division_id": "tisrd",
+      "depends_on": [
+        {
+          "division_id": "executive",
+          "type": "required",
+          "capability": "Priorities, owner approval routing and division oversight"
+        },
+        {
+          "division_id": "technology",
+          "type": "supporting",
+          "capability": "Secure read-only data handling, reproducible tooling and paper-ledger infrastructure"
+        },
+        {
+          "division_id": "research",
+          "type": "supporting",
+          "capability": "Source terms, jurisdiction, licensing and independent market evidence"
+        },
+        {
+          "division_id": "risk",
+          "type": "supporting",
+          "capability": "Independent challenge of source permissions, privacy, strategy risk and paper controls"
+        }
+      ],
+      "provides_to": [
+        "crypto",
+        "executive"
+      ],
+      "notes": "Separate Financial Group division. Produces permission-qualified research candidates and paper-replication evidence only; it cannot authorize trades or bypass specialist and risk controls."
     }
   ]
 }
