@@ -458,6 +458,32 @@
       "execution_state": "not_started",
       "completion_evidence": [],
       "completed_at": null
+    },
+    {
+      "id": "TISRD-001",
+      "division_id": "tisrd",
+      "title": "Establish source-permission and strategy qualification register",
+      "objective": "Record official source terms, Ontario eligibility, licensing, permitted automation, profiling/copying restrictions, retention, costs and review status before any connector or strategy replication work.",
+      "priority": "high",
+      "depends_on": [
+        "RES-002",
+        "RISK-001"
+      ],
+      "required_evidence": [
+        "Source-permission register with official URLs and checked dates",
+        "Jurisdiction, retention and permitted-use classification for each candidate source"
+      ],
+      "acceptance_criteria": [
+        "Every candidate source is marked eligible, information-only, review-required, excluded or blocked with supporting evidence.",
+        "No public leaderboard, wallet address or UI visibility is treated as permission for automated collection, individual profiling or copy trading.",
+        "No connector, account application, paid feed, wallet access or external action is initiated by this task."
+      ],
+      "approval_gate": "Research and documentation only; platform applications, external contact, account creation, paid data and connector activation require separate explicit owner approval.",
+      "owner_assignment": "unassigned_pending_owner_confirmation",
+      "status": "proposed",
+      "execution_state": "not_started",
+      "completion_evidence": [],
+      "completed_at": null
     }
   ]
 }
