@@ -14,10 +14,10 @@ class OperatingFrameworkTests(unittest.TestCase):
         cls.registry = json.loads((root / "division-registry.json").read_text(encoding="utf-8"))
         cls.framework = json.loads((root / "operating-framework.json").read_text(encoding="utf-8"))
 
-    def test_framework_covers_all_nine_divisions(self):
+    def test_framework_covers_all_ten_divisions(self):
         report = build_report(self.registry, self.framework)
         self.assertTrue(report["validated"], report["errors"])
-        self.assertEqual(report["division_count"], 9)
+        self.assertEqual(report["division_count"], 10)
 
     def test_every_division_has_measurable_acceptance_criteria(self):
         report = build_report(self.registry, self.framework)
