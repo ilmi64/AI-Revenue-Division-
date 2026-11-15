@@ -14,8 +14,8 @@ class DivisionIntegrationTests(unittest.TestCase):
     def test_every_dependency_has_provider_link_and_triggered_handoff(self):
         report=build_report(self.registry,self.dependencies,self.framework)
         self.assertTrue(report["validated"],report["errors"])
-        self.assertEqual(report["dependency_edge_count"],32)
-        self.assertEqual(report["connected_edge_count"],32)
+        self.assertEqual(report["dependency_edge_count"],37)
+        self.assertEqual(report["connected_edge_count"],37)
         self.assertEqual(report["disconnected_edge_count"],0)
 
     def test_tisrd_is_a_separate_research_only_division_with_connected_handoffs(self):
@@ -27,6 +27,16 @@ class DivisionIntegrationTests(unittest.TestCase):
         tisrd_edges = [edge for edge in build_report(self.registry, self.dependencies, self.framework)["edges"] if edge["consumer_division"] == "tisrd"]
         self.assertEqual(len(tisrd_edges), 4)
         self.assertTrue(all(edge["connected"] for edge in tisrd_edges))
+
+
+    def test_business_commercial_has_separate_division_and_connected_handoffs(self):
+        division = next(x for x in self.registry["divisions"] if x["id"] == "business-commercial")
+        assessment = next(x for x in json.loads((Path(__file__).resolve().parents[1] / "readiness-register.json").read_text())["division_assessments"] if x["division_id"] == "business-commercial")
+        self.assertEqual(division["status"], "building")
+        self.assertEqual(assessment["verified_status"], "building")
+        edges = [edge for edge in build_report(self.registry, self.dependencies, self.framework)["edges"] if edge["consumer_division"] == "business-commercial"]
+        self.assertEqual(len(edges), 5)
+        self.assertTrue(all(edge["connected"] for edge in edges))
 
     def test_missing_provider_link_is_reported(self):
         dependencies=json.loads(json.dumps(self.dependencies))
