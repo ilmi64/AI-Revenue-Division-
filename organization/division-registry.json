@@ -3,7 +3,7 @@
   "organisation": {
     "name": "Organisation Control Centre",
     "mission": "Build a coordinated, resilient organisation with diversified, sustainable revenue and disciplined risk controls.",
-    "strategic_priority": "Establish the organisation and develop AI Revenue as an early funding engine in parallel.",
+    "strategic_priority": "Crypto paper-research reliability and organisation-wide launch readiness first; establish the supporting divisions and maintain AI Revenue as a separate zero-upfront-cost second priority. No live operation or paid commitment without the required evidence and explicit owner approval.",
     "operating_budget_default": "CAD 0 without explicit owner approval",
     "owner_approval_required_for": [
       "spending or paid subscriptions",
@@ -127,7 +127,8 @@
         "crypto",
         "executive"
       ],
-      "approval_boundary": "Read-only research and paper replication only; no prohibited scraping, individual profiling, unauthorized monitoring/copying, wallet access, live orders, paid data, or external platform applications without separate explicit approval."
+      "approval_boundary": "Read-only research and paper replication only; no prohibited scraping, individual profiling, unauthorized monitoring/copying, wallet access, live orders, paid data, or external platform applications without separate explicit approval.",
+      "group": "Financial Group"
     }
   ]
 }
