@@ -108,7 +108,7 @@ the pull-request workflow runs the validator and regression tests.
 
 ## Division work queue
 
-The proposed organisation-wide queue is in `work-queue.json`. It seeds measurable work across all nine divisions with task IDs, priority, dependencies, required evidence, acceptance criteria, ownership state, execution state and approval gates.
+The proposed organisation-wide queue is in `work-queue.json`. It seeds measurable work across all eleven divisions with task IDs, priority, dependencies, required evidence, acceptance criteria, ownership state, execution state and approval gates.
 
 Validate it with:
 
