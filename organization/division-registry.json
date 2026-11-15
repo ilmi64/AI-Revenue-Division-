@@ -129,6 +129,19 @@
       ],
       "approval_boundary": "Read-only research and paper replication only; no prohibited scraping, individual profiling, unauthorized monitoring/copying, wallet access, live orders, paid data, or external platform applications without separate explicit approval.",
       "group": "Financial Group"
+    },
+    {
+      "id": "business-commercial",
+      "name": "Business & Commercial",
+      "status": "building",
+      "mandate": "Develop commercial strategy, validate offers and business models, prepare customer-delivery processes, and support approved revenue projects without making external commitments.",
+      "supports": [
+        "ai-revenue",
+        "ecommerce",
+        "animora",
+        "executive"
+      ],
+      "approval_boundary": "Research, pricing models, proposal drafts and delivery preparation only; no client contact, applications, contracts, public claims, purchases, payments or commitments without explicit owner approval."
     }
   ]
 }
