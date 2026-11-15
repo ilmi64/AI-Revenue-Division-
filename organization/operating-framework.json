@@ -565,7 +565,8 @@
         "No live orders, wallet signing, deposits, withdrawals, paid services or external applications occur without separate explicit owner approval and all applicable reviews."
       ],
       "owner_assignment": "Owner to confirm accountable TISRD lead and independent review route",
-      "approval_boundary": "Read-only research and paper replication only. No prohibited scraping, profiling, unauthorized monitoring/copying, wallet access, live execution, paid data or external applications without separate approval."
+      "approval_boundary": "Read-only research and paper replication only. No prohibited scraping, profiling, unauthorized monitoring/copying, wallet access, live execution, paid data or external applications without separate approval.",
+      "group": "Financial Group"
     }
   ]
 }
