@@ -15,7 +15,7 @@ class ExecutionLogTests(unittest.TestCase):
     def test_empty_log_is_valid_and_reports_no_activity(self):
         r = build_report(self.registry, self.queue, {"events":[]})
         self.assertTrue(r["validated"], r["errors"]); self.assertEqual(r["event_count"], 0)
-        self.assertEqual(len(r["divisions"]), 10)
+        self.assertEqual(len(r["divisions"]), 11)
     def test_started_requires_assigned_owner(self):
         r = build_report(self.registry, self.queue, {"events":[self.event("started")]})
         self.assertFalse(r["validated"])
