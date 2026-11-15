@@ -17,14 +17,14 @@ class WorkQueueTests(unittest.TestCase):
     def copy_queue(self):
         return json.loads(json.dumps(self.queue))
 
-    def test_queue_covers_all_nine_divisions_and_is_unassigned(self):
+    def test_queue_covers_all_ten_divisions_and_is_unassigned(self):
         report = build_report(self.registry, self.copy_queue())
         self.assertTrue(report["validated"], report["errors"])
-        self.assertEqual(len(report["divisions"]), 9)
-        self.assertEqual(report["task_count"], 18)
+        self.assertEqual(len(report["divisions"]), 10)
+        self.assertEqual(report["task_count"], 19)
         self.assertEqual(report["completed_count"], 0)
         self.assertEqual(report["in_progress_count"], 0)
-        self.assertEqual(report["unassigned_count"], 18)
+        self.assertEqual(report["unassigned_count"], 19)
 
     def test_incomplete_dependencies_are_reported_as_blocked(self):
         report = build_report(self.registry, self.copy_queue())
