@@ -27,7 +27,7 @@ class OrganisationDashboardTests(unittest.TestCase):
 
     def test_dashboard_covers_all_divisions_and_never_promotes_readiness(self):
         report = self.build()
-        self.assertEqual(report["organisation"]["division_count"], 9)
+        self.assertEqual(report["organisation"]["division_count"], 10)
         self.assertEqual(report["organisation"]["verified_standby_or_operational"], 0)
         self.assertTrue(all(x["verified_status"] not in {"standby", "operational"} for x in report["division_scorecard"]))
 
@@ -201,7 +201,7 @@ class OrganisationDashboardTests(unittest.TestCase):
         self.assertEqual(report["risk_escalations"]["immediate_review_count"], 1)
         self.assertEqual(escalation["route"], ["risk", "executive", "technology"])
         self.assertEqual(escalation["broadcast_scope"], "all_divisions")
-        self.assertEqual(len(escalation["broadcast_divisions"]), 9)
+        self.assertEqual(len(escalation["broadcast_divisions"]), 10)
         self.assertEqual(escalation["linked_tasks"][0]["derived_execution_state"], "in_progress")
         self.assertEqual(escalation["pending_owner_decision_ids"], ["DEC-PENDING-001"])
         self.assertEqual(escalation["description"], "Test-only critical risk")
@@ -269,7 +269,7 @@ class OrganisationDashboardTests(unittest.TestCase):
         report = self.build()
         self.assertEqual(report["ai_revenue"]["finance_cad"]["net_cash_received_verified_by_ledger_status"], "0.00")
         self.assertTrue(report["division_operating_framework"]["validated"])
-        self.assertEqual(report["division_operating_framework"]["division_count"], 9)
+        self.assertEqual(report["division_operating_framework"]["division_count"], 10)
         self.assertIn("risk_register", report)
         self.assertIn("outstanding_decisions", report)
         self.assertTrue(report["division_work_queue"]["validated"])
