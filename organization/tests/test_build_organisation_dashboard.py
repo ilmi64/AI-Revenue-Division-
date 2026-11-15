@@ -271,7 +271,7 @@ class OrganisationDashboardTests(unittest.TestCase):
         report = self.build()
         self.assertEqual(report["ai_revenue"]["finance_cad"]["net_cash_received_verified_by_ledger_status"], "0.00")
         self.assertTrue(report["division_operating_framework"]["validated"])
-        self.assertEqual(report["division_operating_framework"]["division_count"], 10)
+        self.assertEqual(report["division_operating_framework"]["division_count"], 11)
         self.assertIn("risk_register", report)
         self.assertIn("outstanding_decisions", report)
         self.assertTrue(report["division_work_queue"]["validated"])
