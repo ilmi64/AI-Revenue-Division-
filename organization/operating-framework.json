@@ -567,6 +567,80 @@
       "owner_assignment": "Owner to confirm accountable TISRD lead and independent review route",
       "approval_boundary": "Read-only research and paper replication only. No prohibited scraping, profiling, unauthorized monitoring/copying, wallet access, live execution, paid data or external applications without separate approval.",
       "group": "Financial Group"
+    },
+    {
+      "id": "business-commercial",
+      "purpose": "Build commercially sound offers and operating processes for approved revenue projects while keeping external commitments under owner control.",
+      "responsibilities": [
+        "Evaluate customer problems, demand, competition, positioning and practical delivery constraints using sourced evidence.",
+        "Prepare offer briefs, pricing hypotheses, unit-economics inputs, proposal drafts and service-delivery checklists.",
+        "Coordinate with AI Revenue, Ecommerce and Animora on commercial feasibility without overriding their project priorities.",
+        "Review contract, intellectual-property, privacy, refund, fulfilment and customer-support risks with Risk and Research.",
+        "Separate leads, proposals, accepted work, invoiced amounts, earned revenue and cash received; do not invent sales or pipeline activity.",
+        "Keep all client contact, applications, contract acceptance, public claims and payments behind explicit owner approval."
+      ],
+      "deliverables": [
+        "Evidence-backed commercial opportunity and customer-problem briefs.",
+        "Draft offer and proposal packs with scope, exclusions, pricing assumptions and delivery requirements.",
+        "Unit-economics and capacity inputs for Finance review.",
+        "Customer-delivery, support, refund and escalation procedures for owner review."
+      ],
+      "cadence": {
+        "weekly": "Review approved commercial research, draft offers, delivery blockers and owner decisions; no outreach is implied.",
+        "per_offer": "Validate demand, price, costs, legal terms, delivery capacity and risk before requesting approval.",
+        "before_commitment": "Obtain explicit owner approval before external contact, proposal submission, contract, publication or payment."
+      },
+      "handoffs": [
+        {
+          "to": "executive",
+          "artifact": "Commercial options, resource needs, material risks and explicit owner decisions requested",
+          "trigger": "At prioritisation or before external commitment"
+        },
+        {
+          "to": "research",
+          "artifact": "Customer, competitor, demand and platform evidence questions",
+          "trigger": "Before offer validation or material market change"
+        },
+        {
+          "to": "technology",
+          "artifact": "Delivery workflow, tooling and integration requirements with acceptance criteria",
+          "trigger": "Before building a commercial delivery process"
+        },
+        {
+          "to": "finance",
+          "artifact": "Pricing assumptions, cost model, payment terms and unit-economics request",
+          "trigger": "Before an offer is recommended"
+        },
+        {
+          "to": "risk",
+          "artifact": "Contract, privacy, IP, fraud, consumer and delivery-risk review request",
+          "trigger": "Before any external commitment"
+        },
+        {
+          "to": "ai-revenue",
+          "artifact": "Commercial validation, offer packaging and delivery-readiness recommendations",
+          "trigger": "When an AI service or revenue opportunity is shortlisted"
+        },
+        {
+          "to": "ecommerce",
+          "artifact": "Commercial positioning, margin and customer-fulfilment recommendations",
+          "trigger": "Only when ecommerce is reactivated"
+        },
+        {
+          "to": "animora",
+          "artifact": "Audience, monetisation and future-studio commercial research",
+          "trigger": "Only after explicit reactivation and sustainable funding"
+        }
+      ],
+      "acceptance_criteria": [
+        "Every commercial recommendation has a defined customer problem, evidence source, checked date and uncertainty label.",
+        "Pricing includes known fees, delivery costs, capacity and downside assumptions; unknowns remain explicit.",
+        "Drafts distinguish hypotheses and leads from accepted work, invoices, earned revenue and cash received.",
+        "No outreach, application, proposal submission, contract, public claim, purchase or payment occurs without explicit owner approval.",
+        "Risk and Finance reviews are recorded before any external commitment is proposed."
+      ],
+      "owner_assignment": "Owner to confirm accountable Business & Commercial lead",
+      "approval_boundary": "Research and internal preparation only; no external client contact, applications, contracts, public claims, purchases, payments or commitments without explicit owner approval."
     }
   ]
 }
