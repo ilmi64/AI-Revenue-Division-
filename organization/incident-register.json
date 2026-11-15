@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "status": "baseline_empty_pending_evidence",
+  "policy": "Only real, evidence-backed incidents may be recorded. Do not invent events, owners, dates, progress or recovery outcomes. Incident status is a record, not an execution command. Critical/high incidents may trigger the independent Risk stop-only advisory route; no automatic stop, notification, rollback, closure or approval occurs.",
+  "incident_status_vocabulary": [
+    "reported",
+    "triaged",
+    "contained",
+    "recovering",
+    "monitoring",
+    "closed",
+    "unassessed"
+  ],
+  "corrective_action_status_vocabulary": [
+    "proposed",
+    "assigned",
+    "in_progress",
+    "blocked",
+    "completed",
+    "deferred_pending_owner_approval"
+  ],
+  "records": []
+}
