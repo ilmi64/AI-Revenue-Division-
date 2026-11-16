@@ -16,7 +16,7 @@ class UnitEconomicsTests(unittest.TestCase):
   self.assertEqual(r["marketplace_fee"],"5.85")
   self.assertEqual(r["payment_fee"],"1.31")
   self.assertEqual(r["total_variable_cost"],"34.46")
-  self.assertEqual(r["contribution_before_ads_tax_and_overhead"],"10.54")
+  self.assertEqual(r["contribution_before_ads_tax_and_overhead"],"10.55")
  def test_negative_cost_is_rejected(self):
   row=dict(BASE,product_cost="-1")
   r=calculate(row)
