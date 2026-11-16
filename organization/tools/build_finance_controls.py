@@ -50,6 +50,7 @@ def build_report(policy, commitments, revenue_ledger, registry):
         errors.append("Commitments must be a list")
         commitment_rows = []
     allowed_payment = set(policy.get("payment_statuses", []))
+    allowed_ledger_payment = allowed_payment | set(policy.get("cash_receipt_statuses", []))
     allowed_approval = set(policy.get("approval_statuses", []))
     allowed_halal = set(policy.get("halal_review_statuses", []))
     for index, row in enumerate(commitment_rows, start=2):
@@ -126,7 +127,7 @@ def build_report(policy, commitments, revenue_ledger, registry):
         currency = str(row.get("currency", "")).strip().upper()
         if len(currency) != 3 or not currency.isalpha():
             errors.append(f"revenue-row-{index}: currency must be a three-letter code")
-        if status not in allowed_payment:
+        if status not in allowed_ledger_payment:
             errors.append(f"revenue-row-{index}: invalid payment_status")
         if status in RECEIVED:
             proof = str(row.get("proof_reference", "")).strip()
