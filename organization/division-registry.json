@@ -3,7 +3,7 @@
   "organisation": {
     "name": "Organisation Control Centre",
     "mission": "Build a coordinated, resilient organisation with diversified, sustainable revenue and disciplined risk controls.",
-    "strategic_priority": "Crypto paper-research reliability and organisation-wide launch readiness first; establish the supporting divisions and maintain AI Revenue as a separate zero-upfront-cost second priority. No live operation or paid commitment without the required evidence and explicit owner approval.",
+    "strategic_priority": "Build all eleven divisions in parallel toward a coordinated launch window. Maintain paper-only Crypto/PolyBot and research-only market divisions until independently validated. Build, operate, earn, reinvest, own and expand; CAD 0 incremental spend by default. Animora and Ecommerce remain active workstreams, not abandoned or deferred.",
     "operating_budget_default": "CAD 0 without explicit owner approval",
     "owner_approval_required_for": [
       "spending or paid subscriptions",
@@ -64,8 +64,8 @@
     {
       "id": "finance",
       "name": "Finance and Treasury",
-      "status": "planned",
-      "mandate": "Maintain financial models, cash-flow visibility, budget controls, reserves planning, and financing research.",
+      "status": "building",
+      "mandate": "Build organisation-wide financial controls, cash-flow visibility, cost and revenue accounting, reserves planning and halal-aware financing research; no transactions or paid commitments without approval.",
       "supports": [
         "all"
       ],
@@ -98,8 +98,8 @@
     {
       "id": "ecommerce",
       "name": "Ecommerce",
-      "status": "deferred",
-      "mandate": "Maintain existing work and later develop ecommerce automation and commercial operations.",
+      "status": "building",
+      "mandate": "Actively rebuild and validate a commercially sound ecommerce operation, including brand, product economics, storefront and automation research; no listings, purchases or publishing without approval.",
       "supports": [
         "ai-revenue",
         "technology"
@@ -109,8 +109,8 @@
     {
       "id": "animora",
       "name": "Animora and Future Creative Studio",
-      "status": "deferred",
-      "mandate": "Preserve the long-term ambition to grow Animora into a broader independent media and creative production studio.",
+      "status": "building",
+      "mandate": "Actively develop Animora as an anime discovery and creative-media platform, preserving original characters and roadmap while respecting the no-paid-credit constraint; no publishing or paid tool use without approval.",
       "supports": [
         "ai-revenue",
         "technology",
