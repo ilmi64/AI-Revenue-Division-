@@ -31,7 +31,14 @@ def build_report(policy, commitments, revenue_ledger, registry):
     if policy.get("paid_services_enabled") is not False or policy.get("paid_apis_enabled") is not False or policy.get("paid_trials_enabled") is not False:
         errors.append("Paid services, APIs and trials must remain disabled under the current zero-spend mandate.")
     ceiling = _amount(policy.get("approved_spend_ceiling_cad", 0), "approved_spend_ceiling_cad", errors, warnings)
-    division_ids = {d.get("id") for d in registry.get("divisions", []) if isinstance(d, dict)}
+    if not isinstance(registry, dict):
+        errors.append("Division registry must be an object")
+        registry = {}
+    division_rows = registry.get("divisions", [])
+    if not isinstance(division_rows, list):
+        errors.append("Division registry divisions must be a list")
+        division_rows = []
+    division_ids = {d.get("id") for d in division_rows if isinstance(d, dict)}
     commitment_ids = set()
     committed_total = Decimal("0")
     approved_total = Decimal("0")
@@ -116,11 +123,20 @@ def build_report(policy, commitments, revenue_ledger, registry):
             continue
         status = str(row.get("payment_status", "")).strip().lower()
         net = _amount(row.get("net_received_cad"), f"revenue-row-{index}.net_received_cad", errors, warnings)
+        currency = str(row.get("currency", "")).strip().upper()
+        if len(currency) != 3 or not currency.isalpha():
+            errors.append(f"revenue-row-{index}: currency must be a three-letter code")
+        if status not in allowed_payment:
+            errors.append(f"revenue-row-{index}: invalid payment_status")
         if status in RECEIVED:
-            if net > 0 and not str(row.get("proof_reference", "")).strip():
-                warnings.append(f"revenue-row-{index}: received status has no proof_reference")
-            received_cash_cad += net
-            received_rows += 1
+            proof = str(row.get("proof_reference", "")).strip()
+            if net > 0 and not proof:
+                errors.append(f"revenue-row-{index}: received cash requires proof_reference; unverified amount excluded")
+            elif currency != "CAD":
+                errors.append(f"revenue-row-{index}: non-CAD cash receipt requires a documented CAD conversion record")
+            elif net > 0:
+                received_cash_cad += net
+                received_rows += 1
     return {
         "schema_version": 1,
         "status": "validated" if not errors else "invalid",
