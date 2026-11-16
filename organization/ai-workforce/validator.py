@@ -5,10 +5,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 DIVISIONS = {
-    "Executive Management", "AI Revenue", "Technology & Infrastructure",
-    "Research & Intelligence", "Finance & Treasury", "Risk, Security & Recovery",
-    "Crypto & PolyBot", "Ecommerce", "Animora / Future Creative Studio",
-    "TISRD", "Business & Commercial",
+    "Executive Management", "AI Revenue", "Technology and Infrastructure",
+    "Research and Intelligence", "Finance and Treasury", "Risk, Security and Recovery",
+    "Crypto and PolyBot", "Ecommerce", "Animora and Future Creative Studio",
+    "Trader Intelligence & Strategy Replication", "Business & Commercial",
 }
 STATUSES = {"proposed", "ready", "in_progress", "blocked", "review", "complete"}
 RISKS = {"low", "moderate", "high", "critical"}
