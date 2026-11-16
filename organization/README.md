@@ -193,3 +193,7 @@ The `organization/ai-workforce/` package defines the model registry, bounded age
 
 ## Active parallel build direction
 All eleven divisions are active programme workstreams. Finance, Ecommerce and Animora are recorded as `building`, not deferred. Their verified readiness remains `building`; this is not a standby or operational claim. The work queue remains proposed/unassigned until owners and execution evidence are recorded.
+
+
+## Controlled task packet preparation
+The OCC dashboard now derives read-only task packets from the proposed work queue and canonical division-to-role map. Packets expose dependencies, input evidence, expected outputs, approval gates and acknowledgement states. A role template is not a staffed owner; packets remain undispatched and non-executable until ownership and required acknowledgements are genuinely recorded. Invalid queue records or role mappings fail closed.
