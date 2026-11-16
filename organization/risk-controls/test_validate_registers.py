@@ -55,6 +55,21 @@ class OCCRegisterTests(unittest.TestCase):
         data["evidence"]["api_secret"] = "never-store-this"
         self.assertTrue(any("prohibited secret field" in e for e in self.validate(data)))
 
+    def test_unknown_risk_decision_reference_fails(self):
+        data = self.changed("risks")
+        data["risks"]["records"][0]["related_decision_ids"] = ["MISSING"]
+        self.assertTrue(any("invalid decision reference" in e for e in self.validate(data)))
+
+    def test_malformed_registry_root_does_not_crash(self):
+        data = self.changed("registry")
+        data["registry"] = "malformed"
+        self.assertTrue(self.validate(data))
+
+    def test_malformed_incident_root_does_not_crash(self):
+        data = self.changed("incidents")
+        data["incidents"] = "malformed"
+        self.assertTrue(self.validate(data))
+
     def test_invalid_incident_lifecycle_still_fails(self):
         data = self.changed("incidents")
         data["incidents"]["records"] = [{"id": "INC-1", "severity": "critical"}]
