@@ -59,6 +59,20 @@ class FinanceControlsTests(unittest.TestCase):
   ledger=[{"payment_status":"pending","net_received_cad":"50"},{"payment_status":"settled","net_received_cad":"12","proof_reference":"receipt-1"}]
   r=self.report(ledger=ledger)
   self.assertEqual(r["revenue"]["cash_received_cad_by_ledger_status"],"12.00")
+ def test_received_revenue_without_proof_is_excluded_and_invalid(self):
+  ledger=[{"payment_status":"received","currency":"CAD","net_received_cad":"75"}]
+  r=self.report(ledger=ledger)
+  self.assertEqual(r["revenue"]["cash_received_cad_by_ledger_status"],"0.00")
+  self.assertTrue(any("requires proof_reference" in e for e in r["errors"]))
+ def test_non_cad_received_revenue_is_not_silently_converted(self):
+  ledger=[{"payment_status":"settled","currency":"USD","net_received_cad":"75","proof_reference":"receipt-usd"}]
+  r=self.report(ledger=ledger)
+  self.assertEqual(r["revenue"]["cash_received_cad_by_ledger_status"],"0.00")
+  self.assertTrue(any("non-CAD cash receipt" in e for e in r["errors"]))
+ def test_malformed_division_registry_fails_closed_without_crashing(self):
+  r=build_report(POLICY, [], [], {"divisions":"invalid"})
+  self.assertEqual(r["status"],"invalid")
+  self.assertTrue(any("divisions must be a list" in e for e in r["errors"]))
  def test_duplicate_commitment_id_is_rejected(self):
   row={"id":"DUP","division_id":"finance","currency":"CAD","estimated_amount":"0","approved_amount":"0","committed_amount":"0","paid_amount":"0","payment_status":"not_due","approval_status":"not_requested"}
   r=self.report([row,row])
