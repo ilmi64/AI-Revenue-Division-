@@ -199,14 +199,18 @@
       "evidence": [
         "Research and source-qualification mandates are documented in the Control Centre framework and TISRD charter PR #39.",
         "Official source reviews have identified explicit data-rights and Ontario constraints for Pump.fun, Polymarket, Kalshi and other candidate sources.",
-        "Draft market-data source registry covers Crypto/Solana, Forex, indices and XAUUSD candidates, with canonical quote/bar provenance contract, acceptance checklist, test plan and fail-closed registry validator."
+        "Draft market-data source registry covers Crypto/Solana, Forex, indices and XAUUSD candidates, with canonical quote/bar provenance contract, acceptance checklist, test plan and fail-closed registry validator.",
+        "Official-source review dated 2026-11-16 documents Gold/XAUUSD, Forex and US500 reference and broker-feed candidates, including free-tier delay/quotas, attribution/redistribution limits, account/API prerequisites and Canadian dealer-entity checks.",
+        "Frankfurter is classified strictly as daily reference data; GoldPrice.dev as 15-minute delayed free/keyless XAU spot; Standard Bullion as attributed indicative dealer pricing; XAUS provenance independence remains unproven.",
+        "FOREX.com Canada and OANDA Canada are documented as potential broker-specific feed candidates, but account/API eligibility, data rights, contract metadata and free read-only scope remain pending. No accounts or credentials connected."
       ],
       "open_gaps": [
         "Candidate registry is research-only; current provider terms, Canadian access, data rights, quotas, retention and automated-use permissions remain unverified.",
         "No source is approved for production or live execution; no credentials, accounts or paid services are connected.",
         "No provider pair has passed independent-operator failover, stale-data, sequence-gap, outage or clock-skew tests.",
         "Market-data validator and regression tests are included but have not been executed.",
-        "No continuously refreshed source-review service or accountable named source owner is established."
+        "No continuously refreshed source-review service or accountable named source owner is established.",
+        "No broker-specific feed has completed API-license, account eligibility, instrument contract, data-rights and independent Risk/Technology review; current sources remain research-only."
       ]
     },
     {
