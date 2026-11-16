@@ -238,8 +238,22 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
     revenue = build_snapshot(opportunities, ledger)
     operating = build_operating_framework_report(registry, operating_framework)
     work_queue_report = build_work_queue_report(registry, work_queue or {"tasks": []})
-    task_dispatch_report = build_dispatch_report(registry, work_queue or {"tasks": []}, ai_agent_roles or {}, work_queue_report)
-    finance_controls_report = build_finance_controls_report(finance_policy or {}, commitment_register or [], ledger, registry)
+    task_dispatch_report = (
+        build_dispatch_report(registry, work_queue or {"tasks": []}, ai_agent_roles, work_queue_report)
+        if ai_agent_roles is not None else
+        {"status": "not_configured", "task_count": 0, "prepared_count": 0,
+         "blocked_count": 0, "unassigned_count": 0, "dispatch_count": 0,
+         "execution_authority": "none", "tasks": [], "errors": [],
+         "policy": "No role registry supplied; no dispatch is possible."}
+    )
+    finance_controls_report = (
+        build_finance_controls_report(finance_policy, commitment_register or [], ledger, registry)
+        if finance_policy is not None else
+        {"status": "not_configured", "commitments": {}, "revenue": {},
+         "halal_screening": {"policy_status": "not_assessed", "flagged_sensitive_activity_count": 0, "flags": []},
+         "warnings": ["Finance policy not supplied to this dashboard invocation."],
+         "errors": [], "authority": "read_only_accounting_and_control_reporting_only"}
+    )
     execution_report = build_execution_log_report(registry, work_queue or {"tasks": []}, execution_log or {"events": []})
     integration_report = build_division_integration_report(registry, dependency_map, operating_framework)
     governance_errors, governance_summary = validate_governance_links(work_queue, risk_register, decision_register, registry)
