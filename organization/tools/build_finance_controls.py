@@ -97,7 +97,13 @@ def build_report(policy, commitments, revenue_ledger, registry):
             paid_total += paid
             currency_totals[currency] += committed
         else:
+            if approved > 0 or committed > 0 or paid > 0:
+                errors.append(f"{record_id}: non-CAD commitments require documented FX conversion before spend-limit validation")
             warnings.append(f"{record_id}: {currency} commitment excluded from CAD totals; no FX conversion is assumed")
+    if approved_total > ceiling:
+        errors.append("Aggregate approved CAD amount exceeds the approved spend ceiling")
+    if committed_total > ceiling:
+        errors.append("Aggregate committed CAD amount exceeds the approved spend ceiling")
     ledger_rows = revenue_ledger if isinstance(revenue_ledger, list) else None
     if ledger_rows is None:
         errors.append("Revenue ledger must be a list")
