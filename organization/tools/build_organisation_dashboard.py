@@ -21,6 +21,10 @@ from validate_security_posture import build_report as build_security_posture_rep
 from build_task_dispatch import build_dispatch_report
 from build_finance_controls import build_report as build_finance_controls_report
 
+RISK_CONTROLS = Path(__file__).resolve().parent.parent / "risk-controls"
+sys.path.insert(0, str(RISK_CONTROLS))
+from validate_registers import validate_evidence_register
+
 
 def load_json(path):
     with path.open("r", encoding="utf-8") as handle:
@@ -230,7 +234,7 @@ def build_ai_workforce_report(model_registry=None, agent_roles=None, division_re
         "policy":"Model outputs are drafts/reviews only. No model can approve spending, publish, contact third parties, trade, sign, merge or deploy.","errors":errors}
 
 
-def build_dashboard(registry, readiness, dependency_map, operating_framework, opportunities, ledger, work_queue=None, execution_log=None, risk_register=None, decision_register=None, incident_register=None, recovery_plan=None, security_report=None, ai_model_registry=None, ai_agent_roles=None, finance_policy=None, commitment_register=None):
+def build_dashboard(registry, readiness, dependency_map, operating_framework, opportunities, ledger, work_queue=None, execution_log=None, risk_register=None, decision_register=None, incident_register=None, recovery_plan=None, security_report=None, ai_model_registry=None, ai_agent_roles=None, finance_policy=None, commitment_register=None, evidence_register=None):
     errors, warnings = validate(registry, readiness)
     security_report = security_report or build_security_posture_report(Path.cwd())
     ai_workforce_report = build_ai_workforce_report(ai_model_registry, ai_agent_roles, registry)
@@ -266,6 +270,18 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
         decision_register or {"records": []}, work_queue or {"tasks": []}, registry
     )
     incident_records = incident_source.get("records", []) if isinstance(incident_source, dict) and isinstance(incident_source.get("records", []), list) else []
+    evidence_source = {"schema_version": "1.0.0", "records": []} if evidence_register is None else evidence_register
+    evidence_errors = validate_evidence_register(evidence_source, incident_source, registry)
+    evidence_records = evidence_source.get("records", []) if isinstance(evidence_source, dict) and isinstance(evidence_source.get("records", []), list) else []
+    evidence_report = {
+        "policy": "Evidence metadata only. References are not independently authenticated merely by appearing here; preserve original evidence and never store secrets.",
+        "record_count": len(evidence_records),
+        "accepted_count": sum(1 for row in evidence_records if isinstance(row, dict) and row.get("review_status") == "accepted"),
+        "unreviewed_count": sum(1 for row in evidence_records if isinstance(row, dict) and row.get("review_status") == "unreviewed"),
+        "integrity_failed_count": sum(1 for row in evidence_records if isinstance(row, dict) and row.get("integrity_status") == "integrity_failed"),
+        "records": evidence_records,
+        "errors": evidence_errors
+    }
     recovery_source = recovery_plan if isinstance(recovery_plan, dict) else {"procedures": []}
     recovery_procedures = recovery_source.get("procedures", []) if isinstance(recovery_source.get("procedures", []), list) else []
     technical_recovery = {
@@ -382,6 +398,7 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
         "ai_revenue": revenue,
         "risk_escalations": risk_escalations,
         "incident_response": incident_response,
+        "evidence_register": evidence_report,
         "technical_recovery": technical_recovery,
         "security_posture": security_report,
         "risk_register": {
@@ -408,6 +425,7 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
             "cross_division_integration_errors": integration_report.get("errors", []),
             "governance_link_errors": governance_errors,
             "incident_register_errors": incident_errors,
+            "evidence_register_errors": evidence_errors,
             "ai_workforce_errors": ai_workforce_report.get("errors", []),
             "revenue_warnings": revenue["data_quality"]["warnings"],
             "note": "Absence of a record is not proof that work or funds do not exist outside these source files."
@@ -426,6 +444,7 @@ def main():
     parser.add_argument("--risk-register", type=Path, default=Path("organization/risk-register.json"))
     parser.add_argument("--decision-register", type=Path, default=Path("organization/decision-register.json"))
     parser.add_argument("--incident-register", type=Path, default=Path("organization/incident-register.json"))
+    parser.add_argument("--evidence-register", type=Path, default=Path("organization/risk-controls/evidence-register.json"))
     parser.add_argument("--recovery-plan", type=Path, default=Path("organization/recovery-plan.json"))
     parser.add_argument("--opportunities", type=Path, default=Path("intelligence/opportunity-tracker.csv"))
     parser.add_argument("--ledger", type=Path, default=Path("finance/revenue-ledger.csv"))
@@ -440,10 +459,11 @@ def main():
         load_json(args.work_queue), load_json(args.execution_log),
         load_json(args.risk_register), load_json(args.decision_register), load_json(args.incident_register), load_json(args.recovery_plan),
         ai_model_registry=load_json(args.ai_model_registry), ai_agent_roles=load_json(args.ai_agent_roles),
+        evidence_register=load_json(args.evidence_register),
         finance_policy=load_json(args.finance_policy), commitment_register=read_csv(args.commitments)
     )
     print(json.dumps(report, indent=2, ensure_ascii=False))
-    return 1 if report["data_quality"]["readiness_validation_errors"] or report["data_quality"]["dependency_map_errors"] or report["data_quality"]["operating_framework_errors"] or report["data_quality"]["work_queue_errors"] or report["data_quality"]["task_dispatch_errors"] or report["data_quality"]["finance_control_errors"] or report["data_quality"]["execution_log_errors"] or report["data_quality"]["cross_division_integration_errors"] or report["data_quality"]["governance_link_errors"] or report["data_quality"]["incident_register_errors"] or report["data_quality"]["ai_workforce_errors"] or report["security_posture"]["errors"] else 0
+    return 1 if report["data_quality"]["readiness_validation_errors"] or report["data_quality"]["dependency_map_errors"] or report["data_quality"]["operating_framework_errors"] or report["data_quality"]["work_queue_errors"] or report["data_quality"]["task_dispatch_errors"] or report["data_quality"]["finance_control_errors"] or report["data_quality"]["execution_log_errors"] or report["data_quality"]["cross_division_integration_errors"] or report["data_quality"]["governance_link_errors"] or report["data_quality"]["incident_register_errors"] or report["data_quality"]["evidence_register_errors"] or report["data_quality"]["ai_workforce_errors"] or report["security_posture"]["errors"] else 0
 
 
 if __name__ == "__main__":
