@@ -190,9 +190,48 @@ def build_risk_escalation_report(risk_register, decision_register, work_queue, e
         "records": escalations
     }
 
-def build_dashboard(registry, readiness, dependency_map, operating_framework, opportunities, ledger, work_queue=None, execution_log=None, risk_register=None, decision_register=None, incident_register=None, recovery_plan=None, security_report=None):
+def build_ai_workforce_report(model_registry=None, agent_roles=None, division_registry=None):
+    """Validate and summarize model/agent registry without granting execution authority."""
+    if model_registry is None or agent_roles is None:
+        return {"status": "not_configured", "model_count": 0, "role_count": 0, "errors": [],
+                "policy": "No AI workforce registry supplied; no agent authority is implied."}
+    errors = []
+    policy = model_registry.get("policy", {})
+    if policy.get("incremental_spend_cad") != 0:
+        errors.append("AI workforce incremental spend must remain CAD 0.")
+    if policy.get("paid_apis") is not False or policy.get("paid_trials") is not False:
+        errors.append("Paid APIs and paid trials must remain disabled.")
+    models = model_registry.get("models", [])
+    model_ids = [m.get("id") for m in models if isinstance(m, dict)]
+    if len(model_ids) != len(models) or len(model_ids) != len(set(model_ids)):
+        errors.append("Model entries must be objects with unique IDs.")
+    model_map = {m.get("id"): m for m in models if isinstance(m, dict)}
+    allowed_model_states = {"integrated_in_main_unverified_end_to_end", "evaluation_candidate", "benchmark_candidate_only", "verified"}
+    for model in models:
+        if not isinstance(model, dict) or model.get("status") not in allowed_model_states:
+            errors.append("Every model requires a recognized evidence-based status.")
+    roles = agent_roles.get("roles", [])
+    role_ids = [r.get("id") for r in roles if isinstance(r, dict)]
+    if len(role_ids) != len(roles) or len(role_ids) != len(set(role_ids)):
+        errors.append("Agent roles must be objects with unique IDs.")
+    for role in roles:
+        if isinstance(role, dict) and role.get("model_id") and role["model_id"] not in model_map:
+            errors.append(f"Role {role.get('id')} references unknown model {role['model_id']}.")
+    if division_registry is not None:
+        expected = {d.get("name") for d in division_registry.get("divisions", []) if isinstance(d, dict)}
+        declared = set(agent_roles.get("divisions", []))
+        if expected != declared:
+            errors.append("AI workforce division names do not match the Control Centre division registry.")
+    return {"status": "validated" if not errors else "invalid", "model_count": len(models), "role_count": len(roles),
+        "models": [{"id":m.get("id"),"provider":m.get("provider"),"model":m.get("model"),"status":m.get("status"),"deployment":m.get("deployment"),"next_gate":m.get("next_gate")} for m in models if isinstance(m,dict)],
+        "roles": [{"id":r.get("id"),"model_id":r.get("model_id"),"authority":r.get("authority"),"scope":r.get("scope")} for r in roles if isinstance(r,dict)],
+        "policy":"Model outputs are drafts/reviews only. No model can approve spending, publish, contact third parties, trade, sign, merge or deploy.","errors":errors}
+
+
+def build_dashboard(registry, readiness, dependency_map, operating_framework, opportunities, ledger, work_queue=None, execution_log=None, risk_register=None, decision_register=None, incident_register=None, recovery_plan=None, security_report=None, ai_model_registry=None, ai_agent_roles=None):
     errors, warnings = validate(registry, readiness)
     security_report = security_report or build_security_posture_report(Path.cwd())
+    ai_workforce_report = build_ai_workforce_report(ai_model_registry, ai_agent_roles, registry)
     dependency_report = build_report(registry, readiness, dependency_map)
     revenue = build_snapshot(opportunities, ledger)
     operating = build_operating_framework_report(registry, operating_framework)
@@ -319,6 +358,7 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
         "division_work_queue": work_queue_report,
         "division_execution_evidence": execution_report,
         "cross_division_integration": integration_report,
+        "ai_workforce": ai_workforce_report,
         "ai_revenue": revenue,
         "risk_escalations": risk_escalations,
         "incident_response": incident_response,
@@ -346,6 +386,7 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
             "cross_division_integration_errors": integration_report.get("errors", []),
             "governance_link_errors": governance_errors,
             "incident_register_errors": incident_errors,
+            "ai_workforce_errors": ai_workforce_report.get("errors", []),
             "revenue_warnings": revenue["data_quality"]["warnings"],
             "note": "Absence of a record is not proof that work or funds do not exist outside these source files."
         }
@@ -366,15 +407,18 @@ def main():
     parser.add_argument("--recovery-plan", type=Path, default=Path("organization/recovery-plan.json"))
     parser.add_argument("--opportunities", type=Path, default=Path("intelligence/opportunity-tracker.csv"))
     parser.add_argument("--ledger", type=Path, default=Path("finance/revenue-ledger.csv"))
+    parser.add_argument("--ai-model-registry", type=Path, default=Path("organization/ai-workforce/model-registry.json"))
+    parser.add_argument("--ai-agent-roles", type=Path, default=Path("organization/ai-workforce/agent-roles.json"))
     args = parser.parse_args()
     report = build_dashboard(
         load_json(args.registry), load_json(args.readiness), load_json(args.dependencies),
         load_json(args.operating_framework), read_csv(args.opportunities), read_csv(args.ledger),
         load_json(args.work_queue), load_json(args.execution_log),
-        load_json(args.risk_register), load_json(args.decision_register), load_json(args.incident_register), load_json(args.recovery_plan)
+        load_json(args.risk_register), load_json(args.decision_register), load_json(args.incident_register), load_json(args.recovery_plan),
+        ai_model_registry=load_json(args.ai_model_registry), ai_agent_roles=load_json(args.ai_agent_roles)
     )
     print(json.dumps(report, indent=2, ensure_ascii=False))
-    return 1 if report["data_quality"]["readiness_validation_errors"] or report["data_quality"]["dependency_map_errors"] or report["data_quality"]["operating_framework_errors"] or report["data_quality"]["work_queue_errors"] or report["data_quality"]["execution_log_errors"] or report["data_quality"]["cross_division_integration_errors"] or report["data_quality"]["governance_link_errors"] or report["data_quality"]["incident_register_errors"] or report["security_posture"]["errors"] else 0
+    return 1 if report["data_quality"]["readiness_validation_errors"] or report["data_quality"]["dependency_map_errors"] or report["data_quality"]["operating_framework_errors"] or report["data_quality"]["work_queue_errors"] or report["data_quality"]["execution_log_errors"] or report["data_quality"]["cross_division_integration_errors"] or report["data_quality"]["governance_link_errors"] or report["data_quality"]["incident_register_errors"] or report["data_quality"]["ai_workforce_errors"] or report["security_posture"]["errors"] else 0
 
 
 if __name__ == "__main__":
