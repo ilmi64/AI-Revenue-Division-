@@ -47,17 +47,31 @@ def validate_evidence_register(evidence, incidents, registry):
     errors = []
     if not isinstance(evidence, dict):
         return ["Evidence register root must be an object."]
+    if not isinstance(incidents, dict):
+        errors.append("Incident register root must be an object for evidence linking.")
+        incidents = {"records": []}
+    if not isinstance(registry, dict):
+        errors.append("Division registry root must be an object for evidence linking.")
+        registry = {"divisions": []}
     if evidence.get("schema_version") != "1.0.0":
         errors.append("Evidence register schema_version must be 1.0.0.")
     rows = evidence.get("records")
     if not isinstance(rows, list):
         return errors + ["Evidence register records must be an array."]
+    division_rows = registry.get("divisions", [])
+    incident_rows = incidents.get("records", [])
+    if not isinstance(division_rows, list):
+        errors.append("Division registry divisions must be an array.")
+        division_rows = []
+    if not isinstance(incident_rows, list):
+        errors.append("Incident register records must be an array.")
+        incident_rows = []
     division_ids = {
-        row.get("id") for row in registry.get("divisions", [])
+        row.get("id") for row in division_rows
         if isinstance(row, dict) and isinstance(row.get("id"), str)
     }
     incident_ids = {
-        row.get("id") for row in incidents.get("records", [])
+        row.get("id") for row in incident_rows
         if isinstance(row, dict) and isinstance(row.get("id"), str)
     }
     seen = set()
@@ -101,12 +115,28 @@ def validate_all(incidents, risks, decisions, queue, registry, evidence):
         errors.append("Canonical OCC risk register records must be an array.")
         risk_rows = []
     seen = set()
+    queue_rows = queue.get("tasks", []) if isinstance(queue, dict) else []
+    division_rows = registry.get("divisions", []) if isinstance(registry, dict) else []
+    decision_rows = decisions.get("records", []) if isinstance(decisions, dict) else []
+    if not isinstance(queue_rows, list):
+        errors.append("Work queue tasks must be an array.")
+        queue_rows = []
+    if not isinstance(division_rows, list):
+        errors.append("Division registry divisions must be an array.")
+        division_rows = []
+    if not isinstance(decision_rows, list):
+        errors.append("Decision register records must be an array.")
+        decision_rows = []
     task_ids = {
-        row.get("id") for row in queue.get("tasks", [])
+        row.get("id") for row in queue_rows
         if isinstance(row, dict) and isinstance(row.get("id"), str)
     }
     division_ids = {
-        row.get("id") for row in registry.get("divisions", [])
+        row.get("id") for row in division_rows
+        if isinstance(row, dict) and isinstance(row.get("id"), str)
+    }
+    decision_ids = {
+        row.get("id") for row in decision_rows
         if isinstance(row, dict) and isinstance(row.get("id"), str)
     }
     for index, row in enumerate(risk_rows):
@@ -130,8 +160,11 @@ def validate_all(incidents, risks, decisions, queue, registry, evidence):
         if row.get("division_id") not in division_ids:
             errors.append(f"Risk {risk_id} references an unknown division.")
         related_tasks = row.get("related_task_ids", [])
-        if not isinstance(related_tasks, list) or any(value not in task_ids for value in related_tasks):
+        if not isinstance(related_tasks, list) or any(not isinstance(value, str) or value not in task_ids for value in related_tasks):
             errors.append(f"Risk {risk_id} contains an invalid task reference.")
+        related_decisions = row.get("related_decision_ids", [])
+        if not isinstance(related_decisions, list) or any(not isinstance(value, str) or value not in decision_ids for value in related_decisions):
+            errors.append(f"Risk {risk_id} contains an invalid decision reference.")
     return errors
 
 
