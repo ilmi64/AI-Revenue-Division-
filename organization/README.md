@@ -188,6 +188,22 @@ No account-level access review has been performed by this repository validator. 
 Production restore or rollback requires explicit owner approval and an independent second review. Access is limited to named, owner-approved operators and should be least-privilege and time-limited. Credentials must never be committed, printed in CI logs, or persisted in drill artifacts. The automated recovery drill remains isolated to temporary fixtures.
 
 
+## Risk, incident and evidence controls
+
+The canonical cross-division risk register is `risk-register.json`. It now contains an initial evidence-backed set of organisation risks with provisional severity, affected division, mitigation, linked work items and unassigned ownership. Ratings require owner review; they are not incident declarations or proof that mitigations are complete. The dashboard derives stop-only advisory escalation routes from these records without sending notifications or changing task state.
+
+The canonical incident lifecycle remains in `incident-register.json` and is validated against the risk register, owner decision register, work queue and division registry. The supplemental provenance index is `risk-controls/evidence-register.json`; it records metadata and references only, not secret material or a substitute for protected evidence storage.
+
+The draft policy, incident lifecycle and restart gates are in `risk-controls/risk-control-policy.json`, `risk-controls/INCIDENT-LIFECYCLE.md` and `risk-controls/STOP-CONDITIONS.md`. Run the structural checks with:
+
+```sh
+python organization/risk-controls/validate_risk_controls.py
+python organization/risk-controls/validate_registers.py
+python -m unittest discover -s organization/risk-controls -p 'test_*.py' -v
+```
+
+The evidence register is included in the consolidated dashboard. Its presence does not authenticate referenced files, create access controls, staff responders, or establish a production incident capability. The evidence register currently starts empty. No tests have been executed for this draft package in this session.
+
 ## AI workforce integration
 The `organization/ai-workforce/` package defines the model registry, bounded agent roles, task/handoff contract, and acceptance tests. The consolidated dashboard reads the model registry and role map, validates model references and exact division coverage, and reports model deployment/evidence states without granting execution authority. Qwen2.5 1.5B remains integrated but end-to-end unverified; Llama 3.2 1B remains an uninstalled evaluation candidate.
 
