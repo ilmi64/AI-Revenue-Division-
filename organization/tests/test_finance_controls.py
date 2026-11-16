@@ -32,6 +32,18 @@ class FinanceControlsTests(unittest.TestCase):
   row={"id":"C3","division_id":"finance","currency":"CAD","approved_amount":"5","committed_amount":"7","paid_amount":"0","payment_status":"unpaid","approval_status":"approved","approval_reference":"owner-decision-3"}
   r=self.report([row],policy=policy)
   self.assertTrue(any("exceeds approved" in e for e in r["errors"]))
+ def test_aggregate_commitments_cannot_exceed_ceiling(self):
+  policy=dict(POLICY,approved_spend_ceiling_cad=10,incremental_spend_cad=10)
+  rows=[]
+  for i in range(2):
+   rows.append({"id":f"AG{i}","division_id":"finance","currency":"CAD","approved_amount":"8","committed_amount":"8","paid_amount":"0","payment_status":"unpaid","approval_status":"approved","approval_reference":f"decision-{i}"})
+  r=self.report(rows,policy=policy)
+  self.assertTrue(any("Aggregate committed CAD amount" in e for e in r["errors"]))
+ def test_non_cad_positive_commitment_requires_fx_review(self):
+  policy=dict(POLICY,approved_spend_ceiling_cad=100,incremental_spend_cad=100)
+  row={"id":"USD1","division_id":"finance","currency":"USD","approved_amount":"5","committed_amount":"5","paid_amount":"0","payment_status":"unpaid","approval_status":"approved","approval_reference":"decision-usd"}
+  r=self.report([row],policy=policy)
+  self.assertTrue(any("non-CAD commitments require documented FX" in e for e in r["errors"]))
  def test_non_cad_is_not_silently_converted(self):
   row={"id":"C4","division_id":"finance","currency":"USD","estimated_amount":"100","approved_amount":"0","committed_amount":"0","paid_amount":"0","payment_status":"not_due","approval_status":"not_requested"}
   r=self.report([row])
