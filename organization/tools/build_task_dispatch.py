@@ -23,6 +23,8 @@ def build_dispatch_report(registry, queue, role_registry, queue_report=None):
         if role_id not in roles:
             errors.append(f"division {division_id} references unknown role {role_id}")
 
+    if queue_report is not None and queue_report.get("errors"):
+        errors.extend(queue_report.get("errors", []))
     tasks = queue.get("tasks", []) if isinstance(queue, dict) else None
     if not isinstance(tasks, list):
         return {
@@ -61,12 +63,16 @@ def build_dispatch_report(registry, queue, role_registry, queue_report=None):
         if not isinstance(unresolved, list):
             unresolved = []
             errors.append(f"{task_id}: unresolved dependency data is invalid")
+        owner_assignment = task.get("owner_assignment", "unassigned_pending_owner_confirmation")
+        owner_is_unassigned = owner_assignment == "unassigned_pending_owner_confirmation"
         if task.get("status") == "cancelled":
             dispatch_status = "cancelled_not_dispatched"
         elif unresolved:
             dispatch_status = "blocked_by_unresolved_dependencies"
-        else:
+        elif owner_is_unassigned:
             dispatch_status = "prepared_waiting_for_owner_confirmation"
+        else:
+            dispatch_status = "prepared_waiting_for_owner_acknowledgement"
         packets.append({
             "task_id": task_id,
             "division_id": division_id,
@@ -75,8 +81,8 @@ def build_dispatch_report(registry, queue, role_registry, queue_report=None):
             "objective": task.get("objective"),
             "role_template_id": role_id,
             "role_template_authority": roles.get(role_id, {}).get("authority"),
-            "owner_status": "unassigned_pending_owner_confirmation",
-            "named_owner": None,
+            "owner_status": "unassigned_pending_owner_confirmation" if owner_is_unassigned else "assigned_recorded_pending_owner_acknowledgement",
+            "named_owner": None if owner_is_unassigned else owner_assignment,
             "dispatch_status": dispatch_status,
             "recorded_task_status": task.get("status"),
             "unresolved_dependencies": unresolved,
@@ -95,7 +101,7 @@ def build_dispatch_report(registry, queue, role_registry, queue_report=None):
             "can_execute": False
         })
 
-    prepared = sum(p["dispatch_status"] == "prepared_waiting_for_owner_confirmation" for p in packets)
+    prepared = sum(p["dispatch_status"] in {"prepared_waiting_for_owner_confirmation", "prepared_waiting_for_owner_acknowledgement"} for p in packets)
     blocked = sum(p["dispatch_status"] == "blocked_by_unresolved_dependencies" for p in packets)
     unassigned = sum(p["owner_status"] == "unassigned_pending_owner_confirmation" for p in packets)
     return {
