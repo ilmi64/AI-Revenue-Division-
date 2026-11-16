@@ -225,13 +225,18 @@
       "evidence": [
         "The Control Centre draft contains risk, incident, security and recovery records plus validators and a temporary-fixture recovery drill.",
         "Crypto PR #37 contains a recovery charter and local SQLite case-register prototype with synthetic tests.",
-        "Draft market-data acceptance rules prohibit live use of stale, indicative, reference-only, synthetic or unlicensed data and require separate source, operational and owner gates."
+        "Draft market-data acceptance rules prohibit live use of stale, indicative, reference-only, synthetic or unlicensed data and require separate source, operational and owner gates.",
+        "Draft organisation-wide risk policy defines owner approval gates, global stop conditions, paper-only trading, secret-handling restrictions and incident lifecycle/restart controls.",
+        "Draft risk, incident and evidence registers plus structural validators and offline regression tests have been added to the OCC feature branch; tests have not been executed."
       ],
       "open_gaps": [
         "No active incident cases are recorded; the repository drill validates temporary fixtures only, not production recovery.",
         "No production case-register RBAC, encryption, tamper-evident evidence export, authenticated case ownership or tested alert/deadline workflow is established.",
         "Independent named risk/recovery ownership, cross-division incident rehearsals and production containment/recovery evidence remain outstanding.",
-        "No independent Risk sign-off has been completed for any provider, feed adapter, instrument mapping or live data use."
+        "No independent Risk sign-off has been completed for any provider, feed adapter, instrument mapping or live data use.",
+        "Incident and evidence registers are intentionally empty; no live monitoring, staffed responders, authenticated ownership, access-controlled evidence store or notification mechanism exists.",
+        "Risk/register validators and regression tests remain unexecuted; structural files do not prove incident-response readiness.",
+        "Initial cross-division risk ratings are provisional hypotheses and require accountable owner review and evidence."
       ]
     },
     {
