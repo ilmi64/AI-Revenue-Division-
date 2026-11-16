@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "status": "active_zero_spend_control",
+  "currency_default": "CAD",
+  "approved_spend_ceiling_cad": 0,
+  "incremental_spend_cad": 0,
+  "paid_services_enabled": false,
+  "paid_apis_enabled": false,
+  "paid_trials_enabled": false,
+  "owner_approval_required_for": [
+    "subscriptions",
+    "software_or_api_spend",
+    "advertising",
+    "inventory_or_product_purchases",
+    "borrowing_or_financing",
+    "financial_transactions",
+    "wallet_actions",
+    "live_trading",
+    "external_contracts"
+  ],
+  "cash_receipt_statuses": [
+    "paid",
+    "received",
+    "settled"
+  ],
+  "payment_statuses": [
+    "not_due",
+    "unpaid",
+    "partially_paid",
+    "paid",
+    "disputed",
+    "void"
+  ],
+  "approval_statuses": [
+    "not_requested",
+    "pending",
+    "approved",
+    "rejected"
+  ],
+  "halal_review_statuses": [
+    "not_assessed",
+    "requires_review",
+    "reviewed_with_advisory_source",
+    "not_applicable"
+  ],
+  "halal_safeguards": {
+    "status": "screening_policy_not_a_religious_ruling",
+    "default": "Flag financing, interest, yield, leverage, margin, derivatives and trading structures for review before consideration.",
+    "prohibited_default": [
+      "interest_based_borrowing",
+      "yield_or_interest_products",
+      "unapproved_leverage_or_margin",
+      "unapproved_paid_financial_services"
+    ],
+    "evidence_rule": "A reviewed_with_advisory_source entry requires a source reference and reviewer notes. This register does not certify religious permissibility.",
+    "shafii_attention": "Escalate uncertain contracts and financial structures for qualified Shafi'i review; do not present automated classifications as a fatwa."
+  },
+  "rules": [
+    "CAD 0 is the default incremental spend ceiling until sustainable revenue and explicit owner approval.",
+    "Estimates are planning data, not commitments or cash outflows.",
+    "Positive approved, committed or paid amounts require a non-zero owner-approved spend ceiling and approval reference.",
+    "Paid amounts require proof reference and cannot exceed the approved or committed amount.",
+    "Only paid, received or settled revenue ledger rows count as cash received; ledger records are not independently verified bank balances.",
+    "Unknown currencies are not converted or added to CAD totals without a documented exchange-rate source.",
+    "No borrowing, yield, leverage, wallet action or live trade is authorised by this policy."
+  ]
+}
