@@ -457,7 +457,7 @@
         "Ecommerce remains an active development workstream; development status is not proof of sales or operational readiness."
       ],
       "owner_assignment": "Executive-coordinated build stream; accountable division lead pending owner confirmation",
-      "approval_boundary": "Maintenance and read-only analysis only unless separately authorised."
+      "approval_boundary": "Active development, read-only audits and preparation are permitted within the zero-spend default; listings, purchases, inventory changes, customer communication and account changes require explicit approval."
     },
     {
       "id": "animora",
