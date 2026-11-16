@@ -40,6 +40,24 @@ class TaskDispatchTests(unittest.TestCase):
         self.assertEqual(packet["owner_status"], "unassigned_pending_owner_confirmation")
         self.assertIsNone(packet["named_owner"])
 
+    def test_recorded_owner_still_requires_acknowledgement(self):
+        queue = json.loads(json.dumps(self.queue))
+        queue["tasks"][0]["owner_assignment"] = "Executive Management lead"
+        report = build_dispatch_report(self.registry, queue, self.roles,
+                                       build_queue_report(self.registry, queue))
+        packet = next(task for task in report["tasks"] if task["task_id"] == "EXEC-001")
+        self.assertEqual(packet["dispatch_status"], "prepared_waiting_for_owner_acknowledgement")
+        self.assertEqual(packet["named_owner"], "Executive Management lead")
+        self.assertEqual(report["dispatch_count"], 0)
+
+    def test_invalid_queue_validation_prevents_validated_dispatch_report(self):
+        queue = json.loads(json.dumps(self.queue))
+        queue["tasks"][0]["depends_on"] = ["UNKNOWN-TASK"]
+        queue_report = build_queue_report(self.registry, queue)
+        report = build_dispatch_report(self.registry, queue, self.roles, queue_report)
+        self.assertEqual(report["status"], "invalid")
+        self.assertEqual(report["dispatch_count"], 0)
+
     def test_missing_division_role_mapping_fails_closed(self):
         roles = json.loads(json.dumps(self.roles))
         roles["division_role_map"].pop("animora")
