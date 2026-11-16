@@ -1,0 +1,74 @@
+{
+  "schema_version": "1.0.0",
+  "roles": [
+    {
+      "id": "executive-coordinator",
+      "owner": "ChatGPT",
+      "scope": "Cross-division coordination, prioritisation, synthesis, approvals queue and executive reporting",
+      "authority": "advisory_and_coordination_only",
+      "prohibited": [
+        "approve_spending",
+        "sign_transactions",
+        "place_trades",
+        "merge_code",
+        "deploy_production"
+      ]
+    },
+    {
+      "id": "local-research-analyst",
+      "model_id": "qwen-primary-pilot",
+      "scope": "Read-only research summaries, structured extraction and first-draft analysis",
+      "authority": "draft_only",
+      "prohibited": [
+        "publish",
+        "contact_third_parties",
+        "change_accounts",
+        "financial_actions"
+      ]
+    },
+    {
+      "id": "independent-model-reviewer",
+      "model_id": "llama-review-candidate",
+      "scope": "Second-pass critique, contradiction detection and completeness checks",
+      "authority": "review_only",
+      "prohibited": [
+        "override_deterministic_controls",
+        "approve_consequential_actions"
+      ]
+    },
+    {
+      "id": "division-specialist",
+      "owner": "division_designated_role",
+      "scope": "Bounded deliverables for assigned division",
+      "authority": "division_policy",
+      "prohibited": [
+        "bypass_approval_gates",
+        "assume_cross_division_authority"
+      ]
+    },
+    {
+      "id": "risk-compliance-reviewer",
+      "owner": "Risk, Security & Recovery",
+      "scope": "Challenge unsupported claims and identify legal, security and operational risks",
+      "authority": "stop_and_challenge_only",
+      "prohibited": [
+        "authorise_trades",
+        "waive_controls",
+        "issue_legal_or_religious_rulings"
+      ]
+    }
+  ],
+  "divisions": [
+    "Executive Management",
+    "AI Revenue",
+    "Technology & Infrastructure",
+    "Research & Intelligence",
+    "Finance & Treasury",
+    "Risk, Security & Recovery",
+    "Crypto & PolyBot",
+    "Ecommerce",
+    "Animora / Future Creative Studio",
+    "TISRD",
+    "Business & Commercial"
+  ]
+}
