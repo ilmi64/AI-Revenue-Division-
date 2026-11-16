@@ -77,9 +77,9 @@
           "name": "Frankfurter / ECB reference rates",
           "endpoint_class": "reference-rate API",
           "status": "candidate_reference_only",
-          "evidence": "Reference rates are not streaming executable bid/ask quotes; cadence and business-day publication make them unsuitable for intraday execution.",
-          "terms_review": "pending",
-          "canada_review": "pending"
+          "evidence": "Frankfurter documents a free keyless API aggregating 219 currencies and 39 other assets from 112 central banks/official sources; each provider publishes once or a few times daily. Explicitly reference-only, not executable bid/ask. Pin provider (for example ECB) and retain provider/date provenance. Official docs reviewed 2026-11-16.",
+          "terms_review": "initial_public_docs_reviewed_recheck_license_and_attribution_before_redistribution",
+          "canada_review": "reference_data_no_broker_account_required_canadian_eligibility_not_a_blocker"
         },
         {
           "name": "Twelve Data",
@@ -88,6 +88,22 @@
           "evidence": "Prior research indicated free Basic limitations; verify current plan, forex coverage, request quotas, redistribution and billing triggers before use.",
           "terms_review": "pending",
           "canada_review": "pending"
+        },
+        {
+          "name": "FOREX.com Canada REST API",
+          "endpoint_class": "broker-specific streaming prices and historical market data; trading endpoints also exist",
+          "status": "research_candidate_account_and_api_access_required_not_approved",
+          "evidence": "Official Canada API page describes live streaming prices, historical data and order/account endpoints. It requires opening a standard account and contacting support for API access; account funding is part of its stated workflow. CIRO dealer listing identifies GAIN Capital - FOREX.com Canada Ltd. Candidate only; no account, API access, credential, order endpoint or execution permission approved.",
+          "terms_review": "official_api_overview_reviewed_full_license_and_data_rights_pending",
+          "canada_review": "canadian_entity_and_ciRO_listing_found_account_eligibility_and_terms_review_pending"
+        },
+        {
+          "name": "OANDA Canada broker feed / v20 API",
+          "endpoint_class": "broker-specific FX pricing stream and historical candles; trading endpoints also exist",
+          "status": "research_candidate_account_api_license_and_division_eligibility_pending",
+          "evidence": "OANDA Canada publicly offers FX instruments; OANDA v20 documentation describes real-time tradeable-pair rates and historical prices, but API use requires a compatible v20 account and acceptance of API license. The API docs contain division-availability exclusions, so Canadian-entity/account compatibility must be confirmed before any use. No account, token or execution permission approved.",
+          "terms_review": "official_api_overview_reviewed_api_license_and_market_data_rights_pending",
+          "canada_review": "CIRO dealer listing found_canadian_v20_api_eligibility_not_confirmed"
         }
       ]
     },
@@ -112,6 +128,22 @@
           "evidence": "A broker instrument feed is required for executable bid/ask and contract specifications; no broker connection is approved.",
           "terms_review": "pending",
           "canada_review": "pending"
+        },
+        {
+          "name": "FOREX.com Canada US SP 500 / index API",
+          "endpoint_class": "broker-specific index CFD stream and historical prices",
+          "status": "research_candidate_account_and_api_access_required_not_approved",
+          "evidence": "Canadian product navigation lists US SP 500 and the API overview describes live streaming prices and historical data across markets; API requires funded standard account and support activation. Index CFD quote is not the cash index or futures price. No account or API permission approved.",
+          "terms_review": "official_market_and_api_overview_reviewed_full_license_and_data_rights_pending",
+          "canada_review": "Canadian_entity_and_CIRO_listing_found_account_eligibility_and_terms_review_pending"
+        },
+        {
+          "name": "OANDA Canada US SPX 500 / indices API",
+          "endpoint_class": "broker-specific index CFD stream and historical market data",
+          "status": "research_candidate_account_api_license_pending",
+          "evidence": "OANDA Canada lists US SPX 500 index CFDs and documents API access for eligible v20 accounts. Exact symbol, contract specifications, Canadian account/API eligibility, historical coverage and licensing require confirmation. Not interchangeable with S&P 500 cash index or CME futures. No account or token approved.",
+          "terms_review": "official_market_and_api_overview_reviewed_api_license_and_data_rights_pending",
+          "canada_review": "CIRO dealer listing found_canadian_v20_api_eligibility_not_confirmed"
         }
       ]
     },
@@ -125,24 +157,24 @@
           "name": "Standard Bullion API",
           "endpoint_class": "indicative bullion bid/ask and historical captures",
           "status": "candidate_reference_only",
-          "evidence": "Previously identified keyless basic endpoint and historical sampling; attribution and raw bulk redistribution restrictions require current terms review. Not assumed to be broker XAUUSD.",
-          "terms_review": "pending",
+          "evidence": "Current official API page documents keyless live dealer bid/ask, 15-minute intraday history from 2026 and older daily/monthly history; attribution is mandatory and raw bulk redistribution/resale is prohibited. Indicative dealer quote, not broker XAUUSD contract quote. Public docs reviewed 2026-11-16.",
+          "terms_review": "initial_public_terms_reviewed_attribution_required_bulk_redistribution_prohibited",
           "canada_review": "pending"
         },
         {
           "name": "XAUS API",
           "endpoint_class": "indicative spot/mid-market",
           "status": "candidate_reference_only",
-          "evidence": "Previously identified keyless spot endpoint and limited retained intraday history; source independence from Gold-API.com was not established.",
-          "terms_review": "pending",
+          "evidence": "Current public API documentation describes keyless spot endpoint and explicit data-state/age fields; the public repository states last-known prices may be returned during upstream outage. Independence of underlying upstream pricing from other APIs has not been demonstrated; not executable broker bid/ask.",
+          "terms_review": "initial_public_docs_reviewed_full_license_and_redistribution_terms_pending",
           "canada_review": "pending"
         },
         {
           "name": "GoldPrice.dev",
           "endpoint_class": "delayed spot and daily historical data",
           "status": "candidate_reference_only",
-          "evidence": "Previously identified delayed spot/daily history; intraday bars may be paid and therefore excluded until revenue and explicit approval.",
-          "terms_review": "pending",
+          "evidence": "Official docs dated 2026-10-20 confirm XAU-USD spot price, keyless free data delayed 15 minutes, 10 requests/minute and 100/hour per IP; free key is 5,000 requests/month and paid plans provide live prices. Intraday bars/paid data not authorized; stale flag and computed_at fields available.",
+          "terms_review": "initial_public_docs_reviewed_recheck_license_and_attribution_before_redistribution",
           "canada_review": "pending"
         },
         {
@@ -152,6 +184,22 @@
           "evidence": "Required for broker-specific spread, contract size, trading hours, financing/swap and execution assumptions; no account or connection approved.",
           "terms_review": "pending",
           "canada_review": "pending"
+        },
+        {
+          "name": "FOREX.com Canada XAUUSD / metals API",
+          "endpoint_class": "broker-specific metals quote stream and historical prices",
+          "status": "research_candidate_account_and_api_access_required_not_approved",
+          "evidence": "Canadian metals page lists XAU and says gold/silver can be traded as FX-quoted spot or CFDs referencing futures. Canada API page describes streaming prices and historical market data but requires a standard account and support activation; account funding is part of the stated workflow. No account or API access approved. Broker quote must remain distinct from bullion spot.",
+          "terms_review": "official_market_and_api_overview_reviewed_full_license_and_data_rights_pending",
+          "canada_review": "Canadian_entity_and_CIRO_listing_found_account_eligibility_and_terms_review_pending"
+        },
+        {
+          "name": "OANDA Canada XAUUSD / metals feed",
+          "endpoint_class": "broker-specific metal CFD quotes and historical market data",
+          "status": "research_candidate_account_api_license_and_halal_review_pending",
+          "evidence": "OANDA Canada lists gold/metals CFDs and publicly documents an API for eligible v20 accounts; API access and product/account eligibility must be confirmed for Canadian entity. CFDs and financing/holding charges create separate product and Shariah review questions. No account, token, trade or execution permission approved.",
+          "terms_review": "official_market_and_api_overview_reviewed_api_license_and_data_rights_pending",
+          "canada_review": "CIRO dealer listing found_canadian_v20_api_eligibility_not_confirmed"
         }
       ]
     }
@@ -161,6 +209,9 @@
     "No production source pair has passed independent-provider failover tests.",
     "No provider has completed current terms, Canadian access, privacy and data-rights review in this build.",
     "No XAUUSD broker feed or executable Forex/indices quote feed is connected.",
-    "No historical out-of-sample dataset has been approved for strategy validation."
+    "No historical out-of-sample dataset has been approved for strategy validation.",
+    "Broker API candidates now have public capability evidence, but account eligibility, API license, data-use rights, symbols, rate limits, historical depth and read-only permission are not cleared; account creation/funding is outside the zero-spend scope.",
+    "Gold reference APIs are not independent broker feeds; only a broker-specific bid/ask stream with verified contract metadata can qualify as the execution-price reference for that broker.",
+    "Any CFD/financing/overnight structure requires separate Shariah review before consideration; a provider's Canadian registration does not establish halal suitability."
   ]
 }
