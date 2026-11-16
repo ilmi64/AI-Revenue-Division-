@@ -140,7 +140,7 @@
         {
           "name": "OANDA Canada US SPX 500 / indices API",
           "endpoint_class": "broker-specific index CFD stream and historical market data",
-          "status": "research_candidate_account_api_license_pending",
+          "status": "not_connected_owner_approval_required",
           "evidence": "OANDA Canada lists US SPX 500 index CFDs and documents API access for eligible v20 accounts. Exact symbol, contract specifications, Canadian account/API eligibility, historical coverage and licensing require confirmation. Not interchangeable with S&P 500 cash index or CME futures. No account or token approved.",
           "terms_review": "pending",
           "canada_review": "pending"
