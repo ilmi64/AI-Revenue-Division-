@@ -131,12 +131,16 @@
       "claimed_status": "building",
       "verified_status": "building",
       "evidence": [
-        "Read-only listing CSV audit MVP exists."
+        "Read-only listing CSV audit MVP exists.",
+        "Added an offline no-dependency per-order contribution calculator with explicit marketplace/payment fee, product cost, fulfilment shipping, packaging and other-variable-cost inputs, plus a sample CSV and six regression tests.",
+        "Calculator separates contribution before advertising, tax and overhead from revenue, and documents that the break-even ad-spend figure is a mathematical ceiling rather than a recommended budget; no marketplace or seller account is connected."
       ],
       "open_gaps": [
         "Ecommerce is an active rebuild workstream; existing storefront/listing baseline and product economics require a current read-only audit.",
         "No verified sales, unit economics, fulfilment quality or customer-acquisition economics are established.",
-        "No listings, purchases, publishing, paid promotion or account changes are authorized."
+        "No listings, purchases, publishing, paid promotion or account changes are authorized.",
+        "Illustrative sample economics are not actual MidnightOtaku/Printify/eBay costs or fee schedules; current supplier, destination-specific shipping, marketplace fee, tax, returns and payout inputs must be independently verified before product decisions.",
+        "The offline calculator and tests have been added but not executed; no actual product-level profitability or demand validation is established."
       ]
     },
     {
