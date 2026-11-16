@@ -5,13 +5,6 @@ import json
 from pathlib import Path
 
 POLICY_PATH = Path(__file__).with_name("risk-control-policy.json")
-REQUIRED_DIVISIONS = {
-    "Executive Management", "AI Revenue", "Technology and Infrastructure",
-    "Research and Intelligence", "Finance and Treasury",
-    "Risk, Security and Recovery", "Crypto and PolyBot", "Ecommerce",
-    "Animora and Future Creative Studio",
-    "Trader Intelligence & Strategy Replication", "Business & Commercial",
-}
 REQUIRED_STOPS = {
     "credential_or_secret_exposure_suspected",
     "unauthorised_access_or_action_detected",
@@ -26,7 +19,17 @@ REQUIRED_STOPS = {
     "material_dependency_unavailable",
     "incident_severity_critical",
 }
-FORBIDDEN_AUTHORITY = {"approve_trades", "waive_controls", "approve_spending"}
+REQUIRED_APPROVALS = {
+    "spending", "subscriptions", "paid_api_usage", "applications", "outreach",
+    "publishing", "contracts", "account_or_permission_changes",
+    "financial_transactions", "wallet_actions", "live_trading", "merges",
+    "deployments", "production_launches", "incident_external_notifications",
+}
+REQUIRED_INCIDENT_FIELDS = {
+    "incident_id", "detected_at_utc", "reporting_division", "category", "severity",
+    "facts", "hypotheses", "evidence_references", "containment", "owner",
+    "status", "next_review_at_utc",
+}
 
 
 def validate(policy: dict) -> list[str]:
@@ -47,12 +50,8 @@ def validate(policy: dict) -> list[str]:
             errors.append(f"{key} must be disabled by default")
     if defaults.get("github_actions") != "hold_until_usage_reset":
         errors.append("GitHub Actions must remain on hold until usage reset")
-    if not FORBIDDEN_AUTHORITY.issubset(set(policy.get("mandatory_owner_approval", []))):
-        # The approval list uses action names, not authority names; validate the exact high-risk gates below.
-        required = {"spending", "financial_transactions", "wallet_actions", "live_trading",
-                    "merges", "deployments", "production_launches"}
-        if not required.issubset(set(policy.get("mandatory_owner_approval", []))):
-            errors.append("mandatory owner-approval gates are incomplete")
+    if not REQUIRED_APPROVALS.issubset(set(policy.get("mandatory_owner_approval", []))):
+        errors.append("mandatory owner-approval gates are incomplete")
     if not set(policy.get("global_stop_conditions", [])).issuperset(REQUIRED_STOPS):
         errors.append("global stop-condition coverage is incomplete")
     if policy.get("never_request_or_store") != [
@@ -75,12 +74,7 @@ def validate(policy: dict) -> list[str]:
         if trading.get(key) is not False:
             errors.append(f"{key} must be false")
     incidents = policy.get("incident_controls", {})
-    required_incident_fields = {
-        "incident_id", "detected_at_utc", "reporting_division", "category", "severity",
-        "facts", "hypotheses", "evidence_references", "containment", "owner",
-        "status", "next_review_at_utc",
-    }
-    if not required_incident_fields.issubset(set(incidents.get("required_fields", []))):
+    if not REQUIRED_INCIDENT_FIELDS.issubset(set(incidents.get("required_fields", []))):
         errors.append("incident record fields are incomplete")
     if incidents.get("preserve_original_evidence") is not True:
         errors.append("original evidence preservation must be enabled")
