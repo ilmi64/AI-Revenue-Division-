@@ -19,6 +19,7 @@ from validate_division_integrations import build_report as build_division_integr
 from validate_incident_register import validate as validate_incident_register
 from validate_security_posture import build_report as build_security_posture_report
 from build_task_dispatch import build_dispatch_report
+from build_finance_controls import build_report as build_finance_controls_report
 
 
 def load_json(path):
@@ -229,7 +230,7 @@ def build_ai_workforce_report(model_registry=None, agent_roles=None, division_re
         "policy":"Model outputs are drafts/reviews only. No model can approve spending, publish, contact third parties, trade, sign, merge or deploy.","errors":errors}
 
 
-def build_dashboard(registry, readiness, dependency_map, operating_framework, opportunities, ledger, work_queue=None, execution_log=None, risk_register=None, decision_register=None, incident_register=None, recovery_plan=None, security_report=None, ai_model_registry=None, ai_agent_roles=None):
+def build_dashboard(registry, readiness, dependency_map, operating_framework, opportunities, ledger, work_queue=None, execution_log=None, risk_register=None, decision_register=None, incident_register=None, recovery_plan=None, security_report=None, ai_model_registry=None, ai_agent_roles=None, finance_policy=None, commitment_register=None):
     errors, warnings = validate(registry, readiness)
     security_report = security_report or build_security_posture_report(Path.cwd())
     ai_workforce_report = build_ai_workforce_report(ai_model_registry, ai_agent_roles, registry)
@@ -238,6 +239,7 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
     operating = build_operating_framework_report(registry, operating_framework)
     work_queue_report = build_work_queue_report(registry, work_queue or {"tasks": []})
     task_dispatch_report = build_dispatch_report(registry, work_queue or {"tasks": []}, ai_agent_roles or {}, work_queue_report)
+    finance_controls_report = build_finance_controls_report(finance_policy or {}, commitment_register or [], ledger, registry)
     execution_report = build_execution_log_report(registry, work_queue or {"tasks": []}, execution_log or {"events": []})
     integration_report = build_division_integration_report(registry, dependency_map, operating_framework)
     governance_errors, governance_summary = validate_governance_links(work_queue, risk_register, decision_register, registry)
@@ -362,6 +364,7 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
         "division_execution_evidence": execution_report,
         "cross_division_integration": integration_report,
         "ai_workforce": ai_workforce_report,
+        "finance_controls": finance_controls_report,
         "ai_revenue": revenue,
         "risk_escalations": risk_escalations,
         "incident_response": incident_response,
@@ -386,6 +389,7 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
             "operating_framework_errors": operating.get("errors", []),
             "work_queue_errors": work_queue_report.get("errors", []),
             "task_dispatch_errors": task_dispatch_report.get("errors", []),
+            "finance_control_errors": finance_controls_report.get("errors", []),
             "execution_log_errors": execution_report.get("errors", []),
             "cross_division_integration_errors": integration_report.get("errors", []),
             "governance_link_errors": governance_errors,
@@ -411,6 +415,8 @@ def main():
     parser.add_argument("--recovery-plan", type=Path, default=Path("organization/recovery-plan.json"))
     parser.add_argument("--opportunities", type=Path, default=Path("intelligence/opportunity-tracker.csv"))
     parser.add_argument("--ledger", type=Path, default=Path("finance/revenue-ledger.csv"))
+    parser.add_argument("--finance-policy", type=Path, default=Path("finance/financial-control-policy.json"))
+    parser.add_argument("--commitments", type=Path, default=Path("finance/commitment-register.csv"))
     parser.add_argument("--ai-model-registry", type=Path, default=Path("organization/ai-workforce/model-registry.json"))
     parser.add_argument("--ai-agent-roles", type=Path, default=Path("organization/ai-workforce/agent-roles.json"))
     args = parser.parse_args()
@@ -419,10 +425,11 @@ def main():
         load_json(args.operating_framework), read_csv(args.opportunities), read_csv(args.ledger),
         load_json(args.work_queue), load_json(args.execution_log),
         load_json(args.risk_register), load_json(args.decision_register), load_json(args.incident_register), load_json(args.recovery_plan),
-        ai_model_registry=load_json(args.ai_model_registry), ai_agent_roles=load_json(args.ai_agent_roles)
+        ai_model_registry=load_json(args.ai_model_registry), ai_agent_roles=load_json(args.ai_agent_roles),
+        finance_policy=load_json(args.finance_policy), commitment_register=read_csv(args.commitments)
     )
     print(json.dumps(report, indent=2, ensure_ascii=False))
-    return 1 if report["data_quality"]["readiness_validation_errors"] or report["data_quality"]["dependency_map_errors"] or report["data_quality"]["operating_framework_errors"] or report["data_quality"]["work_queue_errors"] or report["data_quality"]["task_dispatch_errors"] or report["data_quality"]["execution_log_errors"] or report["data_quality"]["cross_division_integration_errors"] or report["data_quality"]["governance_link_errors"] or report["data_quality"]["incident_register_errors"] or report["data_quality"]["ai_workforce_errors"] or report["security_posture"]["errors"] else 0
+    return 1 if report["data_quality"]["readiness_validation_errors"] or report["data_quality"]["dependency_map_errors"] or report["data_quality"]["operating_framework_errors"] or report["data_quality"]["work_queue_errors"] or report["data_quality"]["task_dispatch_errors"] or report["data_quality"]["finance_control_errors"] or report["data_quality"]["execution_log_errors"] or report["data_quality"]["cross_division_integration_errors"] or report["data_quality"]["governance_link_errors"] or report["data_quality"]["incident_register_errors"] or report["data_quality"]["ai_workforce_errors"] or report["security_posture"]["errors"] else 0
 
 
 if __name__ == "__main__":
