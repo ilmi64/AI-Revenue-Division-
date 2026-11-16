@@ -116,7 +116,7 @@ Validate it with:
 python organization/tools/validate_work_queue.py
 ```
 
-The queue is a planning record, not proof that tasks have been assigned or started. All 18 initial tasks remain proposed and unassigned pending owner confirmation. Dependencies are reported as blockers until their prerequisite tasks have evidence-backed completion. A task cannot be marked completed without completion evidence and a timestamp; work cannot be marked in progress without an assigned owner. The dashboard includes the read-only queue summary, and CI checks its schema, dependency references, cycle safety and state transitions.
+The queue is a planning record, not proof that tasks have been assigned or started. All 20 initial tasks remain proposed and unassigned pending owner confirmation. Dependencies are reported as blockers until their prerequisite tasks have evidence-backed completion. A task cannot be marked completed without completion evidence and a timestamp; work cannot be marked in progress without an assigned owner. The dashboard includes the read-only queue summary, and CI checks its schema, dependency references, cycle safety and state transitions.
 
 
 ## Division execution and evidence reporting
@@ -186,3 +186,10 @@ Review evidence should be retained as redacted references or provider-generated 
 No account-level access review has been performed by this repository validator. The current access-review status is therefore **not assessed**. These checks do not inspect repository history, GitHub account/app permissions, secret stores, third-party vulnerabilities, or production systems. A clean scan is not proof that no secret exists or has ever been exposed.
 
 Production restore or rollback requires explicit owner approval and an independent second review. Access is limited to named, owner-approved operators and should be least-privilege and time-limited. Credentials must never be committed, printed in CI logs, or persisted in drill artifacts. The automated recovery drill remains isolated to temporary fixtures.
+
+
+## AI workforce integration
+The `organization/ai-workforce/` package defines the model registry, bounded agent roles, task/handoff contract, and acceptance tests. The consolidated dashboard reads the model registry and role map, validates model references and exact division coverage, and reports model deployment/evidence states without granting execution authority. Qwen2.5 1.5B remains integrated but end-to-end unverified; Llama 3.2 1B remains an uninstalled evaluation candidate.
+
+## Active parallel build direction
+All eleven divisions are active programme workstreams. Finance, Ecommerce and Animora are recorded as `building`, not deferred. Their verified readiness remains `building`; this is not a standby or operational claim. The work queue remains proposed/unassigned until owners and execution evidence are recorded.
