@@ -1,0 +1,3 @@
+sku,currency,selling_price,buyer_shipping_collected,product_cost,fulfilment_shipping_cost,marketplace_fee_pct,payment_fee_pct,fixed_order_fees,packaging_cost,other_variable_costs
+SAMPLE-TEE,CAD,39.99,6.50,18.00,8.00,13.0,2.9,0.30,1.00,0
+SAMPLE-HOODIE,CAD,59.99,8.00,29.00,10.00,13.0,2.9,0.30,1.25,0
