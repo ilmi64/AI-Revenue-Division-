@@ -216,14 +216,17 @@
       "evidence": [
         "The Control Centre records CAD 0 as the default operating budget and reserves financial transactions, borrowing and paid commitments for explicit owner approval.",
         "Crypto PR #37 documents a paper-only CAD ledger and fee-inclusive FIFO accounting/reconciliation prototype.",
-        "Draft PR #6 adds a CAD 0 financial-control policy, empty commitment register, proof/approval/currency controls, cash-receipt classification and halal-sensitive activity flags; tests are included but have not been executed."
+        "Draft PR #6 adds a CAD 0 financial-control policy, empty commitment register, proof/approval/currency controls, cash-receipt classification and halal-sensitive activity flags; tests are included but have not been executed.",
+        "Finance control validator now requires a proof reference and CAD basis before a received/settled/paid ledger row contributes to reported CAD cash receipts; non-CAD receipts are excluded pending documented conversion.",
+        "Finance regression suite expanded to 14 cases covering missing payout evidence, non-CAD receipt handling and malformed division registry input; tests are included but not executed.",
+        "Finance/MONTH-END-CLOSE.md documents the evidence-based period close, revenue reconciliation, commitment review, treasury reporting and exception escalation."
       ],
       "open_gaps": [
         "No live revenue or commitment entries have been reconciled; the current registers are empty and do not establish activity or balances outside the records.",
         "No bank/payment account connection, independently verified cash balance, bank reconciliation, tax export or reserve execution workflow exists.",
         "No named finance owner or active approval ledger is established; all positive spending remains blocked by the CAD 0 ceiling.",
         "Halal screening is informational only; uncertain financing, investment, yield or trading structures require qualified review and no automated religious ruling is made.",
-        "Offline finance tests and dashboard integration remain unexecuted; operational readiness is not established."
+        "Finance control tests and dashboard integration remain unexecuted; no bank/payment connector or independently verified balances exist."
       ]
     },
     {
