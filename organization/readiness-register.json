@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "policy": "Readiness is evidence-based. A division cannot be marked standby or operational solely because a plan or repository exists.",
-  "last_reviewed": "2026-11-15",
+  "last_reviewed": "2026-11-16",
   "checks": [
     {
       "id": "mandate-defined",
@@ -126,24 +126,28 @@
     },
     {
       "division_id": "ecommerce",
-      "claimed_status": "deferred",
-      "verified_status": "deferred",
+      "claimed_status": "building",
+      "verified_status": "building",
       "evidence": [
         "Read-only listing CSV audit MVP exists."
       ],
       "open_gaps": [
-        "Major development intentionally deferred."
+        "Ecommerce is an active rebuild workstream; existing storefront/listing baseline and product economics require a current read-only audit.",
+        "No verified sales, unit economics, fulfilment quality or customer-acquisition economics are established.",
+        "No listings, purchases, publishing, paid promotion or account changes are authorized."
       ]
     },
     {
       "division_id": "animora",
-      "claimed_status": "deferred",
-      "verified_status": "deferred",
+      "claimed_status": "building",
+      "verified_status": "building",
       "evidence": [
         "Long-term studio ambition recorded in strategic planning."
       ],
       "open_gaps": [
-        "Expansion waits until the main organisation is successful and can fund it sustainably."
+        "Animora is an active development workstream; current site functionality, content pipeline and monetisation paths require a fresh audit.",
+        "Original characters and brand assets must be preserved; Lovable credits and paid tools remain off limits until explicitly authorized.",
+        "No public changes, publishing, paid production or launch is authorized."
       ]
     },
     {
@@ -192,14 +196,14 @@
     },
     {
       "division_id": "finance",
-      "claimed_status": "planned",
-      "verified_status": "planned",
+      "claimed_status": "building",
+      "verified_status": "building",
       "evidence": [
         "The Control Centre records CAD 0 as the default operating budget and reserves financial transactions, borrowing and paid commitments for explicit owner approval.",
         "Crypto PR #37 documents a paper-only CAD ledger and fee-inclusive FIFO accounting/reconciliation prototype."
       ],
       "open_gaps": [
-        "No independently verified finance operating workflow, cash-flow record, reserve policy or reconciled bank/account evidence is connected.",
+        "Finance workstream is active at foundation stage; no independently verified finance operating workflow, reconciled cash-flow record, reserve policy or bank/account evidence is connected.",
         "No confirmed finance owner, approval ledger, tax/accounting export or full organisation-wide cost reporting is established.",
         "No borrowing, yield, interest or investment activity is authorized; halal-sensitive structures require separate review."
       ]
