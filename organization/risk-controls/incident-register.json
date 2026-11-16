@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "status": "draft_empty_register",
+  "policy": "This register contains no live monitoring, alerting, staffed response or incident case. Add a record only when a real event is observed and evidence is available.",
+  "records": [],
+  "record_contract": {
+    "required_fields": [
+      "incident_id", "detected_at_utc", "reporting_division", "affected_divisions",
+      "category", "severity", "status", "facts", "hypotheses",
+      "evidence_references", "containment", "owner_status",
+      "next_review_at_utc", "created_at_utc", "last_updated_at_utc"
+    ],
+    "severity_values": ["SEV1", "SEV2", "SEV3", "SEV4"],
+    "status_values": ["detected", "triaging", "contained", "investigating", "recovering", "validating", "closed"],
+    "owner_status_values": ["unassigned", "assigned_pending_acknowledgement", "acknowledged"],
+    "facts_and_hypotheses_must_be_separate": true,
+    "evidence_must_reference_evidence_register": true,
+    "secrets_prohibited": true
+  }
+}
