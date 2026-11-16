@@ -1,6 +1,8 @@
 """Offline regression tests; no network or GitHub Actions required."""
 import json
 import unittest
+from pathlib import Path
+ROOT = Path(__file__).resolve().parent
 from validator import validate, load
 
 class WorkforceContractTests(unittest.TestCase):
