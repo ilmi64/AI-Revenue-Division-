@@ -1,0 +1,166 @@
+{
+  "schema_version": 1,
+  "status": "candidate_registry_research_only",
+  "reviewed_on": "2026-11-16",
+  "policy": {
+    "default_spend_cad": 0,
+    "production_approval": "none",
+    "execution_authority": "none",
+    "require_before_adoption": [
+      "official documentation and terms reviewed",
+      "Canadian access and eligibility checked",
+      "free-tier limits and billing triggers documented",
+      "data rights and redistribution restrictions checked",
+      "timestamp, timezone, cadence and latency measured",
+      "independent source/fallback assessed",
+      "outage, stale-data and correction handling tested",
+      "secrets and privacy review completed",
+      "owner approval for account connection or paid access"
+    ],
+    "prohibit": [
+      "credential sharing in source code",
+      "scraping where terms prohibit it",
+      "using indicative spot prices as executable broker quotes",
+      "mixing venues or instruments without explicit mapping",
+      "silently forward-filling stale observations",
+      "treating synthetic fixtures as live feed validation"
+    ]
+  },
+  "instruments": [
+    {
+      "id": "SOL-USD",
+      "asset_class": "crypto",
+      "market": "spot",
+      "purpose": "paper research and market microstructure",
+      "candidate_sources": [
+        {
+          "name": "Binance public market data",
+          "endpoint_class": "public REST market-data endpoints",
+          "status": "candidate_read_only_adapter_exists",
+          "evidence": "Existing repository adapter is read-only and limited to public market data; production freshness and independent provider failover not verified.",
+          "terms_review": "pending",
+          "canada_review": "pending"
+        },
+        {
+          "name": "Solana RPC providers",
+          "endpoint_class": "JSON-RPC",
+          "status": "candidate_not_configured",
+          "evidence": "Need two independently operated providers and confirmed endpoint terms/limits; no production RPC pair validated.",
+          "terms_review": "pending",
+          "canada_review": "pending"
+        }
+      ]
+    },
+    {
+      "id": "PUMP-SOL",
+      "asset_class": "crypto",
+      "market": "on-chain token/pool observations",
+      "purpose": "Pump.fun discovery and paper-only observation",
+      "candidate_sources": [
+        {
+          "name": "Pump.fun official interfaces/documentation",
+          "endpoint_class": "official API or documented public interface only",
+          "status": "review_required",
+          "evidence": "Access, rate limits, data rights, API-key requirements and allowed uses must be checked against current official terms before integration.",
+          "terms_review": "pending",
+          "canada_review": "pending"
+        }
+      ]
+    },
+    {
+      "id": "EURUSD",
+      "asset_class": "forex",
+      "market": "spot_reference",
+      "purpose": "FX regime/context research; not broker execution",
+      "candidate_sources": [
+        {
+          "name": "Frankfurter / ECB reference rates",
+          "endpoint_class": "reference-rate API",
+          "status": "candidate_reference_only",
+          "evidence": "Reference rates are not streaming executable bid/ask quotes; cadence and business-day publication make them unsuitable for intraday execution.",
+          "terms_review": "pending",
+          "canada_review": "pending"
+        },
+        {
+          "name": "Twelve Data",
+          "endpoint_class": "market-data API",
+          "status": "candidate_plan_restrictions_unverified",
+          "evidence": "Prior research indicated free Basic limitations; verify current plan, forex coverage, request quotas, redistribution and billing triggers before use.",
+          "terms_review": "pending",
+          "canada_review": "pending"
+        }
+      ]
+    },
+    {
+      "id": "US500",
+      "asset_class": "indices",
+      "market": "index_reference_or_proxy",
+      "purpose": "index context and research; instrument mapping required",
+      "candidate_sources": [
+        {
+          "name": "Stooq",
+          "endpoint_class": "historical/delayed data candidate",
+          "status": "candidate_unverified",
+          "evidence": "Verify exact symbols, delay, completeness, terms and automated access permissions. Do not assume CFD or futures equivalence.",
+          "terms_review": "pending",
+          "canada_review": "pending"
+        },
+        {
+          "name": "Broker-provided index CFD feed",
+          "endpoint_class": "broker quote stream",
+          "status": "not_connected_owner_approval_required",
+          "evidence": "A broker instrument feed is required for executable bid/ask and contract specifications; no broker connection is approved.",
+          "terms_review": "pending",
+          "canada_review": "pending"
+        }
+      ]
+    },
+    {
+      "id": "XAUUSD",
+      "asset_class": "metals",
+      "market": "spot_reference_vs_broker_CFD",
+      "purpose": "gold research; separate indicative bullion spot from broker-tradable XAUUSD",
+      "candidate_sources": [
+        {
+          "name": "Standard Bullion API",
+          "endpoint_class": "indicative bullion bid/ask and historical captures",
+          "status": "candidate_reference_only",
+          "evidence": "Previously identified keyless basic endpoint and historical sampling; attribution and raw bulk redistribution restrictions require current terms review. Not assumed to be broker XAUUSD.",
+          "terms_review": "pending",
+          "canada_review": "pending"
+        },
+        {
+          "name": "XAUS API",
+          "endpoint_class": "indicative spot/mid-market",
+          "status": "candidate_reference_only",
+          "evidence": "Previously identified keyless spot endpoint and limited retained intraday history; source independence from Gold-API.com was not established.",
+          "terms_review": "pending",
+          "canada_review": "pending"
+        },
+        {
+          "name": "GoldPrice.dev",
+          "endpoint_class": "delayed spot and daily historical data",
+          "status": "candidate_reference_only",
+          "evidence": "Previously identified delayed spot/daily history; intraday bars may be paid and therefore excluded until revenue and explicit approval.",
+          "terms_review": "pending",
+          "canada_review": "pending"
+        },
+        {
+          "name": "Broker XAUUSD quote stream",
+          "endpoint_class": "broker executable bid/ask",
+          "status": "not_connected_owner_approval_required",
+          "evidence": "Required for broker-specific spread, contract size, trading hours, financing/swap and execution assumptions; no account or connection approved.",
+          "terms_review": "pending",
+          "canada_review": "pending"
+        }
+      ]
+    }
+  ],
+  "global_gaps": [
+    "No source in this registry is approved for live execution.",
+    "No production source pair has passed independent-provider failover tests.",
+    "No provider has completed current terms, Canadian access, privacy and data-rights review in this build.",
+    "No XAUUSD broker feed or executable Forex/indices quote feed is connected.",
+    "No historical out-of-sample dataset has been approved for strategy validation."
+  ]
+}
