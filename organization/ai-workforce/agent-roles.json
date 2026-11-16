@@ -70,5 +70,18 @@
     "Animora and Future Creative Studio",
     "Trader Intelligence & Strategy Replication",
     "Business & Commercial"
-  ]
+  ],
+  "division_role_map": {
+    "executive": "executive-coordinator",
+    "ai-revenue": "division-specialist",
+    "technology": "division-specialist",
+    "research": "local-research-analyst",
+    "finance": "division-specialist",
+    "risk": "risk-compliance-reviewer",
+    "crypto": "division-specialist",
+    "ecommerce": "division-specialist",
+    "animora": "division-specialist",
+    "tisrd": "division-specialist",
+    "business-commercial": "division-specialist"
+  }
 }
