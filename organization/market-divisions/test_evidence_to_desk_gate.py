@@ -201,6 +201,38 @@ class EvidenceGateTests(unittest.TestCase):
         self.assertEqual(report["authority"], "research_only_no_execution_authority")
         self.assertTrue(all(row["data_class"] == "synthetic" for row in observations))
 
+    def test_crypto_identity_must_be_explicit_and_verified(self):
+        from evidence_to_desk_gate import validate_market_observation
+        obs = {
+            "instrument_id": "SOL-USD", "instrument_type": "crypto_spot",
+            "venue_or_broker": "SYNTHETIC_TEST_VENUE", "source_id": "synthetic-crypto-fixture",
+            "source_timestamp_utc": "2026-11-17T11:59:58Z",
+            "received_timestamp_utc": "2026-11-17T12:00:00Z", "data_class": "synthetic",
+            "licence_status": "not_applicable", "bid": 99.9, "ask": 100.1,
+            "currency": "USD", "unit_or_contract_multiplier": 1,
+            "session_state": "open", "portfolio_version": 1,
+            "base_asset": "SOL", "quote_asset": "USD", "market_pair": "SOL/USD",
+            "token_identity_status": "unverified"
+        }
+        result = validate_market_observation(obs, NOW, 120, 5)
+        self.assertFalse(result["eligible"])
+
+    def test_fx_requires_explicit_quote_per_base_orientation(self):
+        from evidence_to_desk_gate import validate_market_observation
+        obs = {
+            "instrument_id": "EURUSD", "instrument_type": "fx_spot",
+            "venue_or_broker": "SYNTHETIC_TEST_VENUE", "source_id": "synthetic-forex-fixture",
+            "source_timestamp_utc": "2026-11-17T11:59:58Z",
+            "received_timestamp_utc": "2026-11-17T12:00:00Z", "data_class": "synthetic",
+            "licence_status": "not_applicable", "bid": 1.08, "ask": 1.09,
+            "currency": "USD", "unit_or_contract_multiplier": 1,
+            "session_state": "open", "portfolio_version": 1,
+            "base_currency": "EUR", "quote_currency": "USD",
+            "quote_convention": "base_per_quote"
+        }
+        result = validate_market_observation(obs, NOW, 120, 5)
+        self.assertFalse(result["eligible"])
+
     def test_synthetic_fixture_registry_cannot_approve_unlisted_instrument(self):
         root = Path(__file__).parent
         registry = json.loads((root / "synthetic-market-source-registry.json").read_text(encoding="utf-8"))
