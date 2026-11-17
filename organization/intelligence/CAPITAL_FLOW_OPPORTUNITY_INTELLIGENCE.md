@@ -189,3 +189,16 @@ A standard-library-only JSON Lines normalizer and regression-test suite now live
 The normalizer is deliberately offline. It does not connect to J7, Buildix.trade, Sanbase/Santiment, RPC nodes, exchanges, wallets or any external service. It does not infer wallet ownership or intent. Duplicate consolidation requires chain, transaction hash and event type; conflicting observations are retained as explicit conflicts for human review. Quality flags are part of the event schema.
 
 **Verification status:** files committed; source and test suite have not been executed in this environment. No CI workflow was triggered. The implementation remains a development artifact and is not an operational monitoring service.
+
+
+## 15. Append-only evidence review history
+
+The offline review-history prototype is in `organization/intelligence/capital_flow/`:
+
+- `capital_flow_review.py` appends reviewer actions to a JSONL ledger, with sequential entry numbers and a SHA-256 hash chain.
+- `test_capital_flow_review.py` covers valid chain construction, sequence linkage, tampering, broken links, action/status constraints, timezone enforcement and append/read integrity.
+- `REVIEW-LEDGER.md` documents commands, controls and limitations.
+
+A review entry references the stable event ID, reviewer ID, action, reason, status and supporting evidence references. Corrections are new entries, not silent edits to the original event. Hash chaining detects accidental or unsophisticated alteration but is not a digital signature or tamper-proof storage. The prototype requires single-writer use and has no authentication, access control, encryption, distributed locking or protected backup.
+
+**Verification status:** implementation and tests committed; tests have not been executed in this hosted repository session. No CI workflow was triggered. This is an offline development prototype, not an operational evidence vault.
