@@ -79,6 +79,22 @@ class FailClosedPublisherTests(unittest.TestCase):
                 now_epoch=1000.0,
             )
 
+    def test_publication_uses_persistent_owner_only_lock_file(self):
+        self.publish()
+        lock_path = self.root / "shared" / "envelope.json.lock"
+        self.assertTrue(lock_path.is_file())
+        self.assertEqual(lock_path.stat().st_mode & 0o077, 0)
+
+    @unittest.skipUnless(hasattr(__import__("os"), "O_NOFOLLOW"), "platform lacks O_NOFOLLOW")
+    def test_publication_refuses_symlink_lock_file(self):
+        shared = self.root / "shared"
+        shared.mkdir()
+        target = self.root / "lock-target"
+        target.write_text("", encoding="utf-8")
+        (shared / "envelope.json.lock").symlink_to(target)
+        with self.assertRaises(OSError):
+            self.publish()
+
 
 if __name__ == "__main__":
     unittest.main()
