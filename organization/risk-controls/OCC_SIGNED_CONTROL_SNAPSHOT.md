@@ -50,3 +50,5 @@ This file is a producer-side contract, not an executable publisher. No HMAC secr
 - `write_envelope_atomic(...)` for atomic local/shared-filesystem publication with restrictive file permissions.
 
 The emitted envelope is exactly `{snapshot, signature_hex}`. The publisher library is not a daemon and does not decide whether OCC is CLEAR. The caller must derive status from the approved OCC risk state, pass the current policy digest and portfolio version, and publish only after those inputs are verified. The shared inbox must be protected by filesystem permissions. No cross-machine network transport is included.
+
+`policy_file_sha256(path)` calculates the exact digest from the approved policy file bytes. PolyBot must be configured with the same digest; a policy change requires a deliberate digest update and a fresh snapshot.
