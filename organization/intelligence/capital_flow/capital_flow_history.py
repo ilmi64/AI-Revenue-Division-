@@ -80,7 +80,7 @@ def main() -> int:
         projected = project_history(events, reviews)
         with args.output.open("w", encoding="utf-8") as handle:
             for record in projected:
-                handle.write(json.dumps(record, sort_keys=True, separators=(",", ":")) + "\\n")
+                handle.write(json.dumps(record, sort_keys=True, separators=(",", ":")) + "\n")
         print(json.dumps({"status": "projected", "event_count": len(projected),
                           "review_count": len(reviews),
                           "authority": "read_only_research_summary_no_execution_authority"}, indent=2))
