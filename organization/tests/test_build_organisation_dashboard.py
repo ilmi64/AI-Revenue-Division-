@@ -41,8 +41,10 @@ class OrganisationDashboardTests(unittest.TestCase):
         report = self.build()
         finance = next(x for x in report["division_scorecard"] if x["id"] == "finance")
         animora = next(x for x in report["division_scorecard"] if x["id"] == "animora")
-        self.assertEqual(finance["verified_status"], "planned")
+        self.assertEqual(finance["verified_status"], "building")
         self.assertEqual(animora["verified_status"], "deferred")
+        ecommerce = next(x for x in report["division_scorecard"] if x["id"] == "ecommerce")
+        self.assertEqual(ecommerce["verified_status"], "deferred")
         commercial = next(row for row in report["division_scorecard"] if row["id"] == "business-commercial")
         self.assertEqual(commercial["verified_status"], "building")
 
