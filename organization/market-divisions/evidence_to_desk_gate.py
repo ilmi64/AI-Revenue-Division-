@@ -142,6 +142,12 @@ def validate_capital_event(event: dict[str, Any], reviews: dict[str, dict[str, A
             errors.append("event ingestion is in the future")
         if (now - observed).total_seconds() > 7 * 86400:
             warnings.append("event observation older than default 7-day research window")
+        revalidate_by = event.get("revalidate_by_epoch")
+        if revalidate_by is not None:
+            if isinstance(revalidate_by, bool) or not isinstance(revalidate_by, (int, float)):
+                errors.append("revalidate_by_epoch invalid")
+            elif now.timestamp() > revalidate_by:
+                errors.append("event revalidation deadline has passed")
     except (KeyError, TypeError, ValueError, OverflowError):
         errors.append("observed_at_epoch/ingested_at_epoch invalid")
     source_ids = set(event.get("source_ids", [])) if isinstance(event.get("source_ids"), list) else set()
@@ -153,6 +159,13 @@ def validate_capital_event(event: dict[str, Any], reviews: dict[str, dict[str, A
             errors.append(f"latest review status {status!r} is not handoff-eligible")
         if review.get("action") in {"reject", "expire"}:
             errors.append("latest review action rejects or expires the event")
+        if review.get("action") == "challenge":
+            errors.append("latest review action challenges the event; resolve before handoff")
+        if not isinstance(review.get("reason"), str) or not review.get("reason").strip():
+            errors.append("latest review lacks a non-empty rationale")
+        review_refs = review.get("evidence_refs", [])
+        if not isinstance(review_refs, list):
+            errors.append("latest review evidence_refs is not an array")
         if not isinstance(review.get("reviewer_id"), str) or not review.get("reviewer_id"):
             errors.append("latest review lacks reviewer identity")
         try:
@@ -236,12 +249,28 @@ def validate_market_observation(obs: dict[str, Any], now: datetime,
         }
         if instrument_type in GOLD_TYPES and obs.get("gold_price_basis") not in allowed_basis[instrument_type]:
             errors.append("Gold price basis does not match the declared instrument type")
+        if not isinstance(obs.get("gold_session"), str) or not obs.get("gold_session").strip():
+            errors.append("Gold session/calendar provenance must be a non-empty string")
         if obs.get("gold_price_basis") == "indicative_bullion_spot" and instrument_type == "xauusd_spot":
             warnings.append("indicative bullion reference is not broker-executable XAUUSD")
         if obs.get("spot_futures_basis") is not None:
             refs = obs.get("evidence_refs")
+            leg_sources = obs.get("spot_futures_leg_source_ids")
+            leg_times = obs.get("spot_futures_leg_timestamps_utc")
             if not isinstance(refs, list) or len(set(refs)) < 2:
                 errors.append("spot/futures basis requires two distinct evidence references")
+            if not isinstance(leg_sources, list) or len(set(leg_sources)) != 2:
+                errors.append("spot/futures basis requires two distinct leg source IDs")
+            if not isinstance(leg_times, list) or len(leg_times) != 2:
+                errors.append("spot/futures basis requires two leg timestamps")
+            else:
+                try:
+                    first = parse_utc(leg_times[0], "spot_futures_leg_timestamps_utc[0]")
+                    second = parse_utc(leg_times[1], "spot_futures_leg_timestamps_utc[1]")
+                    if abs((first - second).total_seconds()) > max_clock_skew_seconds:
+                        errors.append("spot/futures basis legs are not time-aligned")
+                except GateError as exc:
+                    errors.append(str(exc))
         try:
             quote_age = float(obs["quote_age_seconds"])
             stale_limit = float(obs["stale_threshold_seconds"])
@@ -249,6 +278,8 @@ def validate_market_observation(obs: dict[str, Any], now: datetime,
                 errors.append("Gold quote age/threshold invalid")
             elif quote_age > stale_limit or obs.get("is_stale") is True:
                 errors.append("Gold quote is stale")
+            elif age is not None and abs(quote_age - max(age, 0.0)) > max_clock_skew_seconds:
+                errors.append("Gold quote_age_seconds conflicts with source timestamp age")
             elif obs.get("is_stale") is not False:
                 errors.append("Gold stale flag must be explicit false")
         except (KeyError, TypeError, ValueError):
