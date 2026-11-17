@@ -48,8 +48,29 @@ def verify_review_ledger(entries: list[dict[str, Any]]) -> dict[str, Any]:
             errors.append(f"ledger row {sequence} has invalid entry_hash")
         if not isinstance(entry.get("event_id"), str) or not entry["event_id"].strip():
             errors.append(f"ledger row {sequence} missing event_id")
-        if entry.get("action") not in {"review", "corroborate", "challenge", "correct", "reject", "expire", "reopen"}:
+        action = entry.get("action")
+        status = entry.get("review_status")
+        if action not in {"review", "corroborate", "challenge", "correct", "reject", "expire", "reopen"}:
             errors.append(f"ledger row {sequence} has invalid action")
+        if status is not None and status not in {
+            "watch", "research", "unverified", "corroborated", "rejected", "expired"
+        }:
+            errors.append(f"ledger row {sequence} has invalid review_status")
+        if action == "reject" and status != "rejected":
+            errors.append(f"ledger row {sequence} reject action/status mismatch")
+        if action == "expire" and status != "expired":
+            errors.append(f"ledger row {sequence} expire action/status mismatch")
+        if action == "reopen" and status not in {"watch", "research", "unverified"}:
+            errors.append(f"ledger row {sequence} reopen status invalid")
+        if entry.get("authority") != "research_review_only_no_trade_or_execution_authority":
+            errors.append(f"ledger row {sequence} authority marker missing")
+        if not isinstance(entry.get("reviewer_id"), str) or not entry["reviewer_id"].strip():
+            errors.append(f"ledger row {sequence} reviewer_id missing")
+        if not isinstance(entry.get("reason"), str) or not entry["reason"].strip():
+            errors.append(f"ledger row {sequence} reason missing")
+        refs = entry.get("evidence_refs")
+        if not isinstance(refs, list) or any(not isinstance(ref, str) or not ref.strip() for ref in refs):
+            errors.append(f"ledger row {sequence} evidence_refs malformed")
         try:
             _parse_utc(entry.get("reviewed_at"), "reviewed_at")
         except HandoffError as exc:
