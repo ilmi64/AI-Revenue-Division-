@@ -57,7 +57,7 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:20px}
 const $ = id => document.getElementById(id);
 let report = null;
 const safe = value => value === null || value === undefined || value === "" ? "—" : String(value);
-const el = (tag, value, cls) => { const node=document.createElement(tag); node.textContent=safe(value); if(cls) node.className=cls; return node; };
+const el = (tag, value, cls) => { const node=document.createElement(tag); if(value!==null && value!==undefined) node.textContent=String(value); if(cls) node.className=cls; return node; };
 const addCell = (row,value,cls) => { const td=el("td",value,cls); row.appendChild(td); };
 const arr = value => Array.isArray(value) ? value : [];
 const countErrors = data => Object.values(data||{}).reduce((n,v)=>n+(Array.isArray(v)?v.length:0),0);
@@ -67,9 +67,9 @@ function renderTasks(){
  const body=$("taskRows");body.replaceChildren();
  const tasks=arr(report.division_work_queue?.tasks);
  const filter=$("taskFilter").value;
- const visible=tasks.filter(t=>filter==="all"||t.status===filter||(filter==="blocked"&&arr(t.unresolved_dependencies).length>0));
- if(!visible.length){body.append(el("tr",""));const tr=body.lastChild;const td=el("td","No matching tasks.");td.colSpan=6;tr.append(td);return;}
- visible.forEach(t=>{const tr=document.createElement("tr");addCell(tr,(t.task_id||t.id)+" — "+safe(t.title));addCell(tr,t.division_id);addCell(tr,t.priority);addCell(tr,t.status);addCell(tr,t.derived_execution_state||t.execution_state||"not verified");addCell(tr,arr(t.unresolved_dependencies).join(", ")||"None recorded");body.append(tr);});
+ const visible=tasks.filter(t=>filter==="all"||(t.computed_status||t.recorded_status)===filter||(filter==="blocked"&&arr(t.unresolved_dependencies).length>0));
+ if(!visible.length){const tr=document.createElement("tr");const td=el("td","No matching tasks.");td.colSpan=6;tr.append(td);body.append(tr);return;}
+ visible.forEach(t=>{const tr=document.createElement("tr");addCell(tr,(t.task_id||t.id)+" — "+safe(t.title));addCell(tr,t.division_id);addCell(tr,t.priority);addCell(tr,t.computed_status||t.recorded_status||t.status);addCell(tr,t.derived_execution_state||t.execution_state||"not verified");addCell(tr,arr(t.unresolved_dependencies).join(", ")||"None recorded");body.append(tr);});
 }
 function render(data){
  report=data||{};$("dashboard").hidden=false;$("emptyState").hidden=true;
