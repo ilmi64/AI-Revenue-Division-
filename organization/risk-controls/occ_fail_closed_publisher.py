@@ -13,7 +13,7 @@ from pathlib import Path
 import time
 from typing import Any
 
-from .occ_snapshot_publisher import (
+from occ_snapshot_publisher import (
     SnapshotPublisherError,
     SnapshotSequenceStore,
     policy_file_sha256,
