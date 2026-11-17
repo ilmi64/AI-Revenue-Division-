@@ -56,7 +56,7 @@ class FinanceControlsTests(unittest.TestCase):
   r=self.report([row])
   self.assertEqual(r["halal_screening"]["flagged_sensitive_activity_count"],1)
  def test_received_cash_uses_only_received_statuses(self):
-  ledger=[{"payment_status":"pending","net_received_cad":"50"},{"payment_status":"settled","net_received_cad":"12","proof_reference":"receipt-1"}]
+  ledger=[{"payment_status":"not_due","currency":"CAD","net_received_cad":"50"},{"payment_status":"settled","currency":"CAD","net_received_cad":"12","proof_reference":"receipt-1"}]
   r=self.report(ledger=ledger)
   self.assertEqual(r["revenue"]["cash_received_cad_by_ledger_status"],"12.00")
  def test_received_revenue_without_proof_is_excluded_and_invalid(self):
