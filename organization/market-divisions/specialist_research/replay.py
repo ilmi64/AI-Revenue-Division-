@@ -149,6 +149,7 @@ def replay(observations: list[dict[str, Any]], gate_report: dict[str, Any],
             "trade_authority": False,
         },
         "authority": "research_only_no_execution_authority",
+        "trade_authority": False,
         "live_readiness": False,
         "limitations": [
             "Replay only; no live feed or unattended monitoring",
