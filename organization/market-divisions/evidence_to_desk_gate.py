@@ -205,7 +205,7 @@ def validate_market_observation(obs: dict[str, Any], now: datetime,
     if isinstance(bid, (int, float)) and isinstance(ask, (int, float)) and bid > ask:
         errors.append("crossed quote: bid exceeds ask")
     if obs.get("licence_status") not in {"approved", "not_applicable"}:
-        warnings.append("licence not cleared; research evidence cannot be promoted")
+        errors.append("licence status is not approved")
     if obs.get("data_class") != "live":
         warnings.append(f"data class {obs.get('data_class')!r} is not live; research-only")
     if obs.get("session_state") != "open":
@@ -244,9 +244,39 @@ def validate_market_observation(obs: dict[str, Any], now: datetime,
             "mode": "research_only", "trade_authority": False}
 
 
+def validate_market_source(obs: dict[str, Any], registry: dict[str, Any] | None) -> list[str]:
+    if registry is None:
+        return ["market source registry not supplied"]
+    errors = []
+    instruments = registry.get("instruments")
+    if not isinstance(instruments, list):
+        return ["market source registry instruments array missing"]
+    instrument = next((row for row in instruments
+                       if isinstance(row, dict) and row.get("id") == obs.get("instrument_id")), None)
+    if instrument is None:
+        return [f"instrument {obs.get('instrument_id')!r} absent from market source registry"]
+    candidates = instrument.get("candidate_sources", [])
+    matched = next((row for row in candidates if isinstance(row, dict)
+                    and row.get("name") == obs.get("source_id")), None)
+    if matched is None:
+        return [f"source {obs.get('source_id')!r} is not a named candidate for instrument"]
+    if matched.get("status") not in {"approved_read_only", "approved_manual"}:
+        errors.append(f"market source status {matched.get('status')!r} is not approved")
+    if matched.get("terms_review") != "approved":
+        errors.append("market source terms are not approved")
+    if matched.get("canada_review") != "approved":
+        errors.append("market source Canada eligibility is not approved")
+    return errors
+
+
 def run_pipeline(events: list[dict[str, Any]], ledger: list[dict[str, Any]],
                  registry: dict[str, Any], observations: list[dict[str, Any]],
-                 now: datetime, max_market_age: float, max_clock_skew: float) -> dict[str, Any]:
+                 now: datetime, max_market_age: float, max_clock_skew: float,
+                 market_registry: dict[str, Any] | None = None) -> dict[str, Any]:
+    if not events and not observations:
+        return {"status": "BLOCKED", "reason": "no evidence records supplied",
+                "ledger_errors": [], "capital_flow": [], "market_observations": [],
+                "authority": "research_only_no_execution_authority"}
     ledger_ok, ledger_errors = verify_ledger(ledger)
     if not ledger_ok:
         return {"status": "BLOCKED", "reason": "review ledger integrity failure",
@@ -262,8 +292,12 @@ def run_pipeline(events: list[dict[str, Any]], ledger: list[dict[str, Any]],
             result["eligible"] = False
             result["errors"].append("duplicate event_id in batch")
         cf_results.append(result)
-    market_results = [validate_market_observation(obs, now, max_market_age, max_clock_skew)
-                      for obs in observations]
+    market_results = []
+    for obs in observations:
+        result = validate_market_observation(obs, now, max_market_age, max_clock_skew)
+        result["errors"].extend(validate_market_source(obs, market_registry))
+        result["eligible"] = not result["errors"]
+        market_results.append(result)
     all_pass = all(x["eligible"] for x in cf_results + market_results)
     return {"status": "PASS_RESEARCH_GATES" if all_pass else "PARTIAL_OR_BLOCKED",
             "generated_at_utc": now.isoformat().replace("+00:00", "Z"),
@@ -278,6 +312,7 @@ def main() -> int:
     parser.add_argument("--events", type=Path, help="Normalized capital-flow JSONL")
     parser.add_argument("--ledger", type=Path, help="Capital-flow review ledger JSONL")
     parser.add_argument("--source-registry", type=Path, help="Capital-flow source registry JSON")
+    parser.add_argument("--market-source-registry", type=Path, help="Market-data source registry JSON")
     parser.add_argument("--observations", type=Path, help="Market observations JSONL")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--now-utc", required=True, help="Fixed UTC ISO-8601 reference time ending Z")
@@ -290,8 +325,9 @@ def main() -> int:
         ledger = read_jsonl(args.ledger) if args.ledger else []
         registry = read_json(args.source_registry) if args.source_registry else {"status": "research_only", "sources": []}
         observations = read_jsonl(args.observations) if args.observations else []
+        market_registry = read_json(args.market_source_registry) if args.market_source_registry else None
         report = run_pipeline(events, ledger, registry, observations, now,
-                              args.max_market_age_seconds, args.max_clock_skew_seconds)
+                              args.max_market_age_seconds, args.max_clock_skew_seconds, market_registry)
         args.output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         print(json.dumps({"status": report["status"], "capital_flow_records": len(events),
                           "market_observations": len(observations), "output": str(args.output),
