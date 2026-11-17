@@ -87,10 +87,35 @@ python -m specialist_research.replay \
 
 The replay expects the gate report's market-observation records to be keyed by
 the same `instrument_id` values as the observation JSONL. It does not consume
-capital-flow events implicitly. A separate verified capital-flow-to-Crypto
-handoff adapter remains a distinct next integration; this replay reports
-`not_consumed` rather than guessing that a capital-flow event belongs to a
-token or contract.
+capital-flow events implicitly. Capital-flow evidence remains opt-in. When all three local inputs are supplied,
+the replay re-runs the Capital Flow -> Crypto adapter for each Crypto observation.
+The adapter verifies the canonical event records, the complete review-ledger
+hash chain, latest review decision, source access/cost/terms status, event
+freshness/revalidation, evidence references and independent confidence fields.
+It attaches an event only when base asset, chain ID and contract address match
+exactly. Ticker-only matches are prohibited. A challenge, rejection, expiry,
+or invalid ledger/source record cannot be attached.
+
+Example (run from `organization/market-divisions`):
+
+```sh
+python -m specialist_research.replay \\
+  --observations fixtures/specialist-market-observations.synthetic.jsonl \\
+  --gate-report /tmp/occ-synthetic-gate-report.json \\
+  --capital-flow-events /path/to/canonical-events.jsonl \\
+  --capital-flow-reviews /path/to/review-ledger.jsonl \\
+  --capital-flow-source-registry /path/to/source-registry.json \\
+  --now-utc 2026-11-17T12:00:00Z \\
+  --output /tmp/occ-multi-desk-replay.json
+```
+
+All three Capital Flow inputs are required together. If omitted, the replay
+reports `not_consumed`. If supplied but no event passes, it reports
+`provided_no_eligible_match`. A failed adapter is marked blocked on the
+Crypto packet and cannot add an event. Capital Flow evidence never replaces
+the independent market evidence gate or market observation. The handoff is
+research context only and does not produce a directional signal, sizing,
+leverage, order, or execution permission.
 
 The harness detects duplicate instrument IDs, mismatched OCC portfolio
 versions/timestamps, invalid authority markers and unsupported instruments.
@@ -100,5 +125,5 @@ is a local deterministic replay tool, not a live supervisor or readiness test.
 Additional replay tests:
 
 ```sh
-python -m unittest specialist_research.test_replay -v
+python -m unittest specialist_research.test_replay specialist_research.test_capital_flow_handoff -v
 ```
