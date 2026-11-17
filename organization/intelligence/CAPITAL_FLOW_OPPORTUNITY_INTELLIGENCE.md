@@ -168,3 +168,11 @@ All gates currently remain not validated until evidence is recorded. This docume
 ## 12. Operating restrictions
 
 Research and offline development only. No exchange/broker/wallet connection with spending authority, no trading, no deposits, no leverage, no publishing, no external outreach, no paid APIs, and no background monitoring claim. Any external action or spending requires explicit owner approval.
+
+## 13. Initial repository artifacts
+
+- `capital-flow-event.schema.json`: canonical normalized event record schema.
+- `capital-flow-source.schema.json`: source-registry entry schema.
+- `capital-flow-source-registry.template.json`: starter registry for J7, Buildix.trade and Sanbase/Santiment. All three are explicitly marked unverified, not accessible, cost unknown, terms not reviewed, and research-only. No provider capability or free access is asserted.
+
+The two JSON schema files were fetched back from the development branch and confirmed to parse as JSON. This is only a JSON syntax check, not a JSON Schema metaschema validation or functional test. The source registry template is a planning artifact, not evidence of connected or approved sources.
