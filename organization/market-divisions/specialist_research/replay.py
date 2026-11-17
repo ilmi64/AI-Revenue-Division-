@@ -9,10 +9,10 @@ from typing import Any
 
 try:
     from .engines import ASSESSORS, coordinate
-    from .capital_flow_handoff import build_handoff
+    from .capital_flow_handoff import build_handoff, _read_jsonl
 except ImportError:  # direct script execution
     from engines import ASSESSORS, coordinate
-    from capital_flow_handoff import build_handoff
+    from capital_flow_handoff import build_handoff, _read_jsonl
 
 
 def replay(observations: list[dict[str, Any]], gate_report: dict[str, Any],
