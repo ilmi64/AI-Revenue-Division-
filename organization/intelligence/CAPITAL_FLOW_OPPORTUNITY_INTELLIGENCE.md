@@ -176,3 +176,16 @@ Research and offline development only. No exchange/broker/wallet connection with
 - `capital-flow-source-registry.template.json`: starter registry for J7, Buildix.trade and Sanbase/Santiment. All three are explicitly marked unverified, not accessible, cost unknown, terms not reviewed, and research-only. No provider capability or free access is asserted.
 
 The two JSON schema files were fetched back from the development branch and confirmed to parse as JSON. This is only a JSON syntax check, not a JSON Schema metaschema validation or functional test. The source registry template is a planning artifact, not evidence of connected or approved sources.
+
+
+## 14. Offline normalisation implementation
+
+A standard-library-only JSON Lines normalizer and regression-test suite now live in `organization/intelligence/capital_flow/`:
+
+- `capital_flow_normalizer.py`: deterministic timestamp/identifier normalization, conservative quality flags, validation, and duplicate consolidation.
+- `test_capital_flow_normalizer.py`: regression cases for missing/unknown values, timezone handling, self-transfers, exchange reshuffles, bridge hops, wrapped-token mint/burn, stale observations, duplicate evidence and conflicting duplicate values.
+- `README.md`: local usage, input contract, deduplication policy and limitations.
+
+The normalizer is deliberately offline. It does not connect to J7, Buildix.trade, Sanbase/Santiment, RPC nodes, exchanges, wallets or any external service. It does not infer wallet ownership or intent. Duplicate consolidation requires chain, transaction hash and event type; conflicting observations are retained as explicit conflicts for human review. Quality flags are part of the event schema.
+
+**Verification status:** files committed; source and test suite have not been executed in this environment. No CI workflow was triggered. The implementation remains a development artifact and is not an operational monitoring service.
