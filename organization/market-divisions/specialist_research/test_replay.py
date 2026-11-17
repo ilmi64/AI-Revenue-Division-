@@ -1,6 +1,7 @@
 import unittest
 
 from specialist_research.replay import replay
+from specialist_research.test_capital_flow_handoff import event as flow_event, review as flow_review, REGISTRY as FLOW_REGISTRY
 
 NOW = "2026-11-17T12:00:00Z"
 AUTHORITY = "research_only_no_execution_authority"
@@ -59,6 +60,34 @@ class ReplayTests(unittest.TestCase):
                          {"crypto", "forex", "indices", "gold"})
         self.assertFalse(result["live_readiness"])
         self.assertEqual(result["capital_flow_handoff"]["status"], "not_consumed")
+
+    def test_verified_capital_flow_event_attaches_only_to_exact_crypto_identity(self):
+        rows = [obs("crypto_spot", "SOL-USDC")]
+        events = [flow_event()]
+        reviews = [flow_review()]
+        result = replay(rows, gate(rows), NOW, events, reviews, FLOW_REGISTRY)
+        packet = result["desk_packets"][0]
+        self.assertEqual(len(packet["capital_flow_handoff"]["event_records"]), 1)
+        self.assertEqual(result["capital_flow_handoff"]["status"], "consumed_research_context")
+        self.assertFalse(result["capital_flow_handoff"]["trade_authority"])
+        self.assertFalse(result["trade_authority"])
+
+    def test_capital_flow_wrong_contract_never_attaches(self):
+        rows = [obs("crypto_spot", "SOL-USDC")]
+        events = [flow_event(contract_address="different-mint")]
+        result = replay(rows, gate(rows), NOW, events, [flow_review()], FLOW_REGISTRY)
+        self.assertEqual(result["capital_flow_handoff"]["accepted_event_count"], 0)
+        self.assertEqual(result["capital_flow_handoff"]["status"], "provided_no_eligible_match")
+
+    def test_capital_flow_broken_ledger_is_blocked_without_granting_authority(self):
+        rows = [obs("crypto_spot", "SOL-USDC")]
+        bad_review = flow_review()
+        bad_review["reason"] = "tampered"
+        result = replay(rows, gate(rows), NOW, [flow_event()], [bad_review], FLOW_REGISTRY)
+        packet = result["desk_packets"][0]
+        self.assertEqual(packet["capital_flow_handoff"]["status"], "blocked")
+        self.assertIn("CAPITAL_FLOW_HANDOFF_REJECTED", packet["risk_flags"])
+        self.assertFalse(result["trade_authority"])
 
     def test_nonpassing_gate_blocks_replay(self):
         rows = [obs("crypto_spot", "SOL-USDC")]
