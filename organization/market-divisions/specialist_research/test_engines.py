@@ -137,7 +137,7 @@ class SpecialistEngineTests(unittest.TestCase):
                           liquidity_evidence={"fixture_depth": True})
         second = assess_crypto(second_obs, NOW)
         result = coordinate([first, second], NOW)
-        self.assertEqual(result["status"], "research")
+        self.assertEqual(result["status"], "unverified")
         self.assertEqual(result["desk_count"], 1)
         self.assertEqual(result["packet_count"], 2)
 
