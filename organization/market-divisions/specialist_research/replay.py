@@ -15,10 +15,10 @@ except ImportError:  # direct script execution
     from engines import ASSESSORS, coordinate
     from capital_flow_handoff import build_handoff, _read_jsonl
 
-try:
-    from evidence_to_desk_gate import parse_utc, run_pipeline
-except ImportError:  # package import from repository root
-    from organization.market_divisions.evidence_to_desk_gate import parse_utc, run_pipeline
+# Run from organization/market-divisions so this resolves the canonical gate.
+import evidence_to_desk_gate as _evidence_gate
+parse_utc = _evidence_gate.parse_utc
+run_pipeline = _evidence_gate.run_pipeline
 
 
 DESK_TYPES = {
@@ -163,14 +163,23 @@ def replay(observations: list[dict[str, Any]], now_utc: str,
                    if isinstance(h.get("event_records"), list))
     flow_status = ("consumed_research_context" if accepted else
                    "provided_no_eligible_match" if capital_flow_events is not None else "not_consumed")
-    gate_code_path = Path(__file__).resolve().parent.parent / "evidence_to_desk_gate.py"
+    gate_code_path = Path(_evidence_gate.__file__).resolve()
     gate_code_sha256 = hashlib.sha256(gate_code_path.read_bytes()).hexdigest()
-    observations_sha256 = hashlib.sha256(
-        json.dumps(observations, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
-    ).hexdigest()
-    market_registry_sha256 = hashlib.sha256(
-        json.dumps(market_source_registry, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
-    ).hexdigest()
+
+    def canonical_sha256(value: Any) -> str:
+        encoded = json.dumps(value, sort_keys=True, separators=(",", ":"),
+                             ensure_ascii=False, allow_nan=False).encode("utf-8")
+        return hashlib.sha256(encoded).hexdigest()
+
+    observations_sha256 = canonical_sha256(observations)
+    market_registry_sha256 = canonical_sha256(market_source_registry)
+    capital_flow_inputs_sha256 = None
+    if capital_flow_events is not None:
+        capital_flow_inputs_sha256 = {
+            "events": canonical_sha256(capital_flow_events),
+            "reviews": canonical_sha256(capital_flow_reviews or []),
+            "source_registry": canonical_sha256(capital_flow_source_registry or {}),
+        }
     return {
         "schema_version": "1.2.0",
         "run_type": "offline_multi_desk_replay",
@@ -188,6 +197,8 @@ def replay(observations: list[dict[str, Any]], now_utc: str,
             "observations_sha256": observations_sha256,
             "market_source_registry_sha256": market_registry_sha256,
             "gate_implementation_sha256": gate_code_sha256,
+            "capital_flow_inputs_sha256": capital_flow_inputs_sha256,
+            "evaluation_time_utc": now_utc,
             "digest_note": "Reproducibility/integrity identifiers only; not signatures or source authentication",
         },
         "capital_flow_handoff": {
