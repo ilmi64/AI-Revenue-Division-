@@ -10,6 +10,7 @@ from occ_snapshot_publisher import (
     SnapshotPublisherError,
     SnapshotSequenceStore,
     canonical_snapshot_bytes,
+    write_envelope_atomic,
 )
 
 
@@ -113,6 +114,16 @@ class SnapshotPublisherTests(unittest.TestCase):
             now_epoch=1001, ttl_seconds=60, secret=SECRET,
         )
         self.assertEqual(envelope["snapshot"]["generated_at_epoch"], 1001.0)
+
+    def test_envelope_is_atomically_written_without_secret(self):
+        envelope = self.issue_clear()
+        destination = Path(self.temp.name) / "shared" / "occ-control-envelope.json"
+        written = write_envelope_atomic(envelope, destination)
+        self.assertEqual(written, destination)
+        decoded = json.loads(destination.read_text(encoding="utf-8"))
+        self.assertEqual(decoded, envelope)
+        self.assertNotIn(SECRET.decode("utf-8"), destination.read_text(encoding="utf-8"))
+        self.assertEqual(destination.stat().st_mode & 0o777, 0o600)
 
     def test_boolean_version_and_timestamp_are_rejected(self):
         with self.assertRaises(SnapshotPublisherError):
