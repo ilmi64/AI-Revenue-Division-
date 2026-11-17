@@ -1,0 +1,60 @@
+{
+  "schema_version": "1.0.0",
+  "status": "draft_research_and_paper_only",
+  "description": "Four-market synthetic fixture pack for offline schema and OCC evidence-gate regression tests.",
+  "reference_time_utc": "2026-11-17T12:00:00Z",
+  "market_source_registry": "synthetic-market-source-registry.json",
+  "observations": "fixtures/specialist-market-observations.synthetic.jsonl",
+  "fixture_policy": {
+    "data_class": "synthetic",
+    "external_network_calls": false,
+    "external_provider_claims": false,
+    "live_readiness": false,
+    "execution_authority": false,
+    "price_values": "invented deterministic test values; never quote as real market prices"
+  },
+  "instruments": [
+    {
+      "instrument_id": "SOL-USD",
+      "instrument_type": "crypto_spot",
+      "source_id": "synthetic-crypto-fixture",
+      "required_specialist_fields": [
+        "upstream_dependencies"
+      ],
+      "description": "Synthetic crypto_spot contract fixture; not a real quote."
+    },
+    {
+      "instrument_id": "EURUSD",
+      "instrument_type": "fx_spot",
+      "source_id": "synthetic-forex-fixture",
+      "required_specialist_fields": [
+        "base_currency",
+        "quote_currency"
+      ],
+      "description": "Synthetic fx_spot contract fixture; not a real quote."
+    },
+    {
+      "instrument_id": "US500-CASH-REFERENCE",
+      "instrument_type": "index_cash",
+      "source_id": "synthetic-index-fixture",
+      "required_specialist_fields": [],
+      "description": "Synthetic index_cash contract fixture; not a real quote."
+    },
+    {
+      "instrument_id": "XAUUSD",
+      "instrument_type": "xauusd_spot",
+      "source_id": "synthetic-gold-fixture",
+      "required_specialist_fields": [
+        "quote_unit",
+        "gold_price_basis",
+        "gold_session",
+        "quote_age_seconds",
+        "stale_threshold_seconds",
+        "is_stale",
+        "financing_status",
+        "settlement_type"
+      ],
+      "description": "Synthetic xauusd_spot contract fixture; not a real quote."
+    }
+  ]
+}
