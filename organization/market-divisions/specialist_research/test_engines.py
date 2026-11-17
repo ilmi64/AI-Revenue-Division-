@@ -123,8 +123,12 @@ class SpecialistEngineTests(unittest.TestCase):
         self.assertFalse(result["trade_authority"])
 
     def test_occ_accepts_multiple_distinct_instruments_from_one_desk(self):
-        first = assess_crypto(common("crypto_spot"), NOW)
-        first["instrument_id"] = "SOL-USDC"
+        first_obs = common("crypto_spot")
+        first_obs.update(instrument_id="SOL-USDC", base_asset="SOL", quote_asset="USDC",
+                         market_pair="SOL/USDC", token_identity_status="verified",
+                         chain_id="solana", contract_address="fixture-sol",
+                         currency="USDC", liquidity_evidence={"fixture_depth": True})
+        first = assess_crypto(first_obs, NOW)
         second_obs = common("crypto_spot")
         second_obs["instrument_id"] = "BTC-USDC"
         second_obs.update(base_asset="BTC", quote_asset="USDC", market_pair="BTC/USDC",
