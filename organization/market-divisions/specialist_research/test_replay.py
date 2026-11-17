@@ -145,6 +145,28 @@ class ReplayTests(unittest.TestCase):
         self.assertEqual(result["status"], "halt")
         self.assertEqual(result["desk_packets"][0]["status"], "halt")
 
+    def test_replay_emits_reproducibility_digests_for_raw_inputs_and_gate_code(self):
+        rows = [obs("crypto_spot", "SOL-USDC")]
+        result = self.run_replay(rows)
+        gate = result["evidence_gate"]
+        for key in ("observations_sha256", "market_source_registry_sha256",
+                    "gate_implementation_sha256"):
+            self.assertRegex(gate[key], r"^[a-f0-9]{64}$")
+        self.assertIsNone(gate["capital_flow_inputs_sha256"])
+        self.assertEqual(gate["evaluation_time_utc"], NOW)
+
+    def test_capital_flow_input_digests_are_recorded_when_supplied(self):
+        rows = [obs("crypto_spot", "SOL-USDC")]
+        result = self.run_replay(
+            rows, capital_flow_events=[flow_event(contract_address="fixture-mint")],
+            capital_flow_reviews=[flow_review()],
+            capital_flow_source_registry=FLOW_REGISTRY,
+        )
+        digests = result["evidence_gate"]["capital_flow_inputs_sha256"]
+        self.assertEqual(set(digests), {"events", "reviews", "source_registry"})
+        for value in digests.values():
+            self.assertRegex(value, r"^[a-f0-9]{64}$")
+
     def test_replay_does_not_accept_a_supplied_gate_report(self):
         rows = [obs("crypto_spot", "SOL-USDC")]
         with self.assertRaises(TypeError):
