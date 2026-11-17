@@ -107,7 +107,7 @@ class SnapshotSequenceStore:
         ttl_seconds: float,
         secret: bytes,
     ) -> dict[str, Any]:
-        if status not in {"CLEAR", "HALT"}:
+        if not isinstance(status, str) or status not in {"CLEAR", "HALT"}:
             raise SnapshotPublisherError("status must be CLEAR or HALT")
         if not isinstance(stop_conditions, list) or any(
             not isinstance(item, str) or item not in _ALLOWED_STOP_CONDITIONS
