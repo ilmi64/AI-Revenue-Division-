@@ -129,6 +129,10 @@ def _validate_event(event: dict[str, Any], now: datetime, max_age_seconds: int) 
     event_id = event.get("event_id")
     if not isinstance(event_id, str) or not event_id.strip():
         raise HandoffError("canonical event_id missing")
+    if not isinstance(event.get("event_type"), str) or not event["event_type"].strip():
+        raise HandoffError(f"{event_id}: event_type missing")
+    if event.get("direction", "unknown") not in {"inflow", "outflow", "internal", "unknown"}:
+        raise HandoffError(f"{event_id}: direction invalid")
     event_time = datetime.fromtimestamp(_epoch(event.get("observed_at_epoch"), "observed_at_epoch"), timezone.utc)
     if event_time > now:
         raise HandoffError(f"{event_id}: event timestamp is in the future")
@@ -215,6 +219,11 @@ def build_handoff(events: list[dict[str, Any]], reviews: list[dict[str, Any]],
             decision = latest.get(event_id)
             if decision is None:
                 raise HandoffError(f"{event_id}: no explicit review-ledger decision")
+            reviewed_at = _parse_utc(decision.get("reviewed_at"), "reviewed_at")
+            if reviewed_at > now:
+                raise HandoffError(f"{event_id}: review timestamp is in the future")
+            if (now - reviewed_at).total_seconds() > 90 * 86400:
+                raise HandoffError(f"{event_id}: latest review is stale")
             action = decision.get("action")
             status = decision.get("review_status")
             if action in BLOCKING_ACTIONS:
