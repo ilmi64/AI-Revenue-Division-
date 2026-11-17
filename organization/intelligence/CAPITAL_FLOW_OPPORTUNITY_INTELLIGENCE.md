@@ -202,3 +202,10 @@ The offline review-history prototype is in `organization/intelligence/capital_fl
 A review entry references the stable event ID, reviewer ID, action, reason, status and supporting evidence references. Corrections are new entries, not silent edits to the original event. Hash chaining detects accidental or unsophisticated alteration but is not a digital signature or tamper-proof storage. The prototype requires single-writer use and has no authentication, access control, encryption, distributed locking or protected backup.
 
 **Verification status:** implementation and tests committed; tests have not been executed in this hosted repository session. No CI workflow was triggered. This is an offline development prototype, not an operational evidence vault.
+
+
+## 16. Read-only event-history projection
+
+`capital_flow_history.py` combines a normalized event JSONL file with a verified review ledger and emits a derived event-history JSONL view. It preserves the source event unchanged, shows the complete review timeline, carries forward the latest explicit review status, and fails closed on duplicate event IDs or reviews referencing missing events.
+
+The projection is read-only and has no trading, wallet, publishing or provider authority. Its regression suite covers timeline projection, source-record preservation, status carry-forward, duplicate IDs, orphan reviews and events without review entries. Tests are committed but have not been run in this hosted session.
