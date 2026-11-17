@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -162,8 +163,16 @@ def replay(observations: list[dict[str, Any]], now_utc: str,
                    if isinstance(h.get("event_records"), list))
     flow_status = ("consumed_research_context" if accepted else
                    "provided_no_eligible_match" if capital_flow_events is not None else "not_consumed")
+    gate_code_path = Path(__file__).resolve().parent.parent / "evidence_to_desk_gate.py"
+    gate_code_sha256 = hashlib.sha256(gate_code_path.read_bytes()).hexdigest()
+    observations_sha256 = hashlib.sha256(
+        json.dumps(observations, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    ).hexdigest()
+    market_registry_sha256 = hashlib.sha256(
+        json.dumps(market_source_registry, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    ).hexdigest()
     return {
-        "schema_version": "1.1.0",
+        "schema_version": "1.2.0",
         "run_type": "offline_multi_desk_replay",
         "as_of_utc": now_utc,
         "status": occ["status"],
@@ -176,6 +185,10 @@ def replay(observations: list[dict[str, Any]], now_utc: str,
             "market_observation_count": len(gate_rows),
             "max_market_age_seconds": max_market_age_seconds,
             "max_clock_skew_seconds": max_clock_skew_seconds,
+            "observations_sha256": observations_sha256,
+            "market_source_registry_sha256": market_registry_sha256,
+            "gate_implementation_sha256": gate_code_sha256,
+            "digest_note": "Reproducibility/integrity identifiers only; not signatures or source authentication",
         },
         "capital_flow_handoff": {
             "status": flow_status, "accepted_event_count": accepted,
