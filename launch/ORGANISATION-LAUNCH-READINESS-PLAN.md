@@ -3,13 +3,13 @@
 **Status:** Draft operating plan; not a launch authorization  
 **Baseline:** 2026-11-16  
 **Scope:** All active divisions except Animora, which is on hold  
-**Launch model:** Coordinated organisation-wide launch with capability-specific gates
+**Launch model:** Coordinated readiness by Christmas 2026; controlled activation after New Year 2027, capability-specific and subject to approvals
 
 ## 1. Objective
 
-Prepare one governed organisation, not disconnected prototypes. All ten active divisions participate in the initial readiness programme. A division may enter in restricted read-only, research or paper mode while higher-risk capabilities remain disabled.
+Prepare one governed organisation, not disconnected prototypes. All ten active divisions participate in the initial readiness programme. The readiness target is December 24, 2026. The intended coordinated activation window is the first eligible operating sessions after New Year, planning around the week of January 4, 2027.
 
-A document, dashboard, passing unit test, mergeable pull request or synthetic simulation is not by itself evidence of operational readiness.
+A division may enter in restricted read-only, research or paper mode while higher-risk capabilities remain disabled. A document, dashboard, passing unit test, mergeable pull request or synthetic simulation is not by itself evidence of operational readiness.
 
 ## 2. Scope
 
@@ -27,22 +27,35 @@ Active divisions:
 
 Animora is excluded from active implementation by owner instruction. Preserve existing work; do not edit its app, consume Lovable credits or advance studio/store production until resumed.
 
-## 3. Launch tiers
+## 3. Two-stage schedule
 
-### Tier A — Controlled internal/read-only launch
+### Stage 1 — Readiness by December 24, 2026
+
+Complete applicable build, integration, security review, test execution, recovery validation and cross-division rehearsal. Freeze the proposed activation scope, exact commits, operators, backups, procedures, exclusions and outstanding blockers in an executive go/no-go packet. December 24 is a readiness checkpoint, not an automatic production or market launch.
+
+### Stage 2 — Controlled activation after New Year 2027
+
+Aim to initiate approved divisions at the first eligible operating sessions after the New Year holiday, using the week of January 4, 2027 as the planning window. Verify each exchange, broker, data provider and jurisdiction calendar immediately before activation. Crypto, FX, metals, indices and other instruments do not necessarily share the same holiday schedule, liquidity or session times.
+
+Start with restricted internal coordination, authorized read-only research/monitoring and paper operation where proven. Activate each division only within its approved scope. If a division fails its gate, keep it blocked or exclude it while safe independent divisions proceed.
+
+### Tier A — Controlled internal/read-only/paper operation
+
 Potential scope: source intake, research, dashboards, internal task routing, evidence records, finance simulations, risk monitoring, offline tests, manual research and paper trading. Requires source permissions, security, provenance, monitoring, incident and rollback controls.
 
 ### Tier B — Limited commercial operation
+
 A specific service or product may operate only after its own legal, tax, privacy, consumer, contract, fulfilment, funding and owner-approval gates pass. This does not authorize trading or other divisions' external actions.
 
 ### Tier C — Live financial operation
+
 Separate higher gate. Requires verified Ontario eligibility and legal/product review, approved counterparties where applicable, approved accounts and permissions, tested read-only feeds, independently validated strategies, capital/risk limits, custody/signing controls, incident response and explicit owner authorization. This plan does not authorize live trading, wallet signing, deposits, withdrawals or financial transactions.
 
-A Tier A launch must never be described as Tier B or Tier C readiness.
+A Tier A activation must never be described as Tier B or Tier C readiness.
 
 ## 4. Organisation-wide exit criteria
 
-All mandatory controls must pass before Tier A launch:
+All mandatory controls must pass before the selected activation scope:
 - Canonical division and owner-role registry; no duplicate or orphan divisions.
 - OCC status, queue, dependency, evidence, approval and incident views reconcile to source records.
 - Every task has a unique ID, scope, responsible role, dependency, acceptance evidence, risk class and approval gate.
@@ -97,13 +110,13 @@ Executive and Risk functions may recommend, challenge and stop. They cannot auth
 - No TikTok work unless owner reopens that channel.
 - Do not claim unattended background operation without a supported runtime, named owner, alert path and tested recovery.
 
-## 9. Initial launch decision
+## 9. Initial activation decision
 
-The first launch candidate is Tier A: coordinated internal, read-only and paper operations across all ten active divisions. This is a target, not a declaration of readiness. Tier B and Tier C are separate approvals.
+The initial coordinated activation candidate is restricted Tier A: internal coordination, approved read-only research/monitoring and paper operation across the ten active divisions. This is a target, not a declaration of readiness. Activation after New Year requires venue-calendar checks, fresh data/permission checks, passed acceptance evidence and explicit owner go/no-go approval. Tier B and Tier C are separate approvals.
 
 ## 10. Required executive launch packet
 
-Before Tier A go/no-go, assemble:
+Before activation, assemble:
 - Current division readiness matrix and linked evidence.
 - Exact commit/branch identifiers and executed test results.
 - Data-source and permission register.
@@ -113,4 +126,5 @@ Before Tier A go/no-go, assemble:
 - End-to-end rehearsal results, defects and remediation.
 - Backup/restore and rollback evidence.
 - Outstanding blockers and scope exclusions.
+- Market/venue holiday and session-calendar verification for any market-facing capability.
 - Owner's explicit go/no-go decision and approved operating envelope.
