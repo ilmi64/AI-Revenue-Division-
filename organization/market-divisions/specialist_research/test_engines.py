@@ -122,6 +122,21 @@ class SpecialistEngineTests(unittest.TestCase):
         self.assertEqual(result["halted_desks"], ["crypto"])
         self.assertFalse(result["trade_authority"])
 
+    def test_occ_accepts_multiple_distinct_instruments_from_one_desk(self):
+        first = assess_crypto(common("crypto_spot"), NOW)
+        first["instrument_id"] = "SOL-USDC"
+        second_obs = common("crypto_spot")
+        second_obs["instrument_id"] = "BTC-USDC"
+        second_obs.update(base_asset="BTC", quote_asset="USDC", market_pair="BTC/USDC",
+                          token_identity_status="verified", chain_id="bitcoin",
+                          contract_address="fixture-btc", currency="USDC",
+                          liquidity_evidence={"fixture_depth": True})
+        second = assess_crypto(second_obs, NOW)
+        result = coordinate([first, second], NOW)
+        self.assertEqual(result["status"], "research")
+        self.assertEqual(result["desk_count"], 1)
+        self.assertEqual(result["packet_count"], 2)
+
     def test_occ_halts_on_portfolio_version_mismatch(self):
         a = assess_crypto(common("crypto_spot"), NOW)
         b = assess_forex(common("fx_spot"), NOW)
