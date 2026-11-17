@@ -41,7 +41,7 @@ class SpecialistEngineTests(unittest.TestCase):
                  chain_id="solana", contract_address="synthetic-mint",
                  liquidity_evidence={"depth": "fixture"})
         p = assess_crypto(o, NOW)
-        self.assertEqual(p["status"], "research")
+        self.assertEqual(p["status"], "unverified")
         self.assertFalse(p["trade_authority"])
 
     def test_crypto_blocks_unverified_token(self):
