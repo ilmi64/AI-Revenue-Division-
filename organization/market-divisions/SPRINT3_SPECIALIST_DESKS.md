@@ -43,3 +43,11 @@ Asset identity alone does not establish permissibility. Instrument-specific revi
 ## Not included
 
 No live feeds, paid data, broker APIs, wallet connections, signing, order routing, trade sizing, leverage, execution, deployment, external account changes or spending. Synthetic fixtures may test code paths but cannot be represented as live market evidence.
+
+## Capital Flow Intelligence integration
+
+The Crypto desk may receive evidence-only event packets under [the Capital Flow → Crypto handoff](CAPITAL-FLOW-CRYPTO-DESK-HANDOFF.md), validated by `capital-flow-desk-handoff.schema.json`. Canonical event records and the verified review ledger remain authoritative; packets are not signals or trade instructions.
+
+## Gold data-quality contract
+
+Gold observations are subject to [the XAUUSD data-quality controls](GOLD-XAUUSD-DATA-QUALITY.md) and the Gold-specific conditions in `market-observation.schema.json`. Indicative bullion spot, broker XAUUSD, gold CFDs and COMEX futures remain distinct instrument bases.
