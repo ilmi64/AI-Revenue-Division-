@@ -50,6 +50,18 @@ def canonical_snapshot_bytes(snapshot: dict[str, Any]) -> bytes:
         raise SnapshotPublisherError("snapshot is not canonical finite JSON") from exc
 
 
+def policy_file_sha256(path: str | Path) -> str:
+    """Calculate the exact SHA-256 digest of the approved policy file bytes."""
+    digest = hashlib.sha256()
+    try:
+        with Path(path).open("rb") as handle:
+            for chunk in iter(lambda: handle.read(65536), b""):
+                digest.update(chunk)
+    except OSError as exc:
+        raise SnapshotPublisherError(f"unable to read approved policy file: {type(exc).__name__}") from exc
+    return digest.hexdigest()
+
+
 def sign_snapshot(snapshot: dict[str, Any], secret: bytes) -> str:
     """Return lowercase HMAC-SHA256 hex; never persist or transmit the secret."""
     if not isinstance(secret, bytes) or len(secret) < 32:
