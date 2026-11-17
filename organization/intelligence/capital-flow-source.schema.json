@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/occ/capital-flow-source.schema.json",
+  "title": "Capital Flow Intelligence Source Registry Entry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source_id",
+    "provider",
+    "dataset",
+    "access_mode",
+    "access_status",
+    "cost_status",
+    "terms_review_status",
+    "coverage",
+    "methodology_notes",
+    "known_blind_spots",
+    "last_checked_epoch",
+    "operational_status"
+  ],
+  "properties": {
+    "source_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provider": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dataset": {
+      "type": "string",
+      "minLength": 1
+    },
+    "access_mode": {
+      "enum": [
+        "public_web",
+        "public_export",
+        "existing_authorized_connection",
+        "manual_entry",
+        "not_accessible"
+      ]
+    },
+    "access_status": {
+      "enum": [
+        "verified",
+        "unverified",
+        "unavailable",
+        "restricted"
+      ]
+    },
+    "cost_status": {
+      "enum": [
+        "free_verified",
+        "paid",
+        "unknown",
+        "not_applicable"
+      ]
+    },
+    "terms_review_status": {
+      "enum": [
+        "reviewed_permitted",
+        "reviewed_restricted",
+        "not_reviewed",
+        "unknown"
+      ]
+    },
+    "coverage": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "metric_definitions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "update_cadence": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "historical_depth": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "methodology_notes": {
+      "type": "string"
+    },
+    "known_blind_spots": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "attribution_methodology": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "last_checked_epoch": {
+      "type": "number",
+      "minimum": 0
+    },
+    "operational_status": {
+      "enum": [
+        "research_only",
+        "approved_manual",
+        "approved_adapter",
+        "disabled",
+        "rejected"
+      ]
+    },
+    "rate_limit_notes": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "credential_reference": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Non-secret reference only. Never store credentials, tokens, or API keys here."
+    }
+  }
+}
