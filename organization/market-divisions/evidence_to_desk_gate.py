@@ -291,10 +291,45 @@ def validate_market_observation(obs: dict[str, Any], now: datetime,
             warnings.append("Gold settlement structure unknown")
         if instrument_type == "gold_future" and (not obs.get("contract_code") or not obs.get("expiry_utc")):
             errors.append("Gold futures require contract code and expiry")
-    if instrument_type == "fx_spot" and (not obs.get("base_currency") or not obs.get("quote_currency")):
-        errors.append("FX base/quote currency mapping missing")
-    if instrument_type in {"index_future", "gold_future"} and not obs.get("contract_code"):
-        errors.append("futures contract code missing")
+    if instrument_type in {"crypto_spot", "crypto_perpetual"}:
+        for field in ("base_asset", "quote_asset", "market_pair"):
+            if not isinstance(obs.get(field), str) or not obs.get(field).strip():
+                errors.append(f"Crypto {field} missing")
+        if obs.get("base_asset") == obs.get("quote_asset"):
+            errors.append("Crypto base and quote assets must differ")
+        if obs.get("token_identity_status") == "unverified":
+            errors.append("Crypto token identity is unverified")
+        if obs.get("token_identity_status") not in {"verified", "unverified", "not_applicable"}:
+            errors.append("Crypto token_identity_status missing or invalid")
+        chain_id, contract = obs.get("chain_id"), obs.get("contract_address")
+        if (chain_id is None) != (contract is None):
+            errors.append("Crypto chain_id and contract_address must both be supplied or both be null")
+    if instrument_type == "crypto_perpetual":
+        if not isinstance(obs.get("settlement_asset"), str) or not obs.get("settlement_asset"):
+            errors.append("Crypto perpetual settlement asset missing")
+        rate, interval = obs.get("funding_rate"), obs.get("funding_interval_hours")
+        if rate is not None and (isinstance(rate, bool) or not isinstance(rate, (int, float)) or not math.isfinite(rate)):
+            errors.append("Crypto perpetual funding_rate invalid")
+        if interval is not None and (isinstance(interval, bool) or not isinstance(interval, (int, float)) or not math.isfinite(interval) or interval <= 0):
+            errors.append("Crypto perpetual funding interval invalid")
+    if instrument_type == "fx_spot":
+        if not obs.get("base_currency") or not obs.get("quote_currency"):
+            errors.append("FX base/quote currency mapping missing")
+        if obs.get("quote_convention") != "base_per_quote":
+            errors.append("FX quote convention must be explicit as quote currency per base unit")
+        if obs.get("base_currency") == obs.get("quote_currency"):
+            errors.append("FX base and quote currencies must differ")
+    if instrument_type == "index_cash":
+        if not obs.get("index_code") or not obs.get("index_calculation_currency"):
+            errors.append("cash index identity/currency missing")
+    if instrument_type in {"index_future", "gold_future"}:
+        if not obs.get("contract_code"):
+            errors.append("futures contract code missing")
+        if not obs.get("expiry_utc"):
+            errors.append("futures expiry missing")
+    if instrument_type in {"index_cfd", "gold_cfd"}:
+        if not obs.get("broker_symbol") or not obs.get("contract_unit"):
+            errors.append("broker CFD symbol/contract unit missing")
     return {"record_id": obs.get("instrument_id"), "eligible": not errors,
             "errors": errors, "warnings": warnings, "age_seconds": age,
             "mode": "research_only", "trade_authority": False}
