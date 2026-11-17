@@ -7,6 +7,7 @@ publish is HALT. It does not start a service or publish on import.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -16,7 +17,6 @@ from typing import Any
 from occ_snapshot_publisher import (
     SnapshotPublisherError,
     SnapshotSequenceStore,
-    policy_file_sha256,
     write_envelope_atomic,
 )
 
@@ -42,7 +42,8 @@ def publish_draft_baseline_halt(
     """
     policy_file = Path(policy_path)
     try:
-        policy = json.loads(policy_file.read_text(encoding="utf-8"))
+        policy_bytes = policy_file.read_bytes()
+        policy = json.loads(policy_bytes.decode("utf-8"))
     except (OSError, UnicodeError, json.JSONDecodeError) as exc:
         raise FailClosedPublicationError(
             f"cannot read authoritative OCC policy ({type(exc).__name__})"
@@ -51,7 +52,10 @@ def publish_draft_baseline_halt(
         raise FailClosedPublicationError("authoritative OCC policy must be a JSON object")
 
     policy_status = policy.get("status")
-    policy_digest = policy_file_sha256(policy_file)
+    if not isinstance(policy_status, str) or len(policy_status) > 100:
+        policy_status = "invalid_or_unrecognised"
+    # Bind the snapshot to the exact same bytes that were parsed above.
+    policy_digest = hashlib.sha256(policy_bytes).hexdigest()
     timestamp = time.time() if now_epoch is None else now_epoch
 
     # This policy is deliberately a draft baseline, not an operational
