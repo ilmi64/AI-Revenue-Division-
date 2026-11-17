@@ -26,12 +26,12 @@ Expected: `PASS_RESEARCH_GATES` for these four fixtures only. The report will ex
 
 | Desk | Fixture | Explicit identity controls |
 |---|---|---|
-| Crypto | SOL-USD spot | Venue, USD quote, synthetic provenance |
-| Forex | EURUSD spot | EUR base / USD quote orientation |
-| Indices | US500 cash reference | Cash index identity, not futures or CFD |
+| Crypto | SOL-USD spot | Explicit SOL/USD orientation, venue-native pair, token identity state, synthetic provenance |
+| Forex | EURUSD spot | EUR base / USD quote, explicit quote-per-base convention |
+| Indices | US500 cash reference | Cash index code and calculation currency, distinct from futures and CFD |
 | Gold | XAUUSD synthetic spot | Synthetic basis, troy-ounce quote unit, named UTC test session, freshness, financing and settlement marked unreviewed/unknown |
 
-Gold's unknown financing and settlement remain warnings, not a suitability approval. The indicative/broker quote distinction is preserved. No instrument is asserted to be halal or suitable.
+The common contract also carries dedicated conditionals for Crypto spot/perpetual identity and funding metadata, Forex pair orientation, cash-index identity, futures expiry and CFD broker symbols. Gold's unknown financing and settlement remain warnings, not a suitability approval. The indicative/broker quote distinction is preserved. No instrument is asserted to be halal or suitable.
 
 ## Safety boundaries
 
