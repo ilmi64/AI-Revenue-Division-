@@ -31,7 +31,20 @@ A read-only workflow-file audit found scheduled triggers in both default-branch 
 
 The workflow files contain these schedules; the current enabled/disabled state and future run history were not verified. A local instruction not to trigger Actions does not itself pause scheduled workflows. The owner should confirm both workflows are disabled/paused in GitHub Actions while the 2,000-minute reserve is protected. Do not edit workflow files to pause them during this hold, because a push/PR event could itself trigger a run. No workflow was triggered by this audit.
 
-## 4. Countdown work plan
+## 4. Current OCC baseline and reconciliation gap
+
+The latest read-only parse of the inherited OCC source records shows:
+
+- 20 work-queue tasks; all 20 remain `proposed`.
+- All 20 tasks remain `unassigned_pending_owner_confirmation`; none is recorded as started or completed.
+- The inherited readiness register reports nine active divisions as `building` and Crypto as `testing`; it still reports Animora as `building`.
+- The inherited queue still contains ANI-001 and ANI-002 as proposed tasks.
+
+The owner's later instruction to place Animora ON_HOLD takes precedence operationally. The inherited readiness register and queue have not yet been reconciled to that instruction because the launch PR is deliberately kept on its current parent commit. Until a reviewed source-register update is integrated, OCC dashboard outputs may still display stale Animora and queue states. Do not treat those inherited values as current owner intent or as evidence of assigned work.
+
+The immediate OCC priority is to reconcile owner-directed holds, active scope, role/backup assignments, queue state and dashboard interpretation before any launch rehearsal.
+
+## 5. Countdown work plan
 
 Dates are target windows, not evidence that work has happened. If a prerequisite or Actions release is delayed, keep the relevant gate blocked rather than compressing or skipping safety checks.
 
@@ -46,7 +59,7 @@ Dates are target windows, not evidence that work has happened. If a prerequisite
 | Dec 19-22 | Final evidence review, access/secret review, zero-spend check, restore/rollback check, scope and exclusions freeze | Complete executive launch packet; every gate PASS or explicit BLOCKED; no silent waivers |
 | Dec 23-24 | Owner review and Tier A go/no-go only | Owner's explicit decision and narrowly defined operating envelope; otherwise remain in controlled preparation |
 
-## 5. GitHub Actions release-day sequence
+## 6. GitHub Actions release-day sequence
 
 Do not trigger workflows while the hold is active. Once the owner explicitly releases the hold, use this order and stop on critical failures:
 
@@ -61,7 +74,7 @@ Do not trigger workflows while the hold is active. Once the owner explicitly rel
 
 For each run record workflow URL, commit SHA, trigger, start/end, minutes consumed if available, pass/fail, skipped tests, artifacts and defects. A failed run is not to be rerun repeatedly without diagnosing the failure.
 
-## 6. Repository integration controls
+## 7. Repository integration controls
 
 ### OCC repository
 
@@ -83,7 +96,7 @@ Current reviewed chain and known drift:
 
 Every integration decision requires refreshed PR metadata, changed-file lists, exact base/head SHAs, diff review, dependency verification and owner approval. Mergeable metadata alone is insufficient.
 
-## 7. Ten-division work allocation
+## 8. Ten-division work allocation
 
 | Division | Christmas critical path |
 |---|---|
@@ -100,7 +113,7 @@ Every integration decision requires refreshed PR metadata, changed-file lists, e
 
 Animora is intentionally excluded from implementation and launch scope until the owner resumes it.
 
-## 8. Tier A acceptance gate
+## 9. Tier A acceptance gate
 
 A Tier A go/no-go packet must show all of the following for the exact selected scope:
 
@@ -120,7 +133,7 @@ A Tier A go/no-go packet must show all of the following for the exact selected s
 
 A division may be excluded from Tier A only if its dependencies are isolated and the exclusion is explicit. Crypto remains paper-only unless a separate future live-readiness process and explicit approval are completed.
 
-## 9. Executive reporting cadence
+## 10. Executive reporting cadence
 
 At each active work session, report only:
 - What changed, with branch/PR/file/commit references.
