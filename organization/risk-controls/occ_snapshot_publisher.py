@@ -10,8 +10,10 @@ import hashlib
 import hmac
 import json
 import math
+import os
 from pathlib import Path
 import sqlite3
+import tempfile
 from typing import Any
 from uuid import uuid4
 
@@ -158,3 +160,51 @@ class SnapshotSequenceStore:
             db.commit()
 
         return {"snapshot": snapshot, "signature_hex": signature}
+
+
+def write_envelope_atomic(envelope: dict[str, Any], destination: str | Path) -> Path:
+    """Atomically publish a signed envelope to a trusted shared local inbox.
+
+    The destination directory must be accessible only to the OCC publisher and
+    the PolyBot receiver. This is a same-host/shared-filesystem transport, not
+    a network service. The HMAC secret is never written to disk.
+    """
+    if not isinstance(envelope, dict) or set(envelope) != {"snapshot", "signature_hex"}:
+        raise SnapshotPublisherError("envelope must contain exactly snapshot and signature_hex")
+    if not isinstance(envelope["snapshot"], dict):
+        raise SnapshotPublisherError("envelope snapshot must be an object")
+    signature = envelope["signature_hex"]
+    if (not isinstance(signature, str) or len(signature) != 64
+            or any(ch not in "0123456789abcdef" for ch in signature)):
+        raise SnapshotPublisherError("envelope signature must be lowercase HMAC-SHA256 hex")
+
+    path = Path(destination)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if path.is_symlink():
+        raise SnapshotPublisherError("refusing to replace a symlink inbox destination")
+    payload = json.dumps(
+        envelope, sort_keys=True, separators=(",", ":"),
+        ensure_ascii=False, allow_nan=False,
+    ).encode("utf-8")
+    fd, temporary_name = tempfile.mkstemp(
+        prefix=f".{path.name}.", suffix=".tmp", dir=str(path.parent)
+    )
+    try:
+        os.fchmod(fd, 0o600)
+        with os.fdopen(fd, "wb") as handle:
+            handle.write(payload)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary_name, path)
+        directory_fd = os.open(path.parent, os.O_RDONLY)
+        try:
+            os.fsync(directory_fd)
+        finally:
+            os.close(directory_fd)
+    except Exception:
+        try:
+            os.unlink(temporary_name)
+        except FileNotFoundError:
+            pass
+        raise
+    return path
