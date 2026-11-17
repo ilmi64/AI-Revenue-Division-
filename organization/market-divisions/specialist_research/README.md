@@ -37,11 +37,12 @@ occ_view = coordinate([packet], "2026-11-17T12:00:00Z")
 
 ## Safety and interpretation
 
-These modules do not fetch data, validate a provider's legal licence, replace
-the upstream evidence-to-desk gate, or prove that a source is truthful. They
-must consume the result of the common evidence gate and preserve its errors.
-A clean packet means only that the fields checked by this local engine passed.
-Synthetic, delayed, indicative or historical inputs remain research-only.
+These modules do not fetch data, independently establish a provider's legal
+licence, or prove that a source is truthful. In the replay path, the canonical
+OCC evidence-to-desk gate is rerun internally from the raw local observations
+and source registry immediately before desk assessment. A clean packet means
+only that the fields checked by the local gate and engine passed. Synthetic,
+delayed, indicative or historical inputs remain research-only.
 
 Statuses are limited to `research`, `unverified` and `halt`. A missing or
 contradictory identity produces `halt`; incomplete evidence produces
@@ -86,17 +87,20 @@ Example (run from `organization/market-divisions`):
 ```sh
 python -m specialist_research.replay \
   --observations fixtures/specialist-market-observations.synthetic.jsonl \
-  --market-source-registry /path/to/market-source-registry.json \
+  --market-source-registry synthetic-market-source-registry.json \
   --now-utc 2026-11-17T12:00:00Z \
   --max-market-age-seconds 120 \
   --max-clock-skew-seconds 5 \
   --output /tmp/occ-multi-desk-replay.json
 ```
 
-The output records SHA-256 digests for the normalized observation input,
-market-source registry and exact evidence-gate implementation file. These
-digests support reproducibility and later comparison; they are not signatures,
-source authentication, or proof that registry assertions are true. The gate
+The output records canonical SHA-256 digests for the observation set,
+market-source registry and exact evidence-gate implementation file. When
+Capital Flow inputs are supplied, it also records separate digests for the
+event set, review ledger and Capital Flow source registry. The fixed evaluation
+time and freshness thresholds are recorded alongside them. These digests
+support reproducibility and later comparison; they are not signatures, source
+authentication, or proof that registry assertions are true. The gate
 implementation is re-run from raw inputs; no external gate report is trusted.
 
 Capital-flow evidence remains opt-in. When all three local inputs are supplied,
