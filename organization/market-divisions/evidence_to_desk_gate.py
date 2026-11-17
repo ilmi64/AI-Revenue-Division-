@@ -150,7 +150,8 @@ def validate_capital_event(event: dict[str, Any], reviews: dict[str, dict[str, A
                 errors.append("event revalidation deadline has passed")
     except (KeyError, TypeError, ValueError, OverflowError):
         errors.append("observed_at_epoch/ingested_at_epoch invalid")
-    source_ids = set(event.get("source_ids", [])) if isinstance(event.get("source_ids"), list) else set()
+    source_values = event.get("source_ids", [])
+    source_ids = {value for value in source_values if isinstance(value, str)} if isinstance(source_values, list) else set()
     errors.extend(validate_source_registry(registry, source_ids))
     if event_id in reviews:
         review = reviews[event_id]
@@ -302,6 +303,8 @@ def validate_market_observation(obs: dict[str, Any], now: datetime,
 def validate_market_source(obs: dict[str, Any], registry: dict[str, Any] | None) -> list[str]:
     if registry is None:
         return ["market source registry not supplied"]
+    if not isinstance(registry, dict):
+        return ["market source registry must be a JSON object"]
     errors = []
     instruments = registry.get("instruments")
     if not isinstance(instruments, list):
@@ -328,6 +331,14 @@ def run_pipeline(events: list[dict[str, Any]], ledger: list[dict[str, Any]],
                  registry: dict[str, Any], observations: list[dict[str, Any]],
                  now: datetime, max_market_age: float, max_clock_skew: float,
                  market_registry: dict[str, Any] | None = None) -> dict[str, Any]:
+    if not math.isfinite(max_market_age) or max_market_age <= 0:
+        raise GateError("max_market_age_seconds must be finite and positive")
+    if not math.isfinite(max_clock_skew) or max_clock_skew < 0:
+        raise GateError("max_clock_skew_seconds must be finite and non-negative")
+    if not isinstance(registry, dict):
+        raise GateError("capital-flow source registry must be a JSON object")
+    if market_registry is not None and not isinstance(market_registry, dict):
+        raise GateError("market source registry must be a JSON object")
     if not events and not observations:
         return {"status": "BLOCKED", "reason": "no evidence records supplied",
                 "ledger_errors": [], "capital_flow": [], "market_observations": [],
@@ -338,7 +349,7 @@ def run_pipeline(events: list[dict[str, Any]], ledger: list[dict[str, Any]],
                 "ledger_errors": ledger_errors, "capital_flow": [], "market_observations": [],
                 "authority": "research_only_no_execution_authority"}
     reviews = latest_reviews(ledger)
-    event_ids = [event.get("event_id") for event in events]
+    event_ids = [event.get("event_id") for event in events if isinstance(event.get("event_id"), str)]
     duplicate_ids = {item for item in event_ids if event_ids.count(item) > 1}
     cf_results = []
     for event in events:
