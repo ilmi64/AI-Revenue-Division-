@@ -26,6 +26,7 @@
 | LB-020 | Medium | Documentation | Cross-repository dependency chain and PR base/head freshness need final review | Exact dependency graph, merge order, conflict review and owner approval |
 | LB-021 | Medium | Animora | Animora intentionally paused by owner | No action; preserve work and keep excluded |
 | LB-022 | Medium | GitHub Actions | Actions intentionally held to preserve next 2,000 minutes | Owner explicitly releases hold; prioritize essential validation only |
+| LB-023 | High | Actions quota protection | Scheduled workflows exist on both default branches; enabled state and future schedule consumption are not verified | Owner confirms scheduled workflows are paused/disabled in GitHub Actions until release; capture state and re-enable only by explicit decision |
 
 ## Handling rules
 
