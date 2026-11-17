@@ -9,11 +9,12 @@ from capital_flow_review import (
 
 class ReviewLedgerTests(unittest.TestCase):
     def make_entry(self, sequence=1, previous=GENESIS, **kwargs):
+        reviewed_at = kwargs.pop("reviewed_at", "2026-11-17T12:00:00Z")
         return build_entry(
             sequence=sequence, previous_hash=previous,
             event_id="cfi-event-1", action="review", reviewer_id="reviewer-1",
             reason="Checked primary evidence; identity remains unverified.",
-            reviewed_at="2026-11-17T12:00:00Z", **kwargs
+            reviewed_at=reviewed_at, **kwargs
         )
 
     def test_first_entry_uses_genesis_and_verifies(self):
