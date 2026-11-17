@@ -56,3 +56,8 @@ Gold observations are subject to [the XAUUSD data-quality controls](GOLD-XAUUSD-
 ## Common observation contract and synthetic validation fixtures
 
 The common [market observation schema](market-observation.schema.json) now makes specialist identity explicit for Crypto spot/perpetuals, Forex quote orientation, cash indices, futures, CFDs and Gold. The offline [evidence-to-desk gate](EVIDENCE-TO-DESK-GATE.md) checks the local source registry, timestamp quality and instrument-specific fields. Four deterministic synthetic fixtures are documented in [Synthetic Specialist Desk Fixtures](SYNTHETIC-SPECIALIST-FIXTURES.md); they are test data only and cannot establish market readiness or authorize external sources.
+
+
+## Specialist engines and OCC replay
+
+The four offline [specialist research engines](specialist_research/README.md) implement independent Crypto, Forex, Indices and Gold/XAUUSD field checks. The [OCC-gated replay harness](specialist_research/replay.py) requires a passing research-gate report before dispatching an observation to a desk, propagates warnings and halts, and produces a cross-desk OCC coordination record. The optional [Capital Flow -> Crypto adapter](specialist_research/capital_flow_handoff.py) revalidates canonical events, the review-ledger hash chain, source eligibility and exact base/chain/contract identity before attaching research context; it never replaces the market evidence gate. Regression coverage is in `specialist_research/test_engines.py`, `specialist_research/test_replay.py` and `specialist_research/test_capital_flow_handoff.py`. The combined 44 tests are authored but have not yet been executed. This is a local replay capability, not a live monitor or readiness sign-off.

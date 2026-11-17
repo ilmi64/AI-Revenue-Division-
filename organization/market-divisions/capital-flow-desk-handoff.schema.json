@@ -191,6 +191,41 @@
         "type": "string"
       }
     },
+    "instrument_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["base_asset", "chain_id", "contract_address"],
+      "properties": {
+        "base_asset": {"type": "string", "minLength": 1},
+        "chain_id": {"type": "string", "minLength": 1},
+        "contract_address": {"type": "string", "minLength": 1}
+      }
+    },
+    "rejected_matching_events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["event_id", "reason"],
+        "properties": {
+          "event_id": {"type": "string", "minLength": 1},
+          "reason": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "review_ledger": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["valid", "entry_count", "head_hash", "authority"],
+      "properties": {
+        "valid": {"const": true},
+        "entry_count": {"type": "integer", "minimum": 0},
+        "head_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "authority": {"const": "integrity_check_only_not_a_digital_signature"}
+      }
+    },
+    "trade_authority": {"const": false},
+    "live_readiness": {"const": false},
     "consumer_rules": {
       "type": "array",
       "items": {
