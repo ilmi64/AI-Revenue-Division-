@@ -14,14 +14,14 @@
 
 ## Decision and data flow
 
-1. Each specialist desk receives a source-labelled market observation and validates the market-specific mapping and data-quality gates.
+1. Each specialist desk receives a source-labelled market observation and validates the market-specific mapping and data-quality gates. Gold additionally enforces explicit quote basis, age/staleness, session, settlement and financing metadata. The Crypto desk may consume Capital Flow Intelligence packets only through the evidence-only handoff contract, resolving each event against the canonical record and verified review ledger.
 2. Each desk emits a versioned, non-executable assessment using specialist-assessment.schema.json.
 3. Grok Desk reviews the assessments for freshness, evidence, contradictions, missing coverage and operational incidents.
 4. HyperGrok performs a separate challenge pass. Its output is advisory metadata, never an authority token.
 5. OCC records the task, accepted evidence, owner, portfolio version, active stop conditions and readiness state.
 6. PolyBot consumes only approved paper inputs for crypto simulation. Other desks remain research/paper workstreams until their own adapters, simulations and tests exist.
 7. Any validated global HALT is passed through the stop-only control path. Missing or invalid OCC state is treated as interlock unavailable and blocks new exposure. A CLEAR observation does not clear a previously active veto.
-8. Existing-position protection, deterministic risk checks and reconciliation continue independently of advisor availability.
+8. Existing-position protection, deterministic risk checks and reconciliation continue independently of advisor availability. Capital Flow evidence never creates an order or execution permission.
 
 ## Day/night handover
 
@@ -60,3 +60,7 @@ No acknowledgement, uncertain position/order state, stale evidence, failed persi
 ## Explicit non-capabilities
 
 This architecture does not establish a running service, real-time data feed, authenticated inter-process connection, replay protection service, autonomous background operation, broker/wallet access, signing, order routing, trade sizing, leverage, live trading, deployment or production readiness.
+
+## Capital Flow evidence path
+
+The Capital Flow → Crypto handoff is research-only. It carries canonical event IDs, separate source/attribution/event confidence dimensions, evidence references, review state, conflicts and limitations. The Crypto desk must independently validate token/contract identity, event finality, attribution, liquidity and relevance. Rejected, expired, orphaned or ledger-invalid records are not consumed. See [handoff specification](CAPITAL-FLOW-CRYPTO-DESK-HANDOFF.md).
