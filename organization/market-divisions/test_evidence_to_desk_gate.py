@@ -1,5 +1,7 @@
 """Deterministic unit tests for the offline OCC evidence-to-desk gate."""
 import unittest
+import json
+from pathlib import Path
 from datetime import datetime, timezone
 
 from evidence_to_desk_gate import (
@@ -184,6 +186,28 @@ class EvidenceGateTests(unittest.TestCase):
         obs["spot_futures_leg_timestamps_utc"][1] = "2026-11-17T11:59:40Z"
         result = validate_market_observation(obs, NOW, 120, 5)
         self.assertFalse(result["eligible"])
+
+    def test_four_desk_synthetic_fixture_pack_passes_research_gate_only(self):
+        root = Path(__file__).parent
+        fixture_path = root / "fixtures" / "specialist-market-observations.synthetic.jsonl"
+        registry_path = root / "synthetic-market-source-registry.json"
+        observations = [json.loads(line) for line in fixture_path.read_text(encoding="utf-8").splitlines() if line.strip()]
+        registry = json.loads(registry_path.read_text(encoding="utf-8"))
+        report = run_pipeline([], [], {"status": "research_only", "sources": []},
+                              observations, NOW, 120, 5, registry)
+        self.assertEqual(report["status"], "PASS_RESEARCH_GATES")
+        self.assertEqual(len(report["market_observations"]), 4)
+        self.assertTrue(all(row["eligible"] for row in report["market_observations"]))
+        self.assertEqual(report["authority"], "research_only_no_execution_authority")
+        self.assertTrue(all(row["data_class"] == "synthetic" for row in observations))
+
+    def test_synthetic_fixture_registry_cannot_approve_unlisted_instrument(self):
+        root = Path(__file__).parent
+        registry = json.loads((root / "synthetic-market-source-registry.json").read_text(encoding="utf-8"))
+        obs = dict(make_gold())
+        obs["instrument_id"] = "UNLISTED-XAU"
+        from evidence_to_desk_gate import validate_market_source
+        self.assertTrue(validate_market_source(obs, registry))
 
     def test_future_quote_timestamp_fails(self):
         obs = make_gold()
