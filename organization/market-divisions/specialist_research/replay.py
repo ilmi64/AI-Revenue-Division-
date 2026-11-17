@@ -9,12 +9,16 @@ from typing import Any
 
 try:
     from .engines import ASSESSORS, coordinate
+    from .capital_flow_handoff import build_handoff
 except ImportError:  # direct script execution
     from engines import ASSESSORS, coordinate
+    from capital_flow_handoff import build_handoff
 
 
 def replay(observations: list[dict[str, Any]], gate_report: dict[str, Any],
-           now_utc: str) -> dict[str, Any]:
+           now_utc: str, capital_flow_events: list[dict[str, Any]] | None = None,
+           capital_flow_reviews: list[dict[str, Any]] | None = None,
+           capital_flow_source_registry: dict[str, Any] | None = None) -> dict[str, Any]:
     """Run desk assessors only for observations explicitly eligible in gate report."""
     errors: list[str] = []
     if gate_report.get("authority") != "research_only_no_execution_authority":
@@ -80,6 +84,32 @@ def replay(observations: list[dict[str, Any]], gate_report: dict[str, Any],
         if packet["status"] == "research" and packet["data_quality"]["warnings"]:
             packet["status"] = "unverified"
         packet["evidence_gate"] = {"eligible": True, "warnings": gate_warnings}
+        if desk == "crypto" and capital_flow_events is not None:
+            try:
+                handoff = build_handoff(
+                    capital_flow_events,
+                    capital_flow_reviews or [],
+                    capital_flow_source_registry or {},
+                    obs,
+                    now_utc,
+                )
+                packet["capital_flow_handoff"] = handoff
+                if handoff["rejected_matching_events"]:
+                    packet["data_quality"]["warnings"].append(
+                        "one or more matching Capital Flow events were rejected by the handoff gate"
+                    )
+                    if packet["status"] == "research":
+                        packet["status"] = "unverified"
+            except (ValueError, TypeError) as exc:
+                packet["capital_flow_handoff"] = {
+                    "status": "blocked", "reason": str(exc),
+                    "event_records": [], "mode": "research_only",
+                    "trade_authority": False,
+                }
+                packet["data_quality"]["warnings"].append("Capital Flow handoff validation failed")
+                packet["risk_flags"].append("CAPITAL_FLOW_HANDOFF_REJECTED")
+                if packet["status"] == "research":
+                    packet["status"] = "unverified"
         packets.append(packet)
 
     # Cross-desk identity collisions are not silently resolved.
@@ -95,6 +125,14 @@ def replay(observations: list[dict[str, Any]], gate_report: dict[str, Any],
     if errors:
         occ["status"] = "halt"
         occ["errors"].extend(errors)
+    crypto_handoffs = [p.get("capital_flow_handoff") for p in packets
+                       if isinstance(p, dict) and isinstance(p.get("capital_flow_handoff"), dict)]
+    accepted_flow_events = sum(len(h.get("event_records", [])) for h in crypto_handoffs
+                               if isinstance(h.get("event_records"), list))
+    flow_status = (
+        "consumed_research_context" if accepted_flow_events else
+        "provided_no_eligible_match" if capital_flow_events is not None else "not_consumed"
+    )
     return {
         "schema_version": "1.0.0",
         "run_type": "offline_multi_desk_replay",
@@ -103,8 +141,11 @@ def replay(observations: list[dict[str, Any]], gate_report: dict[str, Any],
         "desk_packets": packets,
         "occ": occ,
         "capital_flow_handoff": {
-            "status": "not_consumed",
-            "reason": "No verified capital-flow-to-Crypto handoff supplied to this replay",
+            "status": flow_status,
+            "accepted_event_count": accepted_flow_events,
+            "reason": ("Validated exact-identity research context attached to Crypto packets"
+                       if accepted_flow_events else
+                       "No eligible Capital Flow event was attached; market evidence gate remains independent"),
             "trade_authority": False,
         },
         "authority": "research_only_no_execution_authority",
@@ -122,12 +163,24 @@ def main() -> int:
     parser.add_argument("--observations", type=Path, required=True)
     parser.add_argument("--gate-report", type=Path, required=True)
     parser.add_argument("--now-utc", required=True)
+    parser.add_argument("--capital-flow-events", type=Path)
+    parser.add_argument("--capital-flow-reviews", type=Path)
+    parser.add_argument("--capital-flow-source-registry", type=Path)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     try:
         observations = [json.loads(line) for line in args.observations.read_text(encoding="utf-8").splitlines() if line.strip()]
         gate_report = json.loads(args.gate_report.read_text(encoding="utf-8"))
-        result = replay(observations, gate_report, args.now_utc)
+        flow_args = (args.capital_flow_events, args.capital_flow_reviews,
+                     args.capital_flow_source_registry)
+        if any(flow_args) and not all(flow_args):
+            raise ValueError("all three Capital Flow inputs must be supplied together")
+        flow_events = _read_jsonl(args.capital_flow_events) if args.capital_flow_events else None
+        flow_reviews = _read_jsonl(args.capital_flow_reviews) if args.capital_flow_reviews else None
+        flow_registry = (json.loads(args.capital_flow_source_registry.read_text(encoding="utf-8"))
+                         if args.capital_flow_source_registry else None)
+        result = replay(observations, gate_report, args.now_utc,
+                        flow_events, flow_reviews, flow_registry)
         args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         print(json.dumps({"status": result["status"], "desk_packets": len(result["desk_packets"]),
                           "output": str(args.output), "authority": result["authority"]}, indent=2))
