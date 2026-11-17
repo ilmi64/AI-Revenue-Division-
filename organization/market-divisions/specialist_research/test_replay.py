@@ -63,7 +63,7 @@ class ReplayTests(unittest.TestCase):
 
     def test_verified_capital_flow_event_attaches_only_to_exact_crypto_identity(self):
         rows = [obs("crypto_spot", "SOL-USDC")]
-        events = [flow_event()]
+        events = [flow_event(contract_address="fixture-mint")]
         reviews = [flow_review()]
         result = replay(rows, gate(rows), NOW, events, reviews, FLOW_REGISTRY)
         packet = result["desk_packets"][0]
@@ -83,7 +83,7 @@ class ReplayTests(unittest.TestCase):
         rows = [obs("crypto_spot", "SOL-USDC")]
         bad_review = flow_review()
         bad_review["reason"] = "tampered"
-        result = replay(rows, gate(rows), NOW, [flow_event()], [bad_review], FLOW_REGISTRY)
+        result = replay(rows, gate(rows), NOW, [flow_event(contract_address="fixture-mint")], [bad_review], FLOW_REGISTRY)
         packet = result["desk_packets"][0]
         self.assertEqual(packet["capital_flow_handoff"]["status"], "blocked")
         self.assertIn("CAPITAL_FLOW_HANDOFF_REJECTED", packet["risk_flags"])
