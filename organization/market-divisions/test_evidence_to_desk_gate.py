@@ -187,6 +187,15 @@ class EvidenceGateTests(unittest.TestCase):
         result = validate_market_observation(obs, NOW, 120, 5)
         self.assertFalse(result["eligible"])
 
+    def test_common_schema_declares_market_specific_conditionals(self):
+        root = Path(__file__).parent
+        schema = json.loads((root / "market-observation.schema.json").read_text(encoding="utf-8"))
+        required_sets = [set(item.get("then", {}).get("required", [])) for item in schema.get("allOf", [])]
+        self.assertIn({"base_asset", "quote_asset", "market_pair", "token_identity_status"}, required_sets)
+        self.assertIn({"base_currency", "quote_currency", "quote_convention"}, required_sets)
+        self.assertIn({"index_code", "index_calculation_currency"}, required_sets)
+        self.assertIn({"broker_symbol", "contract_unit", "unit_or_contract_multiplier"}, required_sets)
+
     def test_four_desk_synthetic_fixture_pack_passes_research_gate_only(self):
         root = Path(__file__).parent
         fixture_path = root / "fixtures" / "specialist-market-observations.synthetic.jsonl"
