@@ -19,9 +19,12 @@
       "instrument_type": "crypto_spot",
       "source_id": "synthetic-crypto-fixture",
       "required_specialist_fields": [
-        "upstream_dependencies"
+        "base_asset",
+        "quote_asset",
+        "market_pair",
+        "token_identity_status"
       ],
-      "description": "Synthetic crypto_spot contract fixture; not a real quote."
+      "description": "Synthetic SOL/USD spot identity; token identity explicitly not applicable to the fabricated fixture."
     },
     {
       "instrument_id": "EURUSD",
@@ -29,16 +32,20 @@
       "source_id": "synthetic-forex-fixture",
       "required_specialist_fields": [
         "base_currency",
-        "quote_currency"
+        "quote_currency",
+        "quote_convention"
       ],
-      "description": "Synthetic fx_spot contract fixture; not a real quote."
+      "description": "Synthetic EURUSD pair; quote-per-base convention is explicit."
     },
     {
       "instrument_id": "US500-CASH-REFERENCE",
       "instrument_type": "index_cash",
       "source_id": "synthetic-index-fixture",
-      "required_specialist_fields": [],
-      "description": "Synthetic index_cash contract fixture; not a real quote."
+      "required_specialist_fields": [
+        "index_code",
+        "index_calculation_currency"
+      ],
+      "description": "Synthetic cash index reference, not a futures contract or CFD."
     },
     {
       "instrument_id": "XAUUSD",
@@ -54,7 +61,7 @@
         "financing_status",
         "settlement_type"
       ],
-      "description": "Synthetic xauusd_spot contract fixture; not a real quote."
+      "description": "Synthetic Gold quote with explicit synthetic basis and UTC test session; financing and settlement remain unreviewed/unknown."
     }
   ]
 }
