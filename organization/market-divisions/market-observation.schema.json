@@ -247,9 +247,96 @@
         "pattern": "Z$"
       },
       "description": "UTC source timestamps for spot and futures legs; consumer enforces configured maximum skew."
+    },
+    "base_asset": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 32,
+      "description": "Base asset/token symbol; not inferred from an exchange display pair."
+    },
+    "quote_asset": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 32,
+      "description": "Quote asset/token symbol; pair orientation is base_asset priced in quote_asset."
+    },
+    "market_pair": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 80,
+      "description": "Venue-native market pair identifier, retained verbatim."
+    },
+    "chain_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 80,
+      "description": "Canonical chain identifier for on-chain token identity; null for venue-native assets."
+    },
+    "contract_address": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 200,
+      "description": "Canonical token contract/mint address; null only where no on-chain contract applies."
+    },
+    "token_identity_status": {
+      "enum": [
+        "verified",
+        "unverified",
+        "not_applicable"
+      ]
+    },
+    "funding_rate": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Observed perpetual funding rate; null when not supplied."
+    },
+    "funding_interval_hours": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "exclusiveMinimum": 0
+    },
+    "settlement_asset": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 32
+    },
+    "quote_convention": {
+      "const": "base_per_quote",
+      "description": "Pair is quoted as units of quote currency per one unit of base currency."
+    },
+    "index_code": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "index_calculation_currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$"
+    },
+    "broker_symbol": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 120
+    },
+    "contract_unit": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 80
     }
   },
-  "$comment": "The consumer must additionally enforce bid <= ask, finite numeric values, timestamp skew/freshness, licence/provenance approval, exact instrument mapping, market-specific required fields, venue session/holiday state, and portfolio-version consistency. FX requires explicit base and quote currencies; futures require contract code and expiry; gold instruments require an explicit quote/unit convention. Unknown or failed checks must block qualification. Gold-specific consumers must reject quote_age_seconds above stale_threshold_seconds or is_stale=true; preserve spot, futures and CFD basis separately; require explicit session/calendar, settlement and financing status. Indicative bullion spot must never be relabelled broker-executable XAUUSD. Basis requires two time-aligned, provenance-linked legs. If spot_futures_basis is non-null, require two distinct spot_futures_leg_source_ids, two UTC spot_futures_leg_timestamps_utc, and two distinct evidence_refs; enforce timestamp alignment in the runtime gate.",
+  "$comment": "The consumer must additionally enforce bid <= ask, finite numeric values, timestamp skew/freshness, licence/provenance approval, exact instrument mapping, market-specific required fields, venue session/holiday state, and portfolio-version consistency. FX requires explicit base and quote currencies; futures require contract code and expiry; gold instruments require an explicit quote/unit convention. Unknown or failed checks must block qualification. Gold-specific consumers must reject quote_age_seconds above stale_threshold_seconds or is_stale=true; preserve spot, futures and CFD basis separately; require explicit session/calendar, settlement and financing status. Indicative bullion spot must never be relabelled broker-executable XAUUSD. Basis requires two time-aligned, provenance-linked legs. If spot_futures_basis is non-null, require two distinct spot_futures_leg_source_ids, two UTC spot_futures_leg_timestamps_utc, and two distinct evidence_refs; enforce timestamp alignment in the runtime gate. Crypto requires explicit base/quote orientation and venue pair identity; token identity state is explicit and unresolved identity must block desk qualification. Perpetual observations retain funding interval and settlement asset. FX quote orientation is explicit. Cash indices and broker CFDs retain distinct identities and native symbols/units.",
   "allOf": [
     {
       "if": {
@@ -335,6 +422,104 @@
           "is_stale",
           "financing_status",
           "settlement_type"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "instrument_type": {
+            "const": "crypto_spot"
+          }
+        },
+        "required": [
+          "instrument_type"
+        ]
+      },
+      "then": {
+        "required": [
+          "base_asset",
+          "quote_asset",
+          "market_pair",
+          "token_identity_status"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "instrument_type": {
+            "const": "crypto_perpetual"
+          }
+        },
+        "required": [
+          "instrument_type"
+        ]
+      },
+      "then": {
+        "required": [
+          "base_asset",
+          "quote_asset",
+          "market_pair",
+          "funding_rate",
+          "funding_interval_hours",
+          "settlement_asset"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "instrument_type": {
+            "const": "fx_spot"
+          }
+        },
+        "required": [
+          "instrument_type"
+        ]
+      },
+      "then": {
+        "required": [
+          "base_currency",
+          "quote_currency",
+          "quote_convention"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "instrument_type": {
+            "const": "index_cash"
+          }
+        },
+        "required": [
+          "instrument_type"
+        ]
+      },
+      "then": {
+        "required": [
+          "index_code",
+          "index_calculation_currency"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "instrument_type": {
+            "const": "index_cfd"
+          }
+        },
+        "required": [
+          "instrument_type"
+        ]
+      },
+      "then": {
+        "required": [
+          "broker_symbol",
+          "contract_unit",
+          "unit_or_contract_multiplier"
         ]
       }
     }
