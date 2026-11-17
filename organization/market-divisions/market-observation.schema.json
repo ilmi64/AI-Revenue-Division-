@@ -224,9 +224,32 @@
         "unknown",
         "not_applicable"
       ]
+    },
+    "spot_futures_leg_source_ids": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 160
+      },
+      "description": "Distinct source identifiers for the two time-aligned spot and futures legs."
+    },
+    "spot_futures_leg_timestamps_utc": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "string",
+        "format": "date-time",
+        "pattern": "Z$"
+      },
+      "description": "UTC source timestamps for spot and futures legs; consumer enforces configured maximum skew."
     }
   },
-  "$comment": "The consumer must additionally enforce bid <= ask, finite numeric values, timestamp skew/freshness, licence/provenance approval, exact instrument mapping, market-specific required fields, venue session/holiday state, and portfolio-version consistency. FX requires explicit base and quote currencies; futures require contract code and expiry; gold instruments require an explicit quote/unit convention. Unknown or failed checks must block qualification. Gold-specific consumers must reject quote_age_seconds above stale_threshold_seconds or is_stale=true; preserve spot, futures and CFD basis separately; require explicit session/calendar, settlement and financing status. Indicative bullion spot must never be relabelled broker-executable XAUUSD. Basis requires two time-aligned, provenance-linked legs.",
+  "$comment": "The consumer must additionally enforce bid <= ask, finite numeric values, timestamp skew/freshness, licence/provenance approval, exact instrument mapping, market-specific required fields, venue session/holiday state, and portfolio-version consistency. FX requires explicit base and quote currencies; futures require contract code and expiry; gold instruments require an explicit quote/unit convention. Unknown or failed checks must block qualification. Gold-specific consumers must reject quote_age_seconds above stale_threshold_seconds or is_stale=true; preserve spot, futures and CFD basis separately; require explicit session/calendar, settlement and financing status. Indicative bullion spot must never be relabelled broker-executable XAUUSD. Basis requires two time-aligned, provenance-linked legs. If spot_futures_basis is non-null, require two distinct spot_futures_leg_source_ids, two UTC spot_futures_leg_timestamps_utc, and two distinct evidence_refs; enforce timestamp alignment in the runtime gate.",
   "allOf": [
     {
       "if": {
