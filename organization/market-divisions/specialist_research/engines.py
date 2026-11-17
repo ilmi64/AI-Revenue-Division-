@@ -105,6 +105,8 @@ def assess_crypto(observation: dict[str, Any], now_utc: str,
     if observation.get("token_identity_status") != "verified":
         errors.append("token or market identity is not verified")
         p["risk_flags"].append("TOKEN_IDENTITY_UNVERIFIED")
+    elif not observation.get("chain_id") or not observation.get("contract_address"):
+        errors.append("verified Crypto identity requires chain_id and contract_address")
     if observation.get("instrument_type") == "crypto_perpetual":
         if not observation.get("settlement_asset"):
             errors.append("perpetual settlement asset missing")
@@ -281,13 +283,13 @@ def coordinate(packets: list[dict[str, Any]], now_utc: str) -> dict[str, Any]:
     halts = [p.get("desk_id") for p in packets
              if isinstance(p, dict) and (p.get("status") == "halt" or
                  "STOP_CHALLENGE" in p.get("risk_flags", []))]
-    invalid = [p.get("desk_id") for p in packets
+    invalid = [p.get("desk_id") if isinstance(p, dict) else "non_object_packet" for p in packets
                if not isinstance(p, dict) or p.get("mode") != "research_only"
                or p.get("trade_authority") is not False]
     if invalid:
         errors.append("packet violates research-only authority contract")
     status = "halt" if errors or halts else (
-        "unverified" if any(p.get("status") == "unverified" for p in packets) else "research"
+        "unverified" if any(isinstance(p, dict) and p.get("status") == "unverified" for p in packets) else "research"
     )
     return {
         "desk_id": "occ_coordinator",
