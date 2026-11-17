@@ -15,8 +15,9 @@ class UnifiedIntakeTests(unittest.TestCase):
 
     def build(self, rows=None, **kwargs):
         rows = rows or self.four_desk_rows()
+        version = kwargs.pop("expected_portfolio_version", 7)
         return build_unified_intake(rows, NOW, source_registry(rows),
-                                    expected_portfolio_version=7, **kwargs)
+                                    expected_portfolio_version=version, **kwargs)
 
     def test_builds_one_snapshot_across_all_four_specialist_desks(self):
         result = self.build()
