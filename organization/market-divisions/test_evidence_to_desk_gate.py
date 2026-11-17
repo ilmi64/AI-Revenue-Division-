@@ -152,6 +152,39 @@ class EvidenceGateTests(unittest.TestCase):
                               [], NOW, 120, 5)
         self.assertEqual(report["status"], "BLOCKED")
 
+    def test_challenged_capital_event_fails_handoff(self):
+        ledger = make_ledger()
+        ledger[0]["action"] = "challenge"
+        ledger[0]["entry_hash"] = entry_hash(ledger[0])
+        report = run_pipeline([make_event()], ledger, make_registry(), [], NOW, 120, 5)
+        self.assertFalse(report["capital_flow"][0]["eligible"])
+
+    def test_expired_revalidation_deadline_fails(self):
+        event = make_event()
+        event["revalidate_by_epoch"] = NOW.timestamp() - 1
+        report = run_pipeline([event], make_ledger(), make_registry(), [], NOW, 120, 5)
+        self.assertFalse(report["capital_flow"][0]["eligible"])
+
+    def test_gold_quote_age_must_match_source_timestamp(self):
+        obs = make_gold()
+        obs["quote_age_seconds"] = 30
+        result = validate_market_observation(obs, NOW, 120, 5)
+        self.assertFalse(result["eligible"])
+
+    def test_gold_basis_requires_two_aligned_provenance_legs(self):
+        obs = make_gold()
+        obs["spot_futures_basis"] = 12.5
+        obs["evidence_refs"] = ["spot-ref", "futures-ref"]
+        obs["spot_futures_leg_source_ids"] = ["spot-provider", "futures-provider"]
+        obs["spot_futures_leg_timestamps_utc"] = [
+            "2026-11-17T11:59:58Z", "2026-11-17T11:59:59Z"
+        ]
+        result = validate_market_observation(obs, NOW, 120, 5)
+        self.assertTrue(result["eligible"])
+        obs["spot_futures_leg_timestamps_utc"][1] = "2026-11-17T11:59:40Z"
+        result = validate_market_observation(obs, NOW, 120, 5)
+        self.assertFalse(result["eligible"])
+
     def test_future_quote_timestamp_fails(self):
         obs = make_gold()
         obs["source_timestamp_utc"] = "2026-11-17T12:01:00Z"
