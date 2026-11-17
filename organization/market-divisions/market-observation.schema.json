@@ -170,9 +170,63 @@
         "maxLength": 500
       },
       "uniqueItems": true
+    },
+    "gold_price_basis": {
+      "enum": [
+        "broker_executable_xauusd",
+        "indicative_bullion_spot",
+        "comex_futures",
+        "gold_cfd",
+        "synthetic_test"
+      ]
+    },
+    "gold_session": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 120,
+      "description": "Named venue/session label with timezone/calendar provenance; never infer from symbol."
+    },
+    "quote_age_seconds": {
+      "type": "number",
+      "minimum": 0
+    },
+    "stale_threshold_seconds": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "is_stale": {
+      "type": "boolean"
+    },
+    "spot_futures_basis": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Explicitly calculated basis with both leg references; null when either leg is unavailable."
+    },
+    "financing_status": {
+      "enum": [
+        "not_applicable",
+        "known_no_financing",
+        "known_financing_terms",
+        "unknown",
+        "not_reviewed"
+      ]
+    },
+    "settlement_type": {
+      "enum": [
+        "physical_allocated",
+        "physical_unallocated",
+        "cash_settled",
+        "derivative",
+        "unknown",
+        "not_applicable"
+      ]
     }
   },
-  "$comment": "The consumer must additionally enforce bid <= ask, finite numeric values, timestamp skew/freshness, licence/provenance approval, exact instrument mapping, market-specific required fields, venue session/holiday state, and portfolio-version consistency. FX requires explicit base and quote currencies; futures require contract code and expiry; gold instruments require an explicit quote/unit convention. Unknown or failed checks must block qualification.",
+  "$comment": "The consumer must additionally enforce bid <= ask, finite numeric values, timestamp skew/freshness, licence/provenance approval, exact instrument mapping, market-specific required fields, venue session/holiday state, and portfolio-version consistency. FX requires explicit base and quote currencies; futures require contract code and expiry; gold instruments require an explicit quote/unit convention. Unknown or failed checks must block qualification. Gold-specific consumers must reject quote_age_seconds above stale_threshold_seconds or is_stale=true; preserve spot, futures and CFD basis separately; require explicit session/calendar, settlement and financing status. Indicative bullion spot must never be relabelled broker-executable XAUUSD. Basis requires two time-aligned, provenance-linked legs.",
   "allOf": [
     {
       "if": {
@@ -231,6 +285,33 @@
       "then": {
         "required": [
           "quote_unit"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "instrument_type": {
+            "enum": [
+              "xauusd_spot",
+              "gold_future",
+              "gold_cfd"
+            ]
+          }
+        },
+        "required": [
+          "instrument_type"
+        ]
+      },
+      "then": {
+        "required": [
+          "gold_price_basis",
+          "gold_session",
+          "quote_age_seconds",
+          "stale_threshold_seconds",
+          "is_stale",
+          "financing_status",
+          "settlement_type"
         ]
       }
     }
