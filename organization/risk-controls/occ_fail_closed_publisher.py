@@ -23,6 +23,10 @@ from occ_snapshot_publisher import (
 )
 
 
+class FailClosedPublicationError(RuntimeError):
+    """The current OCC governance state cannot be safely published."""
+
+
 @contextmanager
 def _inbox_publication_lock(inbox_path: str | Path):
     """Lock the stable adjacent lock file shared with the PolyBot receiver."""
@@ -33,6 +37,7 @@ def _inbox_publication_lock(inbox_path: str | Path):
     path = Path(str(Path(inbox_path)) + ".lock")
     if not path.is_absolute() or not hasattr(os, "O_NOFOLLOW"):
         raise FailClosedPublicationError("inbox lock requires an absolute path and no-follow support")
+    path.parent.mkdir(parents=True, exist_ok=True)
     fd = os.open(path, os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
     try:
         metadata = os.fstat(fd)
@@ -47,10 +52,6 @@ def _inbox_publication_lock(inbox_path: str | Path):
             fcntl.flock(fd, fcntl.LOCK_UN)
     finally:
         os.close(fd)
-
-class FailClosedPublicationError(RuntimeError):
-    """The current OCC governance state cannot be safely published."""
-
 
 def publish_draft_baseline_halt(
     *,
