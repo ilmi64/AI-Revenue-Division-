@@ -51,3 +51,8 @@ The Crypto desk may receive evidence-only event packets under [the Capital Flow 
 ## Gold data-quality contract
 
 Gold observations are subject to [the XAUUSD data-quality controls](GOLD-XAUUSD-DATA-QUALITY.md) and the Gold-specific conditions in `market-observation.schema.json`. Indicative bullion spot, broker XAUUSD, gold CFDs and COMEX futures remain distinct instrument bases.
+
+
+## Common observation contract and synthetic validation fixtures
+
+The common [market observation schema](market-observation.schema.json) now makes specialist identity explicit for Crypto spot/perpetuals, Forex quote orientation, cash indices, futures, CFDs and Gold. The offline [evidence-to-desk gate](EVIDENCE-TO-DESK-GATE.md) checks the local source registry, timestamp quality and instrument-specific fields. Four deterministic synthetic fixtures are documented in [Synthetic Specialist Desk Fixtures](SYNTHETIC-SPECIALIST-FIXTURES.md); they are test data only and cannot establish market readiness or authorize external sources.
