@@ -379,7 +379,7 @@
       ],
       "acceptance_criteria": [
         "No account changes or assumptions about live listing state",
-        "Deferred status is retained"
+        "Ecommerce is treated as an active rebuild workstream; this task is read-only baseline preparation"
       ],
       "approval_gate": "No listing, purchase, publishing or account changes",
       "owner_assignment": "unassigned_pending_owner_confirmation",
@@ -405,7 +405,7 @@
         "Checklist catches missing cost, shipping, size and margin inputs",
         "No listing is published"
       ],
-      "approval_gate": "Deferred; no spending or publication",
+      "approval_gate": "No spending, listing, purchase, publishing or account changes without explicit owner approval",
       "owner_assignment": "unassigned_pending_owner_confirmation",
       "status": "proposed",
       "execution_state": "not_started",
@@ -449,10 +449,10 @@
         "Cost-category model with unknowns labelled"
       ],
       "acceptance_criteria": [
-        "Roadmap is explicitly deferred until sustainable funding",
-        "No production spend or new launch is initiated"
+        "Roadmap distinguishes active no-cost preparation from future funded production",
+        "No production spend or public launch is initiated"
       ],
-      "approval_gate": "No spending, subscriptions, production or launch without approval",
+      "approval_gate": "No spending, subscriptions, production, publishing or launch without explicit owner approval",
       "owner_assignment": "unassigned_pending_owner_confirmation",
       "status": "proposed",
       "execution_state": "not_started",

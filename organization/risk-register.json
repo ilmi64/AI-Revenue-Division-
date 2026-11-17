@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "status": "baseline_empty_pending_evidence",
-  "policy": "Only evidence-backed risks are active records. Do not invent risks or owners. Risk Division has independent challenge and stop-only advisory authority; it cannot approve execution or override deterministic controls.",
+  "status": "baseline_initial_evidence_backed_records_pending_owner_review",
+  "policy": "Initial cross-division risks are evidence-backed observations from the draft repository and known operating constraints; ratings are provisional and require owner review. Do not invent owners or incidents. Risk Division has independent challenge and stop-only advisory authority; it cannot approve execution or override deterministic controls.",
   "severity_vocabulary": [
     "critical",
     "high",
@@ -16,7 +16,145 @@
     "closed",
     "unassessed"
   ],
-  "records": [],
+  "records": [
+    {
+      "id": "ORG-R001",
+      "severity": "high",
+      "status": "open",
+      "description": "OCC remains a draft branch rather than an operating control plane; governance records and dashboard code are not yet deployed, staffed or persistently operated.",
+      "division_id": "executive",
+      "mitigation": "Keep readiness at building; require review of the foundation, named owners, authenticated durable records, real handoffs and witnessed exercises before operational claims.",
+      "owner_assignment": "unassigned_pending_owner_confirmation",
+      "related_task_ids": [
+        "EXEC-001",
+        "EXEC-002"
+      ],
+      "related_decision_ids": [],
+      "evidence": [
+        "OCC PR #1 and PR #6 remain draft/unmerged; readiness register documents missing deployment and owners."
+      ]
+    },
+    {
+      "id": "ORG-R002",
+      "severity": "critical",
+      "status": "open",
+      "description": "An agent, model or integration could exceed intended authority if approval boundaries are only documented and not enforced at runtime/tool permissions.",
+      "division_id": "technology",
+      "mitigation": "Keep external, financial, wallet, trading, publishing, merge and deployment actions disabled by default; implement least-privilege tool enforcement and negative permission tests before any live scope.",
+      "owner_assignment": "unassigned_pending_owner_confirmation",
+      "related_task_ids": [
+        "TECH-001",
+        "RISK-002"
+      ],
+      "related_decision_ids": [],
+      "evidence": [
+        "Draft risk-control policy and AI workforce role contracts explicitly deny execution authority; no runtime permission enforcement is yet verified."
+      ]
+    },
+    {
+      "id": "ORG-R003",
+      "severity": "high",
+      "status": "open",
+      "description": "Candidate market-data providers may not have suitable Ontario access, licensing, freshness, provenance, quotas or rights for the intended automated use.",
+      "division_id": "research",
+      "mitigation": "Keep all sources research-only; complete source-specific official terms and Ontario review, sample capture, freshness tests and independent-provider validation before approval.",
+      "owner_assignment": "unassigned_pending_owner_confirmation",
+      "related_task_ids": [
+        "RES-002",
+        "RISK-001"
+      ],
+      "related_decision_ids": [],
+      "evidence": [
+        "Draft market-data source registry has 11 candidates, pending terms and Canada reviews, and no production-approved source."
+      ]
+    },
+    {
+      "id": "ORG-R004",
+      "severity": "critical",
+      "status": "open",
+      "description": "Position, order or fill state could become uncertain during partial exits, simulator exceptions or restart, risking duplicate or inconsistent position accounting.",
+      "division_id": "crypto",
+      "mitigation": "Maintain paper-only mode; review PR #42 and its parent branch, then run no-fill, confirmed-fill, exception and restart reconciliation tests before any readiness upgrade.",
+      "owner_assignment": "unassigned_pending_owner_confirmation",
+      "related_task_ids": [
+        "CRY-001",
+        "CRY-002",
+        "RISK-002"
+      ],
+      "related_decision_ids": [],
+      "evidence": [
+        "PolyBot PR #42 is draft/unmerged; staged-exit reconciliation changes have not been executed through tests."
+      ]
+    },
+    {
+      "id": "ORG-R005",
+      "severity": "high",
+      "status": "open",
+      "description": "Internal revenue and commitment records could be mistaken for verified cash or complete financial statements without bank reconciliation, tax and liability coverage.",
+      "division_id": "finance",
+      "mitigation": "Keep CAD 0 spend ceiling; distinguish estimated, accepted and cash-received amounts; label external balances unknown until owner-reviewed source evidence exists.",
+      "owner_assignment": "unassigned_pending_owner_confirmation",
+      "related_task_ids": [
+        "FIN-001",
+        "FIN-002"
+      ],
+      "related_decision_ids": [],
+      "evidence": [
+        "Draft Finance controls contain an empty commitment register and no bank connection or independently verified balance."
+      ]
+    },
+    {
+      "id": "ORG-R006",
+      "severity": "high",
+      "status": "open",
+      "description": "Incident response is not staffed or production-tested; written procedures and empty registers do not establish monitoring, responder coverage or recovery capability.",
+      "division_id": "risk",
+      "mitigation": "Confirm accountable responders and escalation route; implement protected evidence handling; execute a witnessed tabletop and target-specific recovery rehearsal.",
+      "owner_assignment": "unassigned_pending_owner_confirmation",
+      "related_task_ids": [
+        "RISK-001",
+        "RISK-002"
+      ],
+      "related_decision_ids": [],
+      "evidence": [
+        "Risk policy and lifecycle are draft; incident register remains empty; no named responder, monitoring or production evidence is established."
+      ]
+    },
+    {
+      "id": "ORG-R007",
+      "severity": "high",
+      "status": "open",
+      "description": "Existing ecommerce listings may have poor unit economics or fulfilment outcomes because current costs, shipping, variants, fees, returns and customer experience have not been freshly verified.",
+      "division_id": "ecommerce",
+      "mitigation": "Complete a read-only listing and unit-economics audit; do not publish, purchase, change accounts or run paid promotion until evidence and approval exist.",
+      "owner_assignment": "unassigned_pending_owner_confirmation",
+      "related_task_ids": [
+        "ECOM-001",
+        "ECOM-002"
+      ],
+      "related_decision_ids": [],
+      "evidence": [
+        "OCC readiness register records no verified sales, unit economics or fulfilment quality and prohibits publishing."
+      ]
+    },
+    {
+      "id": "ORG-R008",
+      "severity": "medium",
+      "status": "open",
+      "description": "Animora's original characters, brand assets, site functionality and integrations could be lost or drift during future rebuild work without a fresh baseline.",
+      "division_id": "animora",
+      "mitigation": "Inventory and preserve current site and asset state before changes; do not consume Lovable credits or publish changes without explicit approval.",
+      "owner_assignment": "unassigned_pending_owner_confirmation",
+      "related_task_ids": [
+        "ANI-001",
+        "ANI-002"
+      ],
+      "related_decision_ids": [],
+      "evidence": [
+        "OCC readiness register identifies Lyra, Kaito, Miko and Solen preservation and no-cost rebuild constraints."
+      ]
+    }
+  ],
   "escalation_policy": {
     "immediate_review_severities": [
       "critical",

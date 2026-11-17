@@ -18,6 +18,12 @@ from validate_execution_log import build_report as build_execution_log_report
 from validate_division_integrations import build_report as build_division_integration_report
 from validate_incident_register import validate as validate_incident_register
 from validate_security_posture import build_report as build_security_posture_report
+from build_task_dispatch import build_dispatch_report
+from build_finance_controls import build_report as build_finance_controls_report
+
+RISK_CONTROLS = Path(__file__).resolve().parent.parent / "risk-controls"
+sys.path.insert(0, str(RISK_CONTROLS))
+from validate_registers import validate_evidence_register
 
 
 def load_json(path):
@@ -190,13 +196,68 @@ def build_risk_escalation_report(risk_register, decision_register, work_queue, e
         "records": escalations
     }
 
-def build_dashboard(registry, readiness, dependency_map, operating_framework, opportunities, ledger, work_queue=None, execution_log=None, risk_register=None, decision_register=None, incident_register=None, recovery_plan=None, security_report=None):
+def build_ai_workforce_report(model_registry=None, agent_roles=None, division_registry=None):
+    """Validate and summarize model/agent registry without granting execution authority."""
+    if model_registry is None or agent_roles is None:
+        return {"status": "not_configured", "model_count": 0, "role_count": 0, "errors": [],
+                "policy": "No AI workforce registry supplied; no agent authority is implied."}
+    errors = []
+    policy = model_registry.get("policy", {})
+    if policy.get("incremental_spend_cad") != 0:
+        errors.append("AI workforce incremental spend must remain CAD 0.")
+    if policy.get("paid_apis") is not False or policy.get("paid_trials") is not False:
+        errors.append("Paid APIs and paid trials must remain disabled.")
+    models = model_registry.get("models", [])
+    model_ids = [m.get("id") for m in models if isinstance(m, dict)]
+    if len(model_ids) != len(models) or len(model_ids) != len(set(model_ids)):
+        errors.append("Model entries must be objects with unique IDs.")
+    model_map = {m.get("id"): m for m in models if isinstance(m, dict)}
+    allowed_model_states = {"integrated_in_main_unverified_end_to_end", "evaluation_candidate", "benchmark_candidate_only", "verified"}
+    for model in models:
+        if not isinstance(model, dict) or model.get("status") not in allowed_model_states:
+            errors.append("Every model requires a recognized evidence-based status.")
+    roles = agent_roles.get("roles", [])
+    role_ids = [r.get("id") for r in roles if isinstance(r, dict)]
+    if len(role_ids) != len(roles) or len(role_ids) != len(set(role_ids)):
+        errors.append("Agent roles must be objects with unique IDs.")
+    for role in roles:
+        if isinstance(role, dict) and role.get("model_id") and role["model_id"] not in model_map:
+            errors.append(f"Role {role.get('id')} references unknown model {role['model_id']}.")
+    if division_registry is not None:
+        expected = {d.get("name") for d in division_registry.get("divisions", []) if isinstance(d, dict)}
+        declared = set(agent_roles.get("divisions", []))
+        if expected != declared:
+            errors.append("AI workforce division names do not match the Control Centre division registry.")
+    return {"status": "validated" if not errors else "invalid", "model_count": len(models), "role_count": len(roles),
+        "models": [{"id":m.get("id"),"provider":m.get("provider"),"model":m.get("model"),"status":m.get("status"),"deployment":m.get("deployment"),"next_gate":m.get("next_gate")} for m in models if isinstance(m,dict)],
+        "roles": [{"id":r.get("id"),"model_id":r.get("model_id"),"authority":r.get("authority"),"scope":r.get("scope")} for r in roles if isinstance(r,dict)],
+        "policy":"Model outputs are drafts/reviews only. No model can approve spending, publish, contact third parties, trade, sign, merge or deploy.","errors":errors}
+
+
+def build_dashboard(registry, readiness, dependency_map, operating_framework, opportunities, ledger, work_queue=None, execution_log=None, risk_register=None, decision_register=None, incident_register=None, recovery_plan=None, security_report=None, ai_model_registry=None, ai_agent_roles=None, finance_policy=None, commitment_register=None, evidence_register=None):
     errors, warnings = validate(registry, readiness)
     security_report = security_report or build_security_posture_report(Path.cwd())
+    ai_workforce_report = build_ai_workforce_report(ai_model_registry, ai_agent_roles, registry)
     dependency_report = build_report(registry, readiness, dependency_map)
     revenue = build_snapshot(opportunities, ledger)
     operating = build_operating_framework_report(registry, operating_framework)
     work_queue_report = build_work_queue_report(registry, work_queue or {"tasks": []})
+    task_dispatch_report = (
+        build_dispatch_report(registry, work_queue or {"tasks": []}, ai_agent_roles, work_queue_report)
+        if ai_agent_roles is not None else
+        {"status": "not_configured", "task_count": 0, "prepared_count": 0,
+         "blocked_count": 0, "unassigned_count": 0, "dispatch_count": 0,
+         "execution_authority": "none", "tasks": [], "errors": [],
+         "policy": "No role registry supplied; no dispatch is possible."}
+    )
+    finance_controls_report = (
+        build_finance_controls_report(finance_policy, commitment_register or [], ledger, registry)
+        if finance_policy is not None else
+        {"status": "not_configured", "commitments": {}, "revenue": {},
+         "halal_screening": {"policy_status": "not_assessed", "flagged_sensitive_activity_count": 0, "flags": []},
+         "warnings": ["Finance policy not supplied to this dashboard invocation."],
+         "errors": [], "authority": "read_only_accounting_and_control_reporting_only"}
+    )
     execution_report = build_execution_log_report(registry, work_queue or {"tasks": []}, execution_log or {"events": []})
     integration_report = build_division_integration_report(registry, dependency_map, operating_framework)
     governance_errors, governance_summary = validate_governance_links(work_queue, risk_register, decision_register, registry)
@@ -209,6 +270,18 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
         decision_register or {"records": []}, work_queue or {"tasks": []}, registry
     )
     incident_records = incident_source.get("records", []) if isinstance(incident_source, dict) and isinstance(incident_source.get("records", []), list) else []
+    evidence_source = {"schema_version": "1.0.0", "records": []} if evidence_register is None else evidence_register
+    evidence_errors = validate_evidence_register(evidence_source, incident_source, registry)
+    evidence_records = evidence_source.get("records", []) if isinstance(evidence_source, dict) and isinstance(evidence_source.get("records", []), list) else []
+    evidence_report = {
+        "policy": "Evidence metadata only. References are not independently authenticated merely by appearing here; preserve original evidence and never store secrets.",
+        "record_count": len(evidence_records),
+        "accepted_count": sum(1 for row in evidence_records if isinstance(row, dict) and row.get("review_status") == "accepted"),
+        "unreviewed_count": sum(1 for row in evidence_records if isinstance(row, dict) and row.get("review_status") == "unreviewed"),
+        "integrity_failed_count": sum(1 for row in evidence_records if isinstance(row, dict) and row.get("integrity_status") == "integrity_failed"),
+        "records": evidence_records,
+        "errors": evidence_errors
+    }
     recovery_source = recovery_plan if isinstance(recovery_plan, dict) else {"procedures": []}
     recovery_procedures = recovery_source.get("procedures", []) if isinstance(recovery_source.get("procedures", []), list) else []
     technical_recovery = {
@@ -317,11 +390,15 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
         "cross_division_dependencies": dependency_report,
         "division_operating_framework": operating,
         "division_work_queue": work_queue_report,
+        "task_dispatch": task_dispatch_report,
         "division_execution_evidence": execution_report,
         "cross_division_integration": integration_report,
+        "ai_workforce": ai_workforce_report,
+        "finance_controls": finance_controls_report,
         "ai_revenue": revenue,
         "risk_escalations": risk_escalations,
         "incident_response": incident_response,
+        "evidence_register": evidence_report,
         "technical_recovery": technical_recovery,
         "security_posture": security_report,
         "risk_register": {
@@ -342,10 +419,14 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
             "dependency_map_errors": dependency_report.get("errors", []),
             "operating_framework_errors": operating.get("errors", []),
             "work_queue_errors": work_queue_report.get("errors", []),
+            "task_dispatch_errors": task_dispatch_report.get("errors", []),
+            "finance_control_errors": finance_controls_report.get("errors", []),
             "execution_log_errors": execution_report.get("errors", []),
             "cross_division_integration_errors": integration_report.get("errors", []),
             "governance_link_errors": governance_errors,
             "incident_register_errors": incident_errors,
+            "evidence_register_errors": evidence_errors,
+            "ai_workforce_errors": ai_workforce_report.get("errors", []),
             "revenue_warnings": revenue["data_quality"]["warnings"],
             "note": "Absence of a record is not proof that work or funds do not exist outside these source files."
         }
@@ -363,18 +444,26 @@ def main():
     parser.add_argument("--risk-register", type=Path, default=Path("organization/risk-register.json"))
     parser.add_argument("--decision-register", type=Path, default=Path("organization/decision-register.json"))
     parser.add_argument("--incident-register", type=Path, default=Path("organization/incident-register.json"))
+    parser.add_argument("--evidence-register", type=Path, default=Path("organization/risk-controls/evidence-register.json"))
     parser.add_argument("--recovery-plan", type=Path, default=Path("organization/recovery-plan.json"))
     parser.add_argument("--opportunities", type=Path, default=Path("intelligence/opportunity-tracker.csv"))
     parser.add_argument("--ledger", type=Path, default=Path("finance/revenue-ledger.csv"))
+    parser.add_argument("--finance-policy", type=Path, default=Path("finance/financial-control-policy.json"))
+    parser.add_argument("--commitments", type=Path, default=Path("finance/commitment-register.csv"))
+    parser.add_argument("--ai-model-registry", type=Path, default=Path("organization/ai-workforce/model-registry.json"))
+    parser.add_argument("--ai-agent-roles", type=Path, default=Path("organization/ai-workforce/agent-roles.json"))
     args = parser.parse_args()
     report = build_dashboard(
         load_json(args.registry), load_json(args.readiness), load_json(args.dependencies),
         load_json(args.operating_framework), read_csv(args.opportunities), read_csv(args.ledger),
         load_json(args.work_queue), load_json(args.execution_log),
-        load_json(args.risk_register), load_json(args.decision_register), load_json(args.incident_register), load_json(args.recovery_plan)
+        load_json(args.risk_register), load_json(args.decision_register), load_json(args.incident_register), load_json(args.recovery_plan),
+        ai_model_registry=load_json(args.ai_model_registry), ai_agent_roles=load_json(args.ai_agent_roles),
+        evidence_register=load_json(args.evidence_register),
+        finance_policy=load_json(args.finance_policy), commitment_register=read_csv(args.commitments)
     )
     print(json.dumps(report, indent=2, ensure_ascii=False))
-    return 1 if report["data_quality"]["readiness_validation_errors"] or report["data_quality"]["dependency_map_errors"] or report["data_quality"]["operating_framework_errors"] or report["data_quality"]["work_queue_errors"] or report["data_quality"]["execution_log_errors"] or report["data_quality"]["cross_division_integration_errors"] or report["data_quality"]["governance_link_errors"] or report["data_quality"]["incident_register_errors"] or report["security_posture"]["errors"] else 0
+    return 1 if report["data_quality"]["readiness_validation_errors"] or report["data_quality"]["dependency_map_errors"] or report["data_quality"]["operating_framework_errors"] or report["data_quality"]["work_queue_errors"] or report["data_quality"]["task_dispatch_errors"] or report["data_quality"]["finance_control_errors"] or report["data_quality"]["execution_log_errors"] or report["data_quality"]["cross_division_integration_errors"] or report["data_quality"]["governance_link_errors"] or report["data_quality"]["incident_register_errors"] or report["data_quality"]["evidence_register_errors"] or report["data_quality"]["ai_workforce_errors"] or report["security_posture"]["errors"] else 0
 
 
 if __name__ == "__main__":

@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0.0",
+  "status": "draft_control_baseline",
+  "authority": {
+    "risk_division": "stop_and_challenge_only",
+    "executive_coordinator": "advisory_and_coordination_only",
+    "models_and_agents": "draft_and_review_only",
+    "trade_authority": "not_granted",
+    "production_release_authority": "owner_approval_required"
+  },
+  "default_permissions": {
+    "external_actions": "disabled",
+    "financial_actions": "disabled",
+    "wallet_signing": "disabled",
+    "live_trading": "disabled",
+    "publishing": "disabled",
+    "account_changes": "disabled",
+    "paid_services_and_trials": "disabled",
+    "github_actions": "hold_until_usage_reset"
+  },
+  "mandatory_owner_approval": [
+    "spending",
+    "subscriptions",
+    "paid_api_usage",
+    "applications",
+    "outreach",
+    "publishing",
+    "contracts",
+    "account_or_permission_changes",
+    "financial_transactions",
+    "wallet_actions",
+    "live_trading",
+    "merges",
+    "deployments",
+    "production_launches",
+    "incident_external_notifications"
+  ],
+  "never_request_or_store": [
+    "passwords",
+    "mfa_codes",
+    "seed_phrases",
+    "private_keys",
+    "api_secrets"
+  ],
+  "global_stop_conditions": [
+    "credential_or_secret_exposure_suspected",
+    "unauthorised_access_or_action_detected",
+    "data_provenance_or_licence_unknown_for_intended_use",
+    "market_data_stale_delayed_indicative_reference_only_or_incomplete",
+    "instrument_or_venue_mapping_ambiguous",
+    "position_or_order_state_uncertain",
+    "unreconciled_fill_or_transaction",
+    "risk_limit_missing_or_invalid",
+    "deterministic_validation_failed",
+    "required_owner_approval_missing",
+    "material_dependency_unavailable",
+    "incident_severity_critical"
+  ],
+  "market_data_controls": {
+    "production_sources_approved": [],
+    "fail_closed_on_stale_data": true,
+    "fail_closed_on_unknown_provenance": true,
+    "fail_closed_on_unlicensed_use": true,
+    "synthetic_data_can_satisfy_live_readiness": false,
+    "indicative_or_reference_data_can_authorise_execution": false,
+    "unverified_failover_can_be_treated_as_independent": false
+  },
+  "trading_controls": {
+    "mode": "research_and_paper_only",
+    "live_execution_enabled": false,
+    "wallet_signing_enabled": false,
+    "automatic_recovery_trading_enabled": false,
+    "risk_advisor_can_authorise_trade": false,
+    "agent_can_override_deterministic_control": false,
+    "uncertain_order_or_fill_state_action": "HALT_AND_RECONCILE"
+  },
+  "incident_controls": {
+    "severity_levels": ["SEV1", "SEV2", "SEV3", "SEV4"],
+    "required_fields": [
+      "incident_id",
+      "detected_at_utc",
+      "reporting_division",
+      "category",
+      "severity",
+      "facts",
+      "hypotheses",
+      "evidence_references",
+      "containment",
+      "owner",
+      "status",
+      "next_review_at_utc"
+    ],
+    "preserve_original_evidence": true,
+    "record_all_state_changes": true,
+    "external_contact_requires_owner_approval": true,
+    "never_include_secrets_in_evidence": true
+  },
+  "readiness_rules": [
+    "A policy document or synthetic test is not proof of operational readiness.",
+    "A stop condition must be testable and have a named response owner before production use.",
+    "Risk review may block or challenge work but cannot authorise a trade, waive a control, or approve spending.",
+    "No division is operational without evidence-backed assessment, accountable ownership, tested handoffs and recovery rehearsal."
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "policy": "Readiness is evidence-based. A division cannot be marked standby or operational solely because a plan or repository exists.",
-  "last_reviewed": "2026-11-15",
+  "last_reviewed": "2026-11-16",
   "checks": [
     {
       "id": "mandate-defined",
@@ -112,7 +112,8 @@
         "Repository README explicitly defines paper-trading-only scope.",
         "Paper position lifecycle includes atomic partial exits, versioned stop/trailing/take-profit decisions, FIFO P&L reconciliation, persistent drawdown and allow-listed PAPER_ONLY state persistence.",
         "All 135 then-current paper-engine tests and synthetic simulation passed run 43473656375.",
-        "Read-only Forex and Indices context specialists and their synthetic tests passed the 153-test suite in run 43474468908; specialist and position-engine scope is documented on a draft branch."
+        "Read-only Forex and Indices context specialists and their synthetic tests passed the 153-test suite in run 43474468908; specialist and position-engine scope is documented on a draft branch.",
+        "Draft market-data intake defines separate candidate and acceptance gates for Solana/Pump.fun and spot-crypto sources; no production feed approval is implied."
       ],
       "open_gaps": [
         "Position and exit-engine work remains on unmerged draft branches; no live capability is approved.",
@@ -121,7 +122,8 @@
         "Forex and Indices are analysis-only foundations, not completed source-connected specialist services.",
         "No durable hosted paper service, continuous monitoring, alerting or independently tested production recovery environment.",
         "Historical/out-of-sample evaluation with realistic network fees, liquidity and slippage assumptions remains incomplete.",
-        "No live-trading readiness claim is permitted."
+        "No live-trading readiness claim is permitted.",
+        "Market-data candidate registry and feed-quality contract remain unvalidated; no independent live RPC pair or approved data-rights dossier exists."
       ]
     },
     {
@@ -129,10 +131,17 @@
       "claimed_status": "deferred",
       "verified_status": "deferred",
       "evidence": [
-        "Read-only listing CSV audit MVP exists."
+        "Read-only listing CSV audit MVP exists.",
+        "Added an offline no-dependency per-order contribution calculator with explicit marketplace/payment fee, product cost, fulfilment shipping, packaging and other-variable-cost inputs, plus a sample CSV and six regression tests.",
+        "Calculator separates contribution before advertising, tax and overhead from revenue, and documents that the break-even ad-spend figure is a mathematical ceiling rather than a recommended budget; no marketplace or seller account is connected.",
+        "Owner priority instruction, 2026-11-17: Ecommerce is deferred until explicitly resumed; no active work or resource allocation is authorized."
       ],
       "open_gaps": [
-        "Major development intentionally deferred."
+        "Ecommerce is deferred at owner direction; no active rebuild, listing work or resource allocation is authorized until resumed. Existing storefront/listing baseline and product economics remain unaudited.",
+        "No verified sales, unit economics, fulfilment quality or customer-acquisition economics are established.",
+        "No listings, purchases, publishing, paid promotion or account changes are authorized.",
+        "Illustrative sample economics are not actual MidnightOtaku/Printify/eBay costs or fee schedules; current supplier, destination-specific shipping, marketplace fee, tax, returns and payout inputs must be independently verified before product decisions.",
+        "The offline calculator and tests have been added but not executed; no actual product-level profitability or demand validation is established."
       ]
     },
     {
@@ -140,10 +149,30 @@
       "claimed_status": "deferred",
       "verified_status": "deferred",
       "evidence": [
-        "Long-term studio ambition recorded in strategic planning."
+        "Long-term studio ambition recorded in strategic planning.",
+        "Read-only Lovable project inspection on 2026-11-16 confirms the published project is in ready state and was last edited 2026-11-08; the homepage now has a clear welcome statement and direct quiz/character calls to action.",
+        "Current source confirms AniList primary with Jikan backup, all four original characters and local artwork, and three populated MidnightOtaku product cards with image assets, listing price snapshots and eBay destinations; the prior placeholder-card gap is resolved in source.",
+        "Lovable analytics for 2026-11-01 to 2026-11-16 report 19 visitors, 28 pageviews, 17 mobile and 2 desktop visitors; /characters is the most viewed route at 11 pageviews. Sample size is too small for reliable conversion or retention conclusions.",
+        "A detailed read-only product, technical and analytics audit is recorded in animora/READINESS-AUDIT-2026-11-16.md; no Lovable credits or project edits were used.",
+        "Added animora/STUDIO-AND-INTEGRATED-COMMERCE-MASTERPLAN.md defining Animora as a future original creative/media studio, with integrated commerce as a later commercial arm gated by verified revenue, dedicated funding, rights clearance, production capability and explicit launch approval. Planning document only; no studio production, store launch or funding allocation is claimed.",
+        "Added animora/IP-AND-ASSET-REGISTER-TEMPLATE.md and animora/STUDIO-FUNDING-FRAMEWORK.md to prepare IP provenance controls and a CAD-denominated staged funding gate. Both are blank/preparatory frameworks; no rights clearance, cost quotes, funding pool or spend approval is claimed.",
+        "Added animora/STUDIO-CAPABILITY-MAP.md defining target capabilities, shared division handoffs, future role placeholders, tooling selection criteria and evidence-based readiness states.",
+        "Added animora/CREATIVE-PRODUCTION-PIPELINE.md defining an end-to-end creative workflow with IP screening, funding greenlight, pre-production, animation, post-production, QC, release and archive gates; includes a future integrated-commerce handoff.",
+        "Owner priority instruction, 2026-11-17: Animora and the future creative studio are deferred until explicitly resumed; no active work or resource allocation is authorized."
       ],
       "open_gaps": [
-        "Expansion waits until the main organisation is successful and can fund it sustainably."
+        "Original characters and brand assets must be preserved; Lovable credits and paid tools remain off limits until explicitly authorized.",
+        "No public changes, publishing, paid production or launch is authorized.",
+        "The services page still has no configured contact destination (CONTACT_EMAIL is null), so enquiries cannot yet be submitted through the site.",
+        "Character chats remain fixed demo replies with no persistence or real AI service; any real AI implementation requires separate privacy, moderation, cost and usage-limit design and owner approval.",
+        "Profile notification, autoplay and mature-title controls are localStorage preferences only and do not currently implement the labelled product behaviour; no account-backed cross-device profile/chat system is present.",
+        "Privacy/data-use page, current share image, real Android physical-device verification, accessibility review and fresh build/test run remain outstanding.",
+        "Analytics sample is small (19 reported visitors, 28 pageviews in the inspected 16-day window); no verified sales, customer enquiries, retention or product-market fit is established.",
+        "Studio planning templates now exist on a draft branch but remain preparatory; no funded production scope or accountable studio team exists. The workstream is deferred until explicitly resumed.",
+        "Integrated Animora commerce is a future target only. The standalone ecommerce operation has not been retired or migrated; no store transition, product launch, supplier commitment or inventory purchase is authorized.",
+        "Proper store opening is gated on Animora being sufficiently funded and the studio and commerce launch acceptance criteria being met; forecasts or anticipated revenue do not satisfy the funding gate.",
+        "Production pipeline remains proposed: no proof-of-concept project, crew, production tooling, budget, rights clearance, rehearsed workflow or delivery evidence exists.",
+        "Animora is deferred at owner direction; no active development, publishing, paid production or resource allocation is authorized until resumed."
       ]
     },
     {
@@ -168,12 +197,14 @@
       "verified_status": "building",
       "evidence": [
         "Control Centre draft includes security-posture, readiness, dependency, work-queue, execution-log and incident validators plus isolated fixture recovery checks; latest workflow confirms these validation steps passed before the test stage.",
-        "Crypto development branches contain read-only Solana RPC, provider failover and paper-ingestion components with synthetic test coverage."
+        "Crypto development branches contain read-only Solana RPC, provider failover and paper-ingestion components with synthetic test coverage.",
+        "Draft canonical market-data contract and source registry define timestamps, price basis, provenance, stale-data and failover requirements across asset classes."
       ],
       "open_gaps": [
         "No approved hosted runtime, persistent monitoring, alert routing or independently tested production failover is established.",
         "Live RPC/provider connectivity, endpoint independence, credential governance and sustained outage/restart behaviour remain unverified.",
-        "Control Centre and Crypto changes remain draft/unmerged; no production deployment or permission changes are authorized."
+        "Control Centre and Crypto changes remain draft/unmerged; no production deployment or permission changes are authorized.",
+        "No adapter has yet implemented the canonical contract against independently approved live providers; source validator/tests remain unexecuted."
       ]
     },
     {
@@ -182,26 +213,39 @@
       "verified_status": "building",
       "evidence": [
         "Research and source-qualification mandates are documented in the Control Centre framework and TISRD charter PR #39.",
-        "Official source reviews have identified explicit data-rights and Ontario constraints for Pump.fun, Polymarket, Kalshi and other candidate sources."
+        "Official source reviews have identified explicit data-rights and Ontario constraints for Pump.fun, Polymarket, Kalshi and other candidate sources.",
+        "Draft market-data source registry covers Crypto/Solana, Forex, indices and XAUUSD candidates, with canonical quote/bar provenance contract, acceptance checklist, test plan and fail-closed registry validator.",
+        "Official-source review dated 2026-11-16 documents Gold/XAUUSD, Forex and US500 reference and broker-feed candidates, including free-tier delay/quotas, attribution/redistribution limits, account/API prerequisites and Canadian dealer-entity checks.",
+        "Frankfurter is classified strictly as daily reference data; GoldPrice.dev as 15-minute delayed free/keyless XAU spot; Standard Bullion as attributed indicative dealer pricing; XAUS provenance independence remains unproven.",
+        "FOREX.com Canada and OANDA Canada are documented as potential broker-specific feed candidates, but account/API eligibility, data rights, contract metadata and free read-only scope remain pending. No accounts or credentials connected."
       ],
       "open_gaps": [
-        "No unified, operational source-permission register with accountable review ownership is implemented.",
-        "Several platform permissions, data retention rights, Ontario eligibility and automated-use rights remain restricted, unclear or unverified.",
-        "No continuously refreshed research service or independently rehearsed handoff to every division is established."
+        "Candidate registry is research-only; current provider terms, Canadian access, data rights, quotas, retention and automated-use permissions remain unverified.",
+        "No source is approved for production or live execution; no credentials, accounts or paid services are connected.",
+        "No provider pair has passed independent-operator failover, stale-data, sequence-gap, outage or clock-skew tests.",
+        "Market-data validator and regression tests are included but have not been executed.",
+        "No continuously refreshed source-review service or accountable named source owner is established.",
+        "No broker-specific feed has completed API-license, account eligibility, instrument contract, data-rights and independent Risk/Technology review; current sources remain research-only."
       ]
     },
     {
       "division_id": "finance",
-      "claimed_status": "planned",
-      "verified_status": "planned",
+      "claimed_status": "building",
+      "verified_status": "building",
       "evidence": [
         "The Control Centre records CAD 0 as the default operating budget and reserves financial transactions, borrowing and paid commitments for explicit owner approval.",
-        "Crypto PR #37 documents a paper-only CAD ledger and fee-inclusive FIFO accounting/reconciliation prototype."
+        "Crypto PR #37 documents a paper-only CAD ledger and fee-inclusive FIFO accounting/reconciliation prototype.",
+        "Draft PR #6 adds a CAD 0 financial-control policy, empty commitment register, proof/approval/currency controls, cash-receipt classification and halal-sensitive activity flags; tests are included but have not been executed.",
+        "Finance control validator now requires a proof reference and CAD basis before a received/settled/paid ledger row contributes to reported CAD cash receipts; non-CAD receipts are excluded pending documented conversion.",
+        "Finance regression suite expanded to 14 cases covering missing payout evidence, non-CAD receipt handling and malformed division registry input; tests are included but not executed.",
+        "Finance/MONTH-END-CLOSE.md documents the evidence-based period close, revenue reconciliation, commitment review, treasury reporting and exception escalation."
       ],
       "open_gaps": [
-        "No independently verified finance operating workflow, cash-flow record, reserve policy or reconciled bank/account evidence is connected.",
-        "No confirmed finance owner, approval ledger, tax/accounting export or full organisation-wide cost reporting is established.",
-        "No borrowing, yield, interest or investment activity is authorized; halal-sensitive structures require separate review."
+        "No live revenue or commitment entries have been reconciled; the current registers are empty and do not establish activity or balances outside the records.",
+        "No bank/payment account connection, independently verified cash balance, bank reconciliation, tax export or reserve execution workflow exists.",
+        "No named finance owner or active approval ledger is established; all positive spending remains blocked by the CAD 0 ceiling.",
+        "Halal screening is informational only; uncertain financing, investment, yield or trading structures require qualified review and no automated religious ruling is made.",
+        "Finance control tests and dashboard integration remain unexecuted; no bank/payment connector or independently verified balances exist."
       ]
     },
     {
@@ -210,12 +254,19 @@
       "verified_status": "building",
       "evidence": [
         "The Control Centre draft contains risk, incident, security and recovery records plus validators and a temporary-fixture recovery drill.",
-        "Crypto PR #37 contains a recovery charter and local SQLite case-register prototype with synthetic tests."
+        "Crypto PR #37 contains a recovery charter and local SQLite case-register prototype with synthetic tests.",
+        "Draft market-data acceptance rules prohibit live use of stale, indicative, reference-only, synthetic or unlicensed data and require separate source, operational and owner gates.",
+        "Draft organisation-wide risk policy defines owner approval gates, global stop conditions, paper-only trading, secret-handling restrictions and incident lifecycle/restart controls.",
+        "Draft risk, incident and evidence registers plus structural validators and offline regression tests have been added to the OCC feature branch; tests have not been executed."
       ],
       "open_gaps": [
         "No active incident cases are recorded; the repository drill validates temporary fixtures only, not production recovery.",
         "No production case-register RBAC, encryption, tamper-evident evidence export, authenticated case ownership or tested alert/deadline workflow is established.",
-        "Independent named risk/recovery ownership, cross-division incident rehearsals and production containment/recovery evidence remain outstanding."
+        "Independent named risk/recovery ownership, cross-division incident rehearsals and production containment/recovery evidence remain outstanding.",
+        "No independent Risk sign-off has been completed for any provider, feed adapter, instrument mapping or live data use.",
+        "Incident and evidence registers are intentionally empty; no live monitoring, staffed responders, authenticated ownership, access-controlled evidence store or notification mechanism exists.",
+        "Risk/register validators and regression tests remain unexecuted; structural files do not prove incident-response readiness.",
+        "Initial cross-division risk ratings are provisional hypotheses and require accountable owner review and evidence."
       ]
     },
     {

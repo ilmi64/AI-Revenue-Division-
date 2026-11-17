@@ -1,0 +1,76 @@
+{
+  "registry_version": 1,
+  "status": "research_only",
+  "last_reviewed_epoch": null,
+  "sources": [
+    {
+      "source_id": "j7",
+      "provider": "J7",
+      "dataset": "Smart-money / on-chain intelligence candidate",
+      "access_mode": "not_accessible",
+      "access_status": "unverified",
+      "cost_status": "unknown",
+      "terms_review_status": "not_reviewed",
+      "coverage": [],
+      "metric_definitions": [],
+      "update_cadence": null,
+      "historical_depth": null,
+      "methodology_notes": "Candidate only. Verify exact product identity, metrics, chains, attribution method, export/API access, pricing and terms before use.",
+      "known_blind_spots": [
+        "Product identity and exact feature set not yet verified",
+        "No source coverage or wallet labels assumed"
+      ],
+      "attribution_methodology": null,
+      "last_checked_epoch": 0,
+      "operational_status": "research_only",
+      "rate_limit_notes": null,
+      "credential_reference": null
+    },
+    {
+      "source_id": "buildix-trade",
+      "provider": "Buildix.trade",
+      "dataset": "Opportunity discovery candidate",
+      "access_mode": "not_accessible",
+      "access_status": "unverified",
+      "cost_status": "unknown",
+      "terms_review_status": "not_reviewed",
+      "coverage": [],
+      "metric_definitions": [],
+      "update_cadence": null,
+      "historical_depth": null,
+      "methodology_notes": "Candidate only. Verify data origins, methodology, supported assets, reproducibility, costs and terms before use.",
+      "known_blind_spots": [
+        "Signal methodology not verified",
+        "No performance or predictive value assumed"
+      ],
+      "attribution_methodology": null,
+      "last_checked_epoch": 0,
+      "operational_status": "research_only",
+      "rate_limit_notes": null,
+      "credential_reference": null
+    },
+    {
+      "source_id": "sanbase-santiment",
+      "provider": "Sanbase / Santiment",
+      "dataset": "On-chain, social, development and market metrics candidate",
+      "access_mode": "not_accessible",
+      "access_status": "unverified",
+      "cost_status": "unknown",
+      "terms_review_status": "not_reviewed",
+      "coverage": [],
+      "metric_definitions": [],
+      "update_cadence": null,
+      "historical_depth": null,
+      "methodology_notes": "Candidate only. Verify metric definitions, chain coverage, free access, historical/API restrictions and terms before use.",
+      "known_blind_spots": [
+        "Metric definitions and coverage not yet verified",
+        "No paid API usage authorized"
+      ],
+      "attribution_methodology": null,
+      "last_checked_epoch": 0,
+      "operational_status": "research_only",
+      "rate_limit_notes": null,
+      "credential_reference": null
+    }
+  ]
+}

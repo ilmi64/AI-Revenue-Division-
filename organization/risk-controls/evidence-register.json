@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "status": "draft_empty_register",
+  "policy": "Evidence metadata only. Do not upload secrets, private keys, passwords, MFA codes, personal financial credentials or unnecessary personal data. A reference does not prove authenticity until independently reviewed.",
+  "records": [],
+  "record_contract": {
+    "required_fields": [
+      "evidence_id", "recorded_at_utc", "source_division", "evidence_type",
+      "description", "source_reference", "captured_at_utc", "integrity_status",
+      "review_status", "related_incident_ids", "access_classification",
+      "retention_review_at_utc"
+    ],
+    "integrity_status_values": ["not_checked", "hash_recorded", "verified", "integrity_failed"],
+    "review_status_values": ["unreviewed", "accepted", "rejected", "superseded"],
+    "access_classification_values": ["internal", "restricted", "confidential"],
+    "sha256_required_for_downloaded_artifacts": true,
+    "original_evidence_preservation_required": true,
+    "secret_material_prohibited": true
+  }
+}

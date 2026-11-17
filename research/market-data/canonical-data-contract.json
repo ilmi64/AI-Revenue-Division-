@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "status": "proposed_canonical_data_contract",
+  "authority": "research_and_paper_only",
+  "required_common_fields": [
+    "schema_version",
+    "instrument_id",
+    "venue",
+    "source_id",
+    "observed_at_utc",
+    "received_at_utc",
+    "sequence_or_provider_cursor",
+    "price_basis",
+    "currency",
+    "quality_status"
+  ],
+  "timestamp_rules": [
+    "RFC3339 UTC timestamps only",
+    "Preserve provider timestamp separately from local receive timestamp",
+    "Reject missing or unparsable timestamps",
+    "Mark observations stale using instrument-specific configured thresholds; never silently forward-fill"
+  ],
+  "quote": {
+    "required": [
+      "bid",
+      "ask"
+    ],
+    "rules": [
+      "bid and ask must be positive finite decimals",
+      "ask must be greater than or equal to bid",
+      "spread is derived, never substituted for a provider value",
+      "price_basis must identify broker_executable, venue_quote, indicative_spot or reference_rate"
+    ]
+  },
+  "bar": {
+    "required": [
+      "interval_seconds",
+      "open",
+      "high",
+      "low",
+      "close",
+      "volume",
+      "bar_open_at_utc",
+      "bar_close_at_utc"
+    ],
+    "rules": [
+      "OHLC values must be positive finite decimals",
+      "high must be at least max(open,close,low)",
+      "low must be at most min(open,close,high)",
+      "volume must be non-negative when supplied",
+      "bar close cannot precede bar open",
+      "incomplete bars must be explicitly flagged"
+    ]
+  },
+  "quality_status": [
+    "valid",
+    "stale",
+    "delayed",
+    "indicative",
+    "reference_only",
+    "incomplete",
+    "corrected",
+    "rejected"
+  ],
+  "price_basis": [
+    "broker_executable",
+    "venue_quote",
+    "indicative_spot",
+    "reference_rate",
+    "index_proxy",
+    "synthetic_test"
+  ],
+  "prohibited_inference": [
+    "A reference FX rate is not an executable quote.",
+    "A bullion spot quote is not automatically XAUUSD CFD pricing.",
+    "An index cash reference or ETF is not interchangeable with a CFD or futures contract.",
+    "A synthetic fixture cannot satisfy live-source readiness.",
+    "Different venues must not be spliced into one continuous series without an explicit transformation and provenance."
+  ]
+}

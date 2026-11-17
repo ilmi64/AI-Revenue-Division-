@@ -281,7 +281,7 @@
         "No transfer, borrowing, investment or paid commitment is executed.",
         "Potential riba/yield or non-compliant structures are flagged for qualified review rather than assumed halal."
       ],
-      "owner_assignment": "Owner to confirm finance lead; account access is not presumed",
+      "owner_assignment": "Executive-coordinated finance foundation; accountable finance lead pending owner confirmation",
       "approval_boundary": "Analysis and controls only; no account access or transactions without explicit approval."
     },
     {
@@ -412,7 +412,7 @@
     },
     {
       "id": "ecommerce",
-      "purpose": "Maintain existing ecommerce assets safely and later develop validated store and listing operations.",
+      "purpose": "Actively rebuild and validate a commercially sound ecommerce operation while protecting existing assets and maintaining a zero-spend default.",
       "responsibilities": [
         "Preserve current store/listing records and monitor issues only when authorised.",
         "Prepare read-only listing, pricing, shipping, variant and margin audits.",
@@ -420,13 +420,13 @@
         "Avoid listing publication, purchases, inventory changes and customer communication without approval."
       ],
       "deliverables": [
-        "Read-only store health and listing audit when requested.",
+        "Read-only store health and listing baseline.",
         "Product margin, shipping and variant preflight reports.",
-        "Deferred activation plan with cost and approval gates."
+        "Evidence-backed storefront and business-model comparison with cost and approval gates."
       ],
       "cadence": {
-        "monthly": "Optional low-cost review of existing assets if data is available and requested.",
-        "before_reactivation": "Reassess market demand, fees, shipping, margins and available budget."
+        "weekly": "Advance no-cost research and record material store/product risks where source records are available.",
+        "before_commitment": "Reassess market demand, fees, shipping, margins and approval requirements before any external action."
       },
       "handoffs": [
         {
@@ -453,29 +453,30 @@
       "acceptance_criteria": [
         "No new spend or subscriptions by default.",
         "Any proposed listing has verified product cost, shipping, variants, price and margin.",
-        "No listing, purchase, publishing or account change without explicit approval.",
-        "Deferred status remains visible until owner reprioritises the division."
+        "No listing, purchase, publishing, customer communication or account change without explicit approval.",
+        "Ecommerce remains an active development workstream; development status is not proof of sales or operational readiness."
       ],
-      "owner_assignment": "Deferred; owner to confirm activation and accountable lead",
-      "approval_boundary": "Maintenance and read-only analysis only unless separately authorised."
+      "owner_assignment": "Executive-coordinated build stream; accountable division lead pending owner confirmation",
+      "approval_boundary": "Active development, read-only audits and preparation are permitted within the zero-spend default; listings, purchases, inventory changes, customer communication and account changes require explicit approval."
     },
     {
       "id": "animora",
-      "purpose": "Preserve Animora as a long-term anime discovery and original creative studio opportunity, without diverting current resources prematurely.",
+      "purpose": "Actively develop Animora as an anime discovery and creative-media platform while preserving its original identity and respecting the no-paid-credit constraint.",
       "responsibilities": [
-        "Preserve brand, original characters and project knowledge.",
-        "Maintain a low-cost strategic backlog without consuming paid credits.",
-        "Research audience, production pipeline and monetisation options only when useful and authorised.",
-        "Prepare future studio roadmap, including original short-form anime production, for later funding."
+        "Preserve Animora brand, original characters Lyra, Kaito, Miko and Solen, and project knowledge.",
+        "Audit and improve product requirements, user journeys, data-source reliability and mobile experience using no-cost resources.",
+        "Prepare audience, content and monetisation experiments that do not require paid tools or public commitments.",
+        "Prepare the longer-term original short-form anime studio roadmap separately from current app development."
       ],
       "deliverables": [
-        "Quarterly strategic preservation note when active review is requested.",
-        "Future studio roadmap and production-cost model when funding permits.",
-        "Asset and IP inventory with ownership/source notes."
+        "Current app and feature-gap audit.",
+        "No-cost product, reliability and growth backlog.",
+        "Original character/IP inventory and creative continuity guide.",
+        "Future studio roadmap and production-cost model for later funding."
       ],
       "cadence": {
-        "quarterly": "Lightweight strategic review only when it does not distract from active priorities.",
-        "reactivation_gate": "Reassess only after sustainable organisational revenue and explicit budget approval."
+        "weekly": "Advance no-cost product, technical and creative preparation; record blockers and paid-credit restrictions.",
+        "funded_production_gate": "Any paid production, new subscriptions, domain purchases or public launch requires sustainable funding and explicit owner approval."
       },
       "handoffs": [
         {
@@ -501,11 +502,11 @@
       ],
       "acceptance_criteria": [
         "No Lovable credits, paid tools, domains, production costs or subscriptions are consumed without approval.",
-        "Original characters and brand direction are preserved in project documentation.",
-        "No studio expansion begins before sustainable funding and explicit owner approval.",
-        "Deferred status is not misrepresented as operational."
+        "Original characters and brand direction are preserved accurately.",
+        "Current app development and future funded studio production are tracked as separate workstreams.",
+        "No public changes, publishing or launch without explicit approval."
       ],
-      "owner_assignment": "Deferred; owner to confirm future reactivation",
+      "owner_assignment": "Executive-coordinated build stream; accountable division lead pending owner confirmation",
       "approval_boundary": "Preservation and planning only; no spending or launch."
     },
     {
