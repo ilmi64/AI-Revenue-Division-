@@ -61,6 +61,16 @@ No acknowledgement, uncertain position/order state, stale evidence, failed persi
 
 This architecture does not establish a running service, real-time data feed, authenticated inter-process connection, replay protection service, autonomous background operation, broker/wallet access, signing, order routing, trade sizing, leverage, live trading, deployment or production readiness.
 
+## Unified OCC research-intelligence intake
+
+The offline [Unified Research Intelligence Intake](specialist_research/UNIFIED-INTELLIGENCE-INTAKE.md) is the aggregation boundary for Crypto, Forex, Indices and the distinct Gold/XAUUSD desk. It reruns the canonical evidence gate from raw local market observations and the market-source registry, consumes specialist replay packets, optionally carries separately verified Capital Flow context into Crypto, and builds an evidence-reference index.
+
+It reports per-desk coverage and supports multiple instruments per desk. Any specialist HALT or stop challenge propagates to a global stop. A previous global stop remains active; a CLEAR observation is not authority to erase it. Portfolio-version mismatches, duplicate instrument identities, invalid packet authority and failed evidence gates are fail-closed. Missing desk coverage is explicit and can be made a hard requirement for a particular replay.
+
+Day/night handover is a separate explicit record. Both outgoing and incoming acknowledgement, position reconciliation, healthy critical dependencies, matching portfolio version and an explicit empty unresolved-critical-items list are required for acceptance. A missing handover is never treated as accepted. This module validates supplied assertions; it does not perform position reconciliation, notify shifts or run as an unattended service.
+
+The output is a local research snapshot only. It does not create a live OCC Main Hub, persistent event bus, authenticated cross-process transport, autonomous monitor, broker/wallet integration, order route, trade authority or live-readiness decision.
+
 ## Capital Flow evidence path
 
 The Capital Flow → Crypto handoff is research-only. It carries canonical event IDs, separate source/attribution/event confidence dimensions, evidence references, review state, conflicts and limitations. The Crypto desk must independently validate token/contract identity, event finality, attribution, liquidity and relevance. Rejected, expired, orphaned or ledger-invalid records are not consumed. See [handoff specification](CAPITAL-FLOW-CRYPTO-DESK-HANDOFF.md).

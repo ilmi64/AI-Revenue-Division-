@@ -271,9 +271,16 @@ def coordinate(packets: list[dict[str, Any]], now_utc: str) -> dict[str, Any]:
     if not isinstance(packets, list) or not packets:
         errors.append("no specialist packets supplied")
         packets = []
-    ids = [p.get("desk_id") for p in packets if isinstance(p, dict)]
-    if len(ids) != len(set(ids)):
-        errors.append("duplicate desk_id in coordination batch")
+    identities = [
+        (p.get("desk_id"), p.get("instrument_id"))
+        for p in packets if isinstance(p, dict)
+    ]
+    if len(identities) != len(set(identities)):
+        errors.append("duplicate desk/instrument packet identity in coordination batch")
+    instrument_ids = [p.get("instrument_id") for p in packets
+                      if isinstance(p, dict) and isinstance(p.get("instrument_id"), str)]
+    if len(instrument_ids) != len(set(instrument_ids)):
+        errors.append("duplicate instrument_id across coordination batch")
     versions = {p.get("portfolio_version") for p in packets if isinstance(p, dict)}
     times = {p.get("as_of_utc") for p in packets if isinstance(p, dict)}
     if len(versions) > 1:
@@ -297,7 +304,8 @@ def coordinate(packets: list[dict[str, Any]], now_utc: str) -> dict[str, Any]:
         "status": status,
         "mode": "research_only",
         "portfolio_version": next(iter(versions)) if len(versions) == 1 else None,
-        "desk_count": len(packets),
+        "desk_count": len({p.get("desk_id") for p in packets if isinstance(p, dict)}),
+        "packet_count": len(packets),
         "halted_desks": sorted(halts),
         "errors": errors,
         "packets": packets,
