@@ -123,6 +123,35 @@ class EvidenceGateTests(unittest.TestCase):
                               NOW, 120, 5)
         self.assertTrue(all(not x["eligible"] for x in report["capital_flow"]))
 
+    def test_missing_market_source_registry_fails_closed(self):
+        from evidence_to_desk_gate import run_pipeline
+        report = run_pipeline([], [], {"status": "research_only", "sources": []},
+                              [make_gold()], NOW, 120, 5)
+        self.assertFalse(report["market_observations"][0]["eligible"])
+
+    def test_unapproved_market_source_fails(self):
+        from evidence_to_desk_gate import run_pipeline
+        registry = {"instruments": [{
+            "id": "XAUUSD", "candidate_sources": [{
+                "name": "Example Broker", "status": "candidate_reference_only",
+                "terms_review": "pending", "canada_review": "pending"
+            }]
+        }]}
+        report = run_pipeline([], [], {"status": "research_only", "sources": []},
+                              [make_gold()], NOW, 120, 5, registry)
+        self.assertFalse(report["market_observations"][0]["eligible"])
+
+    def test_unknown_market_licence_fails(self):
+        obs = make_gold()
+        obs["licence_status"] = "unknown"
+        result = validate_market_observation(obs, NOW, 120, 5)
+        self.assertFalse(result["eligible"])
+
+    def test_empty_run_does_not_vacuously_pass(self):
+        report = run_pipeline([], [], {"status": "research_only", "sources": []},
+                              [], NOW, 120, 5)
+        self.assertEqual(report["status"], "BLOCKED")
+
     def test_future_quote_timestamp_fails(self):
         obs = make_gold()
         obs["source_timestamp_utc"] = "2026-11-17T12:01:00Z"
