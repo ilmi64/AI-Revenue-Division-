@@ -127,6 +127,18 @@ class CapitalFlowHandoffTests(unittest.TestCase):
         with self.assertRaises(HandoffError):
             self.build(events=[event(), event()])
 
+    def test_ledger_decision_structure_and_authority_are_checked(self):
+        malformed = [review()]
+        malformed[0]["authority"] = "execution_enabled"
+        malformed[0]["entry_hash"] = _entry_hash(malformed[0])
+        with self.assertRaises(HandoffError):
+            self.build(reviews=malformed)
+
+    def test_reject_action_requires_rejected_status(self):
+        malformed = [review("reject", "corroborated")]
+        with self.assertRaises(HandoffError):
+            self.build(reviews=malformed)
+
     def test_review_ledger_report_is_integrity_only(self):
         report = verify_review_ledger([review()])
         self.assertTrue(report["valid"])
