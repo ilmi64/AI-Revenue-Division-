@@ -68,7 +68,7 @@ python organization/risk-controls/occ_fail_closed_publisher.py \
   --policy organization/risk-controls/risk-control-policy.json \
   --sequence-db /secure/occ/sequence.sqlite3 \
   --inbox /secure/shared/occ-control-envelope.json \
-  --portfolio-version '<current durable PolyBot paper portfolio version>'
+  --portfolio-version 0  # replace with the current durable PolyBot paper portfolio version
 ```
 
 The command is manual and is not started by this repository. The portfolio version must be read from the current durable PolyBot paper state; a mismatch is rejected by PolyBot. Never commit the secret or place it in chat. The publisher is not a daemon and does not start trading.
