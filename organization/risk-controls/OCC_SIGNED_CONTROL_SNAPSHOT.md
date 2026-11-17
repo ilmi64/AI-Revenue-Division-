@@ -53,3 +53,22 @@ The emitted envelope is exactly `{snapshot, signature_hex}`. The publisher libra
 
 `policy_file_sha256(path)` calculates the exact digest from the approved policy file bytes. PolyBot must be configured with the same digest; a policy change requires a deliberate digest update and a fresh snapshot.
 A test-only cross-repository HMAC vector is stored at `fixtures/occ-control-envelope.test.json` and duplicated in PolyBot's `tests/fixtures/`. Both repositories' unit tests verify the same canonical signature. Its public test secret must never be reused for any deployment.
+
+## Conservative Main Hub publisher
+
+`occ_fail_closed_publisher.py` adds a manual, HALT-only publishing entry point for the current governance baseline. It reads the authoritative policy file, calculates its exact digest, issues a 60-second signed HALT snapshot with `required_owner_approval_missing`, and atomically writes the envelope to the configured trusted local inbox.
+
+This publisher deliberately has no CLEAR path. Even changing the policy status field to an apparently approved value cannot make this function emit CLEAR. A future clearance publisher must be a separately reviewed implementation backed by an approved OCC state aggregator, complete readiness evidence, explicit owner approval, and tested restart/incident gates.
+
+Example invocation (only on a prepared host with both repositories and protected filesystem paths):
+
+```bash
+export OCC_HMAC_SECRET_HEX='<fresh locally provisioned secret hex>'
+python organization/risk-controls/occ_fail_closed_publisher.py \
+  --policy organization/risk-controls/risk-control-policy.json \
+  --sequence-db /secure/occ/sequence.sqlite3 \
+  --inbox /secure/shared/occ-control-envelope.json \
+  --portfolio-version '<current durable PolyBot paper portfolio version>'
+```
+
+The command is manual and is not started by this repository. The portfolio version must be read from the current durable PolyBot paper state; a mismatch is rejected by PolyBot. Never commit the secret or place it in chat. The publisher is not a daemon and does not start trading.
