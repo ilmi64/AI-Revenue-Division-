@@ -42,8 +42,7 @@ class MarketDeskContractTests(unittest.TestCase):
         schema = load("market-observation.schema.json")
         gold_condition = next(
             item for item in schema["allOf"]
-            if item.get("if", {}).get("properties", {}).get("instrument_type", {}).get("enum")
-            == ["xauusd_spot", "gold_future", "gold_cfd"]
+            if "gold_price_basis" in item.get("then", {}).get("required", [])
         )
         required = set(gold_condition["then"]["required"])
         self.assertTrue({
