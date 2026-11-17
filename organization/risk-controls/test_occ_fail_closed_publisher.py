@@ -4,6 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from occ_snapshot_publisher import SnapshotPublisherError
 from occ_fail_closed_publisher import (
     FailClosedPublicationError,
     publish_draft_baseline_halt,
@@ -68,7 +69,7 @@ class FailClosedPublisherTests(unittest.TestCase):
             self.publish(policy_path=self.root / "missing.json")
 
     def test_invalid_portfolio_version_refuses_publication(self):
-        with self.assertRaises(Exception):
+        with self.assertRaises(SnapshotPublisherError):
             publish_draft_baseline_halt(
                 policy_path=self.policy,
                 sequence_db_path=self.root / "sequence.sqlite3",
