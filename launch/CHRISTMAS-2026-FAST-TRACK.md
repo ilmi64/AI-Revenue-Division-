@@ -22,7 +22,16 @@ This is not a promise that every commercial service or live financial capability
 - All work remains on isolated feature branches or in offline/read-only preparation.
 - A green CI result, mergeable PR, synthetic simulation or completed document is not an operational-readiness certificate.
 
-## 3. Countdown work plan
+## 3. Actions quota protection
+
+A read-only workflow-file audit found scheduled triggers in both default-branch repositories:
+
+- PolyBot `.github/workflows/paper-simulation.yml`: weekday schedule `0 14 * * 1-5`; it runs the full Python unit-test suite and synthetic paper simulation. Its PR workflow also runs on pull requests targeting `main`.
+- AI Revenue `.github/workflows/research-radar.yml`: weekly schedule `23 13 * * 1`; the job runs tests, installs Ollama, downloads Qwen2.5 1.5B, generates a report and uploads an artifact.
+
+The workflow files contain these schedules; the current enabled/disabled state and future run history were not verified. A local instruction not to trigger Actions does not itself pause scheduled workflows. The owner should confirm both workflows are disabled/paused in GitHub Actions while the 2,000-minute reserve is protected. Do not edit workflow files to pause them during this hold, because a push/PR event could itself trigger a run. No workflow was triggered by this audit.
+
+## 4. Countdown work plan
 
 Dates are target windows, not evidence that work has happened. If a prerequisite or Actions release is delayed, keep the relevant gate blocked rather than compressing or skipping safety checks.
 
@@ -37,7 +46,7 @@ Dates are target windows, not evidence that work has happened. If a prerequisite
 | Dec 19-22 | Final evidence review, access/secret review, zero-spend check, restore/rollback check, scope and exclusions freeze | Complete executive launch packet; every gate PASS or explicit BLOCKED; no silent waivers |
 | Dec 23-24 | Owner review and Tier A go/no-go only | Owner's explicit decision and narrowly defined operating envelope; otherwise remain in controlled preparation |
 
-## 4. GitHub Actions release-day sequence
+## 5. GitHub Actions release-day sequence
 
 Do not trigger workflows while the hold is active. Once the owner explicitly releases the hold, use this order and stop on critical failures:
 
@@ -52,7 +61,7 @@ Do not trigger workflows while the hold is active. Once the owner explicitly rel
 
 For each run record workflow URL, commit SHA, trigger, start/end, minutes consumed if available, pass/fail, skipped tests, artifacts and defects. A failed run is not to be rerun repeatedly without diagnosing the failure.
 
-## 5. Repository integration controls
+## 6. Repository integration controls
 
 ### OCC repository
 
@@ -74,7 +83,7 @@ Current reviewed chain and known drift:
 
 Every integration decision requires refreshed PR metadata, changed-file lists, exact base/head SHAs, diff review, dependency verification and owner approval. Mergeable metadata alone is insufficient.
 
-## 6. Ten-division work allocation
+## 7. Ten-division work allocation
 
 | Division | Christmas critical path |
 |---|---|
@@ -91,7 +100,7 @@ Every integration decision requires refreshed PR metadata, changed-file lists, e
 
 Animora is intentionally excluded from implementation and launch scope until the owner resumes it.
 
-## 7. Tier A acceptance gate
+## 8. Tier A acceptance gate
 
 A Tier A go/no-go packet must show all of the following for the exact selected scope:
 
@@ -111,7 +120,7 @@ A Tier A go/no-go packet must show all of the following for the exact selected s
 
 A division may be excluded from Tier A only if its dependencies are isolated and the exclusion is explicit. Crypto remains paper-only unless a separate future live-readiness process and explicit approval are completed.
 
-## 8. Executive reporting cadence
+## 9. Executive reporting cadence
 
 At each active work session, report only:
 - What changed, with branch/PR/file/commit references.
