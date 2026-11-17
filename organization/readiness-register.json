@@ -152,7 +152,8 @@
         "Read-only Lovable project inspection on 2026-11-16 confirms the published project is in ready state and was last edited 2026-11-08; the homepage now has a clear welcome statement and direct quiz/character calls to action.",
         "Current source confirms AniList primary with Jikan backup, all four original characters and local artwork, and three populated MidnightOtaku product cards with image assets, listing price snapshots and eBay destinations; the prior placeholder-card gap is resolved in source.",
         "Lovable analytics for 2026-11-01 to 2026-11-16 report 19 visitors, 28 pageviews, 17 mobile and 2 desktop visitors; /characters is the most viewed route at 11 pageviews. Sample size is too small for reliable conversion or retention conclusions.",
-        "A detailed read-only product, technical and analytics audit is recorded in animora/READINESS-AUDIT-2026-11-16.md; no Lovable credits or project edits were used."
+        "A detailed read-only product, technical and analytics audit is recorded in animora/READINESS-AUDIT-2026-11-16.md; no Lovable credits or project edits were used.",
+        "Added animora/STUDIO-AND-INTEGRATED-COMMERCE-MASTERPLAN.md defining Animora as a future original creative/media studio, with integrated commerce as a later commercial arm gated by verified revenue, dedicated funding, rights clearance, production capability and explicit launch approval. Planning document only; no studio production, store launch or funding allocation is claimed."
       ],
       "open_gaps": [
         "Original characters and brand assets must be preserved; Lovable credits and paid tools remain off limits until explicitly authorized.",
@@ -161,7 +162,10 @@
         "Character chats remain fixed demo replies with no persistence or real AI service; any real AI implementation requires separate privacy, moderation, cost and usage-limit design and owner approval.",
         "Profile notification, autoplay and mature-title controls are localStorage preferences only and do not currently implement the labelled product behaviour; no account-backed cross-device profile/chat system is present.",
         "Privacy/data-use page, current share image, real Android physical-device verification, accessibility review and fresh build/test run remain outstanding.",
-        "Analytics sample is small (19 reported visitors, 28 pageviews in the inspected 16-day window); no verified sales, customer enquiries, retention or product-market fit is established."
+        "Analytics sample is small (19 reported visitors, 28 pageviews in the inspected 16-day window); no verified sales, customer enquiries, retention or product-market fit is established.",
+        "Studio capability map, canonical IP/asset register, staged cost model and production pipeline remain to be prepared; no funded production scope or accountable studio team exists.",
+        "Integrated Animora commerce is a future target only. The standalone ecommerce operation has not been retired or migrated; no store transition, product launch, supplier commitment or inventory purchase is authorized.",
+        "Proper store opening is gated on Animora being sufficiently funded and the studio and commerce launch acceptance criteria being met; forecasts or anticipated revenue do not satisfy the funding gate."
       ]
     },
     {
