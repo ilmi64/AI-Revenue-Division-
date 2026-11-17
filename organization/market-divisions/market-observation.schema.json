@@ -1,6 +1,5 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://example.invalid/occ/sprint3/market-observation.schema.json",
   "title": "OCC Sprint 3 Market Observation",
   "description": "Structural contract for research/paper market observations. Passing this schema does not establish source trust, licence, freshness, instrument correctness or live readiness.",
   "type": "object",
@@ -173,5 +172,67 @@
       "uniqueItems": true
     }
   },
-  "$comment": "The consumer must additionally enforce bid <= ask, finite numeric values, timestamp skew/freshness, licence/provenance approval, exact instrument mapping, market-specific required fields, venue session/holiday state, and portfolio-version consistency. Unknown or failed checks must block qualification."
+  "$comment": "The consumer must additionally enforce bid <= ask, finite numeric values, timestamp skew/freshness, licence/provenance approval, exact instrument mapping, market-specific required fields, venue session/holiday state, and portfolio-version consistency. FX requires explicit base and quote currencies; futures require contract code and expiry; gold instruments require an explicit quote/unit convention. Unknown or failed checks must block qualification.",
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "instrument_type": {
+            "const": "fx_spot"
+          }
+        },
+        "required": [
+          "instrument_type"
+        ]
+      },
+      "then": {
+        "required": [
+          "base_currency",
+          "quote_currency"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "instrument_type": {
+            "enum": [
+              "index_future",
+              "gold_future"
+            ]
+          }
+        },
+        "required": [
+          "instrument_type"
+        ]
+      },
+      "then": {
+        "required": [
+          "contract_code",
+          "expiry_utc"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "instrument_type": {
+            "enum": [
+              "xauusd_spot",
+              "gold_future",
+              "gold_cfd"
+            ]
+          }
+        },
+        "required": [
+          "instrument_type"
+        ]
+      },
+      "then": {
+        "required": [
+          "quote_unit"
+        ]
+      }
+    }
+  ]
 }
