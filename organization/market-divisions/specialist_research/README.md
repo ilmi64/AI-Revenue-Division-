@@ -64,3 +64,41 @@ python -m unittest specialist_research.test_engines -v
 
 Tests use invented fixture metadata only. They have been authored but must not
 be described as passing until executed in a suitable local environment.
+
+
+## OCC-gated multi-desk replay
+
+The `replay.py` harness joins the output JSON from the existing
+`evidence_to_desk_gate.py` pipeline to the four desk assessors. It will not
+run a desk packet unless the gate report has the expected research-only
+authority marker, overall `PASS_RESEARCH_GATES` status, and exactly one
+eligible gate result for that instrument. Failed/missing/ambiguous gate rows
+become explicit desk halts. Gate warnings are carried into the desk packet.
+
+Example (run from `organization/market-divisions`):
+
+```sh
+python -m specialist_research.replay \
+  --observations fixtures/specialist-market-observations.synthetic.jsonl \
+  --gate-report /tmp/occ-synthetic-gate-report.json \
+  --now-utc 2026-11-17T12:00:00Z \
+  --output /tmp/occ-multi-desk-replay.json
+```
+
+The replay expects the gate report's market-observation records to be keyed by
+the same `instrument_id` values as the observation JSONL. It does not consume
+capital-flow events implicitly. A separate verified capital-flow-to-Crypto
+handoff adapter remains a distinct next integration; this replay reports
+`not_consumed` rather than guessing that a capital-flow event belongs to a
+token or contract.
+
+The harness detects duplicate instrument IDs, mismatched OCC portfolio
+versions/timestamps, invalid authority markers and unsupported instruments.
+A desk halt is propagated to OCC; no coordinator function can clear it. This
+is a local deterministic replay tool, not a live supervisor or readiness test.
+
+Additional replay tests:
+
+```sh
+python -m unittest specialist_research.test_replay -v
+```
