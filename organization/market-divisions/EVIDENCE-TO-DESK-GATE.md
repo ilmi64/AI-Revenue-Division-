@@ -11,6 +11,7 @@ python evidence_to_desk_gate.py \
   --events normalized-events.jsonl \
   --ledger review-ledger.jsonl \
   --source-registry capital-flow-source-registry.json \
+  --market-source-registry market-data-source-registry.json \
   --observations market-observations.jsonl \
   --now-utc 2026-11-17T12:00:00Z \
   --output gate-report.json
@@ -23,9 +24,9 @@ All inputs are local snapshots supplied by the operator. The `--now-utc` referen
 - Verifies the capital-flow review ledger hash chain before processing any event. A failed chain blocks the entire run.
 - Requires each event to have a ledger review, a recent UTC review timestamp, eligible review state, source/evidence references and separate confidence dimensions.
 - Checks each event source against the supplied source registry. Access must be verified, cost free/not-applicable, terms reviewed permitted, and operational status approved manual/adapter. The current candidate registry intentionally fails these gates.
-- Rejects duplicate event IDs in a batch.
+- Rejects duplicate event IDs in a batch, challenged events, events past their revalidation deadline, and reviews older than 30 days.
 - Checks market timestamps, clock skew, quote age, finite positive bid/ask, crossed quotes, licence status, session and market-specific mappings. It also requires a supplied market source registry, exact instrument/source candidate mapping, approved status, approved terms and Canadian eligibility; the current candidate registry intentionally fails closed.
-- Gold checks require explicit basis, quote unit, session, quote age/staleness, financing and settlement metadata. Indicative bullion spot remains visibly distinct from broker-executable XAUUSD.
+- Gold checks require explicit basis, quote unit, session, quote age/staleness, financing and settlement metadata. Quote age must agree with the source timestamp. If a spot/futures basis is supplied, it requires two distinct evidence references, two distinct leg-source IDs and two UTC leg timestamps within the configured skew tolerance. Indicative bullion spot remains visibly distinct from broker-executable XAUUSD.
 - Emits a JSON report with eligibility, errors and warnings. It never generates a trade stance or instruction.
 
 ## Status interpretation
