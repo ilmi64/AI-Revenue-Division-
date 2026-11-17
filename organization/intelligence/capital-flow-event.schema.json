@@ -251,6 +251,14 @@
         "null"
       ],
       "minimum": 0
+    },
+    "quality_flags": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
     }
   }
 }
