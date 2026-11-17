@@ -128,15 +128,16 @@
     },
     {
       "division_id": "ecommerce",
-      "claimed_status": "building",
-      "verified_status": "building",
+      "claimed_status": "deferred",
+      "verified_status": "deferred",
       "evidence": [
         "Read-only listing CSV audit MVP exists.",
         "Added an offline no-dependency per-order contribution calculator with explicit marketplace/payment fee, product cost, fulfilment shipping, packaging and other-variable-cost inputs, plus a sample CSV and six regression tests.",
-        "Calculator separates contribution before advertising, tax and overhead from revenue, and documents that the break-even ad-spend figure is a mathematical ceiling rather than a recommended budget; no marketplace or seller account is connected."
+        "Calculator separates contribution before advertising, tax and overhead from revenue, and documents that the break-even ad-spend figure is a mathematical ceiling rather than a recommended budget; no marketplace or seller account is connected.",
+        "Owner priority instruction, 2026-11-17: Ecommerce is deferred until explicitly resumed; no active work or resource allocation is authorized."
       ],
       "open_gaps": [
-        "Ecommerce is an active rebuild workstream; existing storefront/listing baseline and product economics require a current read-only audit.",
+        "Ecommerce is deferred at owner direction; no active rebuild, listing work or resource allocation is authorized until resumed. Existing storefront/listing baseline and product economics remain unaudited.",
         "No verified sales, unit economics, fulfilment quality or customer-acquisition economics are established.",
         "No listings, purchases, publishing, paid promotion or account changes are authorized.",
         "Illustrative sample economics are not actual MidnightOtaku/Printify/eBay costs or fee schedules; current supplier, destination-specific shipping, marketplace fee, tax, returns and payout inputs must be independently verified before product decisions.",
@@ -145,8 +146,8 @@
     },
     {
       "division_id": "animora",
-      "claimed_status": "building",
-      "verified_status": "building",
+      "claimed_status": "deferred",
+      "verified_status": "deferred",
       "evidence": [
         "Long-term studio ambition recorded in strategic planning.",
         "Read-only Lovable project inspection on 2026-11-16 confirms the published project is in ready state and was last edited 2026-11-08; the homepage now has a clear welcome statement and direct quiz/character calls to action.",
@@ -156,7 +157,8 @@
         "Added animora/STUDIO-AND-INTEGRATED-COMMERCE-MASTERPLAN.md defining Animora as a future original creative/media studio, with integrated commerce as a later commercial arm gated by verified revenue, dedicated funding, rights clearance, production capability and explicit launch approval. Planning document only; no studio production, store launch or funding allocation is claimed.",
         "Added animora/IP-AND-ASSET-REGISTER-TEMPLATE.md and animora/STUDIO-FUNDING-FRAMEWORK.md to prepare IP provenance controls and a CAD-denominated staged funding gate. Both are blank/preparatory frameworks; no rights clearance, cost quotes, funding pool or spend approval is claimed.",
         "Added animora/STUDIO-CAPABILITY-MAP.md defining target capabilities, shared division handoffs, future role placeholders, tooling selection criteria and evidence-based readiness states.",
-        "Added animora/CREATIVE-PRODUCTION-PIPELINE.md defining an end-to-end creative workflow with IP screening, funding greenlight, pre-production, animation, post-production, QC, release and archive gates; includes a future integrated-commerce handoff."
+        "Added animora/CREATIVE-PRODUCTION-PIPELINE.md defining an end-to-end creative workflow with IP screening, funding greenlight, pre-production, animation, post-production, QC, release and archive gates; includes a future integrated-commerce handoff.",
+        "Owner priority instruction, 2026-11-17: Animora and the future creative studio are deferred until explicitly resumed; no active work or resource allocation is authorized."
       ],
       "open_gaps": [
         "Original characters and brand assets must be preserved; Lovable credits and paid tools remain off limits until explicitly authorized.",
@@ -166,10 +168,11 @@
         "Profile notification, autoplay and mature-title controls are localStorage preferences only and do not currently implement the labelled product behaviour; no account-backed cross-device profile/chat system is present.",
         "Privacy/data-use page, current share image, real Android physical-device verification, accessibility review and fresh build/test run remain outstanding.",
         "Analytics sample is small (19 reported visitors, 28 pageviews in the inspected 16-day window); no verified sales, customer enquiries, retention or product-market fit is established.",
-        "Studio capability map, canonical IP/asset register, staged cost model and production pipeline remain to be prepared; no funded production scope or accountable studio team exists.",
+        "Studio planning templates now exist on a draft branch but remain preparatory; no funded production scope or accountable studio team exists. The workstream is deferred until explicitly resumed.",
         "Integrated Animora commerce is a future target only. The standalone ecommerce operation has not been retired or migrated; no store transition, product launch, supplier commitment or inventory purchase is authorized.",
         "Proper store opening is gated on Animora being sufficiently funded and the studio and commerce launch acceptance criteria being met; forecasts or anticipated revenue do not satisfy the funding gate.",
-        "Production pipeline remains proposed: no proof-of-concept project, crew, production tooling, budget, rights clearance, rehearsed workflow or delivery evidence exists."
+        "Production pipeline remains proposed: no proof-of-concept project, crew, production tooling, budget, rights clearance, rehearsed workflow or delivery evidence exists.",
+        "Animora is deferred at owner direction; no active development, publishing, paid production or resource allocation is authorized until resumed."
       ]
     },
     {
