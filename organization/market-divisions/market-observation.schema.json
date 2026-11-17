@@ -309,7 +309,7 @@
       "maxLength": 32
     },
     "quote_convention": {
-      "const": "base_per_quote",
+      "const": "quote_per_base",
       "description": "Pair is quoted as units of quote currency per one unit of base currency."
     },
     "index_code": {
