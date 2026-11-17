@@ -27,6 +27,8 @@
 | LB-021 | Medium | Animora | Animora intentionally paused by owner | No action; preserve work and keep excluded |
 | LB-022 | Medium | GitHub Actions | Actions intentionally held to preserve next 2,000 minutes | Owner explicitly releases hold; prioritize essential validation only |
 | LB-023 | High | Actions quota protection | Scheduled workflows exist on both default branches; enabled state and future schedule consumption are not verified | Owner confirms scheduled workflows are paused/disabled in GitHub Actions until release; capture state and re-enable only by explicit decision |
+| LB-024 | High | OCC source-state reconciliation | Inherited readiness register still lists Animora as building and work queue still contains ANI-001/002; all 20 tasks remain proposed and unassigned | Reviewed source-register update reflects Animora ON_HOLD, reconciles active scope, assigns accountable owner roles/backups where confirmed, and verifies dashboard/dispatch output |
+| LB-025 | Critical | OCC task accountability | No work-queue task has an assigned owner; no task is recorded as started or completed | Owner-confirmed accountable role/backup roster and evidence-backed task assignments; no inferred or fabricated ownership |
 
 ## Handling rules
 
