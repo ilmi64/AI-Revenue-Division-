@@ -72,3 +72,7 @@ python organization/risk-controls/occ_fail_closed_publisher.py \
 ```
 
 The command is manual and is not started by this repository. The portfolio version must be read from the current durable PolyBot paper state; a mismatch is rejected by PolyBot. Never commit the secret or place it in chat. The publisher is not a daemon and does not start trading.
+
+## Same-host publication / entry lock
+
+The conservative Main Hub publisher now holds an exclusive POSIX advisory lock on the stable adjacent `<inbox>.lock` file across sequence issuance and atomic envelope replacement. PolyBot's LeadTradingAgent holds that same lock across its final portfolio-version check, inbox poll, OCC gate and paper simulator call. This serializes cooperating HALT publication and paper entry on one trusted local filesystem: whichever operation obtains the lock first completes its critical section first. The lock file is persistent, owner-only, and must not be deleted or replaced while either process is active. Symlink/non-regular lock paths, unsafe permissions, unsupported platforms and lock failures stop the operation. Any other publisher must use this exact lock protocol; network filesystems and uncoordinated writers are unsupported. The protocol is source-level only and has not been executed or stress-tested.
