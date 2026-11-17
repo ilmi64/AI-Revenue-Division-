@@ -181,9 +181,22 @@ def validate_market_observation(obs: dict[str, Any], now: datetime,
                                 max_age_seconds: float, max_clock_skew_seconds: float) -> dict[str, Any]:
     errors, warnings = [], []
     instrument_type = obs.get("instrument_type")
-    for field in ("instrument_id", "venue_or_broker", "source_id", "portfolio_version"):
+    allowed_types = {"crypto_spot", "crypto_perpetual", "fx_spot", "index_cash",
+                     "index_future", "index_cfd", "xauusd_spot", "gold_future", "gold_cfd"}
+    if instrument_type not in allowed_types:
+        errors.append("instrument_type missing or unsupported")
+    for field in ("instrument_id", "venue_or_broker", "source_id", "portfolio_version",
+                  "currency", "unit_or_contract_multiplier", "data_class", "licence_status",
+                  "session_state"):
         if field not in obs:
             errors.append(f"{field} missing")
+    if obs.get("data_class") not in ALLOWED_RESEARCH_DATA:
+        errors.append("data_class missing or unsupported")
+    if isinstance(obs.get("portfolio_version"), bool) or not isinstance(obs.get("portfolio_version"), int) or obs.get("portfolio_version", -1) < 0:
+        errors.append("portfolio_version must be a non-negative integer")
+    multiplier = obs.get("unit_or_contract_multiplier")
+    if isinstance(multiplier, bool) or not isinstance(multiplier, (int, float)) or not math.isfinite(multiplier) or multiplier <= 0:
+        errors.append("unit_or_contract_multiplier must be finite and positive")
     try:
         source_time = parse_utc(obs.get("source_timestamp_utc"), "source_timestamp_utc")
         received_time = parse_utc(obs.get("received_timestamp_utc"), "received_timestamp_utc")
@@ -216,8 +229,19 @@ def validate_market_observation(obs: dict[str, Any], now: datetime,
         for field in required:
             if field not in obs or obs.get(field) is None:
                 errors.append(f"Gold field {field} missing")
+        allowed_basis = {
+            "xauusd_spot": {"broker_executable_xauusd", "indicative_bullion_spot", "synthetic_test"},
+            "gold_future": {"comex_futures", "synthetic_test"},
+            "gold_cfd": {"gold_cfd", "synthetic_test"}
+        }
+        if instrument_type in GOLD_TYPES and obs.get("gold_price_basis") not in allowed_basis[instrument_type]:
+            errors.append("Gold price basis does not match the declared instrument type")
         if obs.get("gold_price_basis") == "indicative_bullion_spot" and instrument_type == "xauusd_spot":
             warnings.append("indicative bullion reference is not broker-executable XAUUSD")
+        if obs.get("spot_futures_basis") is not None:
+            refs = obs.get("evidence_refs")
+            if not isinstance(refs, list) or len(set(refs)) < 2:
+                errors.append("spot/futures basis requires two distinct evidence references")
         try:
             quote_age = float(obs["quote_age_seconds"])
             stale_limit = float(obs["stale_threshold_seconds"])
