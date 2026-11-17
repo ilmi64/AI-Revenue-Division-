@@ -140,13 +140,16 @@ class SnapshotSequenceStore:
         if not isinstance(secret, bytes) or len(secret) < 32:
             raise SnapshotPublisherError("HMAC secret must contain at least 32 bytes")
 
+        expires_at = float(now_epoch) + float(ttl_seconds)
+        if not math.isfinite(expires_at) or expires_at <= float(now_epoch):
+            raise SnapshotPublisherError("snapshot expiry must be finite and later than generation time")
         snapshot_id = f"occ-{uuid4().hex}"
         snapshot = {
             "schema_version": 1,
             "source_system": "OCC",
             "snapshot_id": snapshot_id,
             "generated_at_epoch": float(now_epoch),
-            "expires_at_epoch": float(now_epoch) + float(ttl_seconds),
+            "expires_at_epoch": expires_at,
             "policy_sha256": policy_sha256,
             "portfolio_version": portfolio_version,
             "status": status,
