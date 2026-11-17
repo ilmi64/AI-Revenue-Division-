@@ -68,44 +68,55 @@ be described as passing until executed in a suitable local environment.
 
 ## OCC-gated multi-desk replay
 
-The `replay.py` harness joins the output JSON from the existing
-`evidence_to_desk_gate.py` pipeline to the four desk assessors. It will not
-run a desk packet unless the gate report has the expected research-only
-authority marker, overall `PASS_RESEARCH_GATES` status, and exactly one
-eligible gate result for that instrument. Failed/missing/ambiguous gate rows
-become explicit desk halts. Gate warnings are carried into the desk packet.
+The replay harness no longer accepts a precomputed gate-report file. It calls
+`evidence_to_desk_gate.run_pipeline()` internally immediately before desk
+assessment, using the raw local market-observation JSONL, the market-source
+registry JSON, one fixed UTC evaluation time and explicit market-age/clock-skew
+limits. This removes the old trust boundary where a caller could fabricate
+`PASS_RESEARCH_GATES` and an authority string in a supplied JSON report.
+
+The market-source registry must map each observation's exact
+`instrument_id` to its `source_id` candidate and show approved manual/read-only
+status, approved terms and Canada review. These are local operator assertions,
+not independent proof of source authenticity or legal rights. Unapproved or
+missing mappings fail closed.
 
 Example (run from `organization/market-divisions`):
 
 ```sh
 python -m specialist_research.replay \
   --observations fixtures/specialist-market-observations.synthetic.jsonl \
-  --gate-report /tmp/occ-synthetic-gate-report.json \
+  --market-source-registry /path/to/market-source-registry.json \
   --now-utc 2026-11-17T12:00:00Z \
+  --max-market-age-seconds 120 \
+  --max-clock-skew-seconds 5 \
   --output /tmp/occ-multi-desk-replay.json
 ```
 
-The replay expects the gate report's market-observation records to be keyed by
-the same `instrument_id` values as the observation JSONL. It does not consume
-capital-flow events implicitly. Capital-flow evidence remains opt-in. When all three local inputs are supplied,
-the replay re-runs the Capital Flow -> Crypto adapter for each Crypto observation.
-The adapter verifies the canonical event records, the complete review-ledger
-hash chain, latest review decision, source access/cost/terms status, event
-freshness/revalidation, evidence references and independent confidence fields.
-It attaches an event only when base asset, chain ID and contract address match
-exactly. Ticker-only matches are prohibited. A challenge, rejection, expiry,
-or invalid ledger/source record cannot be attached.
+The output records SHA-256 digests for the normalized observation input,
+market-source registry and exact evidence-gate implementation file. These
+digests support reproducibility and later comparison; they are not signatures,
+source authentication, or proof that registry assertions are true. The gate
+implementation is re-run from raw inputs; no external gate report is trusted.
 
-Example (run from `organization/market-divisions`):
+Capital-flow evidence remains opt-in. When all three local inputs are supplied,
+the replay independently runs the Capital Flow -> Crypto adapter for each
+Crypto observation. The adapter verifies canonical event records, the complete
+review-ledger hash chain, latest review decision, source access/cost/terms
+status, event freshness/revalidation, evidence references and independent
+confidence fields. It attaches an event only when base asset, chain ID and
+contract address match exactly. Ticker-only matches are prohibited.
+
+Example with the optional Capital Flow inputs:
 
 ```sh
-python -m specialist_research.replay \\
-  --observations fixtures/specialist-market-observations.synthetic.jsonl \\
-  --gate-report /tmp/occ-synthetic-gate-report.json \\
-  --capital-flow-events /path/to/canonical-events.jsonl \\
-  --capital-flow-reviews /path/to/review-ledger.jsonl \\
-  --capital-flow-source-registry /path/to/source-registry.json \\
-  --now-utc 2026-11-17T12:00:00Z \\
+python -m specialist_research.replay \
+  --observations fixtures/specialist-market-observations.synthetic.jsonl \
+  --market-source-registry /path/to/market-source-registry.json \
+  --capital-flow-events /path/to/canonical-events.jsonl \
+  --capital-flow-reviews /path/to/review-ledger.jsonl \
+  --capital-flow-source-registry /path/to/capital-flow-source-registry.json \
+  --now-utc 2026-11-17T12:00:00Z \
   --output /tmp/occ-multi-desk-replay.json
 ```
 
@@ -113,9 +124,9 @@ All three Capital Flow inputs are required together. If omitted, the replay
 reports `not_consumed`. If supplied but no event passes, it reports
 `provided_no_eligible_match`. A failed adapter is marked blocked on the
 Crypto packet and cannot add an event. Capital Flow evidence never replaces
-the independent market evidence gate or market observation. The handoff is
-research context only and does not produce a directional signal, sizing,
-leverage, order, or execution permission.
+the independently rerun market evidence gate or market observation. The
+handoff is research context only and does not produce a directional signal,
+sizing, leverage, order, or execution permission.
 
 The harness detects duplicate instrument IDs, mismatched OCC portfolio
 versions/timestamps, invalid authority markers and unsupported instruments.
@@ -125,5 +136,5 @@ is a local deterministic replay tool, not a live supervisor or readiness test.
 Additional replay tests:
 
 ```sh
-python -m unittest specialist_research.test_replay specialist_research.test_capital_flow_handoff -v
+python -m unittest specialist_research.test_engines specialist_research.test_replay specialist_research.test_capital_flow_handoff -v
 ```
