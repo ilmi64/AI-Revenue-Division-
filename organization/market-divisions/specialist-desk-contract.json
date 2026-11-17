@@ -8,7 +8,16 @@
     "occ": "coordination_audit_and_readiness_assessment_only",
     "trade_authority": "not_granted",
     "live_execution": false,
-    "owner_approval_required_for": ["spending", "paid_data", "account_or_permission_changes", "publishing", "merges", "deployments", "live_trading", "wallet_or_broker_actions"]
+    "owner_approval_required_for": [
+      "spending",
+      "paid_data",
+      "account_or_permission_changes",
+      "publishing",
+      "merges",
+      "deployments",
+      "live_trading",
+      "wallet_or_broker_actions"
+    ]
   },
   "common_input_contract": {
     "required": [
@@ -27,8 +36,19 @@
       "session_state",
       "portfolio_version"
     ],
-    "data_class_allowed": ["live", "delayed", "indicative", "historical", "synthetic"],
-    "licence_status_allowed": ["approved", "restricted", "unknown", "not_applicable"],
+    "data_class_allowed": [
+      "live",
+      "delayed",
+      "indicative",
+      "historical",
+      "synthetic"
+    ],
+    "licence_status_allowed": [
+      "approved",
+      "restricted",
+      "unknown",
+      "not_applicable"
+    ],
     "rules": [
       "Unknown provenance, unknown licence, unapproved source, stale data, invalid instrument mapping, crossed or non-finite prices, missing bid/ask, or clock uncertainty blocks signal qualification.",
       "Delayed, indicative, historical, and synthetic data are research-only and cannot satisfy live readiness.",
@@ -38,10 +58,38 @@
     ]
   },
   "common_output_contract": {
-    "required": ["desk_id", "instrument_id", "as_of_utc", "portfolio_version", "mode", "stance", "confidence_band", "horizon", "evidence_refs", "data_quality", "risk_flags", "invalidation_conditions", "review_by_utc"],
-    "mode_allowed": ["research", "paper"],
-    "stance_allowed": ["bullish_bias", "bearish_bias", "neutral", "no_assessment", "halt"],
-    "confidence_band_allowed": ["low", "medium", "high", "not_assessed"],
+    "required": [
+      "desk_id",
+      "instrument_id",
+      "as_of_utc",
+      "portfolio_version",
+      "mode",
+      "stance",
+      "confidence_band",
+      "horizon",
+      "evidence_refs",
+      "data_quality",
+      "risk_flags",
+      "invalidation_conditions",
+      "review_by_utc"
+    ],
+    "mode_allowed": [
+      "research",
+      "paper"
+    ],
+    "stance_allowed": [
+      "bullish_bias",
+      "bearish_bias",
+      "neutral",
+      "no_assessment",
+      "halt"
+    ],
+    "confidence_band_allowed": [
+      "low",
+      "medium",
+      "high",
+      "not_assessed"
+    ],
     "rules": [
       "No output is an order, instruction to trade, target size, leverage setting or execution permission.",
       "No numeric confidence may be presented as a calibrated probability unless calibration evidence exists.",
@@ -54,33 +102,113 @@
       "id": "crypto",
       "name": "Crypto Specialist Desk",
       "status": "research_and_paper_only",
-      "coverage": ["spot markets", "perpetuals for risk research only", "on-chain and venue intelligence"],
-      "specialist_checks": ["24/7 operation and UTC timestamp integrity", "venue and token identity verification", "chain and contract provenance", "liquidity depth and spread", "concentration, unlocks and treasury flows", "bridge, oracle, custody and smart-contract incidents", "wash-trading and spoofing uncertainty"],
-      "hard_stops": ["unknown token or contract identity", "venue status or order state uncertain", "stale book or trade feed", "unverified chain/bridge event", "unreconciled position or fill"]
+      "coverage": [
+        "spot markets",
+        "perpetuals for risk research only",
+        "on-chain and venue intelligence"
+      ],
+      "specialist_checks": [
+        "24/7 operation and UTC timestamp integrity",
+        "venue and token identity verification",
+        "chain and contract provenance",
+        "liquidity depth and spread",
+        "concentration, unlocks and treasury flows",
+        "bridge, oracle, custody and smart-contract incidents",
+        "wash-trading and spoofing uncertainty"
+      ],
+      "hard_stops": [
+        "unknown token or contract identity",
+        "venue status or order state uncertain",
+        "stale book or trade feed",
+        "unverified chain/bridge event",
+        "unreconciled position or fill"
+      ]
     },
     {
       "id": "forex",
       "name": "Forex Specialist Desk",
       "status": "research_and_paper_only",
-      "coverage": ["major and minor currency pairs", "crosses", "macro and central-bank event research"],
-      "specialist_checks": ["base/quote orientation", "pip and pip-value conventions", "broker symbol suffix and contract size", "bid/ask spread and rollover timing", "market session and holiday calendar", "central-bank releases and scheduled macro risk", "swap/financing and overnight charges"],
-      "hard_stops": ["ambiguous pair orientation", "unknown broker contract specification", "unverified rollover or financing treatment", "stale quote", "holiday or session state uncertain"]
+      "coverage": [
+        "major and minor currency pairs",
+        "crosses",
+        "macro and central-bank event research"
+      ],
+      "specialist_checks": [
+        "base/quote orientation",
+        "pip and pip-value conventions",
+        "broker symbol suffix and contract size",
+        "bid/ask spread and rollover timing",
+        "market session and holiday calendar",
+        "central-bank releases and scheduled macro risk",
+        "swap/financing and overnight charges"
+      ],
+      "hard_stops": [
+        "ambiguous pair orientation",
+        "unknown broker contract specification",
+        "unverified rollover or financing treatment",
+        "stale quote",
+        "holiday or session state uncertain"
+      ]
     },
     {
       "id": "indices",
       "name": "Equity Indices Specialist Desk",
       "status": "research_and_paper_only",
-      "coverage": ["cash index references", "index futures", "index CFDs for instrument-risk research only"],
-      "specialist_checks": ["cash/futures/CFD instrument distinction", "index value versus contract price", "multiplier and currency", "exchange calendar and session", "overnight gaps and limit states", "roll dates and fair-value basis", "constituent concentration and macro event risk"],
-      "hard_stops": ["cash/futures/CFD mapping ambiguity", "unknown multiplier or tick value", "unverified expiry or roll", "stale reference index", "session or halt state uncertain"]
+      "coverage": [
+        "cash index references",
+        "index futures",
+        "index CFDs for instrument-risk research only"
+      ],
+      "specialist_checks": [
+        "cash/futures/CFD instrument distinction",
+        "index value versus contract price",
+        "multiplier and currency",
+        "exchange calendar and session",
+        "overnight gaps and limit states",
+        "roll dates and fair-value basis",
+        "constituent concentration and macro event risk"
+      ],
+      "hard_stops": [
+        "cash/futures/CFD mapping ambiguity",
+        "unknown multiplier or tick value",
+        "unverified expiry or roll",
+        "stale reference index",
+        "session or halt state uncertain"
+      ]
     },
     {
       "id": "gold",
       "name": "Gold Specialist Desk",
       "status": "research_and_paper_only",
-      "coverage": ["XAUUSD spot references", "COMEX gold futures research", "gold-related instrument and macro intelligence"],
-      "specialist_checks": ["XAUUSD versus futures versus CFD distinction", "troy-ounce and contract-unit conversion", "USD quote and account-currency conversion", "spot/futures basis and expiry/roll", "liquidity by session and spread", "real yields, USD, central-bank demand and event risk", "physical, allocated, unallocated and derivative exposure distinctions"],
-      "hard_stops": ["ambiguous XAUUSD or futures contract mapping", "unknown ounce/unit or multiplier", "unverified futures expiry/roll", "stale or indicative-only quote presented as tradable", "unknown financing, swap or settlement terms"],
+      "coverage": [
+        "XAUUSD spot references",
+        "COMEX gold futures research",
+        "gold-related instrument and macro intelligence"
+      ],
+      "specialist_checks": [
+        "XAUUSD versus futures versus CFD distinction",
+        "troy-ounce and contract-unit conversion",
+        "USD quote and account-currency conversion",
+        "spot/futures basis and expiry/roll",
+        "liquidity by session and spread",
+        "real yields, USD, central-bank demand and event risk",
+        "physical, allocated, unallocated and derivative exposure distinctions",
+        "explicit quote basis separating broker XAUUSD, indicative bullion spot, COMEX futures, CFDs and synthetic fixtures",
+        "quote age versus configured stale threshold and explicit stale flag",
+        "named session and source calendar/timezone",
+        "financing status and settlement type recorded as known or explicitly unknown",
+        "spot/futures basis only from time-aligned, provenance-linked legs"
+      ],
+      "hard_stops": [
+        "ambiguous XAUUSD or futures contract mapping",
+        "unknown ounce/unit or multiplier",
+        "unverified futures expiry/roll",
+        "stale or indicative-only quote presented as tradable",
+        "unknown financing, swap or settlement terms",
+        "quote age exceeds stale threshold or stale flag is true",
+        "gold quote basis or session/calendar provenance missing",
+        "spot/futures basis calculated from unaligned or unprovenanced legs"
+      ],
       "dedicated_requirement": "Gold remains a first-class specialist desk with its own data lineage, contract mapping, research, risk flags, paper evaluation and readiness evidence. It must not be folded into generic forex coverage."
     }
   ],
@@ -95,7 +223,15 @@
   },
   "halal_and_financial_review": {
     "required_before_any_product_or_live_readiness_claim": true,
-    "review_items": ["instrument ownership and possession", "spot versus derivative structure", "leverage and margin", "interest, swap, rollover and financing charges", "short selling", "settlement and counterparty obligations", "broker and venue terms"],
+    "review_items": [
+      "instrument ownership and possession",
+      "spot versus derivative structure",
+      "leverage and margin",
+      "interest, swap, rollover and financing charges",
+      "short selling",
+      "settlement and counterparty obligations",
+      "broker and venue terms"
+    ],
     "default": "unassessed_until_instrument_specific_shariah_review",
     "rule": "Do not label an instrument, strategy or account halal based only on its asset name or a model-generated opinion."
   },
@@ -110,5 +246,27 @@
     "Cross-desk conflict, outage and handover rehearsal",
     "Risk and halal review where applicable",
     "Explicit owner approval before any live capability is even considered"
-  ]
+  ],
+  "capital_flow_handoff": {
+    "schema": "capital-flow-desk-handoff.schema.json",
+    "source_of_truth": "OCC canonical capital-flow event record plus verified append-only review ledger",
+    "destination_desk": "crypto",
+    "mode": "research_only",
+    "permitted_review_states": [
+      "watch",
+      "research",
+      "unverified",
+      "corroborated"
+    ],
+    "rejected_states": [
+      "rejected",
+      "expired"
+    ],
+    "rules": [
+      "Resolve every event ID against the canonical event and verified review ledger at consumption time.",
+      "Preserve source reliability, attribution confidence, event confidence and materiality as separate dimensions.",
+      "Do not convert a capital-flow observation into a trade stance, order, sizing, leverage or execution permission.",
+      "The Crypto desk independently validates token/contract identity, event finality, attribution, liquidity and relevance."
+    ]
+  }
 }
