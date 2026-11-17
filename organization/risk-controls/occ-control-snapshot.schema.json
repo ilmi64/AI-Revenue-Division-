@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OCC Signed Control Snapshot",
+  "description": "Stop-only OCC state snapshot consumed by the PolyBot authenticated receiver. The HMAC signature is a separate transport-envelope field and is not included in this object.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "source_system",
+    "snapshot_id",
+    "generated_at_epoch",
+    "expires_at_epoch",
+    "policy_sha256",
+    "portfolio_version",
+    "status",
+    "stop_conditions",
+    "evidence_refs"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "source_system": {
+      "const": "OCC"
+    },
+    "snapshot_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "\\S"
+    },
+    "generated_at_epoch": {
+      "type": "number"
+    },
+    "expires_at_epoch": {
+      "type": "number"
+    },
+    "policy_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "portfolio_version": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "status": {
+      "enum": [
+        "CLEAR",
+        "HALT"
+      ]
+    },
+    "stop_conditions": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "credential_or_secret_exposure_suspected",
+          "unauthorised_access_or_action_detected",
+          "data_provenance_or_licence_unknown_for_intended_use",
+          "market_data_stale_delayed_indicative_reference_only_or_incomplete",
+          "instrument_or_venue_mapping_ambiguous",
+          "position_or_order_state_uncertain",
+          "unreconciled_fill_or_transaction",
+          "risk_limit_missing_or_invalid",
+          "deterministic_validation_failed",
+          "required_owner_approval_missing",
+          "material_dependency_unavailable",
+          "incident_severity_critical"
+        ]
+      }
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "CLEAR"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "stop_conditions": {
+            "maxItems": 0
+          },
+          "evidence_refs": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "HALT"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "stop_conditions": {
+            "minItems": 1
+          },
+          "evidence_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ],
+  "$comment": "JSON Schema validation is structural only. Producer must additionally reject booleans/non-finite timestamps, require generated_at_epoch < expires_at_epoch, cap TTL, ensure generated_at_epoch is strictly newer than prior snapshots, preserve exact approved policy digest and portfolio version, and use a trusted monotonic UTC clock."
+}
