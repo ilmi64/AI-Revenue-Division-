@@ -98,8 +98,8 @@
     {
       "id": "ecommerce",
       "name": "Ecommerce",
-      "status": "building",
-      "mandate": "Actively rebuild and validate a commercially sound ecommerce operation, including brand, product economics, storefront and automation research; no listings, purchases or publishing without approval.",
+      "status": "deferred",
+      "mandate": "Long-term mandate (deferred): maintain the option to rebuild and validate a commercially sound ecommerce operation, including brand, product economics, storefront and automation research. No active development or resource allocation until the owner explicitly resumes it; no listings, purchases or publishing without approval.",
       "supports": [
         "ai-revenue",
         "technology"
@@ -109,8 +109,8 @@
     {
       "id": "animora",
       "name": "Animora and Future Creative Studio",
-      "status": "building",
-      "mandate": "Actively develop Animora as an anime discovery and creative-media platform, preserving original characters and roadmap while respecting the no-paid-credit constraint; no publishing or paid tool use without approval.",
+      "status": "deferred",
+      "mandate": "Long-term mandate (deferred): preserve Animora as an anime discovery and future creative-media platform, including its original characters and roadmap. No active development or resource allocation until the owner explicitly resumes it; no publishing or paid tool use without approval.",
       "supports": [
         "ai-revenue",
         "technology",
