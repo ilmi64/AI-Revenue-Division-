@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#11101b">
+<title>OCC — Offline Control Centre</title>
+<style>
+:root{color-scheme:dark;--bg:#0d0c14;--panel:#171522;--panel2:#201d2e;--line:#302b43;--text:#f4f0ff;--muted:#aaa3bd;--accent:#a78bfa;--good:#70d6a5;--warn:#f4c978;--bad:#ff8585}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#21183a 0,#0d0c14 48%);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+header{padding:24px max(18px,calc((100vw - 1180px)/2));border-bottom:1px solid var(--line);background:#100e19d9}
+.brand{display:flex;align-items:center;gap:12px}.mark{width:38px;height:38px;border-radius:12px;background:linear-gradient(145deg,#a78bfa,#6d4bc1);display:grid;place-items:center;font-weight:800;color:#100e19}
+h1{font-size:20px;margin:0}header p{margin:3px 0 0;color:var(--muted);font-size:13px}
+main{max-width:1180px;margin:auto;padding:22px 16px 60px}.toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:18px}
+button,.filelabel{border:1px solid #66518e;background:#302448;color:var(--text);padding:10px 14px;border-radius:10px;font:inherit;font-weight:650;cursor:pointer}
+button:hover,.filelabel:hover{background:#3a2b58}.filelabel input{display:none}.subtle{color:var(--muted);font-size:13px}
+.notice{border:1px solid var(--line);background:#171522;border-radius:12px;padding:14px;margin:12px 0 20px;color:var(--muted)}
+.notice strong{color:var(--text)}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:16px 0}
+.card,.section{background:linear-gradient(160deg,#1a1727,#14121d);border:1px solid var(--line);border-radius:14px;padding:16px;min-width:0}
+.metric{font-size:28px;font-weight:750;letter-spacing:-.04em}.metric-label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+.section{margin:14px 0}.section h2{font-size:16px;margin:0 0 12px}.sectionhead{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.pill{display:inline-flex;padding:3px 8px;border-radius:99px;background:#29243a;color:#d9ccff;font-size:12px;white-space:nowrap}
+.good{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-weight:600}
+.tablewrap{overflow:auto}select,input[type=search]{background:#100e19;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:9px;font:inherit}
+.list{display:grid;gap:8px}.rowitem{padding:11px 12px;background:#1d1a2a;border:1px solid var(--line);border-radius:10px;display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.rowitem small{display:block;color:var(--muted);margin-top:3px}.empty{color:var(--muted);padding:14px;border:1px dashed var(--line);border-radius:10px}
+footer{color:var(--muted);font-size:12px;text-align:center;padding:20px}
+@media(max-width:760px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}main{padding:16px 12px 44px}.card,.section{padding:13px}table{min-width:620px}.metric{font-size:24px}}
+@media(max-width:360px){.grid{grid-template-columns:1fr 1fr}.metric{font-size:21px}}
+</style>
+</head>
+<body>
+<header><div class="brand"><div class="mark">O</div><div><h1>Organisation Control Centre</h1><p>Executive overview · Offline, read-only dashboard</p></div></div></header>
+<main>
+<div class="toolbar">
+<label class="filelabel">Load OCC report JSON <input id="reportFile" type="file" accept=".json,application/json"></label>
+<button id="clearBtn" type="button">Clear report</button>
+<span class="subtle" id="fileState" aria-live="polite">No report loaded. Generate the report from the repository first.</span>
+</div>
+<div class="notice"><strong>Safety boundary:</strong> This viewer only displays a generated report. It cannot assign work, approve requests, contact anyone, change accounts, trade, sign, publish, merge or deploy. Data stays in this browser tab and is not uploaded.</div>
+<div id="dashboard" hidden>
+<div class="grid" id="metrics"></div>
+<section class="section"><div class="sectionhead"><h2>Division scorecard</h2><span class="pill" id="divisionCount"></span></div><div class="tablewrap"><table><thead><tr><th>Division</th><th>Registry</th><th>Verified readiness</th><th>Dependencies</th><th>Open gaps</th></tr></thead><tbody id="divisionRows"></tbody></table></div></section>
+<section class="section"><div class="sectionhead"><h2>Work queue</h2><div><select id="taskFilter" aria-label="Filter tasks"><option value="all">All tasks</option><option value="blocked">Blocked</option><option value="proposed">Proposed</option><option value="in_progress">In progress</option><option value="completed">Completed</option></select></div></div><div class="tablewrap"><table><thead><tr><th>Task</th><th>Division</th><th>Priority</th><th>Status</th><th>Execution</th><th>Dependencies</th></tr></thead><tbody id="taskRows"></tbody></table></div></section>
+<section class="section"><h2>Risk escalations</h2><div class="list" id="riskRows"></div></section>
+<section class="section"><h2>Pending owner decisions</h2><div class="list" id="decisionRows"></div></section>
+<section class="section"><h2>Data quality and safeguards</h2><div class="list" id="qualityRows"></div></section>
+<p class="subtle" id="reportMeta"></p>
+</div>
+<div id="emptyState" class="empty">Load a JSON report to populate the OCC overview. The dashboard will clearly show missing or unassessed information rather than treating it as ready.</div>
+</main>
+<footer>OCC local viewer · No external libraries · No network requests · Read-only</footer>
+<script>
+(() => {
+"use strict";
+const $ = id => document.getElementById(id);
+let report = null;
+const safe = value => value === null || value === undefined || value === "" ? "—" : String(value);
+const el = (tag, value, cls) => { const node=document.createElement(tag); node.textContent=safe(value); if(cls) node.className=cls; return node; };
+const addCell = (row,value,cls) => { const td=el("td",value,cls); row.appendChild(td); };
+const arr = value => Array.isArray(value) ? value : [];
+const countErrors = data => Object.values(data||{}).reduce((n,v)=>n+(Array.isArray(v)?v.length:0),0);
+function metric(label,value){const box=el("div",null,"card");box.append(el("div",value,"metric"),el("div",label,"metric-label"));return box;}
+function rowItem(title,detail,status){const box=el("div",null,"rowitem");const left=el("div",null);left.append(el("strong",title),el("small",detail));box.append(left,el("span",status,"pill"));return box;}
+function renderTasks(){
+ const body=$("taskRows");body.replaceChildren();
+ const tasks=arr(report.division_work_queue?.tasks);
+ const filter=$("taskFilter").value;
+ const visible=tasks.filter(t=>filter==="all"||t.status===filter||(filter==="blocked"&&arr(t.unresolved_dependencies).length>0));
+ if(!visible.length){body.append(el("tr",""));const tr=body.lastChild;const td=el("td","No matching tasks.");td.colSpan=6;tr.append(td);return;}
+ visible.forEach(t=>{const tr=document.createElement("tr");addCell(tr,(t.task_id||t.id)+" — "+safe(t.title));addCell(tr,t.division_id);addCell(tr,t.priority);addCell(tr,t.status);addCell(tr,t.derived_execution_state||t.execution_state||"not verified");addCell(tr,arr(t.unresolved_dependencies).join(", ")||"None recorded");body.append(tr);});
+}
+function render(data){
+ report=data||{};$("dashboard").hidden=false;$("emptyState").hidden=true;
+ const org=report.organisation||{}, divisions=arr(report.division_scorecard), tasks=arr(report.division_work_queue?.tasks), risks=arr(report.risk_escalations?.records), decisions=arr(report.outstanding_decisions);
+ const approvals=arr(report.reserved_owner_approvals);
+ const metrics=$("metrics");metrics.replaceChildren(
+  metric("Divisions",safe(org.division_count??divisions.length)),
+  metric("Verified ready",safe(org.verified_standby_or_operational??0)),
+  metric("Work items",tasks.length),
+  metric("Risk escalations",risks.length)
+ );
+ $("divisionCount").textContent=divisions.length+" registered";
+ const dr=$("divisionRows");dr.replaceChildren();
+ divisions.forEach(d=>{const tr=document.createElement("tr");addCell(tr,d.name||d.id);addCell(tr,d.registry_status);addCell(tr,d.verified_status);addCell(tr,d.dependency_status);addCell(tr,arr(d.open_gaps).length);dr.append(tr);});
+ renderTasks();
+ $("riskRows").replaceChildren();
+ if(!risks.length)$("riskRows").append(el("div","No risk escalation records are present in this report. This is not proof that no risks exist.","empty"));
+ risks.forEach(r=>$("riskRows").append(rowItem(r.risk_id||"Risk",r.description||r.mitigation||"No description",r.severity||r.escalation_tier||"unassessed")));
+ $("decisionRows").replaceChildren();
+ if(!decisions.length)$("decisionRows").append(el("div","No pending decision prompts are included in this report.","empty"));
+ decisions.forEach((d,i)=>$("decisionRows").append(rowItem(d.id||("Decision prompt "+(i+1)),d.scope||d.item||d.requested_action||"Review source record",d.status||"review required")));
+ $("qualityRows").replaceChildren();
+ const dq=report.data_quality||{};
+ Object.entries(dq).filter(([k,v])=>Array.isArray(v)).forEach(([k,v])=>$("qualityRows").append(rowItem(k,v.length? v.join(" · "):"No errors recorded",v.length?"Review":"No errors")));
+ $("qualityRows").append(rowItem("Owner approval gates",approvals.join(" · ")||"See source policy","always enforced"));
+ $("qualityRows").append(rowItem("AI workforce",report.ai_workforce?.status||"unassessed",report.ai_workforce?.status==="validated"?"validated":"review"));
+ $("reportMeta").textContent="Report type: "+safe(report.report_type)+" · Generated report contents only; freshness depends on when the source report was generated.";
+}
+$("reportFile").addEventListener("change",async event=>{
+ const file=event.target.files?.[0];if(!file)return;
+ try{const parsed=JSON.parse(await file.text());if(!parsed||typeof parsed!=="object"||Array.isArray(parsed))throw new Error("The file must contain a JSON object.");render(parsed);$("fileState").textContent="Loaded: "+file.name;}
+ catch(error){$("fileState").textContent="Could not load report: "+error.message;$("dashboard").hidden=true;$("emptyState").hidden=false;}
+});
+$("clearBtn").addEventListener("click",()=>{$("reportFile").value="";$("fileState").textContent="No report loaded.";report=null;$("dashboard").hidden=true;$("emptyState").hidden=false;});
+$("taskFilter").addEventListener("change",()=>{if(report)renderTasks();});
+})();
+</script>
+</body>
+</html>
