@@ -315,7 +315,7 @@ def validate_market_observation(obs: dict[str, Any], now: datetime,
     if instrument_type == "fx_spot":
         if not obs.get("base_currency") or not obs.get("quote_currency"):
             errors.append("FX base/quote currency mapping missing")
-        if obs.get("quote_convention") != "base_per_quote":
+        if obs.get("quote_convention") != "quote_per_base":
             errors.append("FX quote convention must be explicit as quote currency per base unit")
         if obs.get("base_currency") == obs.get("quote_currency"):
             errors.append("FX base and quote currencies must differ")
