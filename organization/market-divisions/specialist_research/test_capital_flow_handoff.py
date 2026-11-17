@@ -2,7 +2,7 @@
 import unittest
 from datetime import datetime, timezone
 
-from capital_flow_handoff import (
+from specialist_research.capital_flow_handoff import (
     HandoffError, _entry_hash, build_handoff, verify_review_ledger,
 )
 
