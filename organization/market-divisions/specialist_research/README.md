@@ -142,3 +142,15 @@ Additional replay tests:
 ```sh
 python -m unittest specialist_research.test_engines specialist_research.test_replay specialist_research.test_capital_flow_handoff -v
 ```
+
+
+## Unified OCC research-intelligence intake
+
+The organisation-level offline aggregator is documented in
+[`UNIFIED-INTELLIGENCE-INTAKE.md`](UNIFIED-INTELLIGENCE-INTAKE.md), implemented
+in [`unified_intake.py`](unified_intake.py), and constrained by
+[`unified-intake.schema.json`](unified-intake.schema.json). It combines all
+four desks, evidence provenance, optional Capital Flow context, stop
+propagation, portfolio version checks and explicit day/night handover. Multiple
+instruments per desk are supported. See `test_unified_intake.py` for authored
+regression cases; tests have not yet been run.
