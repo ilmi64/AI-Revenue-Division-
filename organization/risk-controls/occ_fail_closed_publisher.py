@@ -7,9 +7,11 @@ publish is HALT. It does not start a service or publish on import.
 from __future__ import annotations
 
 import argparse
+from contextlib import contextmanager
 import hashlib
 import json
 import os
+import stat
 from pathlib import Path
 import time
 from typing import Any
@@ -20,6 +22,31 @@ from occ_snapshot_publisher import (
     write_envelope_atomic,
 )
 
+
+@contextmanager
+def _inbox_publication_lock(inbox_path: str | Path):
+    """Lock the stable adjacent lock file shared with the PolyBot receiver."""
+    try:
+        import fcntl
+    except ImportError as exc:
+        raise FailClosedPublicationError("platform lacks POSIX advisory file locking") from exc
+    path = Path(str(Path(inbox_path)) + ".lock")
+    if not path.is_absolute() or not hasattr(os, "O_NOFOLLOW"):
+        raise FailClosedPublicationError("inbox lock requires an absolute path and no-follow support")
+    fd = os.open(path, os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
+    try:
+        metadata = os.fstat(fd)
+        if not stat.S_ISREG(metadata.st_mode):
+            raise FailClosedPublicationError("inbox lock is not a regular file")
+        if stat.S_IMODE(metadata.st_mode) & 0o077:
+            raise FailClosedPublicationError("inbox lock permissions allow group/other access")
+        fcntl.flock(fd, fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(fd, fcntl.LOCK_UN)
+    finally:
+        os.close(fd)
 
 class FailClosedPublicationError(RuntimeError):
     """The current OCC governance state cannot be safely published."""
@@ -64,17 +91,18 @@ def publish_draft_baseline_halt(
         f"{policy_file.as_posix()}#status={policy_status!s};"
         "clearance=not-established"
     )
-    envelope = SnapshotSequenceStore(sequence_db_path).issue(
-        status="HALT",
-        stop_conditions=["required_owner_approval_missing"],
-        evidence_refs=[evidence_ref],
-        policy_sha256=policy_digest,
-        portfolio_version=portfolio_version,
-        now_epoch=timestamp,
-        ttl_seconds=ttl_seconds,
-        secret=secret,
-    )
-    write_envelope_atomic(envelope, inbox_path)
+    with _inbox_publication_lock(inbox_path):
+        envelope = SnapshotSequenceStore(sequence_db_path).issue(
+            status="HALT",
+            stop_conditions=["required_owner_approval_missing"],
+            evidence_refs=[evidence_ref],
+            policy_sha256=policy_digest,
+            portfolio_version=portfolio_version,
+            now_epoch=timestamp,
+            ttl_seconds=ttl_seconds,
+            secret=secret,
+        )
+        write_envelope_atomic(envelope, inbox_path)
     return envelope
 
 
