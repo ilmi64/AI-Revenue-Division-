@@ -1,0 +1,177 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/occ/sprint3/market-observation.schema.json",
+  "title": "OCC Sprint 3 Market Observation",
+  "description": "Structural contract for research/paper market observations. Passing this schema does not establish source trust, licence, freshness, instrument correctness or live readiness.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "instrument_id",
+    "instrument_type",
+    "venue_or_broker",
+    "source_id",
+    "source_timestamp_utc",
+    "received_timestamp_utc",
+    "data_class",
+    "licence_status",
+    "bid",
+    "ask",
+    "currency",
+    "unit_or_contract_multiplier",
+    "session_state",
+    "portfolio_version"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "instrument_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "instrument_type": {
+      "enum": [
+        "crypto_spot",
+        "crypto_perpetual",
+        "fx_spot",
+        "index_cash",
+        "index_future",
+        "index_cfd",
+        "xauusd_spot",
+        "gold_future",
+        "gold_cfd"
+      ]
+    },
+    "venue_or_broker": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "source_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "source_timestamp_utc": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "received_timestamp_utc": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "data_class": {
+      "enum": [
+        "live",
+        "delayed",
+        "indicative",
+        "historical",
+        "synthetic"
+      ]
+    },
+    "licence_status": {
+      "enum": [
+        "approved",
+        "restricted",
+        "unknown",
+        "not_applicable"
+      ]
+    },
+    "bid": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "ask": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3,8}$"
+    },
+    "unit_or_contract_multiplier": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "session_state": {
+      "enum": [
+        "open",
+        "closed",
+        "auction",
+        "halted",
+        "unknown"
+      ]
+    },
+    "portfolio_version": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "contract_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 160
+    },
+    "expiry_utc": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "roll_status": {
+      "enum": [
+        "not_applicable",
+        "not_near_roll",
+        "near_roll",
+        "rolling",
+        "unknown"
+      ]
+    },
+    "quote_unit": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 80
+    },
+    "base_currency": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[A-Z]{3}$"
+    },
+    "quote_currency": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[A-Z]{3}$"
+    },
+    "upstream_dependencies": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 160
+      },
+      "uniqueItems": true
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      },
+      "uniqueItems": true
+    }
+  },
+  "$comment": "The consumer must additionally enforce bid <= ask, finite numeric values, timestamp skew/freshness, licence/provenance approval, exact instrument mapping, market-specific required fields, venue session/holiday state, and portfolio-version consistency. Unknown or failed checks must block qualification."
+}
