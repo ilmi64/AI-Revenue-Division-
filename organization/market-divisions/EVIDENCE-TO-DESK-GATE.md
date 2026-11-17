@@ -24,7 +24,7 @@ All inputs are local snapshots supplied by the operator. The `--now-utc` referen
 - Requires each event to have a ledger review, a recent UTC review timestamp, eligible review state, source/evidence references and separate confidence dimensions.
 - Checks each event source against the supplied source registry. Access must be verified, cost free/not-applicable, terms reviewed permitted, and operational status approved manual/adapter. The current candidate registry intentionally fails these gates.
 - Rejects duplicate event IDs in a batch.
-- Checks market timestamps, clock skew, quote age, finite positive bid/ask, crossed quotes, licence status, session and market-specific mappings.
+- Checks market timestamps, clock skew, quote age, finite positive bid/ask, crossed quotes, licence status, session and market-specific mappings. It also requires a supplied market source registry, exact instrument/source candidate mapping, approved status, approved terms and Canadian eligibility; the current candidate registry intentionally fails closed.
 - Gold checks require explicit basis, quote unit, session, quote age/staleness, financing and settlement metadata. Indicative bullion spot remains visibly distinct from broker-executable XAUUSD.
 - Emits a JSON report with eligibility, errors and warnings. It never generates a trade stance or instruction.
 
