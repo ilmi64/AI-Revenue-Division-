@@ -1,0 +1,224 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OCC Sprint 3 Specialist Assessment",
+  "description": "Non-executable research/paper assessment. This schema intentionally has no fields for orders, sizing, leverage, routing, signing or execution authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "desk_id",
+    "instrument_id",
+    "as_of_utc",
+    "portfolio_version",
+    "mode",
+    "stance",
+    "confidence_band",
+    "horizon",
+    "evidence_refs",
+    "data_quality",
+    "risk_flags",
+    "invalidation_conditions",
+    "review_by_utc"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "desk_id": {
+      "enum": [
+        "crypto",
+        "forex",
+        "indices",
+        "gold"
+      ]
+    },
+    "instrument_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "as_of_utc": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "portfolio_version": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "mode": {
+      "enum": [
+        "research",
+        "paper"
+      ]
+    },
+    "stance": {
+      "enum": [
+        "bullish_bias",
+        "bearish_bias",
+        "neutral",
+        "no_assessment",
+        "halt"
+      ]
+    },
+    "confidence_band": {
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "not_assessed"
+      ]
+    },
+    "horizon": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "evidence_refs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      }
+    },
+    "data_quality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "source_ids",
+        "freshness_status",
+        "licence_status",
+        "instrument_mapping_status"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "qualified_for_research",
+            "not_qualified",
+            "halt"
+          ]
+        },
+        "source_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          }
+        },
+        "freshness_status": {
+          "enum": [
+            "current",
+            "stale",
+            "unknown"
+          ]
+        },
+        "licence_status": {
+          "enum": [
+            "approved",
+            "restricted",
+            "unknown",
+            "not_applicable"
+          ]
+        },
+        "instrument_mapping_status": {
+          "enum": [
+            "verified",
+            "ambiguous",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "risk_flags": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 240
+      }
+    },
+    "invalidation_conditions": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      }
+    },
+    "review_by_utc": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "stance": {
+            "enum": [
+              "no_assessment",
+              "halt"
+            ]
+          }
+        },
+        "required": [
+          "stance"
+        ]
+      },
+      "then": {
+        "properties": {
+          "confidence_band": {
+            "const": "not_assessed"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "data_quality": {
+            "properties": {
+              "status": {
+                "enum": [
+                  "not_qualified",
+                  "halt"
+                ]
+              }
+            },
+            "required": [
+              "status"
+            ]
+          }
+        },
+        "required": [
+          "data_quality"
+        ]
+      },
+      "then": {
+        "properties": {
+          "stance": {
+            "enum": [
+              "no_assessment",
+              "halt"
+            ]
+          },
+          "confidence_band": {
+            "const": "not_assessed"
+          }
+        }
+      }
+    }
+  ],
+  "$comment": "Consumers must enforce as_of_utc <= review_by_utc, portfolio-version match, trusted source lineage, freshness and licence checks. Schema validity is not evidence of predictive performance or permission to trade."
+}

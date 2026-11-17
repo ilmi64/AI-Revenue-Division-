@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "status": "synthetic_test_only_not_production_approval",
+  "instruments": [
+    {
+      "id": "SOL-USD",
+      "asset_class": "crypto_spot",
+      "market": "synthetic_fixture",
+      "purpose": "Deterministic offline gate tests only; not a market observation.",
+      "candidate_sources": [
+        {
+          "name": "synthetic-crypto-fixture",
+          "status": "approved_manual",
+          "terms_review": "approved",
+          "canada_review": "approved",
+          "source_kind": "locally_generated_synthetic_fixture",
+          "production_use": false
+        }
+      ]
+    },
+    {
+      "id": "EURUSD",
+      "asset_class": "fx_spot",
+      "market": "synthetic_fixture",
+      "purpose": "Deterministic offline gate tests only; not a market observation.",
+      "candidate_sources": [
+        {
+          "name": "synthetic-forex-fixture",
+          "status": "approved_manual",
+          "terms_review": "approved",
+          "canada_review": "approved",
+          "source_kind": "locally_generated_synthetic_fixture",
+          "production_use": false
+        }
+      ]
+    },
+    {
+      "id": "US500-CASH-REFERENCE",
+      "asset_class": "index_cash",
+      "market": "synthetic_fixture",
+      "purpose": "Deterministic offline gate tests only; not a market observation.",
+      "candidate_sources": [
+        {
+          "name": "synthetic-index-fixture",
+          "status": "approved_manual",
+          "terms_review": "approved",
+          "canada_review": "approved",
+          "source_kind": "locally_generated_synthetic_fixture",
+          "production_use": false
+        }
+      ]
+    },
+    {
+      "id": "XAUUSD",
+      "asset_class": "xauusd_spot",
+      "market": "synthetic_fixture",
+      "purpose": "Deterministic offline gate tests only; not a market observation.",
+      "candidate_sources": [
+        {
+          "name": "synthetic-gold-fixture",
+          "status": "approved_manual",
+          "terms_review": "approved",
+          "canada_review": "approved",
+          "source_kind": "locally_generated_synthetic_fixture",
+          "production_use": false
+        }
+      ]
+    }
+  ],
+  "policy": {
+    "production_approval": "none",
+    "live_data": "none",
+    "execution_authority": "none",
+    "note": "The approved_manual status applies only to locally generated test fixtures; it is not a source approval for any external provider or production use."
+  }
+}

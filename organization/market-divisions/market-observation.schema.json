@@ -1,0 +1,527 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OCC Sprint 3 Market Observation",
+  "description": "Structural contract for research/paper market observations. Passing this schema does not establish source trust, licence, freshness, instrument correctness or live readiness.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "instrument_id",
+    "instrument_type",
+    "venue_or_broker",
+    "source_id",
+    "source_timestamp_utc",
+    "received_timestamp_utc",
+    "data_class",
+    "licence_status",
+    "bid",
+    "ask",
+    "currency",
+    "unit_or_contract_multiplier",
+    "session_state",
+    "portfolio_version"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "instrument_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "instrument_type": {
+      "enum": [
+        "crypto_spot",
+        "crypto_perpetual",
+        "fx_spot",
+        "index_cash",
+        "index_future",
+        "index_cfd",
+        "xauusd_spot",
+        "gold_future",
+        "gold_cfd"
+      ]
+    },
+    "venue_or_broker": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "source_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "source_timestamp_utc": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "received_timestamp_utc": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "data_class": {
+      "enum": [
+        "live",
+        "delayed",
+        "indicative",
+        "historical",
+        "synthetic"
+      ]
+    },
+    "licence_status": {
+      "enum": [
+        "approved",
+        "restricted",
+        "unknown",
+        "not_applicable"
+      ]
+    },
+    "bid": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "ask": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3,8}$"
+    },
+    "unit_or_contract_multiplier": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "session_state": {
+      "enum": [
+        "open",
+        "closed",
+        "auction",
+        "halted",
+        "unknown"
+      ]
+    },
+    "portfolio_version": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "contract_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 160
+    },
+    "expiry_utc": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "roll_status": {
+      "enum": [
+        "not_applicable",
+        "not_near_roll",
+        "near_roll",
+        "rolling",
+        "unknown"
+      ]
+    },
+    "quote_unit": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 80
+    },
+    "base_currency": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[A-Z]{3}$"
+    },
+    "quote_currency": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[A-Z]{3}$"
+    },
+    "upstream_dependencies": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 160
+      },
+      "uniqueItems": true
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      },
+      "uniqueItems": true
+    },
+    "gold_price_basis": {
+      "enum": [
+        "broker_executable_xauusd",
+        "indicative_bullion_spot",
+        "comex_futures",
+        "gold_cfd",
+        "synthetic_test"
+      ]
+    },
+    "gold_session": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 120,
+      "description": "Named venue/session label with timezone/calendar provenance; never infer from symbol."
+    },
+    "quote_age_seconds": {
+      "type": "number",
+      "minimum": 0
+    },
+    "stale_threshold_seconds": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "is_stale": {
+      "type": "boolean"
+    },
+    "spot_futures_basis": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Explicitly calculated basis with both leg references; null when either leg is unavailable."
+    },
+    "financing_status": {
+      "enum": [
+        "not_applicable",
+        "known_no_financing",
+        "known_financing_terms",
+        "unknown",
+        "not_reviewed"
+      ]
+    },
+    "settlement_type": {
+      "enum": [
+        "physical_allocated",
+        "physical_unallocated",
+        "cash_settled",
+        "derivative",
+        "unknown",
+        "not_applicable"
+      ]
+    },
+    "spot_futures_leg_source_ids": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 160
+      },
+      "description": "Distinct source identifiers for the two time-aligned spot and futures legs."
+    },
+    "spot_futures_leg_timestamps_utc": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "string",
+        "format": "date-time",
+        "pattern": "Z$"
+      },
+      "description": "UTC source timestamps for spot and futures legs; consumer enforces configured maximum skew."
+    },
+    "base_asset": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 32,
+      "description": "Base asset/token symbol; not inferred from an exchange display pair."
+    },
+    "quote_asset": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 32,
+      "description": "Quote asset/token symbol; pair orientation is base_asset priced in quote_asset."
+    },
+    "market_pair": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 80,
+      "description": "Venue-native market pair identifier, retained verbatim."
+    },
+    "chain_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 80,
+      "description": "Canonical chain identifier for on-chain token identity; null for venue-native assets."
+    },
+    "contract_address": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 200,
+      "description": "Canonical token contract/mint address; null only where no on-chain contract applies."
+    },
+    "token_identity_status": {
+      "enum": [
+        "verified",
+        "unverified",
+        "not_applicable"
+      ]
+    },
+    "funding_rate": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Observed perpetual funding rate; null when not supplied."
+    },
+    "funding_interval_hours": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "exclusiveMinimum": 0
+    },
+    "settlement_asset": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 32
+    },
+    "quote_convention": {
+      "const": "quote_per_base",
+      "description": "Pair is quoted as units of quote currency per one unit of base currency."
+    },
+    "index_code": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "index_calculation_currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$"
+    },
+    "broker_symbol": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 120
+    },
+    "contract_unit": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 80
+    }
+  },
+  "$comment": "The consumer must additionally enforce bid <= ask, finite numeric values, timestamp skew/freshness, licence/provenance approval, exact instrument mapping, market-specific required fields, venue session/holiday state, and portfolio-version consistency. FX requires explicit base and quote currencies; futures require contract code and expiry; gold instruments require an explicit quote/unit convention. Unknown or failed checks must block qualification. Gold-specific consumers must reject quote_age_seconds above stale_threshold_seconds or is_stale=true; preserve spot, futures and CFD basis separately; require explicit session/calendar, settlement and financing status. Indicative bullion spot must never be relabelled broker-executable XAUUSD. Basis requires two time-aligned, provenance-linked legs. If spot_futures_basis is non-null, require two distinct spot_futures_leg_source_ids, two UTC spot_futures_leg_timestamps_utc, and two distinct evidence_refs; enforce timestamp alignment in the runtime gate. Crypto requires explicit base/quote orientation and venue pair identity; token identity state is explicit and unresolved identity must block desk qualification. Perpetual observations retain funding interval and settlement asset. FX quote orientation is explicit. Cash indices and broker CFDs retain distinct identities and native symbols/units.",
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "instrument_type": {
+            "const": "fx_spot"
+          }
+        },
+        "required": [
+          "instrument_type"
+        ]
+      },
+      "then": {
+        "required": [
+          "base_currency",
+          "quote_currency"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "instrument_type": {
+            "enum": [
+              "index_future",
+              "gold_future"
+            ]
+          }
+        },
+        "required": [
+          "instrument_type"
+        ]
+      },
+      "then": {
+        "required": [
+          "contract_code",
+          "expiry_utc"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "instrument_type": {
+            "enum": [
+              "xauusd_spot",
+              "gold_future",
+              "gold_cfd"
+            ]
+          }
+        },
+        "required": [
+          "instrument_type"
+        ]
+      },
+      "then": {
+        "required": [
+          "quote_unit"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "instrument_type": {
+            "enum": [
+              "xauusd_spot",
+              "gold_future",
+              "gold_cfd"
+            ]
+          }
+        },
+        "required": [
+          "instrument_type"
+        ]
+      },
+      "then": {
+        "required": [
+          "gold_price_basis",
+          "gold_session",
+          "quote_age_seconds",
+          "stale_threshold_seconds",
+          "is_stale",
+          "financing_status",
+          "settlement_type"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "instrument_type": {
+            "const": "crypto_spot"
+          }
+        },
+        "required": [
+          "instrument_type"
+        ]
+      },
+      "then": {
+        "required": [
+          "base_asset",
+          "quote_asset",
+          "market_pair",
+          "token_identity_status"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "instrument_type": {
+            "const": "crypto_perpetual"
+          }
+        },
+        "required": [
+          "instrument_type"
+        ]
+      },
+      "then": {
+        "required": [
+          "base_asset",
+          "quote_asset",
+          "market_pair",
+          "funding_rate",
+          "funding_interval_hours",
+          "settlement_asset"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "instrument_type": {
+            "const": "fx_spot"
+          }
+        },
+        "required": [
+          "instrument_type"
+        ]
+      },
+      "then": {
+        "required": [
+          "base_currency",
+          "quote_currency",
+          "quote_convention"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "instrument_type": {
+            "const": "index_cash"
+          }
+        },
+        "required": [
+          "instrument_type"
+        ]
+      },
+      "then": {
+        "required": [
+          "index_code",
+          "index_calculation_currency"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "instrument_type": {
+            "const": "index_cfd"
+          }
+        },
+        "required": [
+          "instrument_type"
+        ]
+      },
+      "then": {
+        "required": [
+          "broker_symbol",
+          "contract_unit",
+          "unit_or_contract_multiplier"
+        ]
+      }
+    }
+  ]
+}

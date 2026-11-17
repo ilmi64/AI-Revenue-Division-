@@ -1,0 +1,202 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Capital Flow to Crypto Specialist Desk Handoff",
+  "description": "Evidence-only handoff of reviewed capital-flow events into Crypto desk research. It is not a trading signal, position instruction, order, or execution permission.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "handoff_id",
+    "created_at_utc",
+    "source_system",
+    "destination_desk",
+    "mode",
+    "event_records",
+    "limitations"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "handoff_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "created_at_utc": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "source_system": {
+      "const": "occ_capital_flow_intelligence"
+    },
+    "destination_desk": {
+      "const": "crypto"
+    },
+    "mode": {
+      "const": "research_only"
+    },
+    "event_records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "event_id",
+          "event_type",
+          "review_status",
+          "observed_at_utc",
+          "source_ids",
+          "evidence_refs",
+          "source_reliability",
+          "attribution_confidence",
+          "event_confidence",
+          "materiality",
+          "direction",
+          "limitations",
+          "conflicts"
+        ],
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "event_type": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "review_status": {
+            "enum": [
+              "watch",
+              "research",
+              "unverified",
+              "corroborated"
+            ]
+          },
+          "observed_at_utc": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "Z$"
+          },
+          "asset_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "chain": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "contract_address": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "transaction_hash": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "direction": {
+            "enum": [
+              "inflow",
+              "outflow",
+              "internal",
+              "unknown"
+            ]
+          },
+          "source_ids": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "evidence_refs": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "source_reliability": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 5
+          },
+          "attribution_confidence": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 5
+          },
+          "event_confidence": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 5
+          },
+          "materiality": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 5
+          },
+          "corroboration_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "limitations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "conflicts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "quality_flags": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "revalidate_by_utc": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "consumer_rules": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$comment": "Consumer must resolve each event_id to the canonical event and verified review ledger, reject expired/rejected/orphan/tampered records, preserve original evidence, and independently assess relevance. No schema-valid record grants trade authority."
+}
