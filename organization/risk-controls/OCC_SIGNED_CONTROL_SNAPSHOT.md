@@ -41,3 +41,12 @@ A producer must not assume a snapshot was applied merely because it was generate
 ## Validation and limitations
 
 This file is a producer-side contract, not an executable publisher. No HMAC secret, key store, message queue, network transport, acknowledgement service, live feed or production connection is included. The PolyBot receiver is currently specified as single-process/single-writer and its tests have not been run. Before runtime use, both repositories need schema conformance tests, sender/receiver interoperability tests, clock rollback tests, crash/restart tests, independent security review and owner approval. Live trading remains disabled.
+
+## Implemented producer library
+
+`occ_snapshot_publisher.py` now provides:
+- `SnapshotSequenceStore.issue(...)` for validated CLEAR/HALT snapshots with a persistent monotonic timestamp guard;
+- `sign_snapshot(...)` for canonical HMAC-SHA256 signing;
+- `write_envelope_atomic(...)` for atomic local/shared-filesystem publication with restrictive file permissions.
+
+The emitted envelope is exactly `{snapshot, signature_hex}`. The publisher library is not a daemon and does not decide whether OCC is CLEAR. The caller must derive status from the approved OCC risk state, pass the current policy digest and portfolio version, and publish only after those inputs are verified. The shared inbox must be protected by filesystem permissions. No cross-machine network transport is included.
