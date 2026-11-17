@@ -10,6 +10,7 @@ from occ_snapshot_publisher import (
     SnapshotPublisherError,
     SnapshotSequenceStore,
     canonical_snapshot_bytes,
+    policy_file_sha256,
     write_envelope_atomic,
 )
 
@@ -34,6 +35,14 @@ class SnapshotPublisherTests(unittest.TestCase):
             now_epoch=now,
             ttl_seconds=120,
             secret=SECRET,
+        )
+
+    def test_policy_file_digest_uses_exact_file_bytes(self):
+        policy_path = Path(self.temp.name) / "policy.json"
+        policy_path.write_bytes(b'{"approved":true}\n')
+        self.assertEqual(
+            policy_file_sha256(policy_path),
+            hashlib.sha256(b'{"approved":true}\n').hexdigest(),
         )
 
     def test_clear_snapshot_is_canonical_and_hmac_signed(self):
