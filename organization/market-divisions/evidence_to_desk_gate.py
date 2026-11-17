@@ -304,6 +304,10 @@ def validate_market_observation(obs: dict[str, Any], now: datetime,
         chain_id, contract = obs.get("chain_id"), obs.get("contract_address")
         if (chain_id is None) != (contract is None):
             errors.append("Crypto chain_id and contract_address must both be supplied or both be null")
+        if obs.get("token_identity_status") == "verified" and (not chain_id or not contract):
+            errors.append("verified Crypto token identity requires chain_id and contract_address")
+        if obs.get("quote_asset") != obs.get("currency"):
+            errors.append("Crypto quote asset does not match observation currency")
     if instrument_type == "crypto_perpetual":
         if not isinstance(obs.get("settlement_asset"), str) or not obs.get("settlement_asset"):
             errors.append("Crypto perpetual settlement asset missing")
@@ -312,6 +316,8 @@ def validate_market_observation(obs: dict[str, Any], now: datetime,
             errors.append("Crypto perpetual funding_rate invalid")
         if interval is not None and (isinstance(interval, bool) or not isinstance(interval, (int, float)) or not math.isfinite(interval) or interval <= 0):
             errors.append("Crypto perpetual funding interval invalid")
+        if rate is None or interval is None:
+            warnings.append("Crypto perpetual funding observation incomplete; research context only")
     if instrument_type == "fx_spot":
         if not obs.get("base_currency") or not obs.get("quote_currency"):
             errors.append("FX base/quote currency mapping missing")
@@ -319,14 +325,25 @@ def validate_market_observation(obs: dict[str, Any], now: datetime,
             errors.append("FX quote convention must be explicit as quote currency per base unit")
         if obs.get("base_currency") == obs.get("quote_currency"):
             errors.append("FX base and quote currencies must differ")
+        if obs.get("quote_currency") != obs.get("currency"):
+            errors.append("FX quote currency does not match observation currency")
     if instrument_type == "index_cash":
         if not obs.get("index_code") or not obs.get("index_calculation_currency"):
             errors.append("cash index identity/currency missing")
+        if obs.get("index_calculation_currency") != obs.get("currency"):
+            errors.append("cash index calculation currency does not match observation currency")
     if instrument_type in {"index_future", "gold_future"}:
         if not obs.get("contract_code"):
             errors.append("futures contract code missing")
         if not obs.get("expiry_utc"):
             errors.append("futures expiry missing")
+        else:
+            try:
+                expiry = parse_utc(obs.get("expiry_utc"), "expiry_utc")
+                if expiry <= now:
+                    warnings.append("futures contract expiry is not in the future")
+            except GateError as exc:
+                errors.append(str(exc))
     if instrument_type in {"index_cfd", "gold_cfd"}:
         if not obs.get("broker_symbol") or not obs.get("contract_unit"):
             errors.append("broker CFD symbol/contract unit missing")
