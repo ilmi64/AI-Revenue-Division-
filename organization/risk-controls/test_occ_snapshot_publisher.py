@@ -11,6 +11,7 @@ from occ_snapshot_publisher import (
     SnapshotSequenceStore,
     canonical_snapshot_bytes,
     policy_file_sha256,
+    sign_snapshot,
     write_envelope_atomic,
 )
 
@@ -36,6 +37,13 @@ class SnapshotPublisherTests(unittest.TestCase):
             ttl_seconds=120,
             secret=SECRET,
         )
+
+    def test_shared_polybot_interoperability_vector(self):
+        fixture_path = Path(__file__).parent / "fixtures" / "occ-control-envelope.test.json"
+        fixture = json.loads(fixture_path.read_text(encoding="utf-8"))
+        secret = bytes.fromhex(fixture["secret_hex"])
+        actual = sign_snapshot(fixture["envelope"]["snapshot"], secret)
+        self.assertEqual(actual, fixture["envelope"]["signature_hex"])
 
     def test_policy_file_digest_uses_exact_file_bytes(self):
         policy_path = Path(self.temp.name) / "policy.json"
