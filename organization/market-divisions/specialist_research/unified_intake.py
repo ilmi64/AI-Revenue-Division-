@@ -618,19 +618,15 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
             if (not isinstance(tx_expected_cancelled, list) or not isinstance(changes_expected_cancelled, list)
                     or sorted(tx_expected_cancelled) != sorted(changes_expected_cancelled)):
                 consistency_errors.append("expected dependent-order cancellation IDs differ between transaction and AccountChanges replay inputs")
-        if isinstance(oanda_pending_order_snapshot, dict) and isinstance(oanda_account_changes_audit, dict):
+        if (oanda_post_closeout_account_changes_replay is not None
+                and isinstance(oanda_pending_order_snapshot, dict)
+                and isinstance(oanda_account_changes_audit, dict)):
             changes_current_orders = changes_report.get("current_pending_order_ids") if isinstance(changes_report, dict) else None
             pending_snapshot_orders = oanda_pending_order_snapshot.get("pending_orders")
             if isinstance(changes_current_orders, list) and isinstance(pending_snapshot_orders, list):
                 pending_ids = sorted(item.get("id") for item in pending_snapshot_orders if isinstance(item, dict))
                 if len(pending_ids) != len(pending_snapshot_orders) or sorted(changes_current_orders) != pending_ids:
                     consistency_errors.append("full-account pending orders differ from the dedicated post-closeout pending-order snapshot")
-                if consistency_errors:
-                    changes_report["status"] = "HALT"
-                    changes_report.setdefault("errors", []).extend(consistency_errors)
-                    oanda_account_changes_audit["status"] = "HALT"
-                    oanda_account_changes_audit["errors"] = changes_report["errors"]
-
         if consistency_errors:
             changes_report["status"] = "HALT"
             changes_report.setdefault("errors", []).extend(consistency_errors)
