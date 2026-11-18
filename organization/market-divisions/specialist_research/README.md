@@ -936,7 +936,7 @@ monitor: the latest document captures must be supplied by a researcher.
 
 ## Official venue-document excerpt capture set
 
-`venue_document_capture_manifest.json` now inventories fifteen official-page
+`venue_document_capture_manifest.json` now inventories seventeen official-page
 search excerpts linked to all seven candidate venues. The sources cover
 Kraken MTF linear crypto derivatives, Coinbase International Exchange
 perpetuals, OANDA Canada's margin schedule, financing policy and index-CFD
@@ -1047,7 +1047,7 @@ OANDA Canada's published margin schedule lists Gold at 4.5:1. This is a dated pu
 
 ### OANDA Canada Gold CFD: hours, gaps, closeout and instrument identity
 
-The official-page excerpt manifest has been extended from nine to fifteen captures. Four new OANDA Canada excerpts record:
+The official-page excerpt manifest has been extended from nine to seventeen captures. Four new OANDA Canada excerpts record:
 
 - XAU/USD is a Gold CFD quoted against USD and measured in troy ounces; it does not convey physical ownership of bullion. The page does not establish a universal account-independent contract multiplier.
 - The published XAU/USD metal-CFD hours are Sunday-Friday 18:05-16:59 New York time. Hours may change for daylight saving time and holidays. The displayed MT4 lot size is 100, which is platform-specific and must not be generalized to every account/platform.
@@ -1086,7 +1086,7 @@ The rule calculation is explicit:
 
 `assess_oanda_margin_state` calculates the margin-call and 100% closeout thresholds from NAV_mid and Margin Used supplied in the same account currency. It does not calculate position margin, currency conversion, NAV_mid, bid/ask P&L, hedged margin, tiered margin, broker closeout sequencing or actual fills. The caller must supply complete account positions and market-availability states for each observation. This is a deterministic policy replay, not a broker implementation or an assertion that every OANDA account uses v20/v20 MT4 terms; exact sub-account, signed agreement and current account rules must be confirmed.
 
-The official evidence excerpts `oanda_canada_margin_rules_faq` and `oanda_canada_subaccount_closeout_differences` are included in the partial capture manifest. The total is now fifteen excerpts. The evidence records the 3:45 p.m. ET check, six consecutive trading-day rule, 100% early closeout threshold, account-wide closeout scope, closed/halted-market exception and unrelated pending-order treatment. Full account agreement bytes, publisher authentication and trusted publisher timestamps have not been captured.
+The official evidence excerpts `oanda_canada_margin_rules_faq` and `oanda_canada_subaccount_closeout_differences` are included in the partial capture manifest. The total is now seventeen excerpts. The evidence records the 3:45 p.m. ET check, six consecutive trading-day rule, 100% early closeout threshold, account-wide closeout scope, closed/halted-market exception and unrelated pending-order treatment. Full account agreement bytes, publisher authentication and trusted publisher timestamps have not been captured.
 
 Regression coverage is in `test_oanda_account_margin_closeout.py`. Tests are authored and have not been executed. All outputs remain research-only with no order action, trade authority or live readiness.
 
@@ -1100,3 +1100,22 @@ The CLI accepts `--oanda-account-margin-replay path/to/account-margin-replay.jso
 
 
 The Main Hub dashboard's `build_occ_control_health_report` now surfaces `oanda_account_margin_audit`. A HALT, malformed report, inconsistent PASS/report pair or invalid authority boundary escalates the Main Hub audit to `HALT_AUDIT`. An omitted audit is visible as `NOT_PROVIDED`; it cannot be mistaken for a successful margin check. The dashboard never receives or exercises broker authority.
+
+
+## OANDA post-closeout pending-order exposure audit
+
+`oanda_pending_order_exposure.py` classifies a caller-supplied complete OANDA v20 pending-order snapshot after a margin closeout. It uses the documented distinction between trade-dependent contingent orders and unrelated pending orders:
+
+- Take-profit, stop-loss, guaranteed-stop-loss and trailing-stop-loss orders carry `tradeID`; if the referenced trade was liquidated, a still-pending dependent order is a reconciliation error because it should have been cancelled.
+- A dependent order is considered attached to a surviving trade only when its `tradeID` appears in the explicitly supplied `remaining_open_trade_ids`. Unknown trade relationships fail closed.
+- Unrelated LIMIT, STOP and MARKET_IF_TOUCHED orders with `OPEN_ONLY`, `REDUCE_FIRST` or `DEFAULT` are treated as capable of reopening or extending exposure.
+- `REDUCE_ONLY` orders are separated because the v20 definition says they can only reduce an existing position.
+- `DEFAULT` is resolved using the caller-supplied account hedging mode: OPEN_ONLY for client-hedging accounts and REDUCE_FIRST otherwise. Both can open exposure.
+- The input requires a complete order list (including an explicit empty list), the liquidated and remaining trade ID sets, account hedging mode, source/evaluation timestamps, and a caller-selected freshness limit. The liquidated and remaining trade sets must be disjoint.
+- Stale, partial, malformed or internally inconsistent snapshots produce HALT. A surviving unrelated exposure-opening order also produces HALT; only a complete snapshot with no such order returns PASS.
+
+The audit is wired into unified OCC intake as optional `oanda_pending_order_snapshot`, exposed in `oanda_pending_order_audit`, and accepted by the CLI flag `--oanda-pending-order-snapshot`. Main Hub surfaces the audit and escalates HALT or malformed/inconsistent status to `HALT_AUDIT`. When omitted, it is explicitly `NOT_PROVIDED`.
+
+Input contract: `oanda-pending-order-snapshot.schema.json`. Official API excerpts `oanda_v20_order_definition` and `oanda_v20_account_pending_orders_endpoint` extend the evidence inventory to seventeen excerpts. The capture remains partial: no full API document bytes, publisher authentication, live account access, or customer-specific terms have been captured.
+
+Regression suites: `test_oanda_pending_order_exposure.py` (31 methods), `test_unified_intake.py` (32 methods), `test_venue_document_capture.py` (14 methods), and `organization/tests/test_build_organisation_dashboard.py` (28 methods). Tests are authored but have not been executed. No API token, account connection, order cancellation, modification or execution action is implemented.
