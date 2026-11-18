@@ -112,6 +112,10 @@ class ControlHealthTests(unittest.TestCase):
         self.assertIn("stop-A", result["control_health"]["active_stop_ids"])
         self.assertTrue(result["global_stop_active"])
         self.assertEqual(result["active_stops"], snap["active_stops"])
+        clearance = result["control_health"]["stop_clearance_review"]
+        self.assertTrue(clearance["global_stop_active"])
+        self.assertFalse(clearance["clearance_performed"])
+        self.assertEqual(clearance["stops"][0]["status"], "review_pending_or_incomplete")
 
     def test_handover_cannot_reference_unknown_snapshot(self):
         self.seed_snapshot()
