@@ -19,6 +19,7 @@ SOURCE_CLASSES = {
     "official_financing_policy", "official_product_page",
     "official_help_centre", "regulator_notice", "exchange_rulebook",
     "broker_client_agreement", "third_party_reference", "research_note",
+    "official_api_schema", "official_api_endpoint_definition",
 }
 CRITICAL_FACTS = {
     "contract_multiplier", "quote_currency", "settlement_currency",
@@ -27,7 +28,8 @@ CRITICAL_FACTS = {
     "financing_convention", "financing_rate_basis", "funding_convention",
     "funding_interval", "liquidation_fee_rate", "margin_closeout_policy",
     "triple_swap_policy", "roll_method", "price_tick", "tick_value",
-    "contract_unit", "partial_liquidation_policy",
+    "contract_unit", "partial_liquidation_policy", "position_fill_semantics",
+    "pending_order_cancellation_scope", "dependent_order_linkage",
 }
 
 
