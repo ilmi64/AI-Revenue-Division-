@@ -33,7 +33,8 @@
     "portfolio_risk",
     "oanda_account_margin_audit",
     "oanda_pending_order_audit",
-    "oanda_closeout_transaction_audit"
+    "oanda_closeout_transaction_audit",
+    "oanda_post_closeout_account_changes_audit"
   ],
   "properties": {
     "schema_version": {
@@ -1208,6 +1209,18 @@
         "live_readiness": {
           "const": false
         }
+      }
+    },
+    "oanda_post_closeout_account_changes_audit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "report", "errors", "trade_authority", "live_readiness"],
+      "properties": {
+        "status": {"enum": ["NOT_PROVIDED", "PASS", "HALT"]},
+        "report": {"type": ["object", "null"]},
+        "errors": {"type": "array", "items": {"type": "string"}},
+        "trade_authority": {"const": false},
+        "live_readiness": {"const": false}
       }
     }
   }
