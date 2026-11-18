@@ -49,7 +49,7 @@ class ControlHealthTests(unittest.TestCase):
         self.tmp.cleanup()
 
     def seed_snapshot(self):
-        append_snapshot(self.snapshots, base_snapshot(), NOW)
+        return append_snapshot(self.snapshots, base_snapshot(), NOW)
 
     def integrate(self):
         return build_control_health(base_snapshot(), self.snapshots, self.events)
@@ -67,8 +67,10 @@ class ControlHealthTests(unittest.TestCase):
         self.assertEqual(result["control_health"]["status"], "HALT_AUDIT")
 
     def test_complete_handover_and_matching_ledgers_pass(self):
-        self.seed_snapshot()
-        append_event(self.events, handover_event())
+        record = self.seed_snapshot()
+        handover = handover_event()
+        handover["details"]["snapshot_id"] = record["snapshot_id"]
+        append_event(self.events, handover)
         result = self.integrate()
         self.assertEqual(result["control_health"]["status"], "PASS_AUDIT")
         self.assertEqual(result["control_health"]["handover_acceptance"], "accepted")
@@ -90,7 +92,7 @@ class ControlHealthTests(unittest.TestCase):
         snap["status"] = "halt"
         snap["global_stop_active"] = True
         snap["active_stops"] = [{"stop_id": "stop-A", "source": "crypto"}]
-        append_snapshot(self.snapshots, snap, NOW)
+        record = append_snapshot(self.snapshots, snap, NOW)
         stop = {
             "event_id": "stop-A-event", "event_type": "stop_raised",
             "occurred_at_utc": NOW, "recorded_at_utc": NOW,
@@ -100,12 +102,21 @@ class ControlHealthTests(unittest.TestCase):
         }
         append_event(self.events, stop)
         hand = handover_event()
+        hand["details"]["snapshot_id"] = record["snapshot_id"]
         hand["details"]["active_veto_ids"] = ["stop-A"]
         append_event(self.events, hand)
         result = self.integrate()
         self.assertIn("stop-A", result["control_health"]["active_stop_ids"])
         self.assertTrue(result["global_stop_active"])
         self.assertEqual(result["active_stops"], snap["active_stops"])
+
+    def test_handover_cannot_reference_unknown_snapshot(self):
+        self.seed_snapshot()
+        append_event(self.events, handover_event())
+        result = self.integrate()
+        self.assertEqual(result["control_health"]["status"], "HALT_AUDIT")
+        self.assertTrue(any("does not reference a verified snapshot" in x
+                            for x in result["control_health"]["errors"]))
 
     def test_input_snapshot_is_not_mutated(self):
         self.seed_snapshot()
