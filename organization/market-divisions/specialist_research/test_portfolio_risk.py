@@ -28,6 +28,13 @@ def packets(status_overrides=None):
                 "leverage": None,
                 "margin_amount": 10.0 if desk in {"indices", "gold"} else None,
                 "delta": 1.0,
+                "initial_margin": 10.0 if desk in {"indices", "gold"} else (None if desk in {"crypto", "forex"} else None),
+                "maintenance_margin": 5.0 if desk in {"indices", "gold"} else None,
+                "available_margin": 20.0 if desk in {"indices", "gold"} else None,
+                "liquidation_distance_pct": 25.0 if desk in {"indices", "gold"} else None,
+                "executable_depth_notional": 150.0 if desk in {"indices", "gold"} else None,
+                "funding_or_financing_cost": 0.5 if desk in {"indices", "gold"} else None,
+                "funding_horizon_hours": 24.0 if desk in {"indices", "gold"} else None,
                 "currency": "USD",
                 "valuation_currency": "USD",
                 "valuation_amount": 100.0,
@@ -135,6 +142,26 @@ class PortfolioRiskTests(unittest.TestCase):
         result = assess_portfolio_risk(packets(), NOW, scoped, correlations())
         self.assertEqual(result["status"], "HALT")
         self.assertEqual(result["risk_limits"]["results"][0]["actual"], 300.0)
+
+    def test_derivative_missing_margin_metadata_remains_unknown(self):
+        rows = packets()
+        rows[2]["context"]["portfolio_risk"]["positions"][0].pop("initial_margin")
+        result = assess_portfolio_risk(rows, NOW, config(), correlations())
+        self.assertEqual(result["status"], "UNKNOWN")
+        self.assertIn("position-indices", result["derivatives_liquidity_risk"]["unclassified_position_ids"])
+
+    def test_derivative_depth_shortfall_is_flagged_without_inventing_slippage(self):
+        rows = packets()
+        rows[2]["context"]["portfolio_risk"]["positions"][0]["executable_depth_notional"] = 10.0
+        result = assess_portfolio_risk(rows, NOW, config(), correlations())
+        self.assertTrue(any("executable depth is below position notional" in w for w in result["warnings"]))
+        self.assertEqual(result["derivatives_liquidity_risk"]["positions"][0]["status"], "INPUTS_VALIDATED_NOT_LIQUIDATION_MODELLED")
+
+    def test_derivative_available_margin_below_initial_margin_warns(self):
+        rows = packets()
+        rows[2]["context"]["portfolio_risk"]["positions"][0]["available_margin"] = 2.0
+        result = assess_portfolio_risk(rows, NOW, config(), correlations())
+        self.assertTrue(any("available margin is below" in w for w in result["warnings"]))
 
     def test_stress_scenario_reports_currency_partitioned_pnl_and_loss(self):
         result = assess_portfolio_risk(packets(), NOW, config(), correlations())
