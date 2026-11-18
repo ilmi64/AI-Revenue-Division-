@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "venue-research-catalogue.schema.json",
+  "title": "OCC Candidate Venue Research Catalogue",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "catalogue_status", "jurisdiction", "checked_at_utc", "candidates", "global_controls"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "catalogue_status": {"const": "candidate_research_only"},
+    "checked_at_utc": {"type": "string", "format": "date-time"},
+    "jurisdiction": {
+      "type": "object", "additionalProperties": false,
+      "required": ["country", "province", "eligibility_status", "note"],
+      "properties": {
+        "country": {"const": "Canada"},
+        "province": {"const": "Ontario"},
+        "eligibility_status": {"const": "UNVERIFIED_FOR_EACH_PROVIDER_AND_PRODUCT"},
+        "note": {"type": "string", "minLength": 1}
+      }
+    },
+    "candidates": {
+      "type": "array", "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["candidate_id", "provider", "division", "instrument_types", "jurisdiction_status", "candidate_status", "sources", "known_gaps", "next_action"],
+        "properties": {
+          "candidate_id": {"type": "string", "minLength": 1},
+          "provider": {"type": "string", "minLength": 1},
+          "division": {"enum": ["crypto", "forex", "indices", "gold"]},
+          "instrument_types": {"type": "array", "minItems": 1, "items": {"enum": ["crypto_perpetual", "forex_cfd", "index_future", "index_cfd", "gold_future", "gold_cfd"]}},
+          "jurisdiction_status": {"type": "string", "minLength": 1},
+          "candidate_status": {"enum": ["official_product_documentation_located", "official_canada_documentation_located", "official_contract_documentation_located"]},
+          "sources": {"type": "array", "minItems": 1, "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["source_id", "source_uri", "source_class", "reviewed_at_utc", "observed_scope", "source_content_hash", "full_document_capture"],
+            "properties": {
+              "source_id": {"type": "string", "minLength": 1},
+              "source_uri": {"type": "string", "format": "uri"},
+              "source_class": {"type": "string", "minLength": 1},
+              "reviewed_at_utc": {"type": "string", "format": "date-time"},
+              "observed_scope": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+              "source_content_hash": {"type": ["string", "null"]},
+              "full_document_capture": {"const": false}
+            }
+          }},
+          "known_gaps": {"type": "array", "items": {"type": "string"}},
+          "next_action": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "global_controls": {
+      "type": "object", "additionalProperties": false,
+      "required": ["profile_creation", "profile_approval", "source_authentication", "trade_authority", "live_readiness", "research_only"],
+      "properties": {
+        "profile_creation": {"const": "not_performed"},
+        "profile_approval": {"const": "not_performed"},
+        "source_authentication": {"const": "not_performed"},
+        "trade_authority": {"const": false},
+        "live_readiness": {"const": false},
+        "research_only": {"const": true}
+      }
+    }
+  }
+}
