@@ -30,7 +30,8 @@
     "live_readiness",
     "limitations",
     "control_health",
-    "portfolio_risk"
+    "portfolio_risk",
+    "oanda_account_margin_audit"
   ],
   "properties": {
     "schema_version": {
@@ -1084,6 +1085,44 @@
         },
         "mode": {
           "const": "research_only"
+        },
+        "trade_authority": {
+          "const": false
+        },
+        "live_readiness": {
+          "const": false
+        }
+      }
+    },
+    "oanda_account_margin_audit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "report",
+        "errors",
+        "trade_authority",
+        "live_readiness"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "NOT_PROVIDED",
+            "PASS",
+            "HALT"
+          ]
+        },
+        "report": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         },
         "trade_authority": {
           "const": false
