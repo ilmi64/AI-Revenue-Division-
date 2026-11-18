@@ -83,6 +83,9 @@ class OrganisationDashboardTests(unittest.TestCase):
             "status": "unverified",
             "global_stop_active": False,
             "active_stops": [],
+            "portfolio_risk": {"status": "ASSESSED_WITHIN_CONFIGURED_LIMITS", "position_count": 4,
+                              "simultaneous_stop_count": 0, "errors": [], "warnings": [],
+                              "trade_authority": False, "live_readiness": False},
             "gold_specialist_audit": {
                 "status": "WARN", "instrument_count": 1,
                 "instruments": [{"instrument_id": "XAUUSD-FIXTURE",
