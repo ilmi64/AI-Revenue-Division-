@@ -223,7 +223,8 @@ in [`HANDOVER-RECONCILIATION.md`](HANDOVER-RECONCILIATION.md). It verifies the
 underlying event ledger first, then checks explicit outgoing/incoming
 acknowledgements, position reconciliation, dependency health, evidence,
 unresolved critical items, duplicate handover IDs/transitions and recorded
-shift-chain continuity. Active vetoes are carried forward and remain latched.
+shift-chain continuity. Every identified stop ID must be carried forward in
+the handover; active vetoes remain latched.
 No handover is inferred when no explicit handover event exists.
 
 The event JSON Schema now defines the required handover details. Regression
