@@ -43,6 +43,8 @@ def validate_contract_profile(profile: Any) -> list[str]:
                 "instrument_type", "quote_currency", "settlement_currency"):
         if not isinstance(profile.get(key), str) or not profile[key].strip():
             errors.append(f"{key} is required")
+    if profile.get("schema_version") != "1.0.0":
+        errors.append("schema_version must be 1.0.0")
     kind = profile.get("instrument_type")
     if kind not in SUPPORTED_TYPES:
         errors.append("instrument_type is unsupported")
@@ -99,12 +101,17 @@ def replay_contract_lifecycle(profile: dict[str, Any], position: dict[str, Any],
     for key in ("position_id", "instrument_id", "side", "quantity", "contract_id"):
         if key not in position:
             errors.append(f"position.{key} is required")
+    for key in ("position_id", "instrument_id", "contract_id"):
+        if key in position and (not isinstance(position[key], str) or not position[key].strip()):
+            errors.append(f"position.{key} must be a non-empty string")
     if position.get("side") not in {"long", "short"}:
         errors.append("position.side must be long or short")
     if not _number(position.get("quantity")) or float(position.get("quantity", 0)) <= 0:
         errors.append("position.quantity must be positive and finite")
     if position.get("instrument_id") != profile.get("instrument_id"):
         errors.append("position.instrument_id must match contract profile")
+    if profile.get("contract_code") and position.get("contract_id") != profile.get("contract_code"):
+        errors.append("position.contract_id must match the profile contract_code initially")
     if not isinstance(events, list):
         errors.append("events must be an array")
         events = []
@@ -136,6 +143,10 @@ def replay_contract_lifecycle(profile: dict[str, Any], position: dict[str, Any],
             errors.append(f"{prefix}.timestamp_utc must increase strictly")
             break
         event_type = event.get("event_type")
+        expiry_time = _utc(profile.get("expiry_utc"))
+        if expiry_time is not None and timestamp >= expiry_time and event_type != "expiry_settlement":
+            errors.append(f"{prefix} is at/after expiry and must be an expiry_settlement event")
+            break
         if event_type not in EVENT_TYPES:
             errors.append(f"{prefix}.event_type is unsupported")
             break
