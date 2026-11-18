@@ -518,3 +518,34 @@ The control-health report includes this assessment under
 The associated regression suite is
 `test_stop_clearance_review.py`; tests are authored and have not yet been
 executed in this environment.
+
+
+## Portfolio-wide OCC risk aggregation
+
+`portfolio_risk.py` provides a read-only aggregation layer across Crypto,
+Forex, indices and Gold. Each desk must explicitly supply
+`context.portfolio_risk.positions` records with a unique position ID,
+instrument identity, asset class, long/short side, notional and currency,
+already-valued amount and valuation currency, exposure group, source timestamp
+and evidence references. Missing desk or position context is UNKNOWN, never
+assumed to be zero exposure.
+
+The intake accepts an optional versioned OCC risk configuration
+(`--portfolio-risk-config`) and optional timestamped correlation evidence
+(`--correlation-evidence`, JSONL). Limits are evaluated only against exposure
+already expressed in the configured valuation currency. The module does not
+invent FX conversions, leverage, contract multipliers, prices, margin, or
+positions. Currency buckets are kept separate. Invalid inputs and configured
+limit breaches halt the portfolio; any specialist HALT or stop challenge
+escalates to the portfolio-wide HALT. Missing correlation evidence remains
+UNKNOWN and is never treated as independence.
+
+Correlation pairs are preserved as caller-supplied, unauthenticated evidence;
+they are not a validated covariance model, portfolio VaR, forecast or
+execution signal. Risk limits must be explicitly supplied and owned by OCC;
+there are no fabricated default thresholds. The Main Hub surfaces UNKNOWN as
+a warning and HALT as a stop-level audit result. The complete report always
+retains the research-only authority boundary.
+
+Regression coverage is in `test_portfolio_risk.py` and the Main Hub dashboard
+tests. These tests are authored, not yet executed.
