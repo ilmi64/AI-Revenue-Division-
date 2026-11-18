@@ -58,6 +58,22 @@ class HandoverReconciliationTests(unittest.TestCase):
         self.assertTrue(result["valid"])
         self.assertEqual(result["status"], "accepted")
 
+    def test_missing_specialist_desk_coverage_blocks_handover(self):
+        data = handover()
+        data["desk_coverage"].pop("gold")
+        self.append(event("evt-h1", details=data))
+        result = self.audit()
+        self.assertFalse(result["valid"])
+        self.assertTrue(any("desk_coverage" in x for x in result["errors"]))
+
+    def test_one_unreconciled_specialist_desk_blocks_handover(self):
+        data = handover()
+        data["positions_reconciled_by_desk"]["indices"] = False
+        self.append(event("evt-h1", details=data))
+        result = self.audit()
+        self.assertFalse(result["valid"])
+        self.assertTrue(any("positions_reconciled_by_desk" in x for x in result["errors"]))
+
     def test_missing_acknowledgement_blocks_handover(self):
         data = handover()
         data["incoming_acknowledged"] = False
