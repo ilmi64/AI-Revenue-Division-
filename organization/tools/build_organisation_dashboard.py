@@ -238,12 +238,19 @@ def build_occ_control_health_report(snapshot=None):
     """Expose an integrated OCC snapshot audit without granting control authority."""
     if snapshot is None:
         return {"status": "NOT_PROVIDED", "snapshot_id": None, "global_stop_active": None,
-                "active_stops": [], "audit": None, "errors": [],
+                "active_stops": [], "audit": None,
+                "gold_specialist_audit": {"status": "NOT_PROVIDED", "instrument_count": 0,
+                                          "instruments": [], "trade_authority": False,
+                                          "live_readiness": False},
+                "errors": [],
                 "warnings": ["No unified OCC snapshot supplied to the Main Hub dashboard."],
                 "trade_authority": False, "live_readiness": False}
     if not isinstance(snapshot, dict) or snapshot.get("snapshot_type") != "unified_occ_research_intelligence":
         return {"status": "HALT_AUDIT", "snapshot_id": None, "global_stop_active": None,
                 "active_stops": [], "audit": None,
+                "gold_specialist_audit": {"status": "HALT", "instrument_count": 0,
+                                          "instruments": [], "trade_authority": False,
+                                          "live_readiness": False},
                 "errors": ["Supplied OCC snapshot is missing or has an unsupported snapshot_type."],
                 "warnings": [], "trade_authority": False, "live_readiness": False}
     audit = snapshot.get("control_health")
@@ -260,12 +267,26 @@ def build_occ_control_health_report(snapshot=None):
         errors.append("OCC control-health authority boundary is invalid.")
     if status == "HALT_AUDIT" and not errors:
         errors.append("OCC control-health audit is in HALT_AUDIT state.")
+    gold_audit = snapshot.get("gold_specialist_audit")
+    if not isinstance(gold_audit, dict):
+        gold_audit = {"status": "NOT_PROVIDED", "instrument_count": 0,
+                      "instruments": [], "trade_authority": False,
+                      "live_readiness": False}
+    elif (gold_audit.get("status") not in {"PASS", "WARN", "HALT", "NOT_PROVIDED"}
+          or gold_audit.get("trade_authority") is not False
+          or gold_audit.get("live_readiness") is not False
+          or not isinstance(gold_audit.get("instruments"), list)):
+        gold_audit = dict(gold_audit)
+        gold_audit["status"] = "HALT"
+        errors.append("Gold specialist audit is malformed or violates its research-only authority boundary.")
+        status = "HALT_AUDIT"
     return {
         "status": status,
         "snapshot_id": audit.get("latest_verified_snapshot_id"),
         "snapshot_status": snapshot.get("status"),
         "global_stop_active": snapshot.get("global_stop_active"),
         "active_stops": snapshot.get("active_stops", []) if isinstance(snapshot.get("active_stops", []), list) else [],
+        "gold_specialist_audit": gold_audit,
         "audit": audit,
         "errors": errors,
         "warnings": warnings,
