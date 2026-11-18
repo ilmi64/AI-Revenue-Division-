@@ -55,8 +55,12 @@ def validate_venue_spec(spec: Any) -> list[str]:
             errors.append(f"{key} must be a finite non-negative number")
     if _positive(spec.get("contract_multiplier")) is False:
         errors.append("contract_multiplier must be greater than zero")
-    if _finite(spec.get("initial_margin_rate")) and float(spec["initial_margin_rate"]) <= 0:
-        errors.append("initial_margin_rate must be greater than zero")
+    if _finite(spec.get("initial_margin_rate")) and not 0 < float(spec["initial_margin_rate"]) <= 1:
+        errors.append("initial_margin_rate must be in (0, 1]")
+    if _finite(spec.get("liquidation_buffer_ratio")) and float(spec["liquidation_buffer_ratio"]) < 1:
+        errors.append("liquidation_buffer_ratio must be at least 1")
+    if _finite(spec.get("max_impact_bps")) and float(spec["max_impact_bps"]) > 10000:
+        errors.append("max_impact_bps cannot exceed 10000")
     if _finite(spec.get("liquidation_fee_rate")) and float(spec["liquidation_fee_rate"]) > 1:
         errors.append("liquidation_fee_rate cannot exceed 1")
     if not isinstance(spec.get("partial_liquidation_supported"), bool):
@@ -184,6 +188,7 @@ def simulate_derivative_path(venue_spec: dict[str, Any], position: dict[str, Any
             break
         timestamp = step.get("timestamp_utc")
         mark = step.get("mark_price")
+        mark_basis = step.get("mark_price_basis")
         depth = step.get("executable_depth_notional")
         rate = step.get("funding_rate")
         interval = step.get("funding_interval_hours")
@@ -191,6 +196,8 @@ def simulate_derivative_path(venue_spec: dict[str, Any], position: dict[str, Any
             errors.append(f"{prefix}.timestamp_utc must be UTC ISO-8601 ending Z")
         if not _positive(mark):
             errors.append(f"{prefix}.mark_price must be positive")
+        if mark_basis != venue_spec.get("mark_price_rule"):
+            errors.append(f"{prefix}.mark_price_basis must match the venue mark_price_rule")
         if not _positive(depth):
             errors.append(f"{prefix}.executable_depth_notional must be positive")
         if not _finite(rate):
