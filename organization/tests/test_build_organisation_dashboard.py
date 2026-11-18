@@ -196,6 +196,24 @@ class OrganisationDashboardTests(unittest.TestCase):
         self.assertEqual(report["gold_specialist_audit"]["status"], "HALT")
         self.assertFalse(report["trade_authority"])
 
+    def test_dashboard_rejects_inconsistent_oanda_margin_audit(self):
+        snapshot = {
+            "snapshot_type": "unified_occ_research_intelligence",
+            "control_health": {
+                "status": "PASS_AUDIT", "errors": [], "warnings": [],
+                "authority": "research_only_no_execution_authority",
+                "trade_authority": False, "live_readiness": False,
+            },
+            "oanda_account_margin_audit": {
+                "status": "PASS", "report": {"status": "MARGIN_CALL_ACTIVE"},
+                "errors": [], "trade_authority": False, "live_readiness": False,
+            },
+        }
+        report = build_occ_control_health_report(snapshot)
+        self.assertEqual(report["status"], "HALT_AUDIT")
+        self.assertEqual(report["oanda_account_margin_audit"]["status"], "HALT")
+        self.assertTrue(report["errors"])
+
     def test_dashboard_rejects_invalid_occ_authority(self):
         snapshot = {
             "snapshot_type": "unified_occ_research_intelligence",
