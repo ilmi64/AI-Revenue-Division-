@@ -103,7 +103,7 @@ class UnifiedIntakeTests(unittest.TestCase):
                       next(p for p in result["specialist_packets"]
                            if p["desk_id"] == "gold")["context"])
 
-    def test_gold_specialist_authority_violation_is_a_packet_error(self):
+    def test_gold_specialist_audit_summary_never_grants_authority(self):
         rows = self.four_desk_rows()
         gold = next(row for row in rows if row["instrument_type"] == "xauusd_spot")
         gold.update(
