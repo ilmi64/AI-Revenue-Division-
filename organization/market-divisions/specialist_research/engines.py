@@ -78,7 +78,7 @@ def _base_packet(desk: str, observation: dict[str, Any], now_utc: str,
         "evidence_refs": sorted(set(refs)),
         "data_quality": {"errors": errors, "warnings": warnings},
         "risk_flags": [],
-        "context": {},
+        "context": {"portfolio_risk": observation.get("portfolio_risk")},
         "limitations": ["No trade authority", "No live-readiness determination"],
         "trade_authority": False,
     }
