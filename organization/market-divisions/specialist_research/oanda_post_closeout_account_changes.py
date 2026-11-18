@@ -6,6 +6,7 @@ subsequent full account snapshot. It performs no network or broker actions.
 from __future__ import annotations
 
 from math import isfinite
+from decimal import Decimal, InvalidOperation
 from typing import Any
 
 AUTHORITY = "research_only_no_execution_authority"
@@ -24,14 +25,14 @@ def _numeric_id(value: Any) -> int | None:
         return None
 
 
-def _units(value: Any) -> float | None:
+def _units(value: Any) -> Decimal | None:
     if isinstance(value, bool) or not isinstance(value, (str, int, float)):
         return None
     try:
-        result = float(value)
-    except (ValueError, OverflowError):
+        result = Decimal(str(value))
+    except (InvalidOperation, ValueError, OverflowError):
         return None
-    return result if isfinite(result) else None
+    return result if result.is_finite() else None
 
 
 def _halt(errors: list[str], warnings: list[str] | None = None) -> dict[str, Any]:
@@ -199,7 +200,9 @@ def assess_oanda_post_closeout_account_changes(
     opened = {item.get("id") for item in arrays["tradesOpened"] if isinstance(item.get("id"), str)}
     reduced = {item.get("id") for item in arrays["tradesReduced"] if isinstance(item.get("id"), str)}
     closed = {item.get("id") for item in arrays["tradesClosed"] if isinstance(item.get("id"), str)}
-    if len(opened) != len(arrays["tradesOpened"]) or len(closed) != len(arrays["tradesClosed"]):
+    if (len(opened) != len(arrays["tradesOpened"])
+            or len(reduced) != len(arrays["tradesReduced"])
+            or len(closed) != len(arrays["tradesClosed"])):
         errors.append("trade change records must each include a string trade id")
     missing_closeout = expected_closed - closed
     if missing_closeout:
