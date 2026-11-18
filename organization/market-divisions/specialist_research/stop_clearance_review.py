@@ -24,7 +24,7 @@ def assess_stop_clearance(event_records: list[dict[str, Any]]) -> dict[str, Any]
         return {
             "valid": False, "status": "HALT_REVIEW",
             "errors": ["event ledger integrity failed; clearance evidence cannot be assessed"],
-            "stops": [], "global_stop_active": ledger.get("global_stop_active", True),
+            "stops": [], "global_stop_active": True,
             "trade_authority": False, "live_readiness": False, "authority": AUTHORITY,
         }
 
