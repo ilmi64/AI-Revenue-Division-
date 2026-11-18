@@ -1060,3 +1060,12 @@ The new excerpts are stored as oanda_xauusd_instrument_page, oanda_canada_tradin
 These facts imply additional Gold risk-model requirements: session-aware close/reopen windows; spread-widening and gap stress scenarios; stop execution slippage/gap assumptions; and a broker-level forced-closeout scenario that can close multiple positions at current rates. The existing venue simulator's generic liquidation heuristic is not an OANDA margin-closeout implementation. Do not equate the two or treat a stop as guaranteed protection. Account-specific contract size, margin threshold, closeout sequence and financing remain unresolved.
 
 The XAU/USD CFD remains distinct from GC/MGC futures. It is a price-difference contract and does not provide the same delivery/ownership rights as physical bullion. Conventional CFD financing is still not a Shariah approval. No venue profile was created or approved, and no account connection or live trading permission was obtained.
+
+
+### XAU/USD CFD session and execution stress overlay
+
+The standalone module gold_cfd_execution_risk.py adds two offline checks. assess_xauusd_weekly_session evaluates the published OANDA Canada weekly XAU/USD hours in America/New_York, including the daily close/reopen window, Sunday open and Saturday closure. It requires an explicit caller-supplied holiday/exception status and reports the broker calendar as unauthenticated; weekly hours alone are not live market status.
+
+assess_gold_cfd_execution_stress compares a caller-supplied current spread with a caller-supplied reference spread against explicit warning/halt multiples, and calculates a simple linear notional loss under a supplied gap shock in basis points. It does not estimate actual fills, broker margin closeout, liquidation sequence or account equity. It explicitly records that OANDA may close all tradable open positions at current rates and that stop-loss execution is not guaranteed. Inputs are not authenticated and the module has no order/position authority.
+
+The XAU/USD hours, spread widening, gap and closeout excerpts are now part of the 13-document partial capture manifest. Regression tests are in test_gold_cfd_execution_risk.py; tests are authored and have not been executed.
