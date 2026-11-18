@@ -141,12 +141,13 @@ class HandoverReconciliationTests(unittest.TestCase):
         self.assertFalse(result["ledger_integrity_valid"])
 
 
-if __name__ == "__main__":
-    unittest.main()
-
     def test_handover_cannot_drop_previously_raised_stop_id(self):
         self.append(event("evt-stop", "stop_raised", {"stop_id": "gold-stop"}, "gold-stop"))
         self.append(event("evt-h1", details=handover()))
         result = self.audit()
         self.assertFalse(result["valid"])
         self.assertTrue(any("not carried forward" in x for x in result["errors"]))
+
+
+if __name__ == "__main__":
+    unittest.main()
