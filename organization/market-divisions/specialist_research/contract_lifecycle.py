@@ -90,8 +90,9 @@ def replay_contract_lifecycle(profile: dict[str, Any], position: dict[str, Any],
     Event cashflow is positive when credited to the position and negative when
     charged. Funding/financing events must supply signed cashflow directly OR
     a rate, notional and day/hour basis. The module does not decide rate signs.
-    Roll events require old/new contract IDs, old/new reference prices and an
-    explicit cash adjustment. Expiry settlement requires an explicit settlement
+    Roll events require old/new contract IDs, old/new reference prices, an
+    explicit cash adjustment and a validated successor contract profile.
+    Expiry settlement requires an explicit settlement
     price and cash/physical/broker adjustment method.
     """
     errors = validate_contract_profile(profile)
