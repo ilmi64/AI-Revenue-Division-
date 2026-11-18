@@ -69,6 +69,17 @@ class OandaPendingOrderExposureTests(unittest.TestCase):
         self.assertEqual(result["status"], "HALT")
         self.assertTrue(any("expected cancellation" in item for item in result["errors"]))
 
+    def test_liquidated_trade_dependent_order_is_explicitly_reported_as_still_pending(self):
+        result = assess([linked()])
+        self.assertEqual(result["orders_still_pending_for_liquidated_trades"], [{
+            "order_id": "dependent-1", "trade_id": "trade-1", "type": "STOP_LOSS",
+        }])
+        self.assertFalse(result["dependent_order_cancellation_transaction_verified"])
+
+    def test_post_snapshot_never_claims_cancellation_transaction_verified(self):
+        result = assess()
+        self.assertFalse(result["dependent_order_cancellation_transaction_verified"])
+
     def test_dependent_take_profit_for_liquidated_trade_must_be_cancelled(self):
         result = assess([linked(order_type="TAKE_PROFIT")])
         self.assertEqual(result["status"], "HALT")
