@@ -58,9 +58,14 @@ def validate_revision(revision: Any) -> list[str]:
         return ["revision must be an object"]
     for key in ("revision_id", "document_id", "canonical_uri", "title",
                 "publisher", "source_class", "captured_at_utc",
-                "extraction_method", "document_text", "content_sha256"):
+                "document_text", "content_sha256"):
         if not _nonempty(revision.get(key)):
             errors.append(f"{key} is required")
+    # Revision records created from live research manifests use retrieval_method;
+    # synthetic/manual captures use extraction_method. Accept either explicit
+    # provenance field, but never accept a revision with neither.
+    if not any(_nonempty(revision.get(key)) for key in ("extraction_method", "retrieval_method")):
+        errors.append("extraction_method or retrieval_method is required")
     if revision.get("source_class") not in SOURCE_CLASSES:
         errors.append("source_class is unsupported")
     uri = revision.get("canonical_uri")
