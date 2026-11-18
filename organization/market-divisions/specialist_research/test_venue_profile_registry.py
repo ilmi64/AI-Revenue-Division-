@@ -4,6 +4,7 @@ import unittest
 from specialist_research.venue_profile_registry import (
     append_profile_revision, resolve_profile, validate_registry,
 )
+from specialist_research.venue_document_revisions import capture_document_revision
 
 
 def record(revision=1, effective_from="2026-01-01T00:00:00Z", **overrides):
@@ -123,6 +124,63 @@ class VenueProfileRegistryTests(unittest.TestCase):
             registry(item), "synthetic-venue", "BTC-PERP", "2026-02-01T00:00:00Z"
         )
         self.assertEqual(result["status"], "BLOCKED_PROFILE_STATE")
+
+
+    def test_stale_source_revision_blocks_registry_resolution(self):
+        def make_revision(captured, text):
+            return capture_document_revision({
+                "document_id": "synthetic-spec",
+                "canonical_uri": "https://example.invalid/venue/spec",
+                "title": "Venue specification", "publisher": "Synthetic Venue",
+                "source_class": "official_contract_specification",
+                "captured_at_utc": captured, "extraction_method": "manual",
+                "document_text": text, "extracted_facts": [
+                    {"fact_key": "initial_margin_rate", "value": 0.2}
+                ],
+            })["revision"]
+        old = make_revision("2026-01-01T00:00:00Z", "old terms")
+        latest = make_revision("2026-01-02T00:00:00Z", "new terms")
+        item = record()
+        item["provenance"][0].update({
+            "document_id": "synthetic-spec", "revision_id": old["revision_id"]
+        })
+        result = resolve_profile(
+            registry(item), "synthetic-venue", "BTC-PERP",
+            "2026-02-01T00:00:00Z", [latest],
+        )
+        self.assertEqual(result["status"], "BLOCKED_STALE_SOURCE_DOCUMENTS")
+        self.assertFalse(result["research_eligible"])
+        self.assertIsNone(result["profile"])
+
+    def test_fresh_source_revision_allows_research_resolution_only(self):
+        latest = capture_document_revision({
+            "document_id": "synthetic-spec",
+            "canonical_uri": "https://example.invalid/venue/spec",
+            "title": "Venue specification", "publisher": "Synthetic Venue",
+            "source_class": "official_contract_specification",
+            "captured_at_utc": "2026-01-02T00:00:00Z",
+            "extraction_method": "manual", "document_text": "current terms",
+            "extracted_facts": [{"fact_key": "initial_margin_rate", "value": 0.2}],
+        })["revision"]
+        item = record()
+        item["provenance"][0].update({
+            "document_id": "synthetic-spec", "revision_id": latest["revision_id"]
+        })
+        result = resolve_profile(
+            registry(item), "synthetic-venue", "BTC-PERP",
+            "2026-02-01T00:00:00Z", [latest],
+        )
+        self.assertEqual(result["status"], "RESEARCH_ELIGIBLE_REVIEWED_PROFILE")
+        self.assertEqual(result["document_freshness"]["status"], "CURRENT_SOURCE_REVISIONS")
+        self.assertFalse(result["trade_authority"])
+
+    def test_freshness_check_requires_explicit_document_revision_links(self):
+        result = resolve_profile(
+            registry(record()), "synthetic-venue", "BTC-PERP",
+            "2026-02-01T00:00:00Z", [],
+        )
+        self.assertEqual(result["status"], "BLOCKED_MISSING_SOURCE_REVISION_LINKS")
+        self.assertFalse(result["research_eligible"])
 
     def test_unknown_profile_returns_no_effective_record(self):
         result = resolve_profile(
