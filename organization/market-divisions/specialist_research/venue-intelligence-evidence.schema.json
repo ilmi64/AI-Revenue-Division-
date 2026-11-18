@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "venue-intelligence-evidence.schema.json",
+  "title": "Offline Venue Intelligence Evidence Bundle",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["venue_id", "instrument_id", "instrument_type", "sources", "facts"],
+  "properties": {
+    "venue_id": {"type": "string", "minLength": 1},
+    "instrument_id": {"type": "string", "minLength": 1},
+    "instrument_type": {"enum": ["crypto_perpetual", "forex_cfd", "index_future", "index_cfd", "gold_future", "gold_cfd"]},
+    "sources": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/source"}},
+    "facts": {"type": "array", "items": {"$ref": "#/$defs/fact"}}
+  },
+  "$defs": {
+    "source": {
+      "type": "object", "additionalProperties": false,
+      "required": ["source_id", "source_uri", "source_class", "publisher", "published_at_utc", "captured_at_utc", "content_sha256"],
+      "properties": {
+        "source_id": {"type": "string", "minLength": 1},
+        "source_uri": {"type": "string", "minLength": 1},
+        "source_class": {"enum": ["official_contract_specification", "official_margin_schedule", "official_financing_policy", "official_product_page", "official_help_centre", "regulator_notice", "exchange_rulebook", "broker_client_agreement", "third_party_reference", "research_note"]},
+        "publisher": {"type": "string", "minLength": 1},
+        "published_at_utc": {"type": ["string", "null"], "format": "date-time"},
+        "captured_at_utc": {"type": "string", "format": "date-time"},
+        "content_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+      }
+    },
+    "fact": {
+      "type": "object", "additionalProperties": false,
+      "required": ["fact_key", "value", "source_id", "observed_at_utc"],
+      "properties": {
+        "fact_key": {"type": "string", "minLength": 1},
+        "value": {},
+        "source_id": {"type": "string", "minLength": 1},
+        "observed_at_utc": {"type": "string", "format": "date-time"},
+        "max_age_days": {"type": "number", "minimum": 0}
+      }
+    }
+  }
+}
