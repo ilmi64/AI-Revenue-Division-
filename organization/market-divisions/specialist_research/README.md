@@ -183,3 +183,19 @@ The journal is single-writer and local-only. Hash chaining is not a digital
 signature, tamper-proof storage, source authentication, or a substitute for
 protected backups and access controls. Regression cases are in
 `test_snapshot_history.py`; they have not been executed.
+
+
+## Persistent incident and control-event history
+
+The separate append-only event ledger is implemented in
+[`incident_event_ledger.py`](incident_event_ledger.py), described in
+[`INCIDENT-EVENT-HISTORY.md`](INCIDENT-EVENT-HISTORY.md), and constrained by
+[`incident-event-ledger.schema.json`](incident-event-ledger.schema.json).
+It records incidents, specialist stop raises/challenges, corrective actions,
+recovery evidence, handovers and stop-clearance requests. A clearance request
+can only be recorded as pending or rejected; no event in this prototype clears
+a stop. Incident closure is tracked separately from global-stop state.
+
+Regression tests are in `test_incident_event_ledger.py`; they are authored,
+not executed. Like snapshot history, this is a local single-writer prototype,
+not a continuously running OCC service.
