@@ -154,3 +154,32 @@ four desks, evidence provenance, optional Capital Flow context, stop
 propagation, portfolio version checks and explicit day/night handover. Multiple
 instruments per desk are supported. See `test_unified_intake.py` for authored
 regression cases; tests have not yet been run.
+
+
+## Persistent OCC snapshot history
+
+The local append-only snapshot journal is documented in
+[`SNAPSHOT-HISTORY.md`](SNAPSHOT-HISTORY.md) and implemented in
+[`snapshot_history.py`](snapshot_history.py). It records each unified OCC
+snapshot with a deterministic snapshot ID, snapshot digest, sequence number,
+previous-entry hash and record hash. Verification checks the chain and
+snapshot authority fields. Once a prior entry records a global stop, this
+prototype rejects a later snapshot that attempts to clear it. There is no
+stop-clearance workflow.
+
+Example commands (from `organization/market-divisions`):
+
+```sh
+python -m specialist_research.snapshot_history append \
+  --history /path/to/private/occ-snapshots.jsonl \
+  --snapshot /path/to/unified-intelligence.json \
+  --appended-at-utc 2026-11-17T18:00:00Z
+
+python -m specialist_research.snapshot_history verify \
+  --history /path/to/private/occ-snapshots.jsonl
+```
+
+The journal is single-writer and local-only. Hash chaining is not a digital
+signature, tamper-proof storage, source authentication, or a substitute for
+protected backups and access controls. Regression cases are in
+`test_snapshot_history.py`; they have not been executed.
