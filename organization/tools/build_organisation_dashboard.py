@@ -267,6 +267,24 @@ def build_occ_control_health_report(snapshot=None):
         errors.append("OCC control-health authority boundary is invalid.")
     if status == "HALT_AUDIT" and not errors:
         errors.append("OCC control-health audit is in HALT_AUDIT state.")
+    portfolio_risk = snapshot.get("portfolio_risk")
+    if not isinstance(portfolio_risk, dict):
+        portfolio_risk = {"status": "UNKNOWN", "errors": [], "warnings": ["Portfolio risk audit was not supplied."],
+                          "position_count": 0, "simultaneous_stop_count": 0,
+                          "trade_authority": False, "live_readiness": False}
+    elif (portfolio_risk.get("status") not in {"HALT", "UNKNOWN", "ASSESSED_WITHIN_CONFIGURED_LIMITS"}
+          or portfolio_risk.get("trade_authority") is not False
+          or portfolio_risk.get("live_readiness") is not False):
+        portfolio_risk = dict(portfolio_risk)
+        portfolio_risk["status"] = "HALT"
+        errors.append("Portfolio risk audit is malformed or violates its research-only authority boundary.")
+        status = "HALT_AUDIT"
+    elif portfolio_risk.get("status") == "HALT":
+        errors.append("Portfolio-wide risk audit reports a stop or limit breach.")
+        status = "HALT_AUDIT"
+    elif portfolio_risk.get("status") == "UNKNOWN" and status in {"PASS_AUDIT", "NOT_PROVIDED"}:
+        status = "WARN_AUDIT"
+        warnings.append("Portfolio-wide risk remains UNKNOWN; missing evidence is not treated as zero risk.")
     gold_audit = snapshot.get("gold_specialist_audit")
     if not isinstance(gold_audit, dict):
         gold_audit = {"status": "NOT_PROVIDED", "instrument_count": 0,
@@ -292,6 +310,7 @@ def build_occ_control_health_report(snapshot=None):
         "global_stop_active": snapshot.get("global_stop_active"),
         "active_stops": snapshot.get("active_stops", []) if isinstance(snapshot.get("active_stops", []), list) else [],
         "gold_specialist_audit": gold_audit,
+        "portfolio_risk": portfolio_risk,
         "audit": audit,
         "errors": errors,
         "warnings": warnings,
