@@ -89,6 +89,19 @@ class OandaPostCloseoutAccountChangesTests(unittest.TestCase):
         self.assertEqual(result["status"], "HALT")
         self.assertTrue(any("absent from the full account" in item for item in result["errors"]))
 
+    def test_order_fill_transaction_requires_order_id(self):
+        result = base(
+            changes={
+                "transactions": [
+                    {"id": "101", "accountID": "acct-1", "type": "ORDER_FILL",
+                     "reason": "MARKET_ORDER_MARGIN_CLOSEOUT"},
+                    {"id": "102", "accountID": "acct-1", "type": "ORDER_CANCEL", "orderID": "sl-1"},
+                ],
+            }
+        )
+        self.assertEqual(result["status"], "HALT")
+        self.assertTrue(any("ORDER_FILL is missing a string orderID" in item for item in result["errors"]))
+
     def test_fill_transaction_missing_from_orders_filled_array_halts(self):
         result = base(
             changes={
