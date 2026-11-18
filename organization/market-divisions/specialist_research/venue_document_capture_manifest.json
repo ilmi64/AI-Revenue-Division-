@@ -873,6 +873,104 @@
       "capture_time_precision": "date_only_normalized_to_utc_midnight",
       "captured_at_utc": "2026-11-17T00:00:00Z",
       "retrieval_method": "official_web_search_excerpt"
+    },
+    {
+      "document_id": "oanda_v20_order_definition",
+      "candidate_ids": [
+        "oanda_canada_fx_cfd",
+        "oanda_canada_index_cfd",
+        "oanda_canada_gold_cfd"
+      ],
+      "canonical_uri": "https://developer.oanda.com/rest-live-v20/order-df/",
+      "title": "OANDA v20 Order Definitions",
+      "publisher": "OANDA",
+      "source_class": "official_api_schema",
+      "source_ref": "turn145847view0",
+      "content_sha256": "f3a2e2fbab3714b237152e1be2f0deebfc2b3b4bd8b4bc64fac988330dca89a6",
+      "document_text": "OANDA's official v20 Order Definitions identify the supported order types (Market, FixedPrice, Limit, Stop, MarketIfTouched, TakeProfit, StopLoss, GuaranteedStopLoss and TrailingStopLoss). Pending orders expose an order ID, state, type, instrument and order-specific fields. Entry orders include signed units and positionFill. Trade-dependent TakeProfit, StopLoss, GuaranteedStopLoss and TrailingStopLoss orders carry tradeID. The API defines positionFill OPEN_ONLY as opening/extending positions, REDUCE_FIRST as reducing existing positions before opening a new position, REDUCE_ONLY as reducing an existing position only, and DEFAULT as REDUCE_FIRST for non-client-hedging accounts or OPEN_ONLY for client-hedging accounts.",
+      "extracted_facts": [
+        {
+          "fact_key": "dependent_order_link",
+          "value": "tradeID",
+          "unit": "API field",
+          "source_locator": "Order definitions for TakeProfit/StopLoss/GuaranteedStopLoss/TrailingStopLoss"
+        },
+        {
+          "fact_key": "open_only_semantics",
+          "value": "opens or extends positions",
+          "unit": "positionFill",
+          "source_locator": "OrderPositionFill"
+        },
+        {
+          "fact_key": "reduce_first_semantics",
+          "value": "reduces existing position before opening new position",
+          "unit": "positionFill",
+          "source_locator": "OrderPositionFill"
+        },
+        {
+          "fact_key": "reduce_only_semantics",
+          "value": "only reduces existing position",
+          "unit": "positionFill",
+          "source_locator": "OrderPositionFill"
+        },
+        {
+          "fact_key": "default_semantics",
+          "value": "REDUCE_FIRST for non-client-hedging; OPEN_ONLY for client-hedging",
+          "unit": "positionFill",
+          "source_locator": "OrderPositionFill"
+        }
+      ],
+      "known_gaps": [
+        "exact MT4 account export shape and field parity",
+        "complete authenticated account snapshot",
+        "broker-side order cancellation timing and event sequencing"
+      ],
+      "capture_scope": "official_api_definition_excerpt",
+      "full_document_capture": false,
+      "capture_time_precision": "date_only_normalized_to_utc_midnight",
+      "captured_at_utc": "2026-11-17T00:00:00Z",
+      "retrieval_method": "official_web_open_excerpt",
+      "revision_id": "oanda_v20_order_definition:excerpt-20261117"
+    },
+    {
+      "document_id": "oanda_v20_account_pending_orders_endpoint",
+      "candidate_ids": [
+        "oanda_canada_fx_cfd",
+        "oanda_canada_index_cfd",
+        "oanda_canada_gold_cfd"
+      ],
+      "canonical_uri": "https://developer.oanda.com/rest-live-v20/order-ep/",
+      "title": "OANDA v20 Orders and Pending Orders Endpoints",
+      "publisher": "OANDA",
+      "source_class": "official_api_endpoint_definition",
+      "source_ref": "turn831054search12",
+      "content_sha256": "6ce8ded65c1d0c18d07b686ada25136bd045a5f38ae35c5b5d42e735e996aa3e",
+      "document_text": "OANDA's official v20 Account definitions include pendingOrderCount and the pending Orders array in account details. The Orders endpoint supports listing account orders, and the pendingOrders endpoint lists all pending Orders in an Account. This provides the API structure needed for a complete pending-order snapshot, but does not authenticate a caller-supplied export or establish account access in this project.",
+      "extracted_facts": [
+        {
+          "fact_key": "account_pending_order_count",
+          "value": "pendingOrderCount",
+          "unit": "API field",
+          "source_locator": "Account definitions"
+        },
+        {
+          "fact_key": "pending_orders_endpoint",
+          "value": "GET /v3/accounts/{accountID}/pendingOrders",
+          "unit": "API endpoint",
+          "source_locator": "Pending Orders endpoint"
+        }
+      ],
+      "known_gaps": [
+        "no API access or token connected",
+        "snapshot pagination/freshness must be controlled by caller",
+        "source authentication and account ownership not verified"
+      ],
+      "capture_scope": "official_api_endpoint_excerpt",
+      "full_document_capture": false,
+      "capture_time_precision": "date_only_normalized_to_utc_midnight",
+      "captured_at_utc": "2026-11-17T00:00:00Z",
+      "retrieval_method": "official_web_search_excerpt",
+      "revision_id": "oanda_v20_account_pending_orders_endpoint:excerpt-20261117"
     }
   ],
   "candidate_coverage": [
@@ -895,7 +993,9 @@
         "oanda_canada_financing_faq",
         "oanda_canada_financing_costs_page",
         "oanda_canada_margin_rules_faq",
-        "oanda_canada_subaccount_closeout_differences"
+        "oanda_canada_subaccount_closeout_differences",
+        "oanda_v20_order_definition",
+        "oanda_v20_account_pending_orders_endpoint"
       ]
     },
     {
@@ -905,7 +1005,9 @@
         "oanda_canada_index_cfd_faq",
         "oanda_canada_financing_costs_page",
         "oanda_canada_margin_rules_faq",
-        "oanda_canada_subaccount_closeout_differences"
+        "oanda_canada_subaccount_closeout_differences",
+        "oanda_v20_order_definition",
+        "oanda_v20_account_pending_orders_endpoint"
       ]
     },
     {
@@ -919,7 +1021,9 @@
         "oanda_canada_margin_closeout",
         "oanda_canada_cfd_account_eligibility",
         "oanda_canada_margin_rules_faq",
-        "oanda_canada_subaccount_closeout_differences"
+        "oanda_canada_subaccount_closeout_differences",
+        "oanda_v20_order_definition",
+        "oanda_v20_account_pending_orders_endpoint"
       ]
     },
     {
