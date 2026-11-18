@@ -64,6 +64,9 @@ class CapitalFlowHandoffTests(unittest.TestCase):
         self.assertEqual(record["asset_id"], "SOL")
         self.assertEqual(record["chain"], "solana")
         self.assertEqual(record["contract_address"], OBS["contract_address"])
+        self.assertEqual(record["event_classification"]["category"], "whale_movement")
+        self.assertEqual(record["event_classification"]["materiality_tier"], "high")
+        self.assertFalse(record["event_classification"]["source_independence_verified"])
         self.assertEqual(result["mode"], "research_only")
 
     def test_no_explicit_review_blocks_event(self):
