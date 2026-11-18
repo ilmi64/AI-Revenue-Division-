@@ -13,7 +13,7 @@ except ImportError:
     from incident_event_ledger import EventLedgerError, read_events, verify_events
 
 REQUIRED_HANDOVER_FIELDS = (
-    "outgoing_shift_id", "incoming_shift_id", "snapshot_id",
+    "handover_id", "outgoing_shift_id", "incoming_shift_id", "snapshot_id",
     "portfolio_version", "outgoing_acknowledged", "incoming_acknowledged",
     "positions_reconciled", "dependency_health", "active_veto_ids",
     "unresolved_critical_items",
