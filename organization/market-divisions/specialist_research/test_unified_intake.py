@@ -38,6 +38,7 @@ class UnifiedIntakeTests(unittest.TestCase):
                  "type": "ORDER_CANCEL", "orderID": "sl-gold", "reason": "LINKED_TRADE_CLOSED"},
             ],
             "transaction_id_start_exclusive": "100", "transaction_id_end_inclusive": "102",
+            "reported_last_transaction_id": "102",
             "transaction_range_complete": True, "transaction_range_unfiltered": True,
             "pre_closeout_orders_complete": True, "post_closeout_orders_complete": True,
             "pre_closeout_snapshot_timestamp_utc": "2026-11-17T20:45:00Z",
