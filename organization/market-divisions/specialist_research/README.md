@@ -932,3 +932,55 @@ remains available but carries no document-freshness assurance. For new
 evidence-controlled replay, callers should supply the complete latest capture
 set and populate both provenance links. This is still not an unattended
 monitor: the latest document captures must be supplied by a researcher.
+
+
+## Official venue-document excerpt capture set
+
+`venue_document_capture_manifest.json` now inventories eight official-page
+search excerpts linked to all seven candidate venues. The sources cover
+Kraken MTF linear crypto derivatives, Coinbase International Exchange
+perpetuals, OANDA Canada's margin schedule, financing policy and index-CFD
+methodology, CME/COMEX Gold futures, and CME equity-index futures.
+
+This is deliberately labelled
+`PARTIAL_OFFICIAL_EXCERPT_CAPTURE_NOT_FULL_DOCUMENTS`. The stored text is
+only the excerpt reviewed during public documentation research, not the
+complete web page, downloadable rulebook or client agreement. The capture
+timestamp is date-only normalized to UTC midnight; it is not a trusted
+publisher timestamp. SHA-256 fingerprints the stored excerpt bytes only.
+The original URLs and research references are retained for source traceability.
+
+The first-pass fact extraction records, among other items:
+
+- Kraken MTF: USD margin/settlement, hourly perpetual funding, mark-price
+  description and broad tier ranges. Instrument/size-specific tier tables,
+  liquidation fees and collateral rules remain missing.
+- Coinbase International Exchange: BTC/ETH USDC-settled perpetual examples,
+  multiplier, settlement cadence, increments and default initial-margin
+  examples. Maintenance margin, liquidation, funding formula and Canadian
+  eligibility remain missing.
+- OANDA Canada: instrument-specific Canadian margin/leverage examples;
+  FX/metals tom-next financing plus admin fee; 5pm ET overnight financing
+  cutoff and index CFD futures/cash reference methodology. Exact live
+  instrument rates, contract units, closeout and triple-day handling remain
+  outstanding.
+- CME/COMEX Gold: GC 100 troy ounces and MGC 10 troy ounces. Exact expiry,
+  tick, delivery/notice, settlement and current FCM margin remain outstanding.
+- CME equity indices: ES USD 50 and MES USD 5 per S&P 500 point, with
+  0.25-point tick examples. Exact contract month, final settlement and FCM
+  requirements remain outstanding.
+
+The companion `venue_document_capture.py` validates the manifest and
+produces a research-only capture report. Its regression tests verify all
+eight excerpt digests, seven-candidate coverage, explicit partial-capture
+status and fail-closed handling of tampered hashes or false full-document
+claims. The JSON contract is
+`venue-document-capture-manifest.schema.json`.
+
+No candidate has become profile-eligible. The Ontario account/product
+eligibility checks remain open. In particular, CME access still depends on
+an eligible Canadian FCM and account, and international crypto-derivative
+documentation does not establish that a Canadian/Ontario resident can use
+those products. Gold futures GC/MGC and XAUUSD Gold CFDs remain separate;
+the OANDA financing description is a conventional financing mechanism and
+is not a Shariah approval.
