@@ -115,6 +115,9 @@ def build_capture_report(manifest: Any) -> dict[str, Any]:
             continue
         docs.append({
             "document_id": capture.get("document_id"),
+            "revision_id": capture.get("revision_id"),
+            "source_ref": capture.get("source_ref"),
+            "retrieval_method": capture.get("retrieval_method"),
             "title": capture.get("title"),
             "publisher": capture.get("publisher"),
             "source_uri": capture.get("canonical_uri"),
