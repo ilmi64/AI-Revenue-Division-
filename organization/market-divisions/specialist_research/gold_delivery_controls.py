@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from datetime import date, datetime
 from typing import Any
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 AUTHORITY = "research_only_no_execution_authority"
 PRODUCTS = {"GC": "113", "MGC": "120"}
@@ -69,6 +70,11 @@ def assess_gold_delivery_controls(contract: Any, position: Any, evaluation_utc: 
     evaluation = _utc(evaluation_utc)
     if evaluation is None:
         errors.append("evaluation_utc must be an explicit UTC timestamp ending Z")
+    try:
+        fcm_zone = ZoneInfo(contract.get("fcm_timezone"))
+    except (ZoneInfoNotFoundError, TypeError):
+        fcm_zone = None
+        errors.append("fcm_timezone must be a valid IANA timezone")
 
     if not errors:
         if not (dates["first_position_date"] <= dates["first_notice_date"] <= dates["delivery_end_date"]):
@@ -114,8 +120,9 @@ def assess_gold_delivery_controls(contract: Any, position: Any, evaluation_utc: 
 
     warnings: list[str] = []
     blocks: list[str] = []
+    local_evaluation_date = evaluation.astimezone(fcm_zone).date()
     if is_open:
-        if product == "MGC" and evaluation.date() != dates["last_intent_date"] and quantity % 10 != 0:
+        if product == "MGC" and local_evaluation_date != dates["last_intent_date"] and quantity % 10 != 0:
             blocks.append("MGC_DELIVERY_QUANTITY_MUST_BE_MULTIPLE_OF_TEN_EXCEPT_LAST_INTENT_DAY")
         if side == "long" and evaluation >= _utc(contract["fcm_long_cutoff_utc"]):
             blocks.append("LONG_POSITION_AT_OR_AFTER_FCM_RECEIVE_CUTOFF")
@@ -126,9 +133,9 @@ def assess_gold_delivery_controls(contract: Any, position: Any, evaluation_utc: 
     else:
         if evaluation >= _utc(contract["new_position_freeze_utc"]):
             blocks.append("NEW_POSITION_PROHIBITED_BY_FCM_FREEZE")
-    if evaluation.date() >= dates["first_position_date"]:
+    if local_evaluation_date >= dates["first_position_date"]:
         warnings.append("PHYSICAL_DELIVERY_POSITION_PERIOD_REACHED")
-    if evaluation.date() >= dates["first_notice_date"]:
+    if local_evaluation_date >= dates["first_notice_date"]:
         warnings.append("FIRST_NOTICE_DATE_REACHED")
     status = "HALT_DELIVERY_CONTROLS" if blocks else ("WARN_DELIVERY_CONTROLS" if warnings else "DELIVERY_CONTROLS_CLEAR")
     return _result(status, [], warnings, bool(blocks), blocks)
