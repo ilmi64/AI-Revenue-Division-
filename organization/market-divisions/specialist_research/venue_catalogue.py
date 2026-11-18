@@ -50,8 +50,12 @@ def validate_catalogue(catalogue: Any) -> list[str]:
         types = candidate.get("instrument_types")
         if not isinstance(types, list) or not types or any(item not in INSTRUMENT_TYPES for item in types):
             errors.append(f"{prefix}.instrument_types is invalid")
-        if candidate.get("jurisdiction_status") is None:
+        if not isinstance(candidate.get("jurisdiction_status"), str) or not candidate.get("jurisdiction_status").strip():
             errors.append(f"{prefix}.jurisdiction_status is required")
+        if candidate.get("candidate_id") == "kraken_mtf_crypto_linear_derivatives" and candidate.get("jurisdiction_status") != "DERIVATIVES_AND_MARGIN_NOT_AVAILABLE_TO_CANADIAN_RESIDENTS":
+            errors.append(f"{prefix} must preserve Kraken's published Canadian derivatives restriction")
+        if candidate.get("candidate_id") == "coinbase_intx_crypto_perpetuals" and candidate.get("jurisdiction_status") != "INSTITUTIONAL_ONLY_SELECT_JURISDICTIONS_CANADA_UNCONFIRMED":
+            errors.append(f"{prefix} must preserve Coinbase International Exchange's institutional-only and Canada-unconfirmed status")
         if candidate.get("candidate_status") not in {
             "official_product_documentation_located",
             "official_canada_documentation_located",
@@ -119,6 +123,11 @@ def build_catalogue_report(catalogue: Any) -> dict[str, Any]:
             "captured_source_count": len(captured),
             "status": "DOCUMENTATION_CAPTURED_NOT_AUTHENTICATED" if captured else "DOCUMENTATION_LOCATED_NOT_CAPTURED",
             "jurisdiction_status": candidate.get("jurisdiction_status"),
+            "canadian_shortlist_status": (
+                "EXCLUDE_CANADIAN_DERIVATIVES" if candidate.get("candidate_id") == "kraken_mtf_crypto_linear_derivatives"
+                else "INSTITUTIONAL_JURISDICTION_UNCONFIRMED" if candidate.get("candidate_id") == "coinbase_intx_crypto_perpetuals"
+                else "UNVERIFIED_ACCOUNT_AND_PRODUCT_ELIGIBILITY"
+            ),
             "profile_eligible": False,
             "operational_readiness": False,
         })
