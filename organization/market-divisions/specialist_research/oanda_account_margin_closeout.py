@@ -219,7 +219,7 @@ def replay_oanda_account_margin_closeout(
                 "position_ordering": "NO_SEQUENCE_ASSUMED_BATCH_CLOSEOUT",
             })
             deferred_closeout_retry_pending = bool(deferred)
-        elif trigger and deferred:
+        elif trigger and deferred and not retry_pending:
             closeout_batches.append({
                 "timestamp_utc": event["timestamp_utc"],
                 "trigger": trigger_reason,
