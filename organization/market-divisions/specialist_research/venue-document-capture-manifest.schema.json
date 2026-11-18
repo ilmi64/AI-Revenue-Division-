@@ -65,7 +65,7 @@
           "full_document_capture": {"const": false},
           "capture_time_precision": {"const": "date_only_normalized_to_utc_midnight"},
           "captured_at_utc": {"type": "string", "format": "date-time", "pattern": "Z$"},
-          "retrieval_method": {"const": "official_web_search_excerpt"}
+          "retrieval_method": {"enum": ["official_web_search_excerpt", "official_web_open_excerpt"]}
         }
       }
     },
