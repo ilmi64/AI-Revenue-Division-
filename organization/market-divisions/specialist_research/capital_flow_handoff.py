@@ -14,6 +14,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+try:
+    from .capital_flow_taxonomy import classify_event
+except ImportError:
+    from capital_flow_taxonomy import classify_event
+
 GENESIS = "0" * 64
 ALLOWED_HANDOFF_STATES = {"watch", "research", "unverified", "corroborated"}
 BLOCKING_ACTIONS = {"challenge", "reject", "expire"}
@@ -300,6 +305,7 @@ def build_handoff(events: list[dict[str, Any]], reviews: list[dict[str, Any]],
             records.append({
                 "event_id": event_id,
                 "event_type": event.get("event_type"),
+                "event_classification": classify_event(event),
                 "review_status": status,
                 "observed_at_utc": observed_at,
                 "asset_id": event.get("asset_id"),
