@@ -128,7 +128,6 @@ def replay_contract_lifecycle(profile: dict[str, Any], position: dict[str, Any],
     previous_time: datetime | None = None
     rows: list[dict[str, Any]] = []
     settled = False
-    side_sign = 1.0 if position["side"] == "long" else -1.0
 
     for index, event in enumerate(events):
         prefix = f"events[{index}]"
