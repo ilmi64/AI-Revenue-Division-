@@ -9,9 +9,21 @@ from pathlib import Path
 from typing import Any
 
 try:
+    from . import engines as _engines
+    from . import gold_specialist as _gold_specialist
+    from . import capital_flow_handoff as _capital_flow_handoff
+    from . import capital_flow_provenance as _capital_flow_provenance
+    from . import capital_flow_priority as _capital_flow_priority
+    from . import capital_flow_taxonomy as _capital_flow_taxonomy
     from .engines import ASSESSORS, coordinate
     from .capital_flow_handoff import build_handoff, _read_jsonl
 except ImportError:  # direct script execution
+    import engines as _engines
+    import gold_specialist as _gold_specialist
+    import capital_flow_handoff as _capital_flow_handoff
+    import capital_flow_provenance as _capital_flow_provenance
+    import capital_flow_priority as _capital_flow_priority
+    import capital_flow_taxonomy as _capital_flow_taxonomy
     from engines import ASSESSORS, coordinate
     from capital_flow_handoff import build_handoff, _read_jsonl
 
@@ -167,6 +179,20 @@ def replay(observations: list[dict[str, Any]], now_utc: str,
                    "provided_no_eligible_match" if capital_flow_events is not None else "not_consumed")
     gate_code_path = Path(_evidence_gate.__file__).resolve()
     gate_code_sha256 = hashlib.sha256(gate_code_path.read_bytes()).hexdigest()
+    implementation_modules = {
+        "replay": Path(__file__).resolve(),
+        "evidence_gate": gate_code_path,
+        "specialist_engines": Path(_engines.__file__).resolve(),
+        "gold_specialist": Path(_gold_specialist.__file__).resolve(),
+        "capital_flow_handoff": Path(_capital_flow_handoff.__file__).resolve(),
+        "capital_flow_provenance": Path(_capital_flow_provenance.__file__).resolve(),
+        "capital_flow_priority": Path(_capital_flow_priority.__file__).resolve(),
+        "capital_flow_taxonomy": Path(_capital_flow_taxonomy.__file__).resolve(),
+    }
+    implementation_sha256 = {
+        name: hashlib.sha256(path.read_bytes()).hexdigest()
+        for name, path in sorted(implementation_modules.items())
+    }
 
     def canonical_sha256(value: Any) -> str:
         encoded = json.dumps(value, sort_keys=True, separators=(",", ":"),
@@ -199,6 +225,7 @@ def replay(observations: list[dict[str, Any]], now_utc: str,
             "observations_sha256": observations_sha256,
             "market_source_registry_sha256": market_registry_sha256,
             "gate_implementation_sha256": gate_code_sha256,
+            "implementation_sha256": implementation_sha256,
             "capital_flow_inputs_sha256": capital_flow_inputs_sha256,
             "evaluation_time_utc": now_utc,
             "digest_note": "Reproducibility/integrity identifiers only; not signatures or source authentication",
