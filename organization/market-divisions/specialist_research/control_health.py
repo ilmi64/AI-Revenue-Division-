@@ -14,11 +14,13 @@ try:
     from .audit_reconciliation import reconcile
     from .handover_reconciliation import audit_handovers
     from .incident_event_ledger import EventLedgerError, read_events
+    from .stop_clearance_review import assess_stop_clearance
     from .snapshot_history import HistoryError, read_history
 except ImportError:
     from audit_reconciliation import reconcile
     from handover_reconciliation import audit_handovers
     from incident_event_ledger import EventLedgerError, read_events
+    from stop_clearance_review import assess_stop_clearance
     from snapshot_history import HistoryError, read_history
 
 AUTHORITY = "research_only_no_execution_authority"
@@ -41,6 +43,7 @@ def build_control_health(snapshot: dict[str, Any],
         event_records = read_events(Path(event_ledger_path))
         cross_ledger = reconcile(snapshot_records, event_records)
         handover = audit_handovers(event_records)
+        stop_clearance = assess_stop_clearance(event_records)
         read_errors: list[str] = []
     except (OSError, HistoryError, EventLedgerError, ValueError) as exc:
         snapshot_records, event_records = [], []
@@ -54,6 +57,13 @@ def build_control_health(snapshot: dict[str, Any],
             "valid": False, "status": "blocked", "handover_count": 0,
             "errors": ["handover audit could not be completed"],
             "warnings": [], "open_incidents": [], "global_stop_active": False,
+        }
+        stop_clearance = {
+            "valid": False, "status": "HALT_REVIEW",
+            "errors": ["stop-clearance assessment could not be completed"],
+            "stops": [], "global_stop_active": True,
+            "clearance_performed": False, "trade_authority": False,
+            "live_readiness": False, "authority": AUTHORITY,
         }
         read_errors = [str(exc)]
 
@@ -140,6 +150,7 @@ def build_control_health(snapshot: dict[str, Any],
         "handover_count": handover_count,
         "latest_verified_snapshot_id": cross_ledger.get("latest_snapshot_id"),
         "active_stop_ids": sorted(stop_ids),
+        "stop_clearance_review": stop_clearance,
         "open_incidents": cross_ledger.get("event_history", {}).get("open_incidents", handover.get("open_incidents", [])),
         "unresolved_critical_items": unresolved,
         "continuity_gaps": continuity_gaps,
