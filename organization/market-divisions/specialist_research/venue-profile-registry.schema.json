@@ -16,6 +16,7 @@
     "provenance": {
       "type": "object",
       "additionalProperties": false,
+      "dependentRequired": {"document_id": ["revision_id"], "revision_id": ["document_id"]},
       "required": ["source_id", "source_uri", "source_type", "captured_at_utc", "evidence_sha256"],
       "properties": {
         "source_id": {"type": "string", "minLength": 1},
