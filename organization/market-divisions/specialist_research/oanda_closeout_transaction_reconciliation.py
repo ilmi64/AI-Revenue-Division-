@@ -87,6 +87,7 @@ def assess_oanda_closeout_transaction_reconciliation(
     transactions: Any,
     transaction_id_start_exclusive: Any,
     transaction_id_end_inclusive: Any,
+    reported_last_transaction_id: Any,
     transaction_range_complete: Any,
     transaction_range_unfiltered: Any,
     pre_closeout_orders_complete: Any,
@@ -105,8 +106,11 @@ def assess_oanda_closeout_transaction_reconciliation(
     if pre_closeout_orders_complete is not True or post_closeout_orders_complete is not True:
         errors.append("pre- and post-closeout pending-order snapshots must both be complete")
     start_id, end_id = _id(transaction_id_start_exclusive), _id(transaction_id_end_inclusive)
+    reported_last_id = _id(reported_last_transaction_id)
     if start_id is None or end_id is None or end_id <= start_id:
         errors.append("transaction ID bounds must be numeric strings with end greater than start")
+    if reported_last_id is None or reported_last_id != end_id:
+        errors.append("reported_last_transaction_id must match the inclusive transaction range end")
     pre_time = _utc(pre_closeout_snapshot_timestamp_utc)
     post_time = _utc(post_closeout_snapshot_timestamp_utc)
     evaluated_time = _utc(evaluated_at_utc)
