@@ -369,12 +369,10 @@ def assess_portfolio_risk(
                                           "status": "BREACH" if breached else "WITHIN_LIMIT"})
 
     stop_active = bool(stop_sources)
-    if errors or stop_active:
+    if errors or stop_active or any(x["status"] == "BREACH" for x in limit_results):
         status = "HALT"
     elif missing_desks or missing_risk_desks or normalization_unknown or config_status != "VALID" or any(x["status"] == "UNKNOWN" for x in limit_results) or not scenario_rows or any(x["status"] != "ASSESSED" for x in scenario_rows):
         status = "UNKNOWN"
-    elif any(x["status"] == "BREACH" for x in limit_results):
-        status = "HALT"
     elif not correlations or any(x.get("proxy_status") == "UNKNOWN" for x in correlations):
         status = "UNKNOWN"
         warnings.append("correlation risk is incomplete; missing comparable exposure is not independence")
