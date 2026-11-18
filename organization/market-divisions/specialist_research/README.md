@@ -213,3 +213,20 @@ or grant execution authority.
 
 Regression cases are in `test_audit_reconciliation.py`; they are authored,
 not executed. This remains an offline audit utility, not a running monitor.
+
+
+## Day/night handover audit
+
+The read-only handover continuity audit is implemented in
+[`handover_reconciliation.py`](handover_reconciliation.py), with its contract
+in [`HANDOVER-RECONCILIATION.md`](HANDOVER-RECONCILIATION.md). It verifies the
+underlying event ledger first, then checks explicit outgoing/incoming
+acknowledgements, position reconciliation, dependency health, evidence,
+unresolved critical items, duplicate handover IDs/transitions and recorded
+shift-chain continuity. Active vetoes are carried forward and remain latched.
+No handover is inferred when no explicit handover event exists.
+
+The event JSON Schema now defines the required handover details. Regression
+cases are in `test_handover_reconciliation.py`; tests are authored, not
+executed. The audit is offline and does not connect to live positions or a
+shift scheduler.
