@@ -242,6 +242,9 @@ def build_occ_control_health_report(snapshot=None):
                 "gold_specialist_audit": {"status": "NOT_PROVIDED", "instrument_count": 0,
                                           "instruments": [], "trade_authority": False,
                                           "live_readiness": False},
+                "portfolio_risk": {"status": "UNKNOWN", "position_count": 0,
+                                   "simultaneous_stop_count": 0, "trade_authority": False,
+                                   "live_readiness": False},
                 "errors": [],
                 "warnings": ["No unified OCC snapshot supplied to the Main Hub dashboard."],
                 "trade_authority": False, "live_readiness": False}
@@ -282,8 +285,9 @@ def build_occ_control_health_report(snapshot=None):
     elif portfolio_risk.get("status") == "HALT":
         errors.append("Portfolio-wide risk audit reports a stop or limit breach.")
         status = "HALT_AUDIT"
-    elif portfolio_risk.get("status") == "UNKNOWN" and status in {"PASS_AUDIT", "NOT_PROVIDED"}:
-        status = "WARN_AUDIT"
+    elif portfolio_risk.get("status") == "UNKNOWN":
+        if status in {"PASS_AUDIT", "NOT_PROVIDED"}:
+            status = "WARN_AUDIT"
         warnings.append("Portfolio-wide risk remains UNKNOWN; missing evidence is not treated as zero risk.")
     gold_audit = snapshot.get("gold_specialist_audit")
     if not isinstance(gold_audit, dict):
