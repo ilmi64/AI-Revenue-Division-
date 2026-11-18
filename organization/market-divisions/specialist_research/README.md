@@ -1203,9 +1203,8 @@ caller-supplied OANDA v20 `GET /v3/accounts/{accountID}/changes` response and
 a subsequent full account snapshot. It reconciles the returned transaction
 cursor, closed margin-closeout trades, linked dependent-order cancellations,
 filled pre-existing orders, newly opened/reduced/closed trades, and changed
-long/short position units against the full snapshot. A newly opened trade or a
-filled pre-existing pending order keeps the audit at HALT for independent OCC
-review. It never connects to OANDA or changes an order or position.
+long/short position units against the full snapshot. A newly opened trade, a filled pre-existing pending order, or a newly remaining
+pending order keeps the audit at HALT for independent OCC exposure review. It never connects to OANDA or changes an order or position.
 
 The input contract is defined in
 `oanda-post-closeout-account-changes.schema.json`; synthetic regression
