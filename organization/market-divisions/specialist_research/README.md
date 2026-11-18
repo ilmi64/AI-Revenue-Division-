@@ -995,3 +995,16 @@ product specification. CME GC/MGC contract sizes and the stated date of the
 page's indicative margin estimates were checked against the opened Gold
 product page. The manifest distinguishes `official_web_open_excerpt` from
 `official_web_search_excerpt` so the retrieval method is not overstated.
+
+
+The OANDA Canada financing and index-CFD help pages were also opened. The
+financing page specifies the 5pm ET overnight cutoff, distinct FX/gold versus
+index financing bases, a 2.5% index admin-fee component, and typical
+Wednesday (FX/metals) versus Friday (indices) triple-day financing, subject
+to settlement calendars and holidays. The index-CFD FAQ describes the
+futures-plus-cash/spot reference, dividend/corporate-action adjustments,
+non-expiry, dynamic spreads, and identifies OANDA Canada Corporation ULC as
+CIRO-regulated with accounts available to people with a Canadian bank
+account. These statements do not establish an individual account's product
+permissions. OANDA's conventional financing charges/credits are recorded
+for technical modelling only; they are not treated as Shariah approval.
