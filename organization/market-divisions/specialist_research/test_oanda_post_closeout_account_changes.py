@@ -130,6 +130,13 @@ class OandaPostCloseoutAccountChangesTests(unittest.TestCase):
         )
         self.assertEqual(result["status"], "PASS")
 
+    def test_fully_closed_position_may_be_absent_from_full_account_positions(self):
+        result = base(changes={"positions": [{
+            "instrument": "EUR_USD",
+            "long": {"units": "0"}, "short": {"units": "0"},
+        }]})
+        self.assertEqual(result["status"], "PASS")
+
     def test_future_snapshot_is_rejected(self):
         result = base(account_snapshot_observed_at_utc="2026-11-18T05:00:11Z")
         self.assertEqual(result["status"], "HALT")
