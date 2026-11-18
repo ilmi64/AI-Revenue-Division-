@@ -144,6 +144,8 @@ class UnifiedIntakeTests(unittest.TestCase):
             "handover_at_utc": NOW, "snapshot_id": "snapshot-1",
             "portfolio_version": 7, "active_veto_ids": [],
             "unresolved_critical_items": [], "dependency_health": "healthy",
+            "desk_coverage": {"crypto": 1, "forex": 1, "indices": 1, "gold": 1},
+            "positions_reconciled_by_desk": {"crypto": True, "forex": True, "indices": True, "gold": True},
             "outgoing_acknowledged": True, "incoming_acknowledged": True,
             "positions_reconciled": True,
         }
@@ -163,6 +165,8 @@ class UnifiedIntakeTests(unittest.TestCase):
             "handover_at_utc": NOW, "snapshot_id": "snapshot-1",
             "portfolio_version": 7, "active_veto_ids": ["veto-1"],
             "unresolved_critical_items": [], "dependency_health": "healthy",
+            "desk_coverage": {"crypto": 1, "forex": 1, "indices": 1, "gold": 1},
+            "positions_reconciled_by_desk": {"crypto": True, "forex": True, "indices": True, "gold": True},
             "outgoing_acknowledged": True, "incoming_acknowledged": True,
             "positions_reconciled": True,
         }
