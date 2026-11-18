@@ -1069,3 +1069,23 @@ The standalone module gold_cfd_execution_risk.py adds two offline checks. assess
 assess_gold_cfd_execution_stress compares a caller-supplied current spread with a caller-supplied reference spread against explicit warning/halt multiples, and calculates a simple linear notional loss under a supplied gap shock in basis points. It does not estimate actual fills, broker margin closeout, liquidation sequence or account equity. It explicitly records that OANDA may close all tradable open positions at current rates and that stop-loss execution is not guaranteed. Inputs are not authenticated and the module has no order/position authority.
 
 The XAU/USD hours, spread widening, gap and closeout excerpts are now part of the 13-document partial capture manifest. Regression tests are in test_gold_cfd_execution_risk.py; tests are authored and have not been executed.
+
+
+### OANDA Canada account-level margin closeout replay
+
+`oanda_account_margin_closeout.py` adds a separate offline account/sub-account risk replay for the OANDA Canada v20/v20 MT4 margin rules. It is account-wide, not Gold-only: the input position set can include Gold, Forex, indices and any other positions held in that same OANDA account/sub-account. It does not combine positions from separate brokers or separate OANDA sub-accounts unless the caller supplies them as one account set and verifies that scope.
+
+The rule calculation is explicit:
+
+- Margin call when `NAV_mid < Margin Used`.
+- OANDA Margin Close-Out Percentage = `(50% × Margin Used) / NAV_mid × 100`.
+- Early margin closeout when `NAV_mid <= 50% × Margin Used` (100% closeout percentage).
+- The time-based rule counts six consecutive under-margined trading-day observations at 3:45 p.m. America/New_York. Each checkpoint requires a caller-verified trading calendar and consecutive sequence number; missing checks cannot be inferred.
+- At a closeout trigger, all currently tradable open positions are represented as one batch, without inventing a liquidation order or execution prices. Positions in closed or halted markets remain open and can be assessed again when the caller reports their markets reopened and the account remains under-margined.
+- Unrelated pending orders are not modelled as cancelled. OANDA's sub-account comparison says unrelated pending orders remain active after a v20/v20 MT4 closeout.
+
+`assess_oanda_margin_state` calculates the margin-call and 100% closeout thresholds from NAV_mid and Margin Used supplied in the same account currency. It does not calculate position margin, currency conversion, NAV_mid, bid/ask P&L, hedged margin, tiered margin, broker closeout sequencing or actual fills. The caller must supply complete account positions and market-availability states for each observation. This is a deterministic policy replay, not a broker implementation or an assertion that every OANDA account uses v20/v20 MT4 terms; exact sub-account, signed agreement and current account rules must be confirmed.
+
+The official evidence excerpts `oanda_canada_margin_rules_faq` and `oanda_canada_subaccount_closeout_differences` are included in the partial capture manifest. The total is now fifteen excerpts. The evidence records the 3:45 p.m. ET check, six consecutive trading-day rule, 100% early closeout threshold, account-wide closeout scope, closed/halted-market exception and unrelated pending-order treatment. Full account agreement bytes, publisher authentication and trusted publisher timestamps have not been captured.
+
+Regression coverage is in `test_oanda_account_margin_closeout.py`. Tests are authored and have not been executed. All outputs remain research-only with no order action, trade authority or live readiness.
