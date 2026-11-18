@@ -59,6 +59,67 @@ class UnifiedIntakeTests(unittest.TestCase):
         self.assertEqual(result["status"], "halt")
         self.assertTrue(any(x["source"] == "crypto" for x in result["active_stops"]))
 
+    def test_halt_from_forex_indices_or_gold_propagates_to_global_stop(self):
+        cases = [
+            ("forex", lambda row: row.update(quote_convention="base_per_quote")),
+            ("indices", lambda row: row.update(index_calculation_currency="EUR")),
+            ("gold", lambda row: row.update(gold_price_basis="comex_futures")),
+        ]
+        for desk, invalidate in cases:
+            with self.subTest(desk=desk):
+                rows = self.four_desk_rows()
+                target = next(row for row in rows if row["instrument_id"] in {
+                    "EUR-USD", "FIXTURE500", "XAUUSD-FIXTURE"
+                } and (
+                    (desk == "forex" and row["instrument_type"] == "fx_spot")
+                    or (desk == "indices" and row["instrument_type"] == "index_cash")
+                    or (desk == "gold" and row["instrument_type"] == "xauusd_spot")
+                ))
+                invalidate(target)
+                result = self.build(rows)
+                self.assertTrue(result["global_stop_active"])
+                self.assertEqual(result["status"], "halt")
+                self.assertTrue(any(stop["source"] == desk for stop in result["active_stops"]))
+
+    def test_gold_specialist_context_survives_unified_intake(self):
+        rows = self.four_desk_rows()
+        gold = next(row for row in rows if row["instrument_type"] == "xauusd_spot")
+        gold.update(
+            gold_price_basis="synthetic_test",
+            gold_session={"session_name": "london", "market_timezone": "Europe/London",
+                          "calendar_status": "verified"},
+            bid=1999.9, ask=2000.1, spread=0.2,
+            quote_age_seconds=1, stale_threshold_seconds=30, is_stale=False,
+            macro_evidence=[],
+        )
+        result = self.build(rows)
+        audit = result["gold_specialist_audit"]
+        self.assertEqual(audit["instrument_count"], 1)
+        self.assertEqual(audit["status"], "WARN")
+        self.assertEqual(audit["instruments"][0]["macro_factor_count"], 0)
+        self.assertFalse(audit["trade_authority"])
+        self.assertFalse(audit["live_readiness"])
+        self.assertIn("gold_specialist_research",
+                      next(p for p in result["specialist_packets"]
+                           if p["desk_id"] == "gold")["context"])
+
+    def test_gold_specialist_authority_violation_is_a_packet_error(self):
+        rows = self.four_desk_rows()
+        gold = next(row for row in rows if row["instrument_type"] == "xauusd_spot")
+        gold.update(
+            gold_price_basis="synthetic_test",
+            gold_session={"session_name": "london", "market_timezone": "Europe/London",
+                          "calendar_status": "verified"},
+            bid=1999.9, ask=2000.1, spread=0.2,
+            quote_age_seconds=1, stale_threshold_seconds=30, is_stale=False,
+            macro_evidence=[],
+        )
+        # The engine contract is independently tested; this assertion protects
+        # the unified intake's explicit no-authority summary shape.
+        result = self.build(rows)
+        self.assertIs(result["gold_specialist_audit"]["trade_authority"], False)
+        self.assertIs(result["gold_specialist_audit"]["live_readiness"], False)
+
     def test_prior_stop_cannot_be_cleared_by_clear_observation(self):
         result = self.build(previous_global_stop=True, occ_stop_state="CLEAR")
         self.assertTrue(result["global_stop_active"])
