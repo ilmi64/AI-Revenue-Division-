@@ -41,8 +41,8 @@ def _halt(errors: list[str], warnings: list[str] | None = None) -> dict[str, Any
         "newly_opened_trade_ids": [], "unexpectedly_open_trades": [],
         "unexpectedly_remaining_closed_trades": [], "filled_preexisting_order_ids": [],
         "new_pending_order_ids": [], "current_pending_order_ids": [],
-        "unexpected_filled_order_ids": [], "newly_created_order_ids": [],
-        "triggered_order_ids": [],
+        "unexpected_filled_order_ids": [], "unmatched_transaction_fill_order_ids": [],
+        "newly_created_order_ids": [], "triggered_order_ids": [],
         "position_reconciliation": "blocked",
         "account_change_reconciliation_complete": False,
         "trade_authority": False, "live_readiness": False,
@@ -274,6 +274,9 @@ def assess_oanda_post_closeout_account_changes(
             tx_order_fills.add(tx["orderID"])
     if filled_order_ids - tx_order_fills:
         errors.append("ordersFilled contains IDs without matching ORDER_FILL transactions: " + ", ".join(sorted(filled_order_ids - tx_order_fills)))
+    unmatched_transaction_fills = tx_order_fills - filled_order_ids
+    if unmatched_transaction_fills:
+        errors.append("ORDER_FILL transactions contain order IDs missing from changes.ordersFilled: " + ", ".join(sorted(unmatched_transaction_fills)))
 
     for instrument_position in arrays["positions"]:
         instrument = instrument_position.get("instrument")
@@ -329,6 +332,7 @@ def assess_oanda_post_closeout_account_changes(
             "new_pending_order_ids": new_pending,
             "current_pending_order_ids": sorted(order_ids),
             "unexpected_filled_order_ids": unexpected_filled,
+            "unmatched_transaction_fill_order_ids": sorted(unmatched_transaction_fills),
             "newly_created_order_ids": newly_created,
             "triggered_order_ids": triggered,
         })
@@ -347,6 +351,7 @@ def assess_oanda_post_closeout_account_changes(
         "new_pending_order_ids": new_pending,
         "current_pending_order_ids": sorted(order_ids),
         "unexpected_filled_order_ids": unexpected_filled,
+        "unmatched_transaction_fill_order_ids": sorted(unmatched_transaction_fills),
         "newly_created_order_ids": newly_created,
         "triggered_order_ids": triggered,
         "closed_trade_ids_confirmed": sorted(closed),
