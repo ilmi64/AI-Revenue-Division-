@@ -601,23 +601,30 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
             tx_closed = transaction_report.get("liquidated_trade_ids")
             change_closed = changes_report.get("closed_trade_ids_confirmed")
             if (not isinstance(tx_closed, list) or not isinstance(change_closed, list)
+                    or any(not isinstance(item, str) for item in tx_closed + change_closed)
                     or sorted(tx_closed) != sorted(change_closed)):
                 consistency_errors.append("closed trade IDs differ between transaction and AccountChanges reconciliations")
             tx_cancelled = transaction_report.get("orders_expected_cancelled")
             change_cancelled = changes_report.get("cancelled_order_ids_confirmed")
             if (not isinstance(tx_cancelled, list) or not isinstance(change_cancelled, list)
+                    or any(not isinstance(item, str) for item in tx_cancelled + change_cancelled)
                     or sorted(tx_cancelled) != sorted(change_cancelled)):
                 consistency_errors.append("expected linked-order cancellations differ between transaction and AccountChanges reconciliations")
             if oanda_closeout_transaction_replay.get("account_id") != oanda_post_closeout_account_changes_replay.get("account_id"):
                 consistency_errors.append("account IDs differ between transaction and AccountChanges reconciliations")
             tx_pre_orders = oanda_closeout_transaction_replay.get("pre_closeout_pending_orders")
             changes_pre_ids = oanda_post_closeout_account_changes_replay.get("pre_closeout_pending_order_ids")
+            tx_pre_ids = ([item.get("id") for item in tx_pre_orders if isinstance(item, dict)]
+                          if isinstance(tx_pre_orders, list) else [])
             if (not isinstance(tx_pre_orders, list) or not isinstance(changes_pre_ids, list)
-                    or sorted(item.get("id") for item in tx_pre_orders if isinstance(item, dict)) != sorted(changes_pre_ids)):
+                    or len(tx_pre_ids) != len(tx_pre_orders)
+                    or any(not isinstance(item, str) for item in tx_pre_ids + changes_pre_ids)
+                    or sorted(tx_pre_ids) != sorted(changes_pre_ids)):
                 consistency_errors.append("pre-closeout order IDs differ between transaction and AccountChanges reconciliations")
             tx_expected_cancelled = transaction_report.get("orders_expected_cancelled")
             changes_expected_cancelled = oanda_post_closeout_account_changes_replay.get("expected_cancelled_order_ids")
             if (not isinstance(tx_expected_cancelled, list) or not isinstance(changes_expected_cancelled, list)
+                    or any(not isinstance(item, str) for item in tx_expected_cancelled + changes_expected_cancelled)
                     or sorted(tx_expected_cancelled) != sorted(changes_expected_cancelled)):
                 consistency_errors.append("expected dependent-order cancellation IDs differ between transaction and AccountChanges replay inputs")
         if (oanda_post_closeout_account_changes_replay is not None
@@ -626,8 +633,10 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
             changes_current_orders = changes_report.get("current_pending_order_ids") if isinstance(changes_report, dict) else None
             pending_snapshot_orders = oanda_pending_order_snapshot.get("pending_orders")
             if isinstance(changes_current_orders, list) and isinstance(pending_snapshot_orders, list):
-                pending_ids = sorted(item.get("id") for item in pending_snapshot_orders if isinstance(item, dict))
-                if len(pending_ids) != len(pending_snapshot_orders) or sorted(changes_current_orders) != pending_ids:
+                pending_ids = ([item.get("id") for item in pending_snapshot_orders if isinstance(item, dict)])
+                if (len(pending_ids) != len(pending_snapshot_orders)
+                        or any(not isinstance(item, str) for item in pending_ids + changes_current_orders)
+                        or sorted(changes_current_orders) != sorted(pending_ids)):
                     consistency_errors.append("full-account pending orders differ from the dedicated post-closeout pending-order snapshot")
         if consistency_errors:
             changes_report["status"] = "HALT"
