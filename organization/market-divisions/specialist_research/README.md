@@ -356,3 +356,18 @@ python -m unittest specialist_research.test_capital_flow_end_to_end -v
 
 It is also included automatically by the OCC regression runner's
 `test_*.py` discovery. These tests are authored, not yet executed.
+
+
+### Review lifecycle and challenge resolution
+
+The review writer and independent Crypto handoff verifier now replay the
+per-event decision lifecycle. The first decision must be `review`. A
+`challenge`, `reject` or `expire` blocks the event. A challenged event may
+return to research only through `correct` or `reopen`, and the resolving
+record must cite at least one evidence reference not present in the prior
+decision. A rejected or expired event cannot be reopened. A correction also
+requires new evidence even when no blocking action preceded it.
+
+The Crypto adapter independently repeats these lifecycle checks rather than
+trusting the writer. This is still evidence-reference validation, not a
+cryptographic proof that the referenced evidence is authentic or independent.
