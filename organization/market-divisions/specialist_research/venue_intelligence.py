@@ -165,6 +165,7 @@ def assess_evidence_bundle(bundle: Any, as_of_utc: str) -> dict[str, Any]:
 
     missing = sorted(required - set(values_by_fact))
     conflicts = []
+    stale_facts = []
     fact_assessments = []
     for key, entries in sorted(values_by_fact.items()):
         canonical = {_digest(entry["value"]) for entry in entries}
@@ -176,17 +177,35 @@ def assess_evidence_bundle(bundle: Any, as_of_utc: str) -> dict[str, Any]:
             if str(entry.get("source_class", "")).startswith("official_")
             or entry.get("source_class") in {"regulator_notice", "exchange_rulebook", "broker_client_agreement"}
         )
+        policy = next((item for item in facts
+                       if isinstance(item, dict) and item.get("fact_key") == key
+                       and item.get("max_age_days") is not None), None)
+        max_age_days = policy.get("max_age_days") if policy else None
+        if max_age_days is not None:
+            if (not isinstance(max_age_days, (int, float))
+                    or isinstance(max_age_days, bool) or max_age_days < 0):
+                errors.append(f"fact {key} max_age_days must be non-negative")
+            elif as_of is not None:
+                for entry in entries:
+                    observed_at = _utc(entry["observed_at_utc"])
+                    if observed_at is not None and (as_of - observed_at).total_seconds() > max_age_days * 86400:
+                        if key not in stale_facts:
+                            stale_facts.append(key)
         fact_assessments.append({
             "fact_key": key, "source_count": len(entries),
             "official_class_source_count": official_count,
             "conflict": conflict, "values": entries,
             "critical": key in CRITICAL_FACTS,
+            "max_age_days": max_age_days,
+            "freshness": "STALE" if key in stale_facts else ("POLICY_DEFINED" if max_age_days is not None else "NOT_ASSESSED_NO_TTL"),
         })
     critical_missing = sorted(CRITICAL_FACTS.intersection(missing))
     if errors:
         status = "INVALID_EVIDENCE_BUNDLE"
     elif conflicts:
         status = "BLOCKED_CONFLICTING_EVIDENCE"
+    elif stale_facts:
+        status = "BLOCKED_STALE_EVIDENCE"
     elif missing:
         status = "INCOMPLETE_EVIDENCE_COVERAGE"
     else:
@@ -195,7 +214,8 @@ def assess_evidence_bundle(bundle: Any, as_of_utc: str) -> dict[str, Any]:
         "status": status, "instrument_type": instrument_type,
         "required_fact_count": len(required), "covered_fact_count": len(required.intersection(values_by_fact)),
         "missing_fact_keys": missing, "critical_missing_fact_keys": critical_missing,
-        "conflicting_fact_keys": conflicts, "fact_assessments": fact_assessments,
+        "conflicting_fact_keys": conflicts, "stale_fact_keys": sorted(stale_facts),
+        "fact_assessments": fact_assessments,
         "source_count": len(sources), "evidence_authenticity": "NOT_AUTHENTICATED",
         "source_independence_verified": False,
         "authority": AUTHORITY, "research_only": True,
