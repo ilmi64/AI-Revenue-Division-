@@ -204,7 +204,8 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
             "accepted_event_summaries": [
                 {"event_id": item.get("event_id"),
                  "event_classification": item.get("event_classification"),
-                 "evidence_provenance": item.get("evidence_provenance")}
+                 "evidence_provenance": item.get("evidence_provenance"),
+                 "research_priority": item.get("research_priority")}
                 for item in handoff["event_records"] if isinstance(item, dict)
             ],
             "rejected_events": [
