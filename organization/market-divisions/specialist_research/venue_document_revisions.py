@@ -9,6 +9,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from hashlib import sha256
 import json
+import math
 from typing import Any
 
 AUTHORITY = "research_only_no_execution_authority"
@@ -310,7 +311,7 @@ def assess_document_freshness(revisions: Any, as_of_utc: Any, freshness_policy: 
             errors.append(f"freshness_policy[{index}] must include document_id")
             continue
         ttl = item.get("max_age_days")
-        if isinstance(ttl, bool) or not isinstance(ttl, (int, float)) or ttl < 0:
+        if isinstance(ttl, bool) or not isinstance(ttl, (int, float)) or not math.isfinite(ttl) or ttl < 0:
             errors.append(f"freshness_policy[{index}].max_age_days must be a non-negative number")
             continue
         if item["document_id"] in policies:
