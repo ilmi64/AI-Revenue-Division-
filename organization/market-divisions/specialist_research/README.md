@@ -939,8 +939,9 @@ monitor: the latest document captures must be supplied by a researcher.
 `venue_document_capture_manifest.json` now inventories seventeen official-page
 search excerpts linked to all seven candidate venues. The sources cover
 Kraken MTF linear crypto derivatives, Coinbase International Exchange
-perpetuals, OANDA Canada's margin schedule, financing policy and index-CFD
-methodology, CME/COMEX Gold futures, and CME equity-index futures.
+perpetuals, OANDA Canada's margin schedule, financing policy, index-CFD
+methodology and XAU/USD instrument details, OANDA v20 order definitions and
+pending-orders endpoint, CME/COMEX Gold futures, and CME equity-index futures.
 
 This is deliberately labelled
 `PARTIAL_OFFICIAL_EXCERPT_CAPTURE_NOT_FULL_DOCUMENTS`. The stored text is
@@ -963,7 +964,9 @@ The first-pass fact extraction records, among other items:
   FX/metals tom-next financing plus admin fee; 5pm ET overnight financing
   cutoff and index CFD futures/cash reference methodology. Exact live
   instrument rates, contract units, closeout and triple-day handling remain
-  outstanding.
+  outstanding. The v20 API excerpts additionally document dependent-order
+  tradeID linkage, positionFill semantics and the account pending-orders
+  endpoint; they do not establish API access or authenticate an account feed.
 - CME/COMEX Gold: GC 100 troy ounces and MGC 10 troy ounces. Exact expiry,
   tick, delivery/notice, settlement and current FCM margin remain outstanding.
 - CME equity indices: ES USD 50 and MES USD 5 per S&P 500 point, with
@@ -972,7 +975,7 @@ The first-pass fact extraction records, among other items:
 
 The companion `venue_document_capture.py` validates the manifest and
 produces a research-only capture report. Its regression tests verify all
-thirteen excerpt digests, seven-candidate coverage, explicit partial-capture
+seventeen excerpt digests, seven-candidate coverage, explicit partial-capture
 status and fail-closed handling of tampered hashes or false full-document
 claims. The JSON contract is
 `venue-document-capture-manifest.schema.json`.
