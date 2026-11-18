@@ -176,6 +176,9 @@ def assess_oanda_post_closeout_account_changes(
 
     order_ids: dict[str, str] = {}
     for index, order in enumerate(current_orders):
+        if not isinstance(order, dict):
+            errors.append(f"post-closeout account orders[{index}] must be an object")
+            continue
         oid = order.get("id")
         if not isinstance(oid, str) or not oid or oid in order_ids:
             errors.append(f"post-closeout account orders[{index}] has missing or duplicate ID")
@@ -186,6 +189,9 @@ def assess_oanda_post_closeout_account_changes(
             order_ids[oid] = str(state)
     trade_ids: set[str] = set()
     for index, trade in enumerate(current_trades):
+        if not isinstance(trade, dict):
+            errors.append(f"post-closeout account trades[{index}] must be an object")
+            continue
         tid = trade.get("id")
         if not isinstance(tid, str) or not tid or tid in trade_ids:
             errors.append(f"post-closeout account trades[{index}] has missing or duplicate ID")
@@ -193,6 +199,9 @@ def assess_oanda_post_closeout_account_changes(
             trade_ids.add(tid)
     position_map: dict[str, dict[str, Any]] = {}
     for index, position in enumerate(current_positions):
+        if not isinstance(position, dict):
+            errors.append(f"post-closeout account positions[{index}] must be an object")
+            continue
         instrument = position.get("instrument")
         if not isinstance(instrument, str) or not instrument or instrument in position_map:
             errors.append(f"post-closeout account positions[{index}] has missing or duplicate instrument")
