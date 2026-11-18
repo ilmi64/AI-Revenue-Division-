@@ -35,7 +35,7 @@ def assess_xauusd_weekly_session(evaluation_utc: Any, holiday_status: Any = "unk
     moment = _utc(evaluation_utc)
     if moment is None:
         errors.append("evaluation_utc must be UTC ISO-8601 ending Z")
-    if holiday_status not in {"open", "closed", "unknown"}:
+    if not isinstance(holiday_status, str) or holiday_status not in {"open", "closed", "unknown"}:
         errors.append("holiday_status must be open, closed or unknown")
     if errors:
         return _session_result("INVALID_SESSION_INPUT", errors, [], None, None)
