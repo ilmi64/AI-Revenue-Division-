@@ -41,6 +41,8 @@ def _halt(errors: list[str], warnings: list[str] | None = None) -> dict[str, Any
         "newly_opened_trade_ids": [], "unexpectedly_open_trades": [],
         "unexpectedly_remaining_closed_trades": [], "filled_preexisting_order_ids": [],
         "new_pending_order_ids": [], "current_pending_order_ids": [],
+        "unexpected_filled_order_ids": [], "newly_created_order_ids": [],
+        "triggered_order_ids": [],
         "position_reconciliation": "blocked",
         "account_change_reconciliation_complete": False,
         "trade_authority": False, "live_readiness": False,
@@ -214,6 +216,21 @@ def assess_oanda_post_closeout_account_changes(
     if unexpectedly_open:
         errors.append("newly opened trades are absent from the full account snapshot and were not subsequently closed: " + ", ".join(sorted(unexpectedly_open)))
 
+    created_order_ids = set()
+    for order in arrays["ordersCreated"]:
+        oid = order.get("id")
+        if not isinstance(oid, str) or not oid:
+            errors.append("changes.ordersCreated contains an order without a string ID")
+        else:
+            created_order_ids.add(oid)
+    triggered_order_ids = set()
+    for order in arrays["ordersTriggered"]:
+        oid = order.get("id")
+        if not isinstance(oid, str) or not oid:
+            errors.append("changes.ordersTriggered contains an order without a string ID")
+        else:
+            triggered_order_ids.add(oid)
+
     filled_order_ids = set()
     for order in arrays["ordersFilled"]:
         oid = order.get("id")
@@ -266,12 +283,30 @@ def assess_oanda_post_closeout_account_changes(
                 errors.append(f"position {instrument} {side} units differ between changes and full account snapshot")
 
     filled_preexisting = sorted(filled_order_ids & pre_order_ids)
+    # Only the explicit margin-closeout ORDER_FILL is expected. Any other fill
+    # after the supplied closeout boundary requires independent exposure review,
+    # including fills from orders created after that boundary.
+    closeout_fill_order_ids = {
+        tx.get("orderID") for tx in arrays["transactions"]
+        if tx.get("type") == "ORDER_FILL"
+        and tx.get("reason") == "MARKET_ORDER_MARGIN_CLOSEOUT"
+        and isinstance(tx.get("orderID"), str)
+    }
+    unexpected_filled = sorted(filled_order_ids - closeout_fill_order_ids)
+    newly_created = sorted(created_order_ids - pre_order_ids)
+    triggered = sorted(triggered_order_ids)
     new_pending = sorted(set(order_ids) - pre_order_ids)
     newly_opened = sorted(opened)
     if newly_opened:
         warnings.append("Account changes report one or more newly opened trades after the closeout boundary; OCC stop must remain active pending independent review.")
     if filled_preexisting:
         warnings.append("One or more pre-closeout pending orders filled during the reconciliation interval.")
+    if unexpected_filled:
+        warnings.append("One or more non-closeout orders filled after the supplied closeout boundary.")
+    if newly_created:
+        warnings.append("One or more orders were created after the supplied closeout boundary.")
+    if triggered:
+        warnings.append("One or more pending orders were triggered after the supplied closeout boundary.")
     if new_pending:
         warnings.append("The full account snapshot contains pending orders not present in the pre-closeout order set.")
 
@@ -284,11 +319,14 @@ def assess_oanda_post_closeout_account_changes(
             "filled_preexisting_order_ids": filled_preexisting,
             "new_pending_order_ids": new_pending,
             "current_pending_order_ids": sorted(order_ids),
+            "unexpected_filled_order_ids": unexpected_filled,
+            "newly_created_order_ids": newly_created,
+            "triggered_order_ids": triggered,
         })
         return result
 
     return {
-        "status": "HALT" if newly_opened or filled_preexisting or new_pending else "PASS",
+        "status": "HALT" if newly_opened or unexpected_filled or newly_created or triggered or new_pending else "PASS",
         "errors": [],
         "warnings": warnings,
         "since_transaction_id": str(since_id),
@@ -299,6 +337,9 @@ def assess_oanda_post_closeout_account_changes(
         "filled_preexisting_order_ids": filled_preexisting,
         "new_pending_order_ids": new_pending,
         "current_pending_order_ids": sorted(order_ids),
+        "unexpected_filled_order_ids": unexpected_filled,
+        "newly_created_order_ids": newly_created,
+        "triggered_order_ids": triggered,
         "closed_trade_ids_confirmed": sorted(closed),
         "reduced_trade_ids": sorted(reduced),
         "cancelled_order_ids_confirmed": sorted(cancelled_order_ids),
