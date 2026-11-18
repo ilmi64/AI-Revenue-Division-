@@ -371,7 +371,7 @@ def assess_portfolio_risk(
     stop_active = bool(stop_sources)
     if errors or stop_active:
         status = "HALT"
-    elif missing_desks or missing_risk_desks or normalization_unknown or config_status != "VALID" or any(x["status"] == "UNKNOWN" for x in limit_results) or any(x["status"] != "ASSESSED" for x in scenario_rows):
+    elif missing_desks or missing_risk_desks or normalization_unknown or config_status != "VALID" or any(x["status"] == "UNKNOWN" for x in limit_results) or not scenario_rows or any(x["status"] != "ASSESSED" for x in scenario_rows):
         status = "UNKNOWN"
     elif any(x["status"] == "BREACH" for x in limit_results):
         status = "HALT"
