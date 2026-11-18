@@ -40,7 +40,10 @@ def verify_review_ledger(entries: list[dict[str, Any]]) -> dict[str, Any]:
         if not isinstance(entry, dict):
             errors.append(f"ledger row {sequence} is not an object")
             continue
-        if entry.get("sequence") != sequence:
+        recorded_sequence = entry.get("sequence")
+        if (isinstance(recorded_sequence, bool)
+                or not isinstance(recorded_sequence, int)
+                or recorded_sequence != sequence):
             errors.append(f"ledger row {sequence} has invalid sequence")
         if entry.get("previous_hash") != previous:
             errors.append(f"ledger row {sequence} breaks previous_hash chain")
