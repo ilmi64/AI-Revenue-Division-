@@ -518,6 +518,75 @@
       "captured_at_utc": "2026-11-17T00:00:00Z",
       "retrieval_method": "official_web_search_excerpt",
       "revision_id": "cme_equity_index_futures_specs:excerpt-20261117"
+    },
+    {
+      "revision_id": "cme_comex_gold_rulebook_ch113:excerpt-20261117",
+      "document_id": "cme_comex_gold_rulebook_ch113",
+      "candidate_ids": [
+        "cme_comex_gold_futures"
+      ],
+      "canonical_uri": "https://www.cmegroup.com/content/dam/cmegroup/rulebook/COMEX/1a/113.pdf",
+      "title": "COMEX Rulebook Chapter 113 — Gold Futures",
+      "publisher": "CME Group / COMEX",
+      "source_class": "exchange_rulebook",
+      "source_ref": "turn797664view0",
+      "retrieval_method": "official_web_open_excerpt",
+      "capture_scope": "official_page_search_excerpt",
+      "full_document_capture": false,
+      "capture_time_precision": "date_only_normalized_to_utc_midnight",
+      "captured_at_utc": "2026-11-17T00:00:00Z",
+      "content_sha256": "b1c31122a7c552ef0cad8ebb78d8274c06a365aca5498837f79a7efb20e35f86",
+      "document_text": "COMEX Rulebook Chapter 113 applies to Gold futures. Contract delivery is 100 troy ounces with 5% weight tolerance; delivered gold must assay at least 995 fineness and be an Exchange-approved brand. Deliverable form is one 100 troy-ounce bar or three one-kilogram bars, through approved depositories and carriers. The trading unit is 100 troy ounces. Minimum price fluctuation is USD 0.10 per troy ounce. No trades in the current delivery month may be made after the third last business day of that month. Delivery may occur on any business day from the first business day of the delivery month through its last business day; contracts remaining open after last trade must be settled by delivery or eligible EFRP under the rule. The chapter says times are New York time unless otherwise specified.",
+      "extracted_facts": [
+        {
+          "fact_key": "contract_multiplier",
+          "value": 100,
+          "unit": "troy ounces",
+          "source_locator": "113101 and 113102.B, lines 16-18 and 72-77"
+        },
+        {
+          "fact_key": "delivery_type",
+          "value": "physical delivery",
+          "unit": "settlement",
+          "source_locator": "113101, lines 16-25"
+        },
+        {
+          "fact_key": "delivery_fineness_minimum",
+          "value": 995,
+          "unit": "fineness",
+          "source_locator": "113101, lines 16-18"
+        },
+        {
+          "fact_key": "deliverable_forms",
+          "value": "one 100 troy-ounce bar or three one-kilogram bars",
+          "unit": "physical delivery",
+          "source_locator": "113101, lines 19-23"
+        },
+        {
+          "fact_key": "price_tick",
+          "value": 0.1,
+          "unit": "USD per troy ounce",
+          "source_locator": "113102.C, lines 75-77"
+        },
+        {
+          "fact_key": "last_trade_rule",
+          "value": "no trades after third-last business day of delivery month",
+          "unit": "calendar rule",
+          "source_locator": "113102.E, lines 89-96"
+        },
+        {
+          "fact_key": "delivery_window",
+          "value": "first through last business day of delivery month",
+          "unit": "calendar rule",
+          "source_locator": "113102.E, lines 93-96"
+        }
+      ],
+      "known_gaps": [
+        "GC/MGC account-level FCM delivery settings",
+        "first notice date controls and broker cutoff policies",
+        "current exchange and FCM margin",
+        "Canadian FCM eligibility"
+      ]
     }
   ],
   "candidate_coverage": [
@@ -560,7 +629,8 @@
     {
       "candidate_id": "cme_comex_gold_futures",
       "document_ids": [
-        "cme_comex_gold_futures_specs"
+        "cme_comex_gold_futures_specs",
+        "cme_comex_gold_rulebook_ch113"
       ]
     },
     {
