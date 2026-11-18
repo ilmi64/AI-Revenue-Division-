@@ -235,7 +235,9 @@ class OandaAccountCloseoutReplayTests(unittest.TestCase):
             "trading_day_check": False,
         })
         result = replay_oanda_account_margin_closeout("CAD", positions(), events)
-        self.assertEqual(result["closeout_batches"], [])
+        self.assertEqual(len(result["closeout_batches"]), 1)
+        self.assertEqual(result["closeout_batches"][0]["trigger"], "SIX_CONSECUTIVE_UNDERMARGINED_TRADING_DAYS")
+        self.assertEqual(result["closeout_batches"][0]["position_ids_closed_as_batch"], [])
         self.assertEqual(len(result["remaining_open_positions"]), 3)
 
     def test_output_never_grants_authority_or_claims_execution(self):
