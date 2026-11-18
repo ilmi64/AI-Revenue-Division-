@@ -913,3 +913,22 @@ All outputs remain research-only with `trade_authority=false` and
 `live_readiness=false`. Gold futures (GC/MGC) and Gold CFDs/XAUUSD remain
 separate instrument-specific document/profile tracks; a revision in one must
 not be copied into the other.
+
+
+### Stale-source gate for registered derivative replay
+
+The registry now accepts optional `document_id` and `revision_id` links on
+each profile provenance record. When a caller supplies
+`latest_document_revisions` to `resolve_profile` or
+`simulate_registered_derivative`, the resolver compares those captures with
+the exact revisions recorded by the profile. A changed revision, an untracked
+new document, a missing latest capture, or missing revision links blocks
+research eligibility with a stale-source status. The registered replay
+therefore cannot use a profile that fails a supplied freshness audit.
+
+If `latest_document_revisions` is omitted, the registry explicitly reports
+`document_freshness.status=NOT_PROVIDED`; the legacy research-resolution path
+remains available but carries no document-freshness assurance. For new
+evidence-controlled replay, callers should supply the complete latest capture
+set and populate both provenance links. This is still not an unattended
+monitor: the latest document captures must be supplied by a researcher.
