@@ -252,22 +252,47 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
                 "live_readiness": False,
             })
             continue
+        specialist_status = specialist.get("status")
+        specialist_errors = specialist.get("errors")
+        specialist_warnings = specialist.get("warnings")
+        macro_count = specialist.get("macro_factor_count")
+        macro_coverage = specialist.get("macro_factor_coverage")
+        boundary_errors = []
+        if specialist_status not in {"research", "unverified", "halt"}:
+            boundary_errors.append("Gold specialist status is missing or unrecognized")
+            specialist_status = "halt"
         if (specialist.get("trade_authority") is not False
                 or specialist.get("live_readiness") is not False
                 or specialist.get("authority") != "research_only_no_execution_authority"):
+            boundary_errors.append("Gold specialist context violates research-only authority boundary")
+        if not isinstance(macro_count, int) or isinstance(macro_count, bool) or not 0 <= macro_count <= 8:
+            boundary_errors.append("Gold macro_factor_count is invalid")
+            macro_count = 0
+        if not isinstance(macro_coverage, dict):
+            boundary_errors.append("Gold macro_factor_coverage must be an object")
+            macro_coverage = {}
+        if not isinstance(specialist_errors, list) or any(not isinstance(x, str) for x in specialist_errors):
+            boundary_errors.append("Gold specialist errors must be an array of strings")
+            specialist_errors = ["Gold specialist errors field is malformed"]
+        if not isinstance(specialist_warnings, list) or any(not isinstance(x, str) for x in specialist_warnings):
+            boundary_errors.append("Gold specialist warnings must be an array of strings")
+            specialist_warnings = ["Gold specialist warnings field is malformed"]
+        if boundary_errors:
             packet_errors.append({
                 "instrument_id": str(packet.get("instrument_id")),
-                "errors": ["Gold specialist context violates research-only authority boundary"],
+                "errors": boundary_errors,
             })
+            specialist_status = "halt"
+            specialist_errors = list(specialist_errors) + boundary_errors
         gold_specialist_packets.append({
             "instrument_id": packet.get("instrument_id"),
-            "status": specialist.get("status", "halt"),
+            "status": specialist_status,
             "price_basis": specialist.get("price_basis"),
-            "macro_factor_count": specialist.get("macro_factor_count", 0),
-            "macro_factor_coverage": specialist.get("macro_factor_coverage", {}),
+            "macro_factor_count": macro_count,
+            "macro_factor_coverage": macro_coverage,
             "source_independence_verified": specialist.get("source_independence_verified", False),
-            "errors": specialist.get("errors", []),
-            "warnings": specialist.get("warnings", []),
+            "errors": specialist_errors,
+            "warnings": specialist_warnings,
             "trade_authority": False,
             "live_readiness": False,
         })
