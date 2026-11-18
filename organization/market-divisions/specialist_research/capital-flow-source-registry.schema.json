@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OCC Capital Flow Source Registry",
+  "description": "Local research-only registry for source eligibility before Capital Flow evidence may be handed to Crypto.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "sources",
+    "policy"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "source_id",
+          "display_name",
+          "access_status",
+          "access_mode",
+          "cost_status",
+          "terms_review_status",
+          "canada_review_status",
+          "operational_status",
+          "evidence_refs",
+          "limitations"
+        ],
+        "properties": {
+          "source_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "display_name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "access_status": {
+            "enum": [
+              "verified",
+              "approved",
+              "unverified",
+              "not_accessible",
+              "blocked"
+            ]
+          },
+          "access_mode": {
+            "enum": [
+              "public",
+              "manual",
+              "read_only_api",
+              "public_api",
+              "manual_export",
+              "unknown",
+              "not_accessible"
+            ]
+          },
+          "cost_status": {
+            "enum": [
+              "free",
+              "zero_cost",
+              "paid",
+              "unknown"
+            ]
+          },
+          "terms_review_status": {
+            "enum": [
+              "approved",
+              "reviewed",
+              "not_reviewed",
+              "unknown",
+              "prohibited"
+            ]
+          },
+          "canada_review_status": {
+            "enum": [
+              "approved",
+              "reviewed",
+              "not_reviewed",
+              "unknown",
+              "blocked"
+            ]
+          },
+          "operational_status": {
+            "enum": [
+              "approved",
+              "active",
+              "research_only",
+              "inactive",
+              "blocked",
+              "unknown"
+            ]
+          },
+          "evidence_refs": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "limitations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "default_decision",
+        "trade_authority",
+        "live_readiness",
+        "notes"
+      ],
+      "properties": {
+        "default_decision": {
+          "const": "blocked_until_all_source_gates_verified"
+        },
+        "trade_authority": {
+          "const": false
+        },
+        "live_readiness": {
+          "const": false
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "$comment": "Registry values are operator-maintained assertions, not independent proof of authenticity, licensing, terms, cost or jurisdictional compliance. Only explicitly allowlisted access modes with verified access, zero cost, reviewed terms, reviewed Canada status and approved operational status may pass the local research gate. No registry entry grants trade authority."
+}
