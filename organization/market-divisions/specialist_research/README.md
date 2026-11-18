@@ -936,7 +936,7 @@ monitor: the latest document captures must be supplied by a researcher.
 
 ## Official venue-document excerpt capture set
 
-`venue_document_capture_manifest.json` now inventories eight official-page
+`venue_document_capture_manifest.json` now inventories nine official-page
 search excerpts linked to all seven candidate venues. The sources cover
 Kraken MTF linear crypto derivatives, Coinbase International Exchange
 perpetuals, OANDA Canada's margin schedule, financing policy and index-CFD
