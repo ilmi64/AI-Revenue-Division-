@@ -23,6 +23,39 @@ class UnifiedIntakeTests(unittest.TestCase):
         return build_unified_intake(rows, NOW, source_registry(rows),
                                     expected_portfolio_version=version, **kwargs)
 
+    def oanda_closeout_transaction_replay(self, post_orders=None):
+        return {
+            "account_id": "acct-1",
+            "pre_closeout_pending_orders": [{
+                "id": "sl-gold", "state": "PENDING", "type": "STOP_LOSS", "tradeID": "trade-gold",
+            }],
+            "post_closeout_pending_orders": [] if post_orders is None else post_orders,
+            "transactions": [
+                {"id": "101", "accountID": "acct-1", "time": "2026-11-17T20:45:01Z",
+                 "type": "ORDER_FILL", "reason": "MARKET_ORDER_MARGIN_CLOSEOUT",
+                 "orderID": "100", "tradesClosed": [{"tradeID": "trade-gold", "units": "1"}]},
+                {"id": "102", "accountID": "acct-1", "time": "2026-11-17T20:45:01Z",
+                 "type": "ORDER_CANCEL", "orderID": "sl-gold", "reason": "LINKED_TRADE_CLOSED"},
+            ],
+            "transaction_id_start_exclusive": "100", "transaction_id_end_inclusive": "102",
+            "transaction_range_complete": True, "transaction_range_unfiltered": True,
+            "pre_closeout_orders_complete": True, "post_closeout_orders_complete": True,
+            "pre_closeout_snapshot_timestamp_utc": "2026-11-17T20:45:00Z",
+            "post_closeout_snapshot_timestamp_utc": "2026-11-17T20:45:02Z",
+            "evaluated_at_utc": "2026-11-17T20:45:03Z", "max_snapshot_age_seconds": 60,
+        }
+
+    def oanda_pending_snapshot(self, orders=None):
+        return {
+            "pending_orders": [] if orders is None else orders,
+            "liquidated_trade_ids": ["trade-gold"], "remaining_open_trade_ids": [],
+            "remaining_open_trade_ids_complete": True, "reported_pending_order_count": len(orders or []),
+            "account_hedging_enabled": False,
+            "source_timestamp_utc": "2026-11-17T20:45:02Z",
+            "evaluated_at_utc": "2026-11-17T20:45:03Z", "max_snapshot_age_seconds": 60,
+            "pending_orders_complete": True, "closeout_occurred": True,
+        }
+
     def test_builds_one_snapshot_across_all_four_specialist_desks(self):
         result = self.build()
         self.assertEqual(result["desk_coverage"],
