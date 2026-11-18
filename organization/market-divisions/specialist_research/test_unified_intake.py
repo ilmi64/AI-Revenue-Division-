@@ -611,14 +611,14 @@ class UnifiedIntakeTests(unittest.TestCase):
 
     def oanda_account_changes_replay(self, new_trade=False):
         changes = {
-            "ordersCreated": [{"id": "closeout"}], "ordersCancelled": [{"id": "sl-gold"}],
-            "ordersFilled": [{"id": "closeout"}], "ordersTriggered": [],
+            "ordersCreated": [{"id": "100"}], "ordersCancelled": [{"id": "sl-gold"}],
+            "ordersFilled": [{"id": "100"}], "ordersTriggered": [],
             "tradesOpened": [{"id": "trade-new"}] if new_trade else [],
             "tradesReduced": [], "tradesClosed": [{"id": "trade-gold"}],
             "positions": [],
             "transactions": [
                 {"id": "100", "accountID": "acct-1", "type": "MARKET_ORDER", "reason": "MARGIN_CLOSEOUT"},
-                {"id": "101", "accountID": "acct-1", "type": "ORDER_FILL", "orderID": "closeout", "reason": "MARKET_ORDER_MARGIN_CLOSEOUT"},
+                {"id": "101", "accountID": "acct-1", "type": "ORDER_FILL", "orderID": "100", "reason": "MARKET_ORDER_MARGIN_CLOSEOUT"},
                 {"id": "102", "accountID": "acct-1", "type": "ORDER_CANCEL", "orderID": "sl-gold"},
             ],
         }
