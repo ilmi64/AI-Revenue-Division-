@@ -265,3 +265,34 @@ integrated = build_control_health(
 Regression cases are in `test_control_health.py`; they are authored and have
 not yet been executed. This is an offline integration adapter, not a live
 monitor, position reconciler, trusted-signature system or execution control.
+
+
+## Main unified-intake connection
+
+The unified snapshot builder now accepts the optional paired CLI inputs
+`--control-health-snapshot-history` and `--control-health-event-ledger`.
+Supply both to attach a fresh read-only audit result to the generated snapshot.
+Without both, the builder emits `control_health.status=NOT_PROVIDED`; it never
+pretends an audit passed.
+
+The adapter requires the snapshot being built to exactly match the latest
+persisted snapshot-history payload. This deliberately prevents attaching a
+green audit to a different or stale snapshot. Operational sequence:
+
+1. Build the unified snapshot without the audit flags and persist that exact
+   JSON snapshot using the existing `snapshot_history append` command.
+2. Ensure the event ledger contains an explicit, accepted handover record
+   referencing that persisted snapshot ID.
+3. Re-run the same intake inputs and timestamp with both audit flags. The
+   adapter attaches the integrity, consistency and handover audit to the
+   output. Any changed input, timestamp, or snapshot payload fails closed.
+
+Example final build flags:
+
+```sh
+--control-health-snapshot-history /path/to/private/occ-snapshots.jsonl \
+--control-health-event-ledger /path/to/private/occ-events.jsonl
+```
+
+This is an explicit operator-run, offline sequence. The intake does not append
+history or events automatically, and it does not create a scheduler or daemon.
