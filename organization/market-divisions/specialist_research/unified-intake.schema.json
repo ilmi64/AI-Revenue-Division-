@@ -15,6 +15,7 @@
     "missing_desks",
     "coverage_complete",
     "specialist_packets",
+    "capital_flow_audit",
     "capital_flow_context",
     "evidence_index",
     "packet_validation_errors",
@@ -361,6 +362,107 @@
           "items": {
             "type": "string"
           }
+        }
+      }
+    },
+    "capital_flow_audit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "instrument_count",
+        "accepted_event_count",
+        "rejected_event_count",
+        "instruments",
+        "boundary_errors",
+        "mode",
+        "trade_authority",
+        "live_readiness"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "not_consumed",
+            "provided_no_eligible_match",
+            "consumed_research_context",
+            "blocked"
+          ]
+        },
+        "instrument_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "accepted_event_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "rejected_event_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "instruments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "instrument_id",
+              "status",
+              "accepted_event_ids",
+              "rejected_events",
+              "trade_authority",
+              "live_readiness"
+            ],
+            "properties": {
+              "instrument_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "status": {
+                "type": "string"
+              },
+              "accepted_event_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "rejected_events": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "review_ledger": {
+                "type": [
+                  "object",
+                  "null"
+                ]
+              },
+              "trade_authority": {
+                "const": false
+              },
+              "live_readiness": {
+                "const": false
+              }
+            }
+          }
+        },
+        "boundary_errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "mode": {
+          "const": "research_only"
+        },
+        "trade_authority": {
+          "const": false
+        },
+        "live_readiness": {
+          "const": false
         }
       }
     }
