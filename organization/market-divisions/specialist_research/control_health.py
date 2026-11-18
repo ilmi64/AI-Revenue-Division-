@@ -58,6 +58,14 @@ def build_control_health(snapshot: dict[str, Any],
         read_errors = [str(exc)]
 
     cross_errors = list(cross_ledger.get("errors", []))
+    if snapshot_records:
+        latest_payload = snapshot_records[-1].get("snapshot")
+        if latest_payload != snapshot:
+            cross_errors.append(
+                "current unified snapshot does not exactly match the latest persisted snapshot-history entry"
+            )
+            cross_ledger["valid"] = False
+            cross_ledger["errors"] = cross_errors
     handover_errors = list(handover.get("errors", []))
     known_snapshot_ids = {
         row.get("snapshot_id") for row in snapshot_records
