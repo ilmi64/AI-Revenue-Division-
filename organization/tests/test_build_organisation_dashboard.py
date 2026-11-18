@@ -38,6 +38,12 @@ class OrganisationDashboardTests(unittest.TestCase):
             "status": "unverified",
             "global_stop_active": False,
             "active_stops": [],
+            "gold_specialist_audit": {
+                "status": "WARN", "instrument_count": 1,
+                "instruments": [{"instrument_id": "XAUUSD-FIXTURE",
+                                 "status": "unverified", "macro_factor_count": 3}],
+                "trade_authority": False, "live_readiness": False,
+            },
             "control_health": {
                 "status": "PASS_AUDIT",
                 "latest_verified_snapshot_id": "occ-fixture",
@@ -52,6 +58,9 @@ class OrganisationDashboardTests(unittest.TestCase):
         self.assertEqual(report["occ_control_health"]["status"], "PASS_AUDIT")
         self.assertEqual(report["occ_control_health"]["snapshot_id"], "occ-fixture")
         self.assertFalse(report["occ_control_health"]["global_stop_active"])
+        self.assertEqual(report["occ_control_health"]["gold_specialist_audit"]["status"], "WARN")
+        self.assertEqual(report["occ_control_health"]["gold_specialist_audit"]["instrument_count"], 1)
+        self.assertFalse(report["occ_control_health"]["gold_specialist_audit"]["trade_authority"])
 
     def test_dashboard_propagates_occ_audit_halt_and_stop_state(self):
         snapshot = {
