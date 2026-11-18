@@ -17,6 +17,7 @@ from specialist_research.contract_lifecycle import (
 from specialist_research.venue_risk_simulation import (
     simulate_derivative_path, validate_venue_spec,
 )
+from specialist_research.venue_profile_registry import resolve_profile
 
 
 def _timestamp(value: Any) -> datetime | None:
@@ -205,3 +206,42 @@ def simulate_unified_derivative(
         "authority": AUTHORITY, "trade_authority": False,
         "live_readiness": False, "simulation_only": True,
     }
+
+
+
+def simulate_registered_derivative(
+    registry: dict[str, Any],
+    venue_id: str,
+    instrument_id: str,
+    as_of_utc: str,
+    position: dict[str, Any],
+    price_path: list[dict[str, Any]],
+    lifecycle_events: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Resolve a reviewed, effective registry profile before research replay.
+
+    Unverified, unreviewed, rejected, suspended or out-of-date records fail
+    closed. A successful resolution still grants no operational readiness.
+    """
+    resolution = resolve_profile(registry, venue_id, instrument_id, as_of_utc)
+    if not resolution.get("research_eligible"):
+        errors = list(resolution.get("errors", []))
+        if not errors:
+            errors.append(f"registry resolution blocked: {resolution.get('status')}")
+        result = _blocked("BLOCKED_REGISTRY_PROFILE", errors)
+        result["registry_resolution"] = resolution
+        return result
+    selected = resolution["profile"]
+    result = simulate_unified_derivative(
+        selected["venue_spec"], selected["contract_profile"],
+        position, price_path, lifecycle_events,
+    )
+    result["registry_resolution"] = {
+        key: value for key, value in resolution.items() if key != "profile"
+    }
+    result["registry_profile_id"] = selected["profile_id"]
+    result["registry_profile_revision"] = selected["revision"]
+    result["operational_readiness"] = False
+    result["trade_authority"] = False
+    result["live_readiness"] = False
+    return result
