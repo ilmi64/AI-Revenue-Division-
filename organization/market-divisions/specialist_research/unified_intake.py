@@ -207,7 +207,7 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
     else:
         status = "research"
 
-    return {
+    result = {
         "schema_version": "1.0.0",
         "snapshot_type": "unified_occ_research_intelligence",
         "generated_at_utc": now_utc,
