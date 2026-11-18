@@ -69,6 +69,17 @@ def validate_handover(record: dict[str, Any] | None, now_utc: str,
     for key in ("outgoing_acknowledged", "incoming_acknowledged", "positions_reconciled"):
         if record.get(key) is not True:
             errors.append(f"{key} must be explicitly true")
+    expected_desks = {"crypto", "forex", "indices", "gold"}
+    coverage = record.get("desk_coverage")
+    if (not isinstance(coverage, dict) or set(coverage) != expected_desks
+            or any(not isinstance(coverage.get(desk), int)
+                   or isinstance(coverage.get(desk), bool)
+                   or coverage[desk] < 1 for desk in expected_desks)):
+        errors.append("desk_coverage must include positive instrument counts for Crypto, Forex, indices and Gold")
+    reconciled = record.get("positions_reconciled_by_desk")
+    if (not isinstance(reconciled, dict) or set(reconciled) != expected_desks
+            or any(reconciled.get(desk) is not True for desk in expected_desks)):
+        errors.append("positions_reconciled_by_desk must explicitly confirm all four specialist desks")
     if record.get("dependency_health") != "healthy":
         errors.append("critical dependency health is not explicitly healthy")
     vetoes = record.get("active_veto_ids")
