@@ -242,19 +242,22 @@ def append_profile_revision(registry: Any, record: Any) -> dict[str, Any]:
                 "status": "BLOCKED_EFFECTIVE_DATE",
                 "errors": ["new revision must have a later effective_from_utc"], "registry": None,
             }
-        if latest.get("effective_to_utc") is None:
-            return {
-                "status": "BLOCKED_OPEN_ENDED_PRIOR_REVISION",
-                "errors": ["close prior revision with effective_to_utc before appending a successor"],
-                "registry": None,
-            }
-        if _utc(latest["effective_to_utc"]) > _utc(record["effective_from_utc"]):
+        if latest.get("effective_to_utc") is not None and _utc(latest["effective_to_utc"]) > _utc(record["effective_from_utc"]):
             return {
                 "status": "BLOCKED_OVERLAPPING_EFFECTIVE_DATES",
                 "errors": ["new revision overlaps the prior revision"], "registry": None,
             }
     updated = dict(registry)
-    updated["profiles"] = list(registry["profiles"]) + [dict(record)]
+    updated_profiles = list(registry["profiles"])
+    if prior and prior[-1].get("effective_to_utc") is None:
+        # Close the previous validity interval in the returned registry snapshot.
+        # Prior revision data remains available, with an explicit end boundary.
+        prior_index = updated_profiles.index(prior[-1])
+        closed = dict(prior[-1])
+        closed["effective_to_utc"] = record["effective_from_utc"]
+        updated_profiles[prior_index] = closed
+    updated_profiles.append(dict(record))
+    updated["profiles"] = updated_profiles
     return {
         "status": "APPENDED_IN_MEMORY", "errors": [], "registry": updated,
         "registry_sha256": _canonical_hash(updated),
