@@ -66,8 +66,8 @@ def validate_capture_manifest(manifest: Any) -> list[str]:
             if document_id in seen_docs:
                 errors.append(f"{prefix}.document_id is duplicated")
             seen_docs.add(document_id)
-        if capture.get("capture_scope") != "official_page_search_excerpt":
-            errors.append(f"{prefix}.capture_scope must disclose official-page excerpt")
+        if capture.get("capture_scope") not in {"official_page_search_excerpt", "official_api_definition_excerpt", "official_api_endpoint_excerpt"}:
+            errors.append(f"{prefix}.capture_scope must disclose official-page or API-definition excerpt")
         if capture.get("capture_time_precision") != "date_only_normalized_to_utc_midnight":
             errors.append(f"{prefix}.capture_time_precision must disclose date-only normalization")
         if capture.get("captured_at_utc") != manifest.get("captured_at_utc"):
