@@ -203,7 +203,9 @@ def assess_portfolio_risk(
         pair = {
             "instrument_id_a": left, "instrument_id_b": right,
             "correlation": float(value), "observed_at_utc": item.get("observed_at_utc"),
-            "source_id": item.get("source_id"), "sample_count": item.get("sample_count"),\n            "lookback_window": item.get("lookback_window"), "methodology": item.get("methodology"),\n            "evidence_refs": refs if isinstance(refs, list) else [],
+            "source_id": item.get("source_id"), "sample_count": item.get("sample_count"),
+            "lookback_window": item.get("lookback_window"), "methodology": item.get("methodology"),
+            "evidence_refs": refs if isinstance(refs, list) else [],
             "authentication_status": "not_authenticated",
         }
         left_values = instrument_currency_exposure.get(left, {})
