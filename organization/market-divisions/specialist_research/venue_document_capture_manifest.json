@@ -77,7 +77,8 @@
       "full_document_capture": false,
       "capture_time_precision": "date_only_normalized_to_utc_midnight",
       "captured_at_utc": "2026-11-17T00:00:00Z",
-      "retrieval_method": "official_web_search_excerpt"
+      "retrieval_method": "official_web_search_excerpt",
+      "revision_id": "kraken_mtf_linear_contract_specs:excerpt-20261117"
     },
     {
       "document_id": "coinbase_intx_perpetual_product_specs",
@@ -140,7 +141,8 @@
       "full_document_capture": false,
       "capture_time_precision": "date_only_normalized_to_utc_midnight",
       "captured_at_utc": "2026-11-17T00:00:00Z",
-      "retrieval_method": "official_web_search_excerpt"
+      "retrieval_method": "official_web_search_excerpt",
+      "revision_id": "coinbase_intx_perpetual_product_specs:excerpt-20261117"
     },
     {
       "document_id": "oanda_canada_margin_rates",
@@ -198,7 +200,8 @@
       "full_document_capture": false,
       "capture_time_precision": "date_only_normalized_to_utc_midnight",
       "captured_at_utc": "2026-11-17T00:00:00Z",
-      "retrieval_method": "official_web_search_excerpt"
+      "retrieval_method": "official_web_search_excerpt",
+      "revision_id": "oanda_canada_margin_rates:excerpt-20261117"
     },
     {
       "document_id": "oanda_canada_financing_faq",
@@ -243,7 +246,8 @@
       "full_document_capture": false,
       "capture_time_precision": "date_only_normalized_to_utc_midnight",
       "captured_at_utc": "2026-11-17T00:00:00Z",
-      "retrieval_method": "official_web_search_excerpt"
+      "retrieval_method": "official_web_search_excerpt",
+      "revision_id": "oanda_canada_financing_faq:excerpt-20261117"
     },
     {
       "document_id": "oanda_canada_index_cfd_faq",
@@ -293,7 +297,8 @@
       "full_document_capture": false,
       "capture_time_precision": "date_only_normalized_to_utc_midnight",
       "captured_at_utc": "2026-11-17T00:00:00Z",
-      "retrieval_method": "official_web_search_excerpt"
+      "retrieval_method": "official_web_search_excerpt",
+      "revision_id": "oanda_canada_index_cfd_faq:excerpt-20261117"
     },
     {
       "document_id": "oanda_canada_financing_costs_page",
@@ -344,7 +349,8 @@
       "full_document_capture": false,
       "capture_time_precision": "date_only_normalized_to_utc_midnight",
       "captured_at_utc": "2026-11-17T00:00:00Z",
-      "retrieval_method": "official_web_search_excerpt"
+      "retrieval_method": "official_web_search_excerpt",
+      "revision_id": "oanda_canada_financing_costs_page:excerpt-20261117"
     },
     {
       "document_id": "cme_comex_gold_futures_specs",
@@ -390,7 +396,8 @@
       "full_document_capture": false,
       "capture_time_precision": "date_only_normalized_to_utc_midnight",
       "captured_at_utc": "2026-11-17T00:00:00Z",
-      "retrieval_method": "official_web_search_excerpt"
+      "retrieval_method": "official_web_search_excerpt",
+      "revision_id": "cme_comex_gold_futures_specs:excerpt-20261117"
     },
     {
       "document_id": "cme_equity_index_futures_specs",
@@ -460,7 +467,8 @@
       "full_document_capture": false,
       "capture_time_precision": "date_only_normalized_to_utc_midnight",
       "captured_at_utc": "2026-11-17T00:00:00Z",
-      "retrieval_method": "official_web_search_excerpt"
+      "retrieval_method": "official_web_search_excerpt",
+      "revision_id": "cme_equity_index_futures_specs:excerpt-20261117"
     }
   ],
   "candidate_coverage": [
