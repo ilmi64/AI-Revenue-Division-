@@ -587,6 +587,183 @@
         "current exchange and FCM margin",
         "Canadian FCM eligibility"
       ]
+    },
+    {
+      "candidate_ids": [
+        "oanda_canada_gold_cfd"
+      ],
+      "capture_scope": "official_page_search_excerpt",
+      "full_document_capture": false,
+      "capture_time_precision": "date_only_normalized_to_utc_midnight",
+      "captured_at_utc": "2026-11-17T00:00:00Z",
+      "retrieval_method": "official_web_open_excerpt",
+      "document_id": "oanda_xauusd_instrument_page",
+      "canonical_uri": "https://www.oanda.com/ca-en/trading/instruments/xau-usd/",
+      "title": "XAU/USD Gold Trading",
+      "publisher": "OANDA (Canada) Corporation",
+      "source_class": "official_product_page",
+      "source_ref": "turn733169search3",
+      "content_sha256": "08f9db31de2f79d9d5348f9642716b31647450e41c95a64cee6e19a3026d718c",
+      "revision_id": "oanda_xauusd_instrument_page:excerpt-20261117",
+      "document_text": "OANDA Canada describes XAU/USD as a Gold CFD quoted against USD, measured in troy ounces, where the trader gains or loses from price movements without taking physical ownership. The page describes buying or selling set amounts of gold. This is a CFD, not ownership of allocated bullion. The page does not establish an account-independent contract multiplier or settlement right.",
+      "extracted_facts": [
+        {
+          "fact_key": "instrument_type",
+          "value": "gold_cfd",
+          "unit": "instrument"
+        },
+        {
+          "fact_key": "quote_currency",
+          "value": "USD",
+          "unit": "currency"
+        },
+        {
+          "fact_key": "physical_ownership",
+          "value": false,
+          "unit": "ownership_right"
+        },
+        {
+          "fact_key": "gold_measurement",
+          "value": "troy ounces",
+          "unit": "unit"
+        }
+      ],
+      "known_gaps": [
+        "account-specific contract unit and lot increment",
+        "margin and closeout schedule for the exact account",
+        "financing charges and credits for long and short positions",
+        "Shariah review of CFD structure and financing"
+      ]
+    },
+    {
+      "candidate_ids": [
+        "oanda_canada_gold_cfd"
+      ],
+      "capture_scope": "official_page_search_excerpt",
+      "full_document_capture": false,
+      "capture_time_precision": "date_only_normalized_to_utc_midnight",
+      "captured_at_utc": "2026-11-17T00:00:00Z",
+      "retrieval_method": "official_web_open_excerpt",
+      "document_id": "oanda_canada_trading_hours_and_gap_risk",
+      "canonical_uri": "https://www.oanda.com/ca-en/trading/hours-of-operation/",
+      "title": "OANDA Canada Trading Hours and Market-Close Risk",
+      "publisher": "OANDA (Canada) Corporation",
+      "source_class": "official_help_centre",
+      "source_ref": "turn733169search4",
+      "content_sha256": "2ba139130b64a748d5cc9acd37924ce66157c0447965ca5e2180e25501925c4f",
+      "revision_id": "oanda_canada_trading_hours_and_gap_risk:excerpt-20261117",
+      "document_text": "OANDA Canada lists XAU/USD metal CFD hours in New York time as Sunday-Friday 18:05-16:59. It states that trading hours can change for daylight saving time and holidays; positions cannot be opened or closed while markets are closed; spreads typically widen around market close; prices may gap on reopening; and stop orders can execute at a less advantageous prevailing price. The displayed MT4 lot size for XAU/USD is 100, which is platform-specific and must not be generalized to all accounts.",
+      "extracted_facts": [
+        {
+          "fact_key": "trading_hours_timezone",
+          "value": "America/New_York",
+          "unit": "IANA timezone"
+        },
+        {
+          "fact_key": "trading_hours",
+          "value": "Sunday-Friday 18:05-16:59",
+          "unit": "local exchange time"
+        },
+        {
+          "fact_key": "market_close_spread_widening",
+          "value": true,
+          "unit": "risk_condition"
+        },
+        {
+          "fact_key": "market_reopen_gap_risk",
+          "value": true,
+          "unit": "risk_condition"
+        },
+        {
+          "fact_key": "stop_loss_guaranteed",
+          "value": false,
+          "unit": "execution_guarantee"
+        },
+        {
+          "fact_key": "contract_unit",
+          "value": 100,
+          "unit": "MT4 lot size; platform-specific"
+        }
+      ],
+      "known_gaps": [
+        "holiday calendar and exceptional closures",
+        "exact account platform and contract unit",
+        "spread history around daily close and reopen",
+        "instrument-specific stop execution policy"
+      ]
+    },
+    {
+      "candidate_ids": [
+        "oanda_canada_gold_cfd"
+      ],
+      "capture_scope": "official_page_search_excerpt",
+      "full_document_capture": false,
+      "capture_time_precision": "date_only_normalized_to_utc_midnight",
+      "captured_at_utc": "2026-11-17T00:00:00Z",
+      "retrieval_method": "official_web_open_excerpt",
+      "document_id": "oanda_canada_margin_closeout",
+      "canonical_uri": "https://www.oanda.com/ca-en/trading/calculating-margin/",
+      "title": "OANDA Canada Margin Calculation and Closeout",
+      "publisher": "OANDA (Canada) Corporation",
+      "source_class": "official_help_centre",
+      "source_ref": "turn733169search1",
+      "content_sha256": "5c73ecf28416f8c04f8bbcba01fff30bbebd866d2e91474c310fc3fbee2dffc5",
+      "revision_id": "oanda_canada_margin_closeout:excerpt-20261117",
+      "document_text": "OANDA Canada states that under-margined accounts are subject to automatic margin closeout, with all tradable open positions closed at current rates under its margin rules. Its margin explanation warns that stop-loss orders are not guaranteed and price gaps can cause worse execution. The customer agreement says OANDA may close all open positions and is not required to provide time to respond before a margin closeout when it considers immediate action necessary. This is a legal/operational risk term, not a simulator liquidation formula.",
+      "extracted_facts": [
+        {
+          "fact_key": "margin_closeout_policy",
+          "value": "automatic closeout of all tradable open positions at current rates when under-margined",
+          "unit": "policy"
+        },
+        {
+          "fact_key": "closeout_notice_required",
+          "value": false,
+          "unit": "contractual discretion; see customer agreement"
+        },
+        {
+          "fact_key": "stop_loss_guaranteed",
+          "value": false,
+          "unit": "execution_guarantee"
+        }
+      ],
+      "known_gaps": [
+        "exact account-specific margin closeout threshold and sequence",
+        "current account agreement version and applicable legal entity",
+        "spread and liquidity assumptions during closeout",
+        "negative balance protection interaction and exceptions"
+      ]
+    },
+    {
+      "candidate_ids": [
+        "oanda_canada_gold_cfd"
+      ],
+      "capture_scope": "official_page_search_excerpt",
+      "full_document_capture": false,
+      "capture_time_precision": "date_only_normalized_to_utc_midnight",
+      "captured_at_utc": "2026-11-17T00:00:00Z",
+      "retrieval_method": "official_web_open_excerpt",
+      "document_id": "oanda_canada_cfd_account_eligibility",
+      "canonical_uri": "https://help.oanda.com/ca/en/faqs/trade-cfds-eligibility.htm",
+      "title": "OANDA Canada CFD Account Eligibility FAQ",
+      "publisher": "OANDA (Canada) Corporation",
+      "source_class": "official_help_centre",
+      "source_ref": "turn733169search2",
+      "content_sha256": "df04caa094b4d6ceb4a940b6b6761b8c5eb1b4dfc51d086fc348cefe589c0fd9",
+      "revision_id": "oanda_canada_cfd_account_eligibility:excerpt-20261117",
+      "document_text": "OANDA Canada states that CFDs and precious metals, including gold, are automatically enabled on its account. This general product FAQ does not establish the permissions, restrictions, suitability or account status of a particular customer.",
+      "extracted_facts": [
+        {
+          "fact_key": "gold_cfd_general_account_enablement",
+          "value": "automatically enabled on OANDA Canada accounts",
+          "unit": "general account feature"
+        }
+      ],
+      "known_gaps": [
+        "specific customer account status and restrictions",
+        "product-specific terms for the exact account",
+        "account entity and customer classification"
+      ]
     }
   ],
   "candidate_coverage": [
@@ -623,7 +800,11 @@
       "document_ids": [
         "oanda_canada_margin_rates",
         "oanda_canada_financing_faq",
-        "oanda_canada_financing_costs_page"
+        "oanda_canada_financing_costs_page",
+        "oanda_xauusd_instrument_page",
+        "oanda_canada_trading_hours_and_gap_risk",
+        "oanda_canada_margin_closeout",
+        "oanda_canada_cfd_account_eligibility"
       ]
     },
     {
