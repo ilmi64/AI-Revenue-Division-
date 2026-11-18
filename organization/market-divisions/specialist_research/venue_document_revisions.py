@@ -278,6 +278,96 @@ def assess_profile_revision_impact(profile: Any, latest_revisions: Any) -> dict[
     }
 
 
+
+def assess_document_freshness(revisions: Any, as_of_utc: Any, freshness_policy: Any) -> dict[str, Any]:
+    """Assess capture age only where an explicit per-document TTL is supplied.
+
+    This measures age since local capture, not age since publisher revision.
+    It never invents a universal freshness threshold.
+    """
+    errors: list[str] = []
+    as_of = _utc(as_of_utc)
+    if as_of is None:
+        errors.append("as_of_utc must be UTC ISO-8601 ending Z")
+    if not isinstance(revisions, list):
+        errors.append("revisions must be an array")
+        revisions = []
+    if not isinstance(freshness_policy, list):
+        errors.append("freshness_policy must be an array")
+        freshness_policy = []
+    valid_revisions: dict[str, dict[str, Any]] = {}
+    for index, revision in enumerate(revisions):
+        revision_errors = validate_revision(revision)
+        if revision_errors:
+            errors.extend(f"revisions[{index}]: {error}" for error in revision_errors)
+        elif revision["document_id"] in valid_revisions:
+            errors.append(f"duplicate revision for document_id {revision['document_id']}")
+        else:
+            valid_revisions[revision["document_id"]] = revision
+    policies: dict[str, int] = {}
+    for index, item in enumerate(freshness_policy):
+        if not isinstance(item, dict) or not _nonempty(item.get("document_id")):
+            errors.append(f"freshness_policy[{index}] must include document_id")
+            continue
+        ttl = item.get("max_age_days")
+        if isinstance(ttl, bool) or not isinstance(ttl, (int, float)) or ttl < 0:
+            errors.append(f"freshness_policy[{index}].max_age_days must be a non-negative number")
+            continue
+        if item["document_id"] in policies:
+            errors.append(f"duplicate freshness policy for {item['document_id']}")
+        else:
+            policies[item["document_id"]] = ttl
+    if errors:
+        return {
+            "status": "INVALID_FRESHNESS_INPUT", "errors": errors, "items": [],
+            "human_review_required": True, "trade_authority": False,
+            "live_readiness": False, "authority": AUTHORITY,
+        }
+    items = []
+    for document_id, revision in sorted(valid_revisions.items()):
+        captured = _utc(revision["captured_at_utc"])
+        if captured > as_of:
+            errors.append(f"revision {revision['revision_id']} is captured after as_of_utc")
+            continue
+        ttl = policies.get(document_id)
+        if ttl is None:
+            status, age_days = "NOT_ASSESSED_NO_TTL", (as_of - captured).total_seconds() / 86400
+        else:
+            age_days = (as_of - captured).total_seconds() / 86400
+            status = "STALE" if age_days > ttl else "WITHIN_POLICY"
+        items.append({
+            "document_id": document_id, "revision_id": revision["revision_id"],
+            "captured_at_utc": revision["captured_at_utc"],
+            "age_days": round(age_days, 6), "max_age_days": ttl,
+            "status": status,
+            "review_required": status == "STALE",
+        })
+    if errors:
+        return {
+            "status": "INVALID_FRESHNESS_INPUT", "errors": errors, "items": [],
+            "human_review_required": True, "trade_authority": False,
+            "live_readiness": False, "authority": AUTHORITY,
+        }
+    stale = [item for item in items if item["status"] == "STALE"]
+    unassessed = [item for item in items if item["status"] == "NOT_ASSESSED_NO_TTL"]
+    status = "STALE_EVIDENCE_REVIEW_REQUIRED" if stale else (
+        "NOT_ASSESSED_NO_TTL" if unassessed else "FRESHNESS_WITHIN_POLICY"
+    )
+    return {
+        "status": status, "errors": [], "items": items,
+        "stale_document_ids": [item["document_id"] for item in stale],
+        "unassessed_document_ids": [item["document_id"] for item in unassessed],
+        "human_review_required": bool(stale), "policy_supplied": bool(policies),
+        "freshness_means_capture_age_only": True,
+        "publisher_revision_time_verified": False,
+        "trade_authority": False, "live_readiness": False, "authority": AUTHORITY,
+        "limitations": [
+            "Capture age does not establish when the publisher last changed the document.",
+            "Freshness is assessed only against explicit per-document max_age_days values.",
+            "No universal TTL or publisher timestamp trust is inferred.",
+        ],
+    }
+
 def build_revision_review_queue(comparison_reports: Any, profile_impact_reports: Any = None) -> dict[str, Any]:
     """Build a deterministic, read-only queue for human review of document changes.
 
