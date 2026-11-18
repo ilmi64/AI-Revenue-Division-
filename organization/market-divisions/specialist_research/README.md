@@ -1194,3 +1194,32 @@ Input/output contracts:
 `oanda-closeout-transaction-audit.schema.json`.
 
 Unified intake also rejects OANDA account-margin observations, pending-order evaluation timestamps, or transaction-replay evaluation timestamps later than the unified snapshot's own `now_utc`. This prevents a snapshot from incorporating evidence that was recorded after its declared evaluation time.
+
+
+## OANDA post-closeout account-change reconciliation
+
+The offline adapter in `oanda_post_closeout_account_changes.py` consumes a
+caller-supplied OANDA v20 `GET /v3/accounts/{accountID}/changes` response and
+a subsequent full account snapshot. It reconciles the returned transaction
+cursor, closed margin-closeout trades, linked dependent-order cancellations,
+filled pre-existing orders, newly opened/reduced/closed trades, and changed
+long/short position units against the full snapshot. A newly opened trade or a
+filled pre-existing pending order keeps the audit at HALT for independent OCC
+review. It never connects to OANDA or changes an order or position.
+
+The input contract is defined in
+`oanda-post-closeout-account-changes.schema.json`; synthetic regression
+coverage is in `test_oanda_post_closeout_account_changes.py`. These tests are
+authored but have not been executed. The adapter's PASS is only agreement
+between caller-supplied records; it does not authenticate the broker response,
+prove that the collector retrieved every change, or establish live readiness.
+
+OANDA documents `AccountChanges` as the transaction-driven changes to Orders,
+Trades and Positions since a supplied transaction ID. The response's
+`lastTransactionID` is the cursor to use for subsequent polling. Its
+`positions` array contains changed positions, whereas the full account
+snapshot provides the current account Orders, Trades and Positions. This
+adapter compares changed long/short units with the supplied full snapshot;
+price-dependent NAV, unrealized P/L and margin are outside this transaction
+reconciliation. See the official OANDA v20 Account definitions and Account
+endpoint documentation before preparing a collector payload.
