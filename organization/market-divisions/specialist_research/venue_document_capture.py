@@ -35,6 +35,8 @@ def validate_capture_manifest(manifest: Any) -> list[str]:
         errors.append("capture_date must be an ISO date")
     if manifest.get("capture_time_precision") != "date_only_normalized_to_utc_midnight":
         errors.append("capture time precision must disclose date-only normalization")
+    if manifest.get("captured_at_utc") != f"{capture_date}T00:00:00Z":
+        errors.append("captured_at_utc must match the disclosed date-only UTC-midnight normalization")
     controls = manifest.get("global_controls")
     if not isinstance(controls, dict):
         errors.append("global_controls must be an object")
@@ -66,6 +68,10 @@ def validate_capture_manifest(manifest: Any) -> list[str]:
             seen_docs.add(document_id)
         if capture.get("capture_scope") != "official_page_search_excerpt":
             errors.append(f"{prefix}.capture_scope must disclose official-page excerpt")
+        if capture.get("capture_time_precision") != "date_only_normalized_to_utc_midnight":
+            errors.append(f"{prefix}.capture_time_precision must disclose date-only normalization")
+        if capture.get("captured_at_utc") != manifest.get("captured_at_utc"):
+            errors.append(f"{prefix}.captured_at_utc must match manifest capture date")
         if capture.get("full_document_capture") is not False:
             errors.append(f"{prefix}.full_document_capture must be false")
         if capture.get("retrieval_method") not in {"official_web_search_excerpt", "official_web_open_excerpt"}:
@@ -102,6 +108,19 @@ def validate_capture_manifest(manifest: Any) -> list[str]:
             errors.append(f"{prefix}.document_ids references an uncaptured document")
     if seen_candidates != EXPECTED_CANDIDATES:
         errors.append("candidate_coverage must include all seven catalogue candidates")
+    capture_candidate_map = {
+        capture.get("document_id"): set(capture.get("candidate_ids", []))
+        for capture in captures if isinstance(capture, dict)
+    }
+    for item in coverage:
+        if not isinstance(item, dict):
+            continue
+        candidate_id = item.get("candidate_id")
+        for document_id in item.get("document_ids", []) if isinstance(item.get("document_ids"), list) else []:
+            if candidate_id not in capture_candidate_map.get(document_id, set()):
+                errors.append(
+                    f"candidate_coverage mapping mismatch: {candidate_id} is not linked by capture {document_id}"
+                )
     return errors
 
 
