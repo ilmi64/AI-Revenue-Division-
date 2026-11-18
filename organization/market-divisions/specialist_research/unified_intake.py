@@ -257,6 +257,27 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
         result = build_control_health(
             result, Path(control_health_snapshot_history), Path(control_health_event_ledger)
         )
+    else:
+        result["control_health"] = {
+            "schema_version": "1.0.0",
+            "status": "NOT_PROVIDED",
+            "snapshot_history_integrity": "invalid_or_missing",
+            "event_ledger_integrity": "invalid_or_missing",
+            "cross_ledger_consistency": "inconsistent",
+            "handover_acceptance": "not_provided",
+            "handover_count": 0,
+            "latest_verified_snapshot_id": None,
+            "active_stop_ids": [],
+            "open_incidents": [],
+            "unresolved_critical_items": [],
+            "continuity_gaps": [],
+            "errors": ["persistent OCC audit journals were not supplied to this intake run"],
+            "warnings": [],
+            "authority": "research_only_no_execution_authority",
+            "trade_authority": False,
+            "live_readiness": False,
+            "limitations": ["Control-health audit was not requested; no verified audit status is implied"],
+        }
     return result
 
 
