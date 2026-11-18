@@ -1027,3 +1027,10 @@ instructions or account-specific controls.
 The queue is a prioritization aid, not a risk score, source-authentication mechanism or approval workflow. Invalid comparison/profile-impact input fails closed. An empty queue means only that the supplied reports contain no outstanding items; it does not establish that documents are complete or current. No profile is modified, approved or made eligible for replay. All outputs retain `trade_authority=false` and `live_readiness=false`.
 
 The revision-record schema now accepts either `extraction_method` (manual/synthetic capture) or `retrieval_method` (research manifest capture), while requiring at least one provenance field. Regression coverage includes critical-first ordering, stale-source queueing, invalid-input blocking and the no-authority boundary. Tests are authored and have not yet been executed.
+
+
+### Explicit-policy document capture freshness
+
+`assess_document_freshness` evaluates the age of a captured revision against an explicit per-document `max_age_days` policy and a caller-supplied UTC evaluation time. It reports stale captures for review, distinguishes documents with no TTL as `NOT_ASSESSED_NO_TTL`, and rejects future-dated captures, duplicate policies and invalid/non-finite thresholds. No universal freshness window is assumed.
+
+This measures age since the local capture only; it does not prove when the publisher last changed the document or whether the capture is complete. Stale results can be routed into `build_revision_review_queue` as critical review items. Freshness checks do not approve evidence, update venue profiles or grant simulation/trading eligibility. Regression coverage has been added but has not been executed.
