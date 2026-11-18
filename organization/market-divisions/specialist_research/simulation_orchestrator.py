@@ -83,6 +83,18 @@ def simulate_unified_derivative(
         if isinstance(rate, bool) or not isinstance(rate, (int, float)) or rate != 0:
             errors.append(f"price_path[{index}].funding_rate must be exactly zero; lifecycle ledger owns carry")
 
+    if price_path and isinstance(price_path[-1], dict):
+        path_end = _timestamp(price_path[-1].get("timestamp_utc"))
+        if path_end is not None:
+            for index, event in enumerate(lifecycle_events):
+                if not isinstance(event, dict) or event.get("event_type") == "expiry_settlement":
+                    continue
+                event_time = _timestamp(event.get("timestamp_utc"))
+                if event_time is not None and event_time > path_end:
+                    errors.append(
+                        f"lifecycle_events[{index}] occurs after the price-path horizon"
+                    )
+
     if errors:
         return _blocked("BLOCKED_INPUT_RECONCILIATION", errors)
 
