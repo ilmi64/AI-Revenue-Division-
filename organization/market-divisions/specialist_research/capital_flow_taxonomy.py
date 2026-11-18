@@ -74,6 +74,9 @@ def classify_event(event: dict[str, Any]) -> dict[str, Any]:
         "classification_status": "classified" if category != "unclassified" else "unclassified",
         "materiality_score": materiality if tier != "unknown" else None,
         "materiality_tier": tier,
+        "source_reliability_score": event.get("source_reliability"),
+        "attribution_confidence_score": event.get("attribution_confidence"),
+        "event_confidence_score": event.get("event_confidence"),
         "source_count": source_count,
         "claimed_corroboration_count": claimed,
         "corroboration_assessment": (
