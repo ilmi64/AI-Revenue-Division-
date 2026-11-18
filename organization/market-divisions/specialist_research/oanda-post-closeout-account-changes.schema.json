@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OANDA v20 Post-Closeout Account Changes Replay",
+  "description": "Offline caller-supplied GET /accounts/{accountID}/changes response and subsequent full account snapshot.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "account_id",
+    "since_transaction_id",
+    "changes_response",
+    "post_closeout_account_snapshot",
+    "expected_closeout_trade_ids",
+    "pre_closeout_pending_order_ids",
+    "expected_cancelled_order_ids",
+    "evaluated_at_utc",
+    "changes_observed_at_utc",
+    "account_snapshot_observed_at_utc",
+    "max_snapshot_age_seconds"
+  ],
+  "properties": {
+    "account_id": {"type": "string", "minLength": 1},
+    "since_transaction_id": {"type": "string", "pattern": "^[0-9]+$"},
+    "changes_response": {
+      "type": "object",
+      "required": ["lastTransactionID", "changes"],
+      "properties": {
+        "lastTransactionID": {"type": "string", "pattern": "^[0-9]+$"},
+        "changes": {
+          "type": "object",
+          "required": [
+            "ordersCreated", "ordersCancelled", "ordersFilled", "ordersTriggered",
+            "tradesOpened", "tradesReduced", "tradesClosed", "positions", "transactions"
+          ],
+          "properties": {
+            "ordersCreated": {"type": "array", "items": {"type": "object"}},
+            "ordersCancelled": {"type": "array", "items": {"type": "object"}},
+            "ordersFilled": {"type": "array", "items": {"type": "object"}},
+            "ordersTriggered": {"type": "array", "items": {"type": "object"}},
+            "tradesOpened": {"type": "array", "items": {"type": "object"}},
+            "tradesReduced": {"type": "array", "items": {"type": "object"}},
+            "tradesClosed": {"type": "array", "items": {"type": "object"}},
+            "positions": {"type": "array", "items": {"type": "object"}},
+            "transactions": {"type": "array", "items": {"type": "object"}}
+          }
+        }
+      }
+    },
+    "post_closeout_account_snapshot": {
+      "type": "object",
+      "required": ["lastTransactionID", "account"],
+      "properties": {
+        "lastTransactionID": {"type": "string", "pattern": "^[0-9]+$"},
+        "account": {
+          "type": "object",
+          "required": ["id", "orders", "trades", "positions"],
+          "properties": {
+            "id": {"type": "string", "minLength": 1},
+            "lastTransactionID": {"type": "string", "pattern": "^[0-9]+$"},
+            "orders": {"type": "array", "items": {"type": "object"}},
+            "trades": {"type": "array", "items": {"type": "object"}},
+            "positions": {"type": "array", "items": {"type": "object"}}
+          }
+        }
+      }
+    },
+    "expected_closeout_trade_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "pre_closeout_pending_order_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "expected_cancelled_order_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "evaluated_at_utc": {"type": "string", "format": "date-time", "pattern": "Z$"},
+    "changes_observed_at_utc": {"type": "string", "format": "date-time", "pattern": "Z$"},
+    "account_snapshot_observed_at_utc": {"type": "string", "format": "date-time", "pattern": "Z$"},
+    "max_snapshot_age_seconds": {"type": "number", "exclusiveMinimum": 0}
+  }
+}
