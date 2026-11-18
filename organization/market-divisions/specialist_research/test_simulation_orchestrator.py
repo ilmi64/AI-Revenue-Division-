@@ -1,7 +1,9 @@
 """Synthetic integration tests for the unified simulation orchestrator."""
 import unittest
 
-from specialist_research.simulation_orchestrator import simulate_unified_derivative
+from specialist_research.simulation_orchestrator import (
+    simulate_registered_derivative, simulate_unified_derivative,
+)
 
 
 def venue():
@@ -172,6 +174,30 @@ class SimulationOrchestratorTests(unittest.TestCase):
             }]
         )
         self.assertEqual(result["status"], "BLOCKED_RECONCILIATION")
+
+    def test_registered_simulation_requires_approved_reviewed_profile(self):
+        from specialist_research.test_venue_profile_registry import record, registry
+        result = simulate_registered_derivative(
+            registry(record()), "synthetic-venue", "BTC-PERP",
+            "2026-02-01T00:00:00Z", position(), path(), [],
+        )
+        self.assertEqual(result["status"], "SIMULATED_OK")
+        self.assertEqual(result["registry_profile_revision"], 1)
+        self.assertFalse(result["operational_readiness"])
+        self.assertFalse(result["trade_authority"])
+
+    def test_registered_simulation_blocks_unverified_profile(self):
+        from specialist_research.test_venue_profile_registry import record, registry
+        item = record(
+            profile_state="unverified", verification_state="unverified",
+            review_state="not_reviewed",
+        )
+        result = simulate_registered_derivative(
+            registry(item), "synthetic-venue", "BTC-PERP",
+            "2026-02-01T00:00:00Z", position(), path(), [],
+        )
+        self.assertEqual(result["status"], "BLOCKED_REGISTRY_PROFILE")
+        self.assertFalse(result["live_readiness"])
 
     def test_authority_never_promoted(self):
         result = simulate_unified_derivative(venue(), profile(), position(), path(), [])
