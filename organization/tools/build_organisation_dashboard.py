@@ -280,6 +280,11 @@ def build_occ_control_health_report(snapshot=None):
         gold_audit["status"] = "HALT"
         errors.append("Gold specialist audit is malformed or violates its research-only authority boundary.")
         status = "HALT_AUDIT"
+    elif gold_audit.get("status") == "HALT":
+        errors.append("Gold specialist audit reports a HALT for at least one instrument.")
+        status = "HALT_AUDIT"
+    elif gold_audit.get("status") == "WARN" and status == "PASS_AUDIT":
+        status = "WARN_AUDIT"
     return {
         "status": status,
         "snapshot_id": audit.get("latest_verified_snapshot_id"),
