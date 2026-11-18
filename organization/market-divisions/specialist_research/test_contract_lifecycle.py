@@ -17,6 +17,14 @@ def profile(kind="gold_future"):
     }
 
 
+def successor_profile(contract_code, expiry_utc, profile_id=None):
+    value = profile()
+    value["profile_id"] = profile_id or f"synthetic-gold-{contract_code}"
+    value["contract_code"] = contract_code
+    value["expiry_utc"] = expiry_utc
+    return value
+
+
 def position(**overrides):
     value = {
         "position_id": "pos-1", "instrument_id": "XAU-DEC",
@@ -42,10 +50,33 @@ class ContractLifecycleTests(unittest.TestCase):
             "old_contract_id": "GCZ6", "new_contract_id": "GCG7",
             "old_reference_price": 4200.0, "new_reference_price": 4220.0,
             "cash_adjustment": -5.0, "currency": "USD",
+            "new_contract_profile": successor_profile("GCG7", "2027-02-28T18:30:00Z"),
         }])
         self.assertEqual(result["status"], "LIFECYCLE_REPLAYED")
         self.assertEqual(result["ending_contract_id"], "GCG7")
         self.assertEqual(result["cashflow_total"], -5.0)
+
+    def test_roll_requires_a_valid_successor_contract_profile(self):
+        result = replay_contract_lifecycle(profile(), position(), [{
+            "event_type": "roll", "timestamp_utc": "2026-11-20T15:00:00Z",
+            "old_contract_id": "GCZ6", "new_contract_id": "GCG7",
+            "old_reference_price": 4200.0, "new_reference_price": 4220.0,
+            "cash_adjustment": 0.0, "currency": "USD",
+        }])
+        self.assertEqual(result["status"], "BLOCKED_INVALID_EVENT_SEQUENCE")
+        self.assertTrue(any("new_contract_profile" in item for item in result["errors"]))
+
+    def test_roll_rejects_successor_profile_with_wrong_contract_code(self):
+        next_profile = successor_profile("WRONG", "2027-02-28T18:30:00Z")
+        result = replay_contract_lifecycle(profile(), position(), [{
+            "event_type": "roll", "timestamp_utc": "2026-11-20T15:00:00Z",
+            "old_contract_id": "GCZ6", "new_contract_id": "GCG7",
+            "old_reference_price": 4200.0, "new_reference_price": 4220.0,
+            "cash_adjustment": 0.0, "currency": "USD",
+            "new_contract_profile": next_profile,
+        }])
+        self.assertEqual(result["status"], "BLOCKED_INVALID_EVENT_SEQUENCE")
+        self.assertTrue(any("contract_code" in item for item in result["errors"]))
 
     def test_roll_wrong_old_contract_blocks(self):
         result = replay_contract_lifecycle(profile(), position(), [{
@@ -146,11 +177,13 @@ class ContractLifecycleTests(unittest.TestCase):
             "old_contract_id": "GCZ6", "new_contract_id": "GCG7",
             "old_reference_price": 4200.0, "new_reference_price": 4220.0,
             "cash_adjustment": 0.0, "currency": "USD",
+            "new_contract_profile": successor_profile("GCG7", "2027-02-28T18:30:00Z"),
         }, {
             "event_type": "roll", "timestamp_utc": "2026-11-20T14:00:00Z",
             "old_contract_id": "GCG7", "new_contract_id": "GCH7",
             "old_reference_price": 4220.0, "new_reference_price": 4230.0,
             "cash_adjustment": 0.0, "currency": "USD",
+            "new_contract_profile": successor_profile("GCH7", "2027-03-31T18:30:00Z"),
         }]
         result = replay_contract_lifecycle(profile(), position(), events)
         self.assertEqual(result["status"], "BLOCKED_INVALID_EVENT_SEQUENCE")
