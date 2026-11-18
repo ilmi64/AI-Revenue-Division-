@@ -548,3 +548,49 @@ retains the research-only authority boundary.
 
 Regression coverage is in `test_portfolio_risk.py` and the Main Hub dashboard
 tests. These tests are authored, not yet executed.
+
+
+## Instrument-specific portfolio exposure and stress testing
+
+The unified OCC portfolio risk adapter validates position metadata against an
+explicit instrument-type contract before an aggregate can be assessed:
+Crypto spot/perpetual, Forex spot/CFD, index futures/CFDs, and Gold spot,
+futures/CFDs have distinct valuation-basis requirements. Derivative records
+must supply contract multipliers where applicable; leveraged products must
+supply leverage and margin fields where required. Units, optional delta,
+valuation currency and evidence references are checked. This is metadata
+validation only: the adapter does not reprice contracts, infer broker
+specifications, calculate margin requirements, or derive a position from a
+ticker.
+
+Every assessed portfolio requires explicit versioned OCC risk limits and at
+least one named stress scenario. Scenarios supply shock percentages by asset
+class, with optional instrument-specific overrides. Outputs show P&L and
+loss by valuation currency, leaving uncovered positions explicitly
+incomplete. The simple linear shock model is a first-order research proxy;
+it does not model options convexity, basis, liquidity, gap risk, funding,
+liquidation or margin calls. Missing shock coverage or normalization metadata
+keeps the portfolio UNKNOWN; known limit breaches and specialist stops HALT.
+No default limits or stress assumptions are supplied.
+
+Example risk configuration shape:
+
+```json
+{
+  "schema_version": "1.0.0",
+  "limits": [
+    {"scope": "portfolio", "metric": "gross_exposure",
+     "valuation_currency": "USD", "max_value": 100000}
+  ],
+  "stress_scenarios": [
+    {"scenario_id": "risk_off",
+     "shocks_by_asset_class": {
+       "crypto": -0.20, "forex": 0.03,
+       "indices": -0.12, "gold": 0.08
+     }}
+  ]
+}
+```
+
+All thresholds and shocks are illustrative configuration examples, not
+approved limits or forecasts. The module remains offline and research-only.
