@@ -17,9 +17,11 @@ from typing import Any
 try:
     from .capital_flow_taxonomy import classify_event
     from .capital_flow_provenance import assess_event_provenance
+    from .capital_flow_priority import assess_research_priority
 except ImportError:
     from capital_flow_taxonomy import classify_event
     from capital_flow_provenance import assess_event_provenance
+    from capital_flow_priority import assess_research_priority
 
 GENESIS = "0" * 64
 ALLOWED_HANDOFF_STATES = {"watch", "research", "unverified", "corroborated"}
@@ -304,11 +306,13 @@ def build_handoff(events: list[dict[str, Any]], reviews: list[dict[str, Any]],
             refs = sorted(set(event["evidence_refs"]) | set(decision.get("evidence_refs", [])))
             if not refs:
                 raise HandoffError(f"{event_id}: evidence references missing")
+            provenance = assess_event_provenance(event, now_utc)
             records.append({
                 "event_id": event_id,
                 "event_type": event.get("event_type"),
                 "event_classification": classify_event(event),
-                "evidence_provenance": assess_event_provenance(event, now_utc),
+                "evidence_provenance": provenance,
+                "research_priority": assess_research_priority(event, provenance),
                 "review_status": status,
                 "observed_at_utc": observed_at,
                 "asset_id": event.get("asset_id"),
