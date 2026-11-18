@@ -338,3 +338,21 @@ reviews. The journal is offline and single-writer; it has no identity
 authentication, trusted timestamp, locking, network access or stop/trade
 authority. A hash chain is not a digital signature or tamper-proof storage.
 Tests are authored but have not been executed.
+
+
+### Synthetic end-to-end Capital Flow acceptance tests
+
+`test_capital_flow_end_to_end.py` exercises the review-writer output through
+the independent Crypto handoff adapter using synthetic fixtures only. It
+covers successful research-context attachment, a later challenge blocking an
+otherwise accepted event, Canada source-review failure, exact contract
+mismatch, tampered review-ledger rejection and missing-review rejection.
+
+Run it independently from `organization/market-divisions`:
+
+```sh
+python -m unittest specialist_research.test_capital_flow_end_to_end -v
+```
+
+It is also included automatically by the OCC regression runner's
+`test_*.py` discovery. These tests are authored, not yet executed.
