@@ -36,6 +36,8 @@ def _entry_hash(entry: dict[str, Any]) -> str:
 def verify_review_ledger(entries: list[dict[str, Any]]) -> dict[str, Any]:
     previous = GENESIS
     errors: list[str] = []
+    latest_by_event: dict[str, dict[str, Any]] = {}
+    blocked_by_event: dict[str, str] = {}
     for sequence, entry in enumerate(entries, 1):
         if not isinstance(entry, dict):
             errors.append(f"ledger row {sequence} is not an object")
@@ -79,6 +81,30 @@ def verify_review_ledger(entries: list[dict[str, Any]]) -> dict[str, Any]:
             _parse_utc(entry.get("reviewed_at"), "reviewed_at")
         except HandoffError as exc:
             errors.append(f"ledger row {sequence}: {exc}")
+        event_id = entry.get("event_id")
+        if isinstance(event_id, str) and event_id:
+            prior = latest_by_event.get(event_id)
+            if prior is None and action != "review":
+                errors.append(f"ledger row {sequence} first decision must be review")
+            if prior is not None:
+                old_refs = set(prior.get("evidence_refs", [])) if isinstance(prior.get("evidence_refs"), list) else set()
+                new_refs = set(refs) - old_refs if isinstance(refs, list) else set()
+                if event_id in blocked_by_event:
+                    if action not in {"correct", "reopen"}:
+                        errors.append(f"ledger row {sequence} blocked event requires correct or reopen")
+                    if not new_refs:
+                        errors.append(f"ledger row {sequence} blocked event resolution requires new evidence")
+                    if blocked_by_event[event_id] in {"reject", "expire"} and action == "reopen":
+                        errors.append(f"ledger row {sequence} rejected or expired event cannot reopen")
+                elif action == "reopen":
+                    errors.append(f"ledger row {sequence} reopen requires a prior challenge")
+                if action == "correct" and not new_refs:
+                    errors.append(f"ledger row {sequence} correction requires new evidence")
+            if action in BLOCKING_ACTIONS:
+                blocked_by_event[event_id] = action
+            elif action in {"correct", "reopen"} and event_id in blocked_by_event:
+                blocked_by_event.pop(event_id, None)
+            latest_by_event[event_id] = entry
         previous = entry.get("entry_hash") if isinstance(entry.get("entry_hash"), str) else previous
     return {"valid": not errors, "errors": errors, "entry_count": len(entries), "head_hash": previous}
 
