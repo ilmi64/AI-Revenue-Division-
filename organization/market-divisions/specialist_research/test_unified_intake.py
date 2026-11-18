@@ -444,6 +444,7 @@ class UnifiedIntakeTests(unittest.TestCase):
             "evaluated_at_utc": NOW,
             "max_snapshot_age_seconds": 60,
             "pending_orders_complete": True,
+            "remaining_open_trade_ids": [],
             "closeout_occurred": True,
         }
         result = self.build(oanda_pending_order_snapshot=snapshot)
