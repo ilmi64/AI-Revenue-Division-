@@ -234,10 +234,51 @@ def build_ai_workforce_report(model_registry=None, agent_roles=None, division_re
         "policy":"Model outputs are drafts/reviews only. No model can approve spending, publish, contact third parties, trade, sign, merge or deploy.","errors":errors}
 
 
-def build_dashboard(registry, readiness, dependency_map, operating_framework, opportunities, ledger, work_queue=None, execution_log=None, risk_register=None, decision_register=None, incident_register=None, recovery_plan=None, security_report=None, ai_model_registry=None, ai_agent_roles=None, finance_policy=None, commitment_register=None, evidence_register=None):
+def build_occ_control_health_report(snapshot=None):
+    """Expose an integrated OCC snapshot audit without granting control authority."""
+    if snapshot is None:
+        return {"status": "NOT_PROVIDED", "snapshot_id": None, "global_stop_active": None,
+                "active_stops": [], "audit": None, "errors": [],
+                "warnings": ["No unified OCC snapshot supplied to the Main Hub dashboard."],
+                "trade_authority": False, "live_readiness": False}
+    if not isinstance(snapshot, dict) or snapshot.get("snapshot_type") != "unified_occ_research_intelligence":
+        return {"status": "HALT_AUDIT", "snapshot_id": None, "global_stop_active": None,
+                "active_stops": [], "audit": None,
+                "errors": ["Supplied OCC snapshot is missing or has an unsupported snapshot_type."],
+                "warnings": [], "trade_authority": False, "live_readiness": False}
+    audit = snapshot.get("control_health")
+    if not isinstance(audit, dict):
+        audit = {}
+    status = audit.get("status")
+    errors = list(audit.get("errors", [])) if isinstance(audit.get("errors", []), list) else ["OCC audit errors field is malformed."]
+    warnings = list(audit.get("warnings", [])) if isinstance(audit.get("warnings", []), list) else ["OCC audit warnings field is malformed."]
+    if status not in {"PASS_AUDIT", "WARN_AUDIT", "HALT_AUDIT", "NOT_PROVIDED"}:
+        status = "HALT_AUDIT"
+        errors.append("OCC control-health status is missing or unrecognized.")
+    if audit.get("authority") != "research_only_no_execution_authority" or audit.get("trade_authority") is not False or audit.get("live_readiness") is not False:
+        status = "HALT_AUDIT"
+        errors.append("OCC control-health authority boundary is invalid.")
+    if status == "HALT_AUDIT" and not errors:
+        errors.append("OCC control-health audit is in HALT_AUDIT state.")
+    return {
+        "status": status,
+        "snapshot_id": audit.get("latest_verified_snapshot_id"),
+        "snapshot_status": snapshot.get("status"),
+        "global_stop_active": snapshot.get("global_stop_active"),
+        "active_stops": snapshot.get("active_stops", []) if isinstance(snapshot.get("active_stops", []), list) else [],
+        "audit": audit,
+        "errors": errors,
+        "warnings": warnings,
+        "trade_authority": False,
+        "live_readiness": False,
+    }
+
+
+def build_dashboard(registry, readiness, dependency_map, operating_framework, opportunities, ledger, work_queue=None, execution_log=None, risk_register=None, decision_register=None, incident_register=None, recovery_plan=None, security_report=None, ai_model_registry=None, ai_agent_roles=None, finance_policy=None, commitment_register=None, evidence_register=None, occ_control_health=None):
     errors, warnings = validate(registry, readiness)
     security_report = security_report or build_security_posture_report(Path.cwd())
     ai_workforce_report = build_ai_workforce_report(ai_model_registry, ai_agent_roles, registry)
+    occ_control_health_report = build_occ_control_health_report(occ_control_health)
     dependency_report = build_report(registry, readiness, dependency_map)
     revenue = build_snapshot(opportunities, ledger)
     operating = build_operating_framework_report(registry, operating_framework)
@@ -401,6 +442,7 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
         "evidence_register": evidence_report,
         "technical_recovery": technical_recovery,
         "security_posture": security_report,
+        "occ_control_health": occ_control_health_report,
         "risk_register": {
             "records": risk_records,
             "readiness_and_dependency_warnings": risks,
@@ -427,6 +469,7 @@ def build_dashboard(registry, readiness, dependency_map, operating_framework, op
             "incident_register_errors": incident_errors,
             "evidence_register_errors": evidence_errors,
             "ai_workforce_errors": ai_workforce_report.get("errors", []),
+            "occ_control_health_errors": occ_control_health_report.get("errors", []),
             "revenue_warnings": revenue["data_quality"]["warnings"],
             "note": "Absence of a record is not proof that work or funds do not exist outside these source files."
         }
@@ -452,6 +495,7 @@ def main():
     parser.add_argument("--commitments", type=Path, default=Path("finance/commitment-register.csv"))
     parser.add_argument("--ai-model-registry", type=Path, default=Path("organization/ai-workforce/model-registry.json"))
     parser.add_argument("--ai-agent-roles", type=Path, default=Path("organization/ai-workforce/agent-roles.json"))
+    parser.add_argument("--occ-control-health-snapshot", type=Path)
     args = parser.parse_args()
     report = build_dashboard(
         load_json(args.registry), load_json(args.readiness), load_json(args.dependencies),
@@ -460,10 +504,11 @@ def main():
         load_json(args.risk_register), load_json(args.decision_register), load_json(args.incident_register), load_json(args.recovery_plan),
         ai_model_registry=load_json(args.ai_model_registry), ai_agent_roles=load_json(args.ai_agent_roles),
         evidence_register=load_json(args.evidence_register),
-        finance_policy=load_json(args.finance_policy), commitment_register=read_csv(args.commitments)
+        finance_policy=load_json(args.finance_policy), commitment_register=read_csv(args.commitments),
+        occ_control_health=load_json(args.occ_control_health_snapshot) if args.occ_control_health_snapshot else None
     )
     print(json.dumps(report, indent=2, ensure_ascii=False))
-    return 1 if report["data_quality"]["readiness_validation_errors"] or report["data_quality"]["dependency_map_errors"] or report["data_quality"]["operating_framework_errors"] or report["data_quality"]["work_queue_errors"] or report["data_quality"]["task_dispatch_errors"] or report["data_quality"]["finance_control_errors"] or report["data_quality"]["execution_log_errors"] or report["data_quality"]["cross_division_integration_errors"] or report["data_quality"]["governance_link_errors"] or report["data_quality"]["incident_register_errors"] or report["data_quality"]["evidence_register_errors"] or report["data_quality"]["ai_workforce_errors"] or report["security_posture"]["errors"] else 0
+    return 1 if report["data_quality"]["readiness_validation_errors"] or report["data_quality"]["dependency_map_errors"] or report["data_quality"]["operating_framework_errors"] or report["data_quality"]["work_queue_errors"] or report["data_quality"]["task_dispatch_errors"] or report["data_quality"]["finance_control_errors"] or report["data_quality"]["execution_log_errors"] or report["data_quality"]["cross_division_integration_errors"] or report["data_quality"]["governance_link_errors"] or report["data_quality"]["incident_register_errors"] or report["data_quality"]["evidence_register_errors"] or report["data_quality"]["ai_workforce_errors"] or report["security_posture"]["errors"] or report["data_quality"]["occ_control_health_errors"] else 0
 
 
 if __name__ == "__main__":
