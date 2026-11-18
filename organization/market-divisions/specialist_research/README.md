@@ -460,3 +460,6 @@ COMEX futures and broker CFDs remain distinct instrument bases.
 
 New offline tests are in `test_gold_specialist.py`; engine integration is also
 covered in `test_engines.py`. These tests are authored, not yet executed.
+
+The output contract is specified in
+[`gold-specialist-research.schema.json`](gold-specialist-research.schema.json).
