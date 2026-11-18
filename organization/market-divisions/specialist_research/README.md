@@ -496,3 +496,25 @@ and Gold, Gold context survival through unified intake, Gold audit visibility
 in the Main Hub, and specialist implementation fingerprints. Tests remain
 authored until the local regression runner is executed in an approved
 environment.
+
+
+## Independent stop-clearance evidence assessment
+
+`stop_clearance_review.py` is a read-only assessor for the stop-clearance
+lifecycle. A request must identify a known latched stop and incident, link
+existing `recovery_evidence_added` and `corrective_action_verified` event IDs
+for that same stop/incident, and identify its requestor. Review events must
+come from people other than the requestor and include two distinct reviewer
+identities: one `independent_risk` and one `occ`. Each review records an
+eligible or rejected decision with evidence references and a reason.
+
+Even when both reviewers mark the request eligible, the result is only
+`eligible_for_separate_occ_decision`. The stop remains active; no event or
+module in this workflow clears or downgrades it. Reviewer identity, role,
+evidence authenticity and trusted time are not independently authenticated.
+The control-health report includes this assessment under
+`control_health.stop_clearance_review`, while the global stop remains latched.
+
+The associated regression suite is
+`test_stop_clearance_review.py`; tests are authored and have not yet been
+executed in this environment.
