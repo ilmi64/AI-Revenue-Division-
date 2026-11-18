@@ -234,11 +234,16 @@ def assess_portfolio_risk(
     if not isinstance(configured_scenarios, list):
         scenario_errors.append("stress_scenarios must be an array")
         configured_scenarios = []
+    seen_scenario_ids: set[str] = set()
     for si, scenario in enumerate(configured_scenarios):
         prefix = f"stress_scenarios[{si}]"
         if not isinstance(scenario, dict) or not isinstance(scenario.get("scenario_id"), str) or not scenario.get("scenario_id"):
             scenario_errors.append(f"{prefix} requires scenario_id")
             continue
+        if scenario["scenario_id"] in seen_scenario_ids:
+            scenario_errors.append(f"{prefix}.scenario_id must be unique")
+            continue
+        seen_scenario_ids.add(scenario["scenario_id"])
         shocks = scenario.get("shocks_by_asset_class")
         instrument_shocks = scenario.get("shocks_by_instrument", {})
         if not isinstance(shocks, dict) or not isinstance(instrument_shocks, dict):
@@ -388,7 +393,7 @@ def assess_portfolio_risk(
         "coverage": {"present_desks": sorted(seen_desks), "missing_desks": missing_desks,
                      "missing_risk_desks": sorted(set(missing_risk_desks))},
         "position_count": len(position_rows),
-        "instrument_normalization": {"status": "INPUTS_VALIDATED_NOT_REPRICED" if position_rows and not normalization_unknown else "UNKNOWN", "positions": normalization_rows, "unclassified_position_ids": normalization_unknown},
+        "instrument_normalization": {"status": "INPUTS_VALIDATED_NOT_REPRICED" if position_rows and not normalization_unknown and not any(any(token in error for token in (".instrument_type", ".valuation_basis", ".units", ".contract_multiplier", ".leverage", ".margin_amount", ".delta")) for error in errors) else "UNKNOWN", "positions": normalization_rows, "unclassified_position_ids": normalization_unknown},
         "stress_testing": {"status": "ASSESSED" if scenario_rows and all(x["status"] == "ASSESSED" for x in scenario_rows) else "UNKNOWN", "scenarios": scenario_rows, "errors": scenario_errors},
         "positions": position_rows,
         "desk_exposure": desk_exposure,
