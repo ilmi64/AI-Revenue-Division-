@@ -1,4 +1,5 @@
 import unittest
+from pathlib import Path
 
 from specialist_research.unified_intake import build_unified_intake, validate_handover
 from specialist_research.test_replay import NOW, obs, source_registry
@@ -114,6 +115,12 @@ class UnifiedIntakeTests(unittest.TestCase):
         rows = self.four_desk_rows()
         with self.assertRaisesRegex(ValueError, "must be supplied together"):
             self.build(rows, capital_flow_events=[])
+
+    def test_control_health_is_explicitly_not_provided_without_audit_paths(self):
+        result = self.build()
+        self.assertEqual(result["control_health"]["status"], "NOT_PROVIDED")
+        self.assertFalse(result["trade_authority"])
+        self.assertFalse(result["live_readiness"])
 
     def test_control_health_paths_must_be_supplied_together(self):
         rows = self.four_desk_rows()
