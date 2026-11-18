@@ -116,6 +116,30 @@ class VenueDocumentRevisionTests(unittest.TestCase):
         )
         self.assertEqual(result["status"], "INVALID_PROFILE_REVISION_INPUT")
 
+    def test_new_untracked_document_requires_profile_review(self):
+        linked = revision("2026-01-01T00:00:00Z")
+        extra = revision(
+            "2026-01-02T00:00:00Z", text="new exchange circular",
+            document_id="new-margin-circular",
+        )
+        result = assess_profile_revision_impact(
+            {"source_revision_ids": [{
+                "document_id": "oanda-gold", "revision_id": linked["revision_id"]
+            }]}, [linked, extra]
+        )
+        self.assertEqual(result["status"], "STALE_REVIEW_REQUIRED")
+        self.assertIn("new-margin-circular", result["untracked_latest_document_ids"])
+
+    def test_profile_source_missing_from_latest_capture_is_stale(self):
+        old = revision("2026-01-01T00:00:00Z")
+        result = assess_profile_revision_impact(
+            {"source_revision_ids": [{
+                "document_id": "oanda-gold", "revision_id": old["revision_id"]
+            }]}, []
+        )
+        self.assertEqual(result["status"], "STALE_REVIEW_REQUIRED")
+        self.assertIn("oanda-gold", result["missing_latest_document_ids"])
+
     def test_authority_never_upgraded(self):
         old = revision("2026-01-01T00:00:00Z")
         new = revision("2026-01-02T00:00:00Z", text="new terms")
