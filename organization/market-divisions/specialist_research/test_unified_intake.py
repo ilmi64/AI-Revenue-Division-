@@ -110,6 +110,22 @@ class UnifiedIntakeTests(unittest.TestCase):
         self.assertTrue(any(stop["source"] == "oanda_account_margin" for stop in result["active_stops"]))
         self.assertFalse(result["oanda_account_margin_audit"]["trade_authority"])
 
+    def test_oanda_recovered_margin_call_still_latches_occ_stop(self):
+        account_replay = {
+            "account_currency": "CAD",
+            "initial_positions": [{"position_id": "gold", "desk_id": "gold", "instrument_id": "XAUUSD"}],
+            "observations": [
+                {"timestamp_utc": "2026-11-17T20:45:00Z", "nav_mid": 900, "margin_used": 1000,
+                 "position_market_status": {"gold": "open"}, "trading_day_check": False},
+                {"timestamp_utc": "2026-11-18T14:00:00Z", "nav_mid": 1200, "margin_used": 1000,
+                 "position_market_status": {"gold": "open"}, "trading_day_check": False},
+            ],
+        }
+        result = self.build(oanda_account_margin_replay=account_replay)
+        self.assertEqual(result["oanda_account_margin_audit"]["status"], "HALT")
+        self.assertEqual(result["oanda_account_margin_audit"]["report"]["status"], "MARGIN_CALL_OBSERVED_RECOVERED")
+        self.assertTrue(result["global_stop_active"])
+
     def test_oanda_account_margin_within_requirements_is_pass(self):
         account_replay = {
             "account_currency": "CAD",
