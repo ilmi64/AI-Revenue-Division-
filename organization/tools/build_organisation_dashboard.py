@@ -303,7 +303,12 @@ def build_occ_control_health_report(snapshot=None):
           or oanda_margin_audit.get("status") not in {"NOT_PROVIDED", "PASS", "HALT"}
           or oanda_margin_audit.get("trade_authority") is not False
           or oanda_margin_audit.get("live_readiness") is not False
-          or not isinstance(oanda_margin_audit.get("errors"), list)):
+          or not isinstance(oanda_margin_audit.get("errors"), list)
+          or any(not isinstance(item, str) for item in oanda_margin_audit.get("errors", []))
+          or (oanda_margin_audit.get("status") == "NOT_PROVIDED" and oanda_margin_audit.get("report") is not None)
+          or (oanda_margin_audit.get("status") in {"PASS", "HALT"} and not isinstance(oanda_margin_audit.get("report"), dict))
+          or (oanda_margin_audit.get("status") == "PASS" and oanda_margin_audit.get("report", {}).get("status") != "WITHIN_MARGIN_REQUIREMENTS")
+          or (oanda_margin_audit.get("status") == "HALT" and oanda_margin_audit.get("report", {}).get("status") == "WITHIN_MARGIN_REQUIREMENTS")):
         oanda_margin_audit = dict(oanda_margin_audit) if isinstance(oanda_margin_audit, dict) else {}
         oanda_margin_audit["status"] = "HALT"
         errors.append("OANDA account margin audit is malformed or violates its research-only authority boundary.")
