@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/occ/portfolio-risk-config.schema.json",
+  "title": "OCC Portfolio Risk Limits Configuration",
+  "description": "Explicit versioned OCC-owned risk thresholds. No default limits are supplied.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "limits"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "limits": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["scope", "metric", "valuation_currency", "max_value"],
+        "properties": {
+          "scope": {"type": "string", "pattern": "^(portfolio|desk:(crypto|forex|indices|gold)|group:.+)$"},
+          "metric": {"enum": ["gross_exposure", "absolute_net_exposure"]},
+          "valuation_currency": {"type": "string", "minLength": 1},
+          "max_value": {"type": "number", "minimum": 0}
+        }
+      }
+    }
+  }
+}
