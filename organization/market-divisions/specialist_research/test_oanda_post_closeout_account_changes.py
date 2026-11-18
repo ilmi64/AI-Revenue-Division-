@@ -192,6 +192,21 @@ class OandaPostCloseoutAccountChangesTests(unittest.TestCase):
         }]})
         self.assertEqual(result["status"], "PASS")
 
+    def test_non_object_account_order_fails_closed_without_exception(self):
+        result = base(account={"orders": ["malformed-order"]})
+        self.assertEqual(result["status"], "HALT")
+        self.assertTrue(any("orders[0] must be an object" in item for item in result["errors"]))
+
+    def test_non_object_account_trade_fails_closed_without_exception(self):
+        result = base(account={"trades": [None]})
+        self.assertEqual(result["status"], "HALT")
+        self.assertTrue(any("trades[0] must be an object" in item for item in result["errors"]))
+
+    def test_non_object_account_position_fails_closed_without_exception(self):
+        result = base(account={"positions": [42]})
+        self.assertEqual(result["status"], "HALT")
+        self.assertTrue(any("positions[0] must be an object" in item for item in result["errors"]))
+
     def test_future_snapshot_is_rejected(self):
         result = base(account_snapshot_observed_at_utc="2026-11-18T05:00:11Z")
         self.assertEqual(result["status"], "HALT")
