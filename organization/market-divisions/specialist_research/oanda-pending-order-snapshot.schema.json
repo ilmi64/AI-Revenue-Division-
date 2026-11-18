@@ -12,7 +12,8 @@
     "evaluated_at_utc",
     "max_snapshot_age_seconds",
     "closeout_occurred",
-    "pending_orders_complete"
+    "pending_orders_complete",
+    "remaining_open_trade_ids"
   ],
   "properties": {
     "pending_orders": {
@@ -51,6 +52,14 @@
     },
     "pending_orders_complete": {
       "const": true
+    },
+    "remaining_open_trade_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
     }
   },
   "$defs": {
