@@ -48,7 +48,15 @@ class UnifiedIntakeTests(unittest.TestCase):
             row["portfolio_risk"] = {"positions": [{
                 "position_id": "risk-position-" + str(index),
                 "instrument_id": row["instrument_id"],
-                "asset_class": row["instrument_type"],
+                "asset_class": ["crypto", "forex", "indices", "gold"][index],
+                "instrument_type": row["instrument_type"],
+                "valuation_basis": {
+                    "crypto_spot": "spot_mark_to_market",
+                    "fx_spot": "base_currency_units",
+                    "index_cash": "cash_index_mark_to_market",
+                    "xauusd_spot": "spot_ounces_or_grams",
+                }[row["instrument_type"]],
+                "units": 1.0,
                 "side": "long",
                 "notional": 100.0,
                 "currency": "USD",
@@ -61,6 +69,9 @@ class UnifiedIntakeTests(unittest.TestCase):
         risk_config = {"schema_version": "1.0.0", "limits": [{
             "scope": "portfolio", "metric": "gross_exposure",
             "valuation_currency": "USD", "max_value": 399.0,
+        }], "stress_scenarios": [{
+            "scenario_id": "fixture-risk-off",
+            "shocks_by_asset_class": {"crypto": -0.2, "forex": 0.05, "indices": -0.1, "gold": 0.08},
         }]}
         correlations = [{
             "instrument_id_a": "SOL-USDC", "instrument_id_b": "EUR-USD",
