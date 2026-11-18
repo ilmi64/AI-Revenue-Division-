@@ -217,13 +217,16 @@ def simulate_registered_derivative(
     position: dict[str, Any],
     price_path: list[dict[str, Any]],
     lifecycle_events: list[dict[str, Any]],
+    latest_document_revisions: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Resolve a reviewed, effective registry profile before research replay.
 
     Unverified, unreviewed, rejected, suspended or out-of-date records fail
     closed. A successful resolution still grants no operational readiness.
     """
-    resolution = resolve_profile(registry, venue_id, instrument_id, as_of_utc)
+    resolution = resolve_profile(
+        registry, venue_id, instrument_id, as_of_utc, latest_document_revisions
+    )
     if not resolution.get("research_eligible"):
         errors = list(resolution.get("errors", []))
         if not errors:
