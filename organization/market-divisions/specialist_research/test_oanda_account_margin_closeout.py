@@ -76,6 +76,12 @@ class OandaMarginStateTests(unittest.TestCase):
         self.assertFalse(result["margin_call"])
         self.assertFalse(result["early_closeout_triggered"])
 
+    def test_extreme_margin_percentage_does_not_emit_infinity(self):
+        result = assess_oanda_margin_state(1e-308, 1e308)
+        self.assertTrue(result["early_closeout_triggered"])
+        self.assertIsNone(result["margin_closeout_percentage"])
+        self.assertTrue(result["margin_closeout_percentage_unbounded"])
+
     def test_boolean_amount_rejected(self):
         self.assertEqual(assess_oanda_margin_state(True, 100)["status"], "INVALID_MARGIN_INPUT")
 
@@ -204,6 +210,14 @@ class OandaAccountCloseoutReplayTests(unittest.TestCase):
         event = observation(17)
         del event["position_market_status"]["index-spx"]
         result = replay_oanda_account_margin_closeout("CAD", positions(), [event])
+        self.assertEqual(result["status"], "BLOCKED_INVALID_OR_INCOMPLETE_INPUT")
+
+    def test_invalid_position_metadata_blocks(self):
+        items = [{"position_id": "gold", "desk_id": {"not": "text"}, "instrument_id": "XAUUSD"}]
+        result = replay_oanda_account_margin_closeout("CAD", items, [{
+            "timestamp_utc": "2026-11-17T20:45:00Z", "nav_mid": 1000, "margin_used": 900,
+            "position_market_status": {"gold": "open"}, "trading_day_check": False,
+        }])
         self.assertEqual(result["status"], "BLOCKED_INVALID_OR_INCOMPLETE_INPUT")
 
     def test_duplicate_position_ids_block(self):
