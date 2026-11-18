@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
-from build_organisation_dashboard import build_dashboard
+from build_organisation_dashboard import build_dashboard, build_occ_control_health_report
 
 
 class OrganisationDashboardTests(unittest.TestCase):
@@ -24,6 +24,45 @@ class OrganisationDashboardTests(unittest.TestCase):
             risk_register, decision_register, incident_register,
             recovery_plan if recovery_plan is not None else json.loads((Path(__file__).resolve().parents[1] / "recovery-plan.json").read_text(encoding="utf-8"))
         )
+
+    def test_dashboard_exposes_not_provided_occ_control_health(self):
+        report = self.build()
+        self.assertEqual(report["occ_control_health"]["status"], "NOT_PROVIDED")
+        self.assertFalse(report["occ_control_health"]["trade_authority"])
+        self.assertFalse(report["occ_control_health"]["live_readiness"])
+
+    def test_dashboard_propagates_occ_audit_halt_and_stop_state(self):
+        snapshot = {
+            "snapshot_type": "unified_occ_research_intelligence",
+            "status": "halt",
+            "global_stop_active": True,
+            "active_stops": [{"stop_id": "stop-fixture"}],
+            "control_health": {
+                "status": "HALT_AUDIT",
+                "latest_verified_snapshot_id": "occ-fixture",
+                "errors": ["Synthetic ledger mismatch"],
+                "warnings": [],
+                "authority": "research_only_no_execution_authority",
+                "trade_authority": False,
+                "live_readiness": False,
+            },
+        }
+        report = build_occ_control_health_report(snapshot)
+        self.assertEqual(report["status"], "HALT_AUDIT")
+        self.assertTrue(report["global_stop_active"])
+        self.assertEqual(report["active_stops"][0]["stop_id"], "stop-fixture")
+        self.assertFalse(report["trade_authority"])
+        self.assertFalse(report["live_readiness"])
+
+    def test_dashboard_rejects_invalid_occ_authority(self):
+        snapshot = {
+            "snapshot_type": "unified_occ_research_intelligence",
+            "control_health": {
+                "status": "PASS_AUDIT", "errors": [], "warnings": [],
+                "authority": "execution", "trade_authority": True, "live_readiness": False,
+            },
+        }
+        self.assertEqual(build_occ_control_health_report(snapshot)["status"], "HALT_AUDIT")
 
     def test_dashboard_covers_all_divisions_and_never_promotes_readiness(self):
         report = self.build()
