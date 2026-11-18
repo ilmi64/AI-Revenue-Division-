@@ -404,3 +404,18 @@ unverified: multiple source IDs do not establish independent ownership,
 collection or provenance. The unified OCC audit carries the classifications
 alongside accepted event IDs so the Crypto desk can inspect the context without
 converting it into a market observation or execution instruction.
+
+
+## Capital Flow evidence provenance
+
+`capital_flow_provenance.py` annotates each accepted research event with
+per-reference publisher identity, canonical source identity, source family,
+publisher-claimed publication timestamp and a declared independence group.
+Missing, malformed, duplicate, unmapped or future-dated metadata is reported
+as incomplete. It does not silently upgrade the event's evidence confidence.
+
+A metadata-complete result is still explicitly unverified. Publisher names,
+canonical source IDs, timestamps and independence groups are supplied claims;
+the adapter does not authenticate the referenced content, verify ownership,
+or establish that two publishers are operationally independent. The unified
+OCC audit carries this provenance assessment beside event classification.
