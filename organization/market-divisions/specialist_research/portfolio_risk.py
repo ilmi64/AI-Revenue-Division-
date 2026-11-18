@@ -44,6 +44,7 @@ def assess_portfolio_risk(
     now_utc: str,
     risk_config: dict[str, Any] | None = None,
     correlation_evidence: list[dict[str, Any]] | None = None,
+    stress_scenarios: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Aggregate comparable exposure and fail closed on missing/invalid inputs.
 
@@ -66,6 +67,8 @@ def assess_portfolio_risk(
         warnings.append("missing specialist risk coverage: " + ", ".join(missing_desks))
 
     position_rows: list[dict[str, Any]] = []
+    normalization_rows: list[dict[str, Any]] = []
+    normalization_unknown: list[str] = []
     seen_positions: set[str] = set()
     desk_exposure: dict[str, dict[str, Any]] = {
         desk: {"by_valuation_currency": {}, "position_count": 0} for desk in DESKS
@@ -125,6 +128,55 @@ def assess_portfolio_risk(
                 errors.append(f"{prefix}.exposure_group missing")
             if not isinstance(refs, list) or not refs or any(not isinstance(x, str) or not x.strip() for x in refs):
                 errors.append(f"{prefix}.evidence_refs must be a non-empty string array")
+            instrument_type = position.get("instrument_type")
+            valuation_basis = position.get("valuation_basis")
+            units = _number(position.get("units"), f"{prefix}.units", errors, minimum=0.0)
+            contract_multiplier = position.get("contract_multiplier")
+            leverage = position.get("leverage")
+            margin_amount = position.get("margin_amount")
+            delta = position.get("delta")
+            requirements = {
+                "crypto_spot": ("spot_mark_to_market", False, False, False),
+                "crypto_perpetual": ("mark_to_market_notional", False, True, True),
+                "forex_spot": ("base_currency_units", False, False, False),
+                "forex_cfd": ("broker_contract_notional", True, True, True),
+                "index_future": ("futures_contract_notional", True, False, True),
+                "index_cfd": ("broker_contract_notional", True, True, True),
+                "gold_spot": ("spot_ounces_or_grams", False, False, False),
+                "gold_future": ("futures_contract_notional", True, False, True),
+                "gold_cfd": ("broker_contract_notional", True, True, True),
+            }
+            if instrument_type not in requirements:
+                normalization_unknown.append(prefix)
+                errors.append(f"{prefix}.instrument_type missing or unsupported")
+            else:
+                expected_basis, needs_multiplier, needs_leverage, needs_margin = requirements[instrument_type]
+                if valuation_basis != expected_basis:
+                    errors.append(f"{prefix}.valuation_basis must be {expected_basis} for {instrument_type}")
+                if needs_multiplier:
+                    multiplier = _number(contract_multiplier, f"{prefix}.contract_multiplier", errors, minimum=0.000000001)
+                else:
+                    multiplier = None
+                if needs_leverage:
+                    lev = _number(leverage, f"{prefix}.leverage", errors, minimum=1.0)
+                else:
+                    lev = None
+                if needs_margin:
+                    margin = _number(margin_amount, f"{prefix}.margin_amount", errors, minimum=0.0)
+                else:
+                    margin = None
+                if isinstance(delta, bool) or (delta is not None and
+                    (not isinstance(delta, (int, float)) or not isfinite(float(delta)) or abs(float(delta)) > 1)):
+                    errors.append(f"{prefix}.delta must be omitted or finite within [-1, 1]")
+                normalization_rows.append({
+                    "position_id": pid, "instrument_type": instrument_type,
+                    "valuation_basis": valuation_basis, "units": units,
+                    "contract_multiplier": multiplier, "leverage": lev,
+                    "margin_amount": margin,
+                    "delta": float(delta) if delta is not None else None,
+                    "normalization_status": "INPUTS_VALIDATED_NOT_REPRICED",
+                    "note": "Valuation amount remains caller-supplied; no contract pricing or margin model is inferred."
+                })
             timestamp = _utc(position.get("source_timestamp_utc"), f"{prefix}.source_timestamp_utc", errors)
             if timestamp and now and timestamp > now:
                 errors.append(f"{prefix}.source_timestamp_utc is in the future")
@@ -167,6 +219,48 @@ def assess_portfolio_risk(
             continue
     if missing_risk_desks:
         warnings.append("portfolio exposure records missing for desk(s): " + ", ".join(sorted(set(missing_risk_desks))))
+
+    # Scenario shocks are explicit OCC research assumptions, never inferred defaults.
+    scenario_rows: list[dict[str, Any]] = []
+    scenario_errors: list[str] = []
+    configured_scenarios = stress_scenarios
+    if configured_scenarios is None and isinstance(risk_config, dict):
+        configured_scenarios = risk_config.get("stress_scenarios")
+    if configured_scenarios is None:
+        configured_scenarios = []
+    if not isinstance(configured_scenarios, list):
+        scenario_errors.append("stress_scenarios must be an array")
+        configured_scenarios = []
+    for si, scenario in enumerate(configured_scenarios):
+        prefix = f"stress_scenarios[{si}]"
+        if not isinstance(scenario, dict) or not isinstance(scenario.get("scenario_id"), str) or not scenario.get("scenario_id"):
+            scenario_errors.append(f"{prefix} requires scenario_id")
+            continue
+        shocks = scenario.get("shocks_by_asset_class")
+        instrument_shocks = scenario.get("shocks_by_instrument", {})
+        if not isinstance(shocks, dict) or not isinstance(instrument_shocks, dict):
+            scenario_errors.append(f"{prefix} requires shock maps")
+            continue
+        currency_results: dict[str, dict[str, float]] = {}
+        uncovered: list[str] = []
+        for row in position_rows:
+            shock = instrument_shocks.get(row["instrument_id"], shocks.get(row["asset_class"]))
+            if isinstance(shock, bool) or not isinstance(shock, (int, float)) or not isfinite(float(shock)) or not -1 <= float(shock) <= 1:
+                uncovered.append(row["position_id"])
+                continue
+            pnl = row["signed_valuation_amount"] * float(shock)
+            currency = row["valuation_currency"]
+            bucket = currency_results.setdefault(currency, {"pnl": 0.0, "loss": 0.0})
+            bucket["pnl"] += pnl
+            bucket["loss"] += max(0.0, -pnl)
+        scenario_rows.append({
+            "scenario_id": scenario["scenario_id"],
+            "status": "ASSESSED" if not uncovered else "INCOMPLETE",
+            "by_valuation_currency": currency_results,
+            "uncovered_position_ids": uncovered,
+            "assumptions": "Linear first-order shock on supplied signed valuation exposure; excludes convexity, basis, liquidity, gap, funding and margin-call effects."
+        })
+    errors.extend(scenario_errors)
 
     # Correlation is reported only from explicitly supplied, timestamped evidence.
     correlations = []
@@ -277,7 +371,7 @@ def assess_portfolio_risk(
     stop_active = bool(stop_sources)
     if errors or stop_active:
         status = "HALT"
-    elif missing_desks or missing_risk_desks or config_status != "VALID" or any(x["status"] == "UNKNOWN" for x in limit_results):
+    elif missing_desks or missing_risk_desks or normalization_unknown or config_status != "VALID" or any(x["status"] == "UNKNOWN" for x in limit_results) or any(x["status"] != "ASSESSED" for x in scenario_rows):
         status = "UNKNOWN"
     elif any(x["status"] == "BREACH" for x in limit_results):
         status = "HALT"
@@ -293,6 +387,8 @@ def assess_portfolio_risk(
         "coverage": {"present_desks": sorted(seen_desks), "missing_desks": missing_desks,
                      "missing_risk_desks": sorted(set(missing_risk_desks))},
         "position_count": len(position_rows),
+        "instrument_normalization": {"status": "INPUTS_VALIDATED_NOT_REPRICED" if position_rows and not normalization_unknown else "UNKNOWN", "positions": normalization_rows, "unclassified_position_ids": normalization_unknown},
+        "stress_testing": {"status": "ASSESSED" if scenario_rows and all(x["status"] == "ASSESSED" for x in scenario_rows) else "UNKNOWN", "scenarios": scenario_rows, "errors": scenario_errors},
         "positions": position_rows,
         "desk_exposure": desk_exposure,
         "exposure_by_valuation_currency": currency_totals,
