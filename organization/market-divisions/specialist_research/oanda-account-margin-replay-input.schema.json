@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OANDA Canada Account Margin Replay Input",
+  "description": "Caller-supplied historical account NAV, Margin Used and position market availability for offline OANDA v20/v20 MT4 margin-rule replay. No account API or execution authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "account_currency",
+    "initial_positions",
+    "observations"
+  ],
+  "properties": {
+    "account_currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$"
+    },
+    "initial_positions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "position_id"
+        ],
+        "properties": {
+          "position_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "desk_id": {
+            "type": "string"
+          },
+          "instrument_id": {
+            "type": "string"
+          },
+          "market_status": {
+            "enum": [
+              "open",
+              "closed",
+              "halted"
+            ],
+            "default": "open"
+          }
+        }
+      }
+    },
+    "observations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "timestamp_utc",
+          "nav_mid",
+          "margin_used",
+          "position_market_status"
+        ],
+        "properties": {
+          "timestamp_utc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "nav_mid": {
+            "type": "number",
+            "minimum": 0
+          },
+          "margin_used": {
+            "type": "number",
+            "minimum": 0
+          },
+          "position_market_status": {
+            "type": "object",
+            "additionalProperties": {
+              "enum": [
+                "open",
+                "closed",
+                "halted"
+              ]
+            }
+          },
+          "trading_day_check": {
+            "type": "boolean",
+            "default": false
+          },
+          "trading_day_sequence": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "trading_calendar_status": {
+            "enum": [
+              "verified",
+              "unknown"
+            ]
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "trading_day_check": {
+                  "const": true
+                }
+              },
+              "required": [
+                "trading_day_check"
+              ]
+            },
+            "then": {
+              "required": [
+                "trading_day_sequence",
+                "trading_calendar_status"
+              ],
+              "properties": {
+                "trading_calendar_status": {
+                  "const": "verified"
+                }
+              }
+            },
+            "else": {
+              "not": {
+                "required": [
+                  "trading_day_sequence"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}
