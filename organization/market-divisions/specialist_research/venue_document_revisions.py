@@ -166,8 +166,11 @@ def compare_document_revisions(previous: Any, current: Any) -> dict[str, Any]:
     changes = []
     for key in sorted(set(old) | set(new)):
         old_values, new_values = old.get(key, []), new.get(key, [])
-        old_unique = {_canonical(item) for item in old_values}
-        new_unique = {_canonical(item) for item in new_values}
+        # Source locators are provenance metadata, not part of a fact's
+        # semantic value. A page-layout change must not look like a changed
+        # contract term when value and unit remain identical.
+        old_unique = {_canonical({"value": item["value"], "unit": item.get("unit")}) for item in old_values}
+        new_unique = {_canonical({"value": item["value"], "unit": item.get("unit")}) for item in new_values}
         if len(old_unique) > 1 or len(new_unique) > 1:
             status = "CONFLICTED"
         elif not old_values:
