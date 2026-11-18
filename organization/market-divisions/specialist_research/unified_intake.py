@@ -234,6 +234,56 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
         "live_readiness": False,
     }
 
+    gold_specialist_packets = []
+    for packet in packets:
+        if not isinstance(packet, dict) or packet.get("desk_id") != "gold":
+            continue
+        context = packet.get("context", {})
+        specialist = context.get("gold_specialist_research") if isinstance(context, dict) else None
+        if not isinstance(specialist, dict):
+            gold_specialist_packets.append({
+                "instrument_id": packet.get("instrument_id"),
+                "status": "NOT_PROVIDED",
+                "macro_factor_count": 0,
+                "macro_factor_coverage": {},
+                "errors": [],
+                "warnings": ["Structured Gold specialist context was not supplied."],
+                "trade_authority": False,
+                "live_readiness": False,
+            })
+            continue
+        if (specialist.get("trade_authority") is not False
+                or specialist.get("live_readiness") is not False
+                or specialist.get("authority") != "research_only_no_execution_authority"):
+            packet_errors.append({
+                "instrument_id": str(packet.get("instrument_id")),
+                "errors": ["Gold specialist context violates research-only authority boundary"],
+            })
+        gold_specialist_packets.append({
+            "instrument_id": packet.get("instrument_id"),
+            "status": specialist.get("status", "halt"),
+            "price_basis": specialist.get("price_basis"),
+            "macro_factor_count": specialist.get("macro_factor_count", 0),
+            "macro_factor_coverage": specialist.get("macro_factor_coverage", {}),
+            "source_independence_verified": specialist.get("source_independence_verified", False),
+            "errors": specialist.get("errors", []),
+            "warnings": specialist.get("warnings", []),
+            "trade_authority": False,
+            "live_readiness": False,
+        })
+    gold_statuses = [item["status"] for item in gold_specialist_packets]
+    gold_specialist_audit = {
+        "status": ("NOT_PROVIDED" if not gold_specialist_packets
+                   or all(item["status"] == "NOT_PROVIDED" for item in gold_specialist_packets)
+                   else "HALT" if any(item["status"] == "halt" for item in gold_specialist_packets)
+                   else "WARN" if any(item["status"] == "unverified" for item in gold_specialist_packets)
+                   else "PASS"),
+        "instrument_count": len(gold_specialist_packets),
+        "instruments": gold_specialist_packets,
+        "trade_authority": False,
+        "live_readiness": False,
+    }
+
     missing_desks = [desk for desk, count in desk_coverage.items() if count == 0]
     if require_full_coverage and missing_desks:
         packet_errors.append({"instrument_id": "coverage", "errors": [
@@ -277,6 +327,7 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
         "coverage_complete": coverage_complete,
         "specialist_packets": packets,
         "capital_flow_audit": capital_flow_audit,
+        "gold_specialist_audit": gold_specialist_audit,
         "capital_flow_context": replay_result.get("capital_flow_handoff", {
             "status": "not_consumed", "accepted_event_count": 0, "trade_authority": False,
         }),
@@ -304,6 +355,7 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
             "A prior global stop remains active; this intake has no authority to clear it",
             "Day/night handover requires explicit acknowledgements and position reconciliation",
             "Capital Flow is research context only and is attached only by the separate exact-identity adapter",
+            "Gold macro and instrument context is descriptive research only and is not independently authenticated",
             "Missing desk coverage is visible and prevents a fully covered research status",
         ],
     }
