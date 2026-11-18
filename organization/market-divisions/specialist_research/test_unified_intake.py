@@ -158,6 +158,64 @@ class UnifiedIntakeTests(unittest.TestCase):
         self.assertTrue(any(stop["reason"] == "POST_CLOSEOUT_PENDING_ORDER_RECONCILIATION_MISSING"
                             for stop in result["active_stops"]))
 
+    def test_oanda_closeout_transaction_reconciliation_passes_through_unified_intake(self):
+        result = self.build(
+            oanda_pending_order_snapshot=self.oanda_pending_snapshot(),
+            oanda_closeout_transaction_replay=self.oanda_closeout_transaction_replay(),
+        )
+        audit = result["oanda_closeout_transaction_audit"]
+        self.assertEqual(audit["status"], "PASS")
+        self.assertEqual(audit["report"]["orders_confirmed_cancelled"][0]["order_id"], "sl-gold")
+        self.assertFalse(audit["trade_authority"])
+        self.assertFalse(result["trade_authority"])
+
+    def test_oanda_closeout_transaction_snapshot_mismatch_escalates_occ(self):
+        result = self.build(
+            oanda_pending_order_snapshot=self.oanda_pending_snapshot([{
+                "id": "new-entry", "state": "PENDING", "type": "STOP",
+                "instrument": "XAU_USD", "units": "1", "positionFill": "OPEN_ONLY",
+            }]),
+            oanda_closeout_transaction_replay=self.oanda_closeout_transaction_replay(),
+        )
+        self.assertEqual(result["oanda_closeout_transaction_audit"]["status"], "HALT")
+        self.assertTrue(result["global_stop_active"])
+        self.assertTrue(any("snapshot differs" in error for error in result["oanda_closeout_transaction_audit"]["errors"]))
+
+    def test_margin_closeout_requires_transaction_history_reconciliation(self):
+        account_replay = {
+            "account_currency": "CAD",
+            "initial_positions": [{"position_id": "gold", "desk_id": "gold", "instrument_id": "XAUUSD"}],
+            "observations": [{
+                "timestamp_utc": "2026-11-17T20:45:00Z", "nav_mid": 400, "margin_used": 1000,
+                "position_market_status": {"gold": "open"}, "trading_day_check": False,
+            }],
+        }
+        result = self.build(
+            oanda_account_margin_replay=account_replay,
+            oanda_pending_order_snapshot=self.oanda_pending_snapshot(),
+        )
+        self.assertEqual(result["oanda_closeout_transaction_audit"]["status"], "HALT")
+        self.assertTrue(any(stop["reason"] == "POST_CLOSEOUT_TRANSACTION_RECONCILIATION_MISSING"
+                            for stop in result["active_stops"]))
+
+    def test_margin_closeout_transaction_pass_does_not_clear_margin_stop(self):
+        account_replay = {
+            "account_currency": "CAD",
+            "initial_positions": [{"position_id": "gold", "desk_id": "gold", "instrument_id": "XAUUSD"}],
+            "observations": [{
+                "timestamp_utc": "2026-11-17T20:45:00Z", "nav_mid": 400, "margin_used": 1000,
+                "position_market_status": {"gold": "open"}, "trading_day_check": False,
+            }],
+        }
+        result = self.build(
+            oanda_account_margin_replay=account_replay,
+            oanda_pending_order_snapshot=self.oanda_pending_snapshot(),
+            oanda_closeout_transaction_replay=self.oanda_closeout_transaction_replay(),
+        )
+        self.assertEqual(result["oanda_closeout_transaction_audit"]["status"], "PASS")
+        self.assertTrue(result["global_stop_active"])
+        self.assertEqual(result["status"], "halt")
+
     def test_oanda_recovered_margin_call_still_latches_occ_stop(self):
         account_replay = {
             "account_currency": "CAD",
