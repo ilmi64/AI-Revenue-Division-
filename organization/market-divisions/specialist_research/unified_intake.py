@@ -347,9 +347,9 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
     active_stops = sorted(active_stops, key=lambda item: (item["source"], item["instrument_id"], item["reason"]))
     coverage_complete = not missing_desks
     replay_failed = replay_result.get("status") == "halt" or replay_result.get("evidence_gate", {}).get("status") != "PASS_RESEARCH_GATES"
-    if active_stops or replay_failed or packet_errors:
+    if active_stops or replay_failed or packet_errors or portfolio_risk_audit["status"] == "HALT":
         status = "halt"
-    elif not coverage_complete or any(p.get("status") == "unverified" for p in packets):
+    elif (not coverage_complete or any(p.get("status") == "unverified" for p in packets)\n          or portfolio_risk_audit["status"] == "UNKNOWN"):
         status = "unverified"
     else:
         status = "research"
