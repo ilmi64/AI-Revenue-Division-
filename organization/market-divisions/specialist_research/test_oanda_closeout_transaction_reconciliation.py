@@ -97,7 +97,7 @@ class OandaCloseoutTransactionReconciliationTests(unittest.TestCase):
                 "id": "103", "accountID": "acct-1", "time": "2026-11-18T05:00:05Z",
                 "type": "MARGIN_CALL_EXIT",
             }],
-            transaction_id_end_inclusive="103", reported_last_transaction_id="103",,
+            transaction_id_end_inclusive="103", reported_last_transaction_id="103",
             evaluated_at_utc="2026-11-18T05:00:06Z",
         )
         self.assertEqual(result["status"], "PASS")
