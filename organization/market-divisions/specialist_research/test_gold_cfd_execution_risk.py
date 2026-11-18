@@ -38,6 +38,10 @@ class GoldCFDExecutionRiskTests(unittest.TestCase):
         self.assertFalse(result["scheduled_open_by_weekly_hours"])
         self.assertEqual(result["status"], "CLOSED_BY_CALLER_REPORTED_EXCEPTION")
 
+    def test_unhashable_holiday_status_fails_closed(self):
+        result = assess_xauusd_weekly_session("2026-11-17T15:00:00Z", [])
+        self.assertEqual(result["status"], "INVALID_SESSION_INPUT")
+
     def test_invalid_session_timestamp_fails_closed(self):
         result = assess_xauusd_weekly_session("2026-11-17T15:00:00")
         self.assertEqual(result["status"], "INVALID_SESSION_INPUT")
