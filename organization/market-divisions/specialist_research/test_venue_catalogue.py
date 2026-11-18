@@ -53,6 +53,22 @@ class VenueCatalogueTests(unittest.TestCase):
         item["jurisdiction"]["eligibility_status"] = "APPROVED"
         self.assertTrue(any("eligibility" in error for error in validate_catalogue(item)))
 
+    def test_kraken_canadian_derivatives_restriction_is_enforced(self):
+        report = build_catalogue_report(self.catalogue)
+        item = next(x for x in report["candidates"] if x["candidate_id"] == "kraken_mtf_crypto_linear_derivatives")
+        self.assertEqual(item["canadian_shortlist_status"], "EXCLUDE_CANADIAN_DERIVATIVES")
+        altered = json.loads(json.dumps(self.catalogue))
+        altered["candidates"][0]["jurisdiction_status"] = "UNVERIFIED_FOR_CANADA_ON"
+        self.assertTrue(any("Kraken's published Canadian derivatives restriction" in e for e in validate_catalogue(altered)))
+
+    def test_coinbase_intx_is_institutional_only_and_unconfirmed(self):
+        report = build_catalogue_report(self.catalogue)
+        item = next(x for x in report["candidates"] if x["candidate_id"] == "coinbase_intx_crypto_perpetuals")
+        self.assertEqual(item["canadian_shortlist_status"], "INSTITUTIONAL_JURISDICTION_UNCONFIRMED")
+        altered = json.loads(json.dumps(self.catalogue))
+        altered["candidates"][1]["jurisdiction_status"] = "APPROVED_FOR_CANADA"
+        self.assertTrue(any("Coinbase International Exchange's institutional-only" in e for e in validate_catalogue(altered)))
+
     def test_trade_authority_cannot_be_enabled(self):
         item = json.loads(json.dumps(self.catalogue))
         item["global_controls"]["trade_authority"] = True
