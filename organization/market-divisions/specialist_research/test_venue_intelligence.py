@@ -71,6 +71,12 @@ class VenueIntelligenceTests(unittest.TestCase):
         result = assess_evidence_bundle(item, "2026-01-03T00:00:00Z")
         self.assertEqual(result["status"], "INVALID_EVIDENCE_BUNDLE")
 
+    def test_missing_publication_date_is_unknown_not_malformed(self):
+        item = bundle()
+        item["sources"][0]["published_at_utc"] = None
+        result = assess_evidence_bundle(item, "2026-01-03T00:00:00Z")
+        self.assertEqual(result["status"], "EVIDENCE_COVERAGE_COMPLETE_UNVERIFIED")
+
     def test_bad_source_digest_invalidates_bundle(self):
         item = bundle()
         item["sources"][0]["content_sha256"] = "not-a-hash"
