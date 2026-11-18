@@ -443,6 +443,7 @@ class UnifiedIntakeTests(unittest.TestCase):
             "source_timestamp_utc": NOW,
             "evaluated_at_utc": NOW,
             "max_snapshot_age_seconds": 60,
+            "pending_orders_complete": True,
             "closeout_occurred": True,
         }
         result = self.build(oanda_pending_order_snapshot=snapshot)
