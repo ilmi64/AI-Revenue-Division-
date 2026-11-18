@@ -244,13 +244,15 @@ def assess_oanda_post_closeout_account_changes(
 
     for instrument_position in arrays["positions"]:
         instrument = instrument_position.get("instrument")
-        if not isinstance(instrument, str) or instrument not in position_map:
-            errors.append("changed position instrument is missing from the full account snapshot")
+        if not isinstance(instrument, str):
+            errors.append("changed position instrument is missing or invalid")
             continue
-        final_position = position_map[instrument]
+        final_position = position_map.get(instrument)
         for side in ("long", "short"):
             changed_units = _position_units(instrument_position, side)
-            final_units = _position_units(final_position, side)
+            # A fully closed position may no longer appear in the full account
+            # snapshot; absence is equivalent to zero units on both sides.
+            final_units = _position_units(final_position, side) if final_position is not None else 0.0
             if changed_units is None or final_units is None:
                 errors.append(f"position {instrument} {side} units missing or invalid")
             elif changed_units != final_units:
