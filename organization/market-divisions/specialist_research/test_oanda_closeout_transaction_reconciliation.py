@@ -90,6 +90,36 @@ class OandaCloseoutTransactionReconciliationTests(unittest.TestCase):
         }])
         self.assertEqual(result["status"], "HALT")
 
+    def test_unrelated_later_account_transaction_does_not_invalidate_order_snapshot(self):
+        result = assess(
+            tx=[closeout_fill(), cancel(), {
+                "id": "103", "accountID": "acct-1", "time": "2026-11-18T05:00:05Z",
+                "type": "MARGIN_CALL_EXIT",
+            }],
+            transaction_id_end_inclusive="103",
+            evaluated_at_utc="2026-11-18T05:00:06Z",
+        )
+        self.assertEqual(result["status"], "PASS")
+
+    def test_dependent_order_snapshot_must_follow_linked_trade_cancel(self):
+        result = assess(tx=[
+            closeout_fill(), cancel(time="2026-11-18T05:00:03Z"),
+        ])
+        self.assertEqual(result["status"], "HALT")
+        self.assertTrue(any("predates its linked-trade cancellation" in error for error in result["errors"]))
+
+    def test_unrelated_order_snapshot_must_follow_its_terminal_event(self):
+        result = assess(
+            pre=[dependent(), entry()], post=[],
+            tx=[closeout_fill(), cancel(), {
+                "id": "103", "accountID": "acct-1", "time": "2026-11-18T05:00:03Z",
+                "type": "ORDER_CANCEL", "orderID": "entry-1", "reason": "CLIENT_REQUEST",
+            }],
+            transaction_id_end_inclusive="103",
+        )
+        self.assertEqual(result["status"], "HALT")
+        self.assertTrue(any("occurred after the post-closeout snapshot" in error for error in result["errors"]))
+
     def test_cancel_before_closeout_fill_halts(self):
         result = assess(tx=[
             cancel(transaction_id="101", time="2026-11-18T05:00:00Z"),
