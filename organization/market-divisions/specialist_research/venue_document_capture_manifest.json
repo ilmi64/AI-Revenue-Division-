@@ -1077,6 +1077,64 @@
       "revision_id": "oanda_v20_transaction_definitions:excerpt-20261117"
     },
     {
+      "document_id": "oanda_v20_account_definitions",
+      "candidate_ids": [
+        "oanda_canada_fx_cfd",
+        "oanda_canada_index_cfd",
+        "oanda_canada_gold_cfd"
+      ],
+      "canonical_uri": "https://developer.oanda.com/rest-live-v20/account-df/",
+      "title": "OANDA v20 Account Definitions",
+      "publisher": "OANDA",
+      "source_class": "official_api_data_definition",
+      "source_ref": "turn673933search1",
+      "content_sha256": "4e734185bc5030fb0e3997343865a9e119c345a180fd5e924ec2ee6e489f26f5",
+      "document_text": "OANDA v20 Account definitions describe the full Account object as containing the account id, lastTransactionID, open trades, positions and pending orders. AccountChangesState is the price-dependent account state and includes NAV, unrealizedPL, marginUsed and marginAvailable. AccountChanges contains transaction-driven changes to orders, trades, positions and generated transactions since a supplied TransactionID. The Account Changes endpoint response contains changes, state and lastTransactionID; the returned lastTransactionID is the cursor for the next poll.",
+      "extracted_facts": [
+        {
+          "fact_key": "full_account_transaction_cursor",
+          "value": "lastTransactionID",
+          "unit": "API response field",
+          "source_locator": "Account and Account endpoint response"
+        },
+        {
+          "fact_key": "full_account_open_trades",
+          "value": "trades",
+          "unit": "API response field",
+          "source_locator": "Account"
+        },
+        {
+          "fact_key": "full_account_positions",
+          "value": "positions",
+          "unit": "API response field",
+          "source_locator": "Account"
+        },
+        {
+          "fact_key": "full_account_pending_orders",
+          "value": "orders",
+          "unit": "API response field",
+          "source_locator": "Account"
+        },
+        {
+          "fact_key": "account_changes_price_dependent_state",
+          "value": "NAV, unrealizedPL, marginUsed and marginAvailable",
+          "unit": "AccountChangesState fields",
+          "source_locator": "AccountChangesState"
+        }
+      ],
+      "known_gaps": [
+        "no live account poll or API token connected",
+        "account response is not authenticated in this project",
+        "price-dependent state still requires a fresh and separate margin assessment"
+      ],
+      "capture_scope": "official_api_definition_excerpt",
+      "full_document_capture": false,
+      "capture_time_precision": "date_only_normalized_to_utc_midnight",
+      "captured_at_utc": "2026-11-18T00:00:00Z",
+      "retrieval_method": "official_web_search_excerpt",
+      "revision_id": "oanda_v20_account_definitions:excerpt-20261118"
+    },
+    {
       "document_id": "oanda_v20_account_changes_endpoint",
       "candidate_ids": [
         "oanda_canada_fx_cfd",
@@ -1160,7 +1218,8 @@
         "oanda_v20_account_pending_orders_endpoint",
         "oanda_v20_transaction_endpoints",
         "oanda_v20_transaction_definitions",
-        "oanda_v20_account_changes_endpoint"
+        "oanda_v20_account_changes_endpoint",
+        "oanda_v20_account_definitions"
       ]
     },
     {
