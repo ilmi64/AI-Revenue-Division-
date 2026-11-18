@@ -84,9 +84,14 @@ def build_control_health(snapshot: dict[str, Any],
     integrity_ok = bool(cross_ledger.get("snapshot_history", {}).get("valid")) and bool(
         cross_ledger.get("event_history", {}).get("valid"))
     handover_count = handover.get("handover_count", 0)
+    event_integrity_ok = bool(cross_ledger.get("event_history", {}).get("valid"))
     handover_valid = bool(handover.get("valid")) and not handover_errors
-    handover_status = "not_provided" if handover_count == 0 else (
-        "accepted" if handover_valid else "blocked")
+    if not event_integrity_ok:
+        handover_status = "blocked"
+    elif handover_count == 0:
+        handover_status = "not_provided"
+    else:
+        handover_status = "accepted" if handover_valid else "blocked"
     if not integrity_ok or not cross_ledger.get("valid") or not handover_valid:
         status = "HALT_AUDIT"
     elif warnings:
