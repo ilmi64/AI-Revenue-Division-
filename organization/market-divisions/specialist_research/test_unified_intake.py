@@ -33,6 +33,47 @@ class UnifiedIntakeTests(unittest.TestCase):
         self.assertFalse(result["live_readiness"])
         self.assertEqual(result["authority"], "research_only_no_execution_authority")
 
+
+    def test_portfolio_risk_unknown_is_visible_in_unified_snapshot(self):
+        result = self.build()
+        self.assertEqual(result["portfolio_risk"]["status"], "UNKNOWN")
+        self.assertEqual(result["portfolio_risk"]["coverage"]["missing_risk_desks"],
+                         ["crypto", "forex", "gold", "indices"])
+        self.assertEqual(result["status"], "unverified")
+        self.assertFalse(result["portfolio_risk"]["trade_authority"])
+
+    def test_portfolio_limit_breach_escalates_to_global_occ_stop(self):
+        rows = self.four_desk_rows()
+        for index, row in enumerate(rows):
+            row["portfolio_risk"] = {"positions": [{
+                "position_id": "risk-position-" + str(index),
+                "instrument_id": row["instrument_id"],
+                "asset_class": row["instrument_type"],
+                "side": "long",
+                "notional": 100.0,
+                "currency": "USD",
+                "valuation_currency": "USD",
+                "valuation_amount": 100.0,
+                "exposure_group": "fixture-portfolio",
+                "evidence_refs": ["fixture:risk:" + str(index)],
+                "source_timestamp_utc": NOW,
+            }]}
+        risk_config = {"schema_version": "1.0.0", "limits": [{
+            "scope": "portfolio", "metric": "gross_exposure",
+            "valuation_currency": "USD", "max_value": 399.0,
+        }]}
+        correlations = [{
+            "instrument_id_a": "SOL-USDC", "instrument_id_b": "EUR-USD",
+            "correlation": 0.25, "observed_at_utc": NOW,
+            "source_id": "fixture-correlation", "evidence_refs": ["fixture:corr"],
+        }]
+        result = self.build(rows, portfolio_risk_config=risk_config,
+                            correlation_evidence=correlations)
+        self.assertEqual(result["portfolio_risk"]["status"], "HALT")
+        self.assertTrue(result["global_stop_active"])
+        self.assertEqual(result["status"], "halt")
+        self.assertTrue(any(stop["source"] == "portfolio_risk" for stop in result["active_stops"]))
+
     def test_multiple_instruments_per_desk_are_supported(self):
         rows = self.four_desk_rows() + [obs("crypto_spot", "BTC-USDC")]
         rows[-1].update(base_asset="BTC", market_pair="BTC/USDC",
