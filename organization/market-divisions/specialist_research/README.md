@@ -1034,3 +1034,12 @@ The revision-record schema now accepts either `extraction_method` (manual/synthe
 `assess_document_freshness` evaluates the age of a captured revision against an explicit per-document `max_age_days` policy and a caller-supplied UTC evaluation time. It reports stale captures for review, distinguishes documents with no TTL as `NOT_ASSESSED_NO_TTL`, and rejects future-dated captures, duplicate policies and invalid/non-finite thresholds. No universal freshness window is assumed.
 
 This measures age since the local capture only; it does not prove when the publisher last changed the document or whether the capture is complete. Stale results can be routed into `build_revision_review_queue` as critical review items. Freshness checks do not approve evidence, update venue profiles or grant simulation/trading eligibility. Regression coverage has been added but has not been executed.
+
+
+### Canadian venue eligibility and Gold delivery controls
+
+The current venue catalogue records two explicit Canadian crypto-derivatives gates: Kraken's published Canada restrictions say residents cannot trade derivatives or use margin; Coinbase International Exchange is institutional-only in selected jurisdictions, and Canadian institutional eligibility is not established. These are not treated as eligible Canadian venue candidates. The catalogue validator prevents these statuses from being silently downgraded to generic "unverified" or upgraded to "approved".
+
+OANDA Canada's published margin schedule lists Gold at 4.5:1. This is a dated public schedule reference, not an account-specific guarantee or a static simulator constant. The live spread/margin display can change, and exact contract unit, closeout terms and account treatment remain to be captured. Conventional CFD financing is not a Shariah approval.
+
+`gold_delivery_controls.py` adds a fail-closed GC/MGC physical-delivery gate. It requires the exact contract month, exchange calendar revision, FCM policy revision, First Position/First Notice/last-trade/delivery dates, and explicit FCM long/short/new-position cutoff dates and UTC times. It validates GC against COMEX Chapter 113 and MGC against Chapter 120. The module does not calculate exchange dates, infer FCM deadlines, roll or liquidate positions, or submit delivery instructions. Missing or inconsistent calendar/policy inputs halt the assessment. The test fixtures are synthetic and do not represent a real contract calendar or broker policy.
