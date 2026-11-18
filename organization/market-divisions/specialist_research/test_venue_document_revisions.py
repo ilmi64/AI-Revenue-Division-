@@ -140,6 +140,18 @@ class VenueDocumentRevisionTests(unittest.TestCase):
         self.assertEqual(result["status"], "STALE_REVIEW_REQUIRED")
         self.assertIn("oanda-gold", result["missing_latest_document_ids"])
 
+    def test_source_locator_only_change_does_not_change_fact_value(self):
+        old = revision("2026-01-01T00:00:00Z", facts=[
+            {"fact_key": "contract_multiplier", "value": 100, "unit": "troy_oz", "source_locator": "page 2"},
+        ])
+        new = revision("2026-01-02T00:00:00Z", text="same term, new page layout", facts=[
+            {"fact_key": "contract_multiplier", "value": 100, "unit": "troy_oz", "source_locator": "page 4"},
+        ])
+        result = compare_document_revisions(old, new)
+        self.assertEqual(result["changes"], [])
+        self.assertTrue(result["content_changed"])
+        self.assertTrue(result["human_review_required"])
+
     def test_authority_never_upgraded(self):
         old = revision("2026-01-01T00:00:00Z")
         new = revision("2026-01-02T00:00:00Z", text="new terms")
