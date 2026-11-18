@@ -936,7 +936,7 @@ monitor: the latest document captures must be supplied by a researcher.
 
 ## Official venue-document excerpt capture set
 
-`venue_document_capture_manifest.json` now inventories thirteen official-page
+`venue_document_capture_manifest.json` now inventories fifteen official-page
 search excerpts linked to all seven candidate venues. The sources cover
 Kraken MTF linear crypto derivatives, Coinbase International Exchange
 perpetuals, OANDA Canada's margin schedule, financing policy and index-CFD
@@ -1047,7 +1047,7 @@ OANDA Canada's published margin schedule lists Gold at 4.5:1. This is a dated pu
 
 ### OANDA Canada Gold CFD: hours, gaps, closeout and instrument identity
 
-The official-page excerpt manifest has been extended from nine to thirteen captures. Four new OANDA Canada excerpts record:
+The official-page excerpt manifest has been extended from nine to fifteen captures. Four new OANDA Canada excerpts record:
 
 - XAU/USD is a Gold CFD quoted against USD and measured in troy ounces; it does not convey physical ownership of bullion. The page does not establish a universal account-independent contract multiplier.
 - The published XAU/USD metal-CFD hours are Sunday-Friday 18:05-16:59 New York time. Hours may change for daylight saving time and holidays. The displayed MT4 lot size is 100, which is platform-specific and must not be generalized to every account/platform.
