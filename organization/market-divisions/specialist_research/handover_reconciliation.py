@@ -55,6 +55,10 @@ def audit_handovers(event_records: list[dict[str, Any]]) -> dict[str, Any]:
             if details is not None:
                 handovers.append((event, details))
 
+    # Audit shift continuity in occurrence-time order, not append order.
+    # The append-only ledger can legitimately receive a late-recorded event.
+    handovers.sort(key=lambda item: (_event_time(item[0]), item[0]["event_id"]))
+
     seen_handover_ids: set[str] = set()
     seen_transitions: set[tuple[str, str]] = set()
     for event, details in handovers:
