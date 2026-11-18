@@ -59,9 +59,9 @@ def validate_review(review: dict[str, Any]) -> None:
             raise ReviewLedgerError(field + " must be a non-empty string")
     action = review.get("action")
     status = review.get("review_status")
-    if action not in ACTIONS:
+    if not isinstance(action, str) or action not in ACTIONS:
         raise ReviewLedgerError("unsupported review action")
-    if status is not None and status not in STATUSES:
+    if status is not None and (not isinstance(status, str) or status not in STATUSES):
         raise ReviewLedgerError("unsupported review_status")
     if action == "reject" and status != "rejected":
         raise ReviewLedgerError("reject action requires rejected status")
