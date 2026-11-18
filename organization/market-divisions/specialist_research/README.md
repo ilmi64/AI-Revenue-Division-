@@ -775,3 +775,39 @@ and Shariah considerations require independent instrument-specific review.
 Regression coverage is in `test_venue_profile_registry.py`; orchestrator
 integration coverage also checks that unverified profiles are blocked. Tests
 are authored and have not yet been executed.
+
+
+## Venue intelligence and evidence acquisition
+
+`venue_intelligence.py` is the offline intake and assessment layer for
+venue-specific contract documentation. It defines separate required-fact
+checklists for Crypto perpetuals, Forex CFDs, index futures/CFDs and Gold
+futures/CFDs. Researchers supply source records and extracted facts; the
+module does not browse, scrape, download, contact venues, or use API keys.
+
+The evidence contract is `venue-intelligence-evidence.schema.json`. Each
+source record identifies publisher, source class, source reference,
+publication/capture timestamps and a SHA-256 content fingerprint. Each fact
+must reference a known source and include its observation timestamp. The
+assessor reports missing coverage, malformed provenance, conflicting values
+and future-dated observations. A per-fact `max_age_days` can be supplied when
+an explicit freshness policy is known. No universal freshness threshold is
+invented; without one the result is `NOT_ASSESSED_NO_TTL`.
+
+A complete bundle returns
+`EVIDENCE_COVERAGE_COMPLETE_UNVERIFIED`, not approval. Conflicting evidence,
+stale evidence under an explicit TTL, missing critical fields or invalid
+provenance block draft preparation. `prepare_profile_draft` creates only a
+candidate marked `under_review`, `unverified` and `pending`; it does not
+construct a trusted venue profile or call the registry append function.
+Human review and separate evidence verification remain mandatory.
+
+`build_research_intake_report` aggregates per-venue/instrument evidence
+coverage without ranking trading opportunities. All outputs remain
+research-only. Source hashes do not authenticate source content, publisher
+identity, URLs, collection timestamps or independence. The current source
+candidate list is not a claim that any exchange or broker has been researched
+or connected.
+
+Regression coverage is in `test_venue_intelligence.py`; tests are authored
+and have not yet been executed.
