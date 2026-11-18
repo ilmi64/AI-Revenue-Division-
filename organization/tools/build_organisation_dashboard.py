@@ -248,6 +248,9 @@ def build_occ_control_health_report(snapshot=None):
                 "oanda_account_margin_audit": {"status": "NOT_PROVIDED", "report": None,
                                                "errors": [], "trade_authority": False,
                                                "live_readiness": False},
+                "oanda_pending_order_audit": {"status": "NOT_PROVIDED", "report": None,
+                                              "errors": [], "trade_authority": False,
+                                              "live_readiness": False},
                 "errors": [],
                 "warnings": ["No unified OCC snapshot supplied to the Main Hub dashboard."],
                 "trade_authority": False, "live_readiness": False}
@@ -260,6 +263,9 @@ def build_occ_control_health_report(snapshot=None):
                 "oanda_account_margin_audit": {"status": "HALT", "report": None,
                                                "errors": ["Supplied OCC snapshot is invalid."],
                                                "trade_authority": False, "live_readiness": False},
+                "oanda_pending_order_audit": {"status": "HALT", "report": None,
+                                              "errors": ["Supplied OCC snapshot is invalid."],
+                                              "trade_authority": False, "live_readiness": False},
                 "errors": ["Supplied OCC snapshot is missing or has an unsupported snapshot_type."],
                 "warnings": [], "trade_authority": False, "live_readiness": False}
     audit = snapshot.get("control_health")
@@ -319,6 +325,30 @@ def build_occ_control_health_report(snapshot=None):
     elif oanda_margin_audit.get("status") == "NOT_PROVIDED" and status == "PASS_AUDIT":
         status = "WARN_AUDIT"
         warnings.append("OANDA account-level margin audit was not supplied.")
+    oanda_pending_audit = snapshot.get("oanda_pending_order_audit")
+    if oanda_pending_audit is None:
+        oanda_pending_audit = {"status": "NOT_PROVIDED", "report": None, "errors": [],
+                               "trade_authority": False, "live_readiness": False}
+    elif (not isinstance(oanda_pending_audit, dict)
+          or oanda_pending_audit.get("status") not in {"NOT_PROVIDED", "PASS", "HALT"}
+          or oanda_pending_audit.get("trade_authority") is not False
+          or oanda_pending_audit.get("live_readiness") is not False
+          or not isinstance(oanda_pending_audit.get("errors"), list)
+          or any(not isinstance(item, str) for item in oanda_pending_audit.get("errors", []))
+          or (oanda_pending_audit.get("status") == "NOT_PROVIDED" and oanda_pending_audit.get("report") is not None)
+          or (oanda_pending_audit.get("status") in {"PASS", "HALT"} and not isinstance(oanda_pending_audit.get("report"), dict))
+          or (oanda_pending_audit.get("status") == "PASS" and oanda_pending_audit.get("report", {}).get("status") != "PASS")
+          or (oanda_pending_audit.get("status") == "HALT" and oanda_pending_audit.get("report", {}).get("status") == "PASS")):
+        oanda_pending_audit = dict(oanda_pending_audit) if isinstance(oanda_pending_audit, dict) else {}
+        oanda_pending_audit["status"] = "HALT"
+        errors.append("OANDA pending-order audit is malformed or violates its research-only authority boundary.")
+        status = "HALT_AUDIT"
+    elif oanda_pending_audit.get("status") == "HALT":
+        errors.append("OANDA pending-order audit reports surviving exposure-opening orders or invalid snapshot data.")
+        status = "HALT_AUDIT"
+    elif oanda_pending_audit.get("status") == "NOT_PROVIDED" and status == "PASS_AUDIT":
+        status = "WARN_AUDIT"
+        warnings.append("OANDA post-closeout pending-order snapshot was not supplied.")
     gold_audit = snapshot.get("gold_specialist_audit")
     if not isinstance(gold_audit, dict):
         gold_audit = {"status": "NOT_PROVIDED", "instrument_count": 0,
@@ -346,6 +376,7 @@ def build_occ_control_health_report(snapshot=None):
         "gold_specialist_audit": gold_audit,
         "portfolio_risk": portfolio_risk,
         "oanda_account_margin_audit": oanda_margin_audit,
+        "oanda_pending_order_audit": oanda_pending_audit,
         "audit": audit,
         "errors": errors,
         "warnings": warnings,
