@@ -188,7 +188,13 @@ class OandaCloseoutTransactionReconciliationTests(unittest.TestCase):
         self.assertEqual(assess(tx=[fill, cancel()])["status"], "HALT")
 
     def test_dependent_order_for_other_trade_is_not_expected_cancelled(self):
-        result = assess(pre=[dependent(trade_id="T2")], post=[dependent(trade_id="T2")])
+        result = assess(
+            pre=[dependent(trade_id="T2")], post=[dependent(trade_id="T2")],
+            tx=[closeout_fill(), {
+                "id": "102", "accountID": "acct-1", "time": "2026-11-18T05:00:01Z",
+                "type": "MARGIN_CALL_ENTER",
+            }],
+        )
         self.assertEqual(result["status"], "PASS")
         self.assertEqual(result["orders_expected_cancelled"], [])
 
