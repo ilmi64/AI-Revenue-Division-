@@ -64,6 +64,8 @@ class SimulationOrchestratorTests(unittest.TestCase):
         self.assertEqual(result["reconciliation"]["carry_source"], "contract_lifecycle_only")
         self.assertEqual(result["lifecycle_replay"]["cashflow_total"], -1.25)
         self.assertEqual(result["venue_simulation"]["cumulative_funding_cost"], 0.0)
+        self.assertIsNone(result["reconciliation"]["combined_equity_estimate"])
+        self.assertFalse(result["reconciliation"]["currency_merge_performed"])
         self.assertFalse(result["trade_authority"])
 
     def test_nonzero_path_funding_is_rejected_as_duplicate_carry_risk(self):
