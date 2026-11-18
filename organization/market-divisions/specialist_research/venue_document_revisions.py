@@ -30,6 +30,8 @@ CRITICAL_FACTS = {
     "triple_swap_policy", "roll_method", "price_tick", "tick_value",
     "contract_unit", "partial_liquidation_policy", "position_fill_semantics",
     "pending_order_cancellation_scope", "dependent_order_linkage",
+    "linked_trade_closed_reason", "margin_closeout_fill_reason",
+    "transaction_id_sequence", "account_changes_cursor",
 }
 
 
