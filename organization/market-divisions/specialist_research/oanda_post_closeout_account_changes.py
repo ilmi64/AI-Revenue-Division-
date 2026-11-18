@@ -270,8 +270,11 @@ def assess_oanda_post_closeout_account_changes(
             tx_ids.add(tid)
         if tx.get("accountID") != account_id:
             errors.append(f"changes.transactions[{index}] accountID mismatch")
-        if tx.get("type") == "ORDER_FILL" and isinstance(tx.get("orderID"), str):
-            tx_order_fills.add(tx["orderID"])
+        if tx.get("type") == "ORDER_FILL":
+            if isinstance(tx.get("orderID"), str) and tx["orderID"]:
+                tx_order_fills.add(tx["orderID"])
+            else:
+                errors.append(f"changes.transactions[{index}] ORDER_FILL is missing a string orderID")
     if filled_order_ids - tx_order_fills:
         errors.append("ordersFilled contains IDs without matching ORDER_FILL transactions: " + ", ".join(sorted(filled_order_ids - tx_order_fills)))
     unmatched_transaction_fills = tx_order_fills - filled_order_ids
