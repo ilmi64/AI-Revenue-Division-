@@ -362,7 +362,8 @@
         "trade_authority",
         "live_readiness",
         "instrument_normalization",
-        "stress_testing"
+        "stress_testing",
+        "derivatives_liquidity_risk"
       ],
       "properties": {
         "schema_version": {
@@ -561,6 +562,94 @@
               }
             },
             "errors": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "derivatives_liquidity_risk": {
+          "type": "object",
+          "required": [
+            "status",
+            "positions",
+            "unclassified_position_ids"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "INPUTS_VALIDATED_NOT_LIQUIDATION_MODELLED",
+                "UNKNOWN"
+              ]
+            },
+            "positions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "position_id",
+                  "status"
+                ],
+                "properties": {
+                  "position_id": {
+                    "type": "string"
+                  },
+                  "initial_margin": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "maintenance_margin": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "available_margin": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "liquidation_distance_pct": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "executable_depth_notional": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "funding_or_financing_cost": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "funding_horizon_hours": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "status": {
+                    "enum": [
+                      "INPUTS_VALIDATED_NOT_LIQUIDATION_MODELLED",
+                      "NOT_APPLICABLE_CASH_OR_SPOT"
+                    ]
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "unclassified_position_ids": {
               "type": "array",
               "items": {
                 "type": "string"
