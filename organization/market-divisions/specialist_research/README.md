@@ -1223,3 +1223,39 @@ adapter compares changed long/short units with the supplied full snapshot;
 price-dependent NAV, unrealized P/L and margin are outside this transaction
 reconciliation. See the official OANDA v20 Account definitions and Account
 endpoint documentation before preparing a collector payload.
+
+
+## OANDA post-closeout AccountChanges and full-account reconciliation
+
+The offline adapter `oanda_post_closeout_account_changes.py` is now integrated
+into unified OCC intake and Main Hub control-health reporting. It consumes the
+caller-supplied OANDA v20 AccountChanges response from
+`GET /v3/accounts/{accountID}/changes?sinceTransactionID=...` and a subsequent
+full account-details snapshot. The audit compares the changes cursor with both
+full-account cursor fields, verifies closed trades and dependent-order
+cancellations, checks filled pre-existing orders and newly opened trades, and
+compares changed long/short position units with the full account state. A fully
+closed position omitted from the current account positions list is treated as
+zero long/short units; nonzero changed units still fail reconciliation.
+
+When the transaction and pending-order audits are also supplied, unified
+intake cross-checks account identity, closed trade IDs, linked-order
+cancellation IDs, the pre-closeout order set and the complete post-closeout
+pending-order ID set. Any mismatch escalates to HALT. A newly opened trade or
+filled pre-existing order also keeps the audit at HALT for independent OCC
+review. No order or position action is performed.
+
+The input contract is
+`oanda-post-closeout-account-changes.schema.json`; synthetic tests are in
+`test_oanda_post_closeout_account_changes.py`, with integration coverage in
+`test_unified_intake.py` and the Main Hub dashboard suite. All are authored
+but have not yet been executed.
+
+OANDA's official documentation distinguishes transaction-driven AccountChanges
+from price-dependent AccountChangesState. The former carries changed Orders,
+Trades, Positions and Transactions; the latter carries values such as NAV,
+unrealized P/L and margin that can change with prices. The API's
+`lastTransactionID` is the cursor for the next poll. This adapter reconciles
+transaction-driven account state only; it does not replace a fresh price and
+margin assessment, authenticate API responses, prove collector completeness,
+or grant live readiness.
