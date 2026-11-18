@@ -1,6 +1,5 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://example.invalid/oanda-account-margin-closeout.schema.json",
   "title": "OANDA Canada Account Margin Closeout Replay",
   "description": "Offline research-only replay of caller-supplied OANDA Canada v20/v20 MT4 account margin observations. Not a broker API or execution instruction.",
   "oneOf": [
@@ -113,7 +112,8 @@
         "early_closeout_threshold_reached",
         "closeout_triggered",
         "position_ids_closed",
-        "position_ids_deferred"
+        "position_ids_deferred",
+        "deferred_closeout_retry_pending"
       ],
       "properties": {
         "timestamp_utc": {
@@ -150,6 +150,9 @@
           "items": {
             "type": "string"
           }
+        },
+        "deferred_closeout_retry_pending": {
+          "type": "boolean"
         }
       },
       "additionalProperties": false
@@ -172,7 +175,8 @@
         "trigger": {
           "enum": [
             "EARLY_100_PERCENT_MARGIN_CLOSEOUT",
-            "SIX_CONSECUTIVE_UNDERMARGINED_TRADING_DAYS"
+            "SIX_CONSECUTIVE_UNDERMARGINED_TRADING_DAYS",
+            "RETRY_DEFERRED_CLOSEOUT_WHILE_UNDERMARGINED"
           ]
         },
         "position_ids_closed_as_batch": {
