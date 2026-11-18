@@ -595,7 +595,9 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
                 changes_report["status"] = "HALT"
                 changes_report.setdefault("errors", []).append("OANDA account-change audit evaluation timestamp is invalid")
         consistency_errors = []
-        if isinstance(oanda_closeout_transaction_replay, dict) and isinstance(transaction_report, dict):
+        if (isinstance(oanda_closeout_transaction_replay, dict)
+                and isinstance(transaction_report, dict)
+                and isinstance(oanda_post_closeout_account_changes_replay, dict)):
             tx_closed = transaction_report.get("liquidated_trade_ids")
             change_closed = changes_report.get("closed_trade_ids_confirmed")
             if (not isinstance(tx_closed, list) or not isinstance(change_closed, list)
