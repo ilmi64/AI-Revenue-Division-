@@ -21,7 +21,8 @@
     "authority",
     "trade_authority",
     "live_readiness",
-    "directional_signal"
+    "directional_signal",
+    "execution_risk"
   ],
   "properties": {
     "desk_id": {
@@ -159,6 +160,44 @@
       "items": {
         "type": "string"
       }
+    },
+    "execution_risk": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "required": [
+        "session",
+        "spread_gap_stress",
+        "profile",
+        "broker_closeout_modelled",
+        "trade_authority",
+        "live_readiness"
+      ],
+      "properties": {
+        "session": {
+          "type": "object"
+        },
+        "spread_gap_stress": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "profile": {
+          "const": "oanda_canada_xauusd"
+        },
+        "broker_closeout_modelled": {
+          "const": false
+        },
+        "trade_authority": {
+          "const": false
+        },
+        "live_readiness": {
+          "const": false
+        }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false
