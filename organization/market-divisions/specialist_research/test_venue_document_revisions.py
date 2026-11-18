@@ -2,8 +2,8 @@
 import unittest
 
 from specialist_research.venue_document_revisions import (
-    assess_profile_revision_impact, capture_document_revision,
-    compare_document_revisions,
+    assess_profile_revision_impact, build_revision_review_queue,
+    capture_document_revision, compare_document_revisions,
 )
 
 
@@ -151,6 +151,48 @@ class VenueDocumentRevisionTests(unittest.TestCase):
         self.assertEqual(result["changes"], [])
         self.assertTrue(result["content_changed"])
         self.assertTrue(result["human_review_required"])
+
+    def test_review_queue_prioritizes_critical_contract_changes(self):
+        old = revision("2026-01-01T00:00:00Z")
+        critical = revision("2026-01-02T00:00:00Z", text="margin changed", facts=[
+            {"fact_key": "initial_margin_rate", "value": 0.15, "unit": "ratio"},
+        ])
+        standard = revision("2026-01-02T00:00:00Z", text="description changed", facts=[
+            {"fact_key": "marketing_description", "value": "new wording"},
+        ])
+        queue = build_revision_review_queue([
+            compare_document_revisions(old, standard),
+            compare_document_revisions(old, critical),
+        ])
+        self.assertEqual(queue["status"], "REVIEW_REQUIRED")
+        self.assertEqual(queue["items"][0]["priority"], "CRITICAL")
+        self.assertEqual(queue["critical_item_count"], 1)
+        self.assertFalse(queue["profile_update_performed"])
+
+    def test_review_queue_includes_stale_profile_sources(self):
+        old = revision("2026-01-01T00:00:00Z")
+        latest = revision("2026-01-02T00:00:00Z", text="new terms")
+        impact = assess_profile_revision_impact(
+            {"source_revision_ids": [{"document_id": "oanda-gold", "revision_id": old["revision_id"]}]},
+            [latest],
+        )
+        queue = build_revision_review_queue([], [impact])
+        self.assertEqual(queue["status"], "REVIEW_REQUIRED")
+        self.assertEqual(queue["items"][0]["review_type"], "PROFILE_SOURCE_FRESHNESS")
+        self.assertEqual(queue["items"][0]["document_id"], "oanda-gold")
+
+    def test_invalid_comparison_blocks_review_queue(self):
+        queue = build_revision_review_queue([{"status": "INVALID_REVISION_COMPARISON"}])
+        self.assertEqual(queue["status"], "INVALID_REVIEW_QUEUE_INPUT")
+        self.assertEqual(queue["items"], [])
+        self.assertTrue(queue["human_review_required"])
+
+    def test_empty_review_queue_has_no_approval_authority(self):
+        queue = build_revision_review_queue([])
+        self.assertEqual(queue["status"], "NO_REVIEW_ITEMS")
+        self.assertFalse(queue["human_review_required"])
+        self.assertFalse(queue["trade_authority"])
+        self.assertFalse(queue["live_readiness"])
 
     def test_authority_never_upgraded(self):
         old = revision("2026-01-01T00:00:00Z")
