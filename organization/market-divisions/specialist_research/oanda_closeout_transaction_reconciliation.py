@@ -156,9 +156,13 @@ def assess_oanda_closeout_transaction_reconciliation(
         return _blocked(errors, warnings)
     parsed_transactions.sort(key=lambda item: item[0])
     ids = [item[0] for item in parsed_transactions]
-    expected_ids = list(range(start_id + 1, end_id + 1))
-    if ids != expected_ids:
+    contiguous = (len(ids) == end_id - start_id and
+                  all(transaction_id == start_id + index + 1 for index, transaction_id in enumerate(ids)))
+    if not contiguous:
         return _blocked(["transaction IDs are not a complete contiguous range from the supplied exclusive start to inclusive end"], warnings)
+    if any(parsed_transactions[index][1] > parsed_transactions[index + 1][1]
+           for index in range(len(parsed_transactions) - 1)):
+        return _blocked(["transaction timestamps move backwards as transaction IDs increase"], warnings)
 
     closeout_fills: list[tuple[int, datetime, dict[str, Any]]] = []
     for item in parsed_transactions:
@@ -219,6 +223,8 @@ def assess_oanda_closeout_transaction_reconciliation(
             rejects = [item for item in events if item[2].get("type") == "ORDER_CANCEL_REJECT"]
             if rejects:
                 errors.append(f"dependent order {order_id} has an ORDER_CANCEL_REJECT transaction")
+            if len(cancels) > 1:
+                errors.append(f"dependent order {order_id} has multiple ORDER_CANCEL transactions")
             if not cancels:
                 errors.append(f"dependent order {order_id} lacks ORDER_CANCEL reason LINKED_TRADE_CLOSED")
             else:
