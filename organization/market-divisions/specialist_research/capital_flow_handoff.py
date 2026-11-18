@@ -53,11 +53,12 @@ def verify_review_ledger(entries: list[dict[str, Any]]) -> dict[str, Any]:
             errors.append(f"ledger row {sequence} missing event_id")
         action = entry.get("action")
         status = entry.get("review_status")
-        if action not in {"review", "corroborate", "challenge", "correct", "reject", "expire", "reopen"}:
+        if (not isinstance(action, str)
+                or action not in {"review", "corroborate", "challenge", "correct", "reject", "expire", "reopen"}):
             errors.append(f"ledger row {sequence} has invalid action")
-        if status is not None and status not in {
-            "watch", "research", "unverified", "corroborated", "rejected", "expired"
-        }:
+        if status is not None and (
+                not isinstance(status, str)
+                or status not in {"watch", "research", "unverified", "corroborated", "rejected", "expired"}):
             errors.append(f"ledger row {sequence} has invalid review_status")
         if action == "reject" and status != "rejected":
             errors.append(f"ledger row {sequence} reject action/status mismatch")
