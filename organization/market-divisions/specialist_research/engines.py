@@ -8,6 +8,11 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any, Callable
 
+try:
+    from .gold_specialist import build_gold_research_context
+except ImportError:
+    from gold_specialist import build_gold_research_context
+
 DESK_TYPES = {
     "crypto": {"crypto_spot", "crypto_perpetual"},
     "forex": {"fx_spot"},
@@ -256,6 +261,13 @@ def assess_gold(observation: dict[str, Any], now_utc: str,
     if observation.get("shariah_review_status") != "instrument_specific_reviewed":
         p["risk_flags"].append("SHARIAH_PRODUCT_REVIEW_UNASSESSED")
         p["data_quality"]["warnings"].append("No instrument-specific Shariah/product conclusion")
+    if isinstance(observation.get("gold_session"), dict) or "macro_evidence" in observation:
+        specialist = build_gold_research_context(observation, now_utc)
+        p["context"]["gold_specialist_research"] = specialist
+        p["data_quality"]["errors"].extend(specialist["errors"])
+        p["data_quality"]["warnings"].extend(specialist["warnings"])
+        if specialist["status"] == "halt":
+            p["risk_flags"].append("GOLD_SPECIALIST_CONTEXT_BLOCK")
     return _finish(p)
 
 
