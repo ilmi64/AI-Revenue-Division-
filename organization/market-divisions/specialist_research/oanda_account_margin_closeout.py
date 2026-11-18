@@ -107,7 +107,7 @@ def replay_oanda_account_margin_closeout(
             errors.append(f"initial_positions[{index}] has missing or duplicate position_id")
             continue
         market_status = position.get("market_status", "open")
-        if market_status not in {"open", "closed", "halted"}:
+        if not isinstance(market_status, str) or market_status not in {"open", "closed", "halted"}:
             errors.append(f"{pid}: market_status must be open, closed or halted")
             continue
         positions[pid] = {
@@ -139,7 +139,7 @@ def replay_oanda_account_margin_closeout(
         active_ids = {pid for pid, p in positions.items() if p["position_state"] == "open"}
         if not isinstance(market_map, dict) or set(market_map) != active_ids:
             errors.append(f"observations[{index}].position_market_status must cover exactly the currently open position IDs")
-        elif any(value not in {"open", "closed", "halted"} for value in market_map.values()):
+        elif any(not isinstance(value, str) or value not in {"open", "closed", "halted"} for value in market_map.values()):
             errors.append(f"observations[{index}].position_market_status contains an invalid market state")
 
         daily_check = event.get("trading_day_check", False)
@@ -151,6 +151,8 @@ def replay_oanda_account_margin_closeout(
             local = moment.astimezone(NEW_YORK)
             if local.time().replace(tzinfo=None) != DAILY_CHECK_TIME:
                 errors.append(f"observations[{index}] daily margin check must be at 15:45 America/New_York")
+            if local.weekday() >= 5:
+                errors.append(f"observations[{index}] daily margin check cannot be on a Saturday or Sunday")
             if event.get("trading_calendar_status") != "verified":
                 errors.append(f"observations[{index}] daily margin check requires caller-verified trading calendar")
             if isinstance(sequence, bool) or not isinstance(sequence, int) or sequence < 1:
@@ -181,7 +183,7 @@ def replay_oanda_account_margin_closeout(
             else:
                 daily_under_margin_days = 0
 
-        time_based = daily_under_margin_days >= TIME_BASED_TRADING_DAYS
+        time_based = daily_under_margin_days >= TIME_BASED_TRADING_DAYS and state["margin_call"]
         early = state["early_closeout_triggered"]
         trigger = early or time_based
         open_positions = [
@@ -211,6 +213,15 @@ def replay_oanda_account_margin_closeout(
                 "position_ordering": "NO_SEQUENCE_ASSUMED_BATCH_CLOSEOUT",
             })
         elif trigger and deferred:
+            closeout_batches.append({
+                "timestamp_utc": event["timestamp_utc"],
+                "trigger": "EARLY_100_PERCENT_MARGIN_CLOSEOUT" if early
+                           else "SIX_CONSECUTIVE_UNDERMARGINED_TRADING_DAYS",
+                "position_ids_closed_as_batch": [],
+                "position_ids_deferred_market_closed_or_halted": deferred,
+                "execution_prices": "NOT_MODELLED_CURRENT_BROKER_RATES_UNAVAILABLE",
+                "position_ordering": "NO_SEQUENCE_ASSUMED_BATCH_CLOSEOUT",
+            })
             warnings.append(
                 f"{event['timestamp_utc']}: closeout threshold reached but all remaining positions are closed or halted"
             )
