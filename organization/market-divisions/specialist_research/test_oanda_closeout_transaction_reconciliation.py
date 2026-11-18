@@ -60,6 +60,7 @@ class OandaCloseoutTransactionReconciliationTests(unittest.TestCase):
         result = assess()
         self.assertEqual(result["status"], "PASS")
         self.assertEqual(result["orders_expected_cancelled"], ["sl-1"])
+        self.assertEqual(result["reported_last_transaction_id"], "102")
         self.assertEqual(result["orders_confirmed_cancelled"][0]["reason"], "LINKED_TRADE_CLOSED")
         self.assertFalse(result["order_cancellation_performed"])
         self.assertFalse(result["trade_authority"])
