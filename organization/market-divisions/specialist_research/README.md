@@ -1217,7 +1217,8 @@ margin-closeout market order in both `ordersCreated` and `ordersFilled`; that
 creation is exempt only when a matching `MARKET_ORDER` transaction has reason
 `MARGIN_CLOSEOUT` and its matching `ORDER_FILL` transaction has reason
 `MARKET_ORDER_MARGIN_CLOSEOUT`. The transaction and AccountChanges fill arrays
-must agree in both directions. It never connects to OANDA or changes an order or position.
+must agree in both directions, and each margin-closeout market-order creation
+transaction must appear in `ordersCreated`. It never connects to OANDA or changes an order or position.
 
 The input contract is defined in
 `oanda-post-closeout-account-changes.schema.json`; synthetic regression
@@ -1275,4 +1276,4 @@ or grant live readiness.
 
 ### Current OANDA closeout reconciliation regression inventory
 
-As of the current development branch, the relevant suites contain 36 pending-order tests, 33 transaction-reconciliation tests, 24 AccountChanges/full-account reconciliation tests, 44 unified-intake tests, 16 venue-document-capture tests, and 35 Main Hub dashboard tests. These are 188 authored test methods across the listed suites (suite totals are not a claim of unique end-to-end scenarios). They have not been executed in this environment. The AccountChanges adapter and both cross-audit layers remain offline and research-only.
+As of the current development branch, the relevant suites contain 36 pending-order tests, 33 transaction-reconciliation tests, 25 AccountChanges/full-account reconciliation tests, 44 unified-intake tests, 16 venue-document-capture tests, and 35 Main Hub dashboard tests. These are 189 authored test methods across the listed suites (suite totals are not a claim of unique end-to-end scenarios). They have not been executed in this environment. The AccountChanges adapter and both cross-audit layers remain offline and research-only.
