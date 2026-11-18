@@ -12,7 +12,7 @@ def contract():
         "fcm_policy_revision_id": "broker-policy-r1",
         "exchange_calendar_source_ref": "official-calendar-ref",
         "fcm_policy_source_ref": "broker-policy-ref", "fcm_timezone": "America/New_York",
-        "first_position_date": "2026-12-01", "first_notice_date": "2026-11-30",
+        "first_position_date": "2026-11-27", "first_notice_date": "2026-11-30",
         "last_trade_date": "2026-12-29", "delivery_start_date": "2026-12-01",
         "delivery_end_date": "2026-12-31",
         "fcm_long_position_cutoff_date": "2026-11-25",
