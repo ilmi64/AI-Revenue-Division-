@@ -13,7 +13,7 @@ def event(event_id, kind="handover_recorded", details=None, subject=None, refs=N
         "event_id": event_id, "event_type": kind,
         "occurred_at_utc": NOW, "recorded_at_utc": NOW,
         "actor_id": "synthetic-reviewer", "subject_id": subject or event_id,
-        "summary": "Synthetic handover test", "evidence_refs": refs or ["evidence:handover"],
+        "summary": "Synthetic handover test", "evidence_refs": refs if refs is not None else ["evidence:handover"],
         "details": details or {},
     }
 
@@ -133,7 +133,7 @@ class HandoverReconciliationTests(unittest.TestCase):
         rows = read_events(self.path)
         rows[0]["event"]["summary"] = "tampered"
         import json
-        self.path.write_text("".join(json.dumps(x) + "\\n" for x in rows), encoding="utf-8")
+        self.path.write_text("".join(json.dumps(x) + "\n" for x in rows), encoding="utf-8")
         result = self.audit()
         self.assertFalse(result["valid"])
         self.assertFalse(result["ledger_integrity_valid"])
