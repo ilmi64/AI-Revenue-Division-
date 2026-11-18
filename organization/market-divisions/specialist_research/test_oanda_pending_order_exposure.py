@@ -9,6 +9,8 @@ def assess(orders=None, liquidated=None, **overrides):
         "pending_orders": orders or [],
         "liquidated_trade_ids": liquidated if liquidated is not None else ["trade-1"],
         "remaining_open_trade_ids": ["trade-2"],
+        "remaining_open_trade_ids_complete": True,
+        "reported_pending_order_count": len(orders or []),
         "account_hedging_enabled": False,
         "source_timestamp_utc": "2026-11-17T20:45:00Z",
         "evaluated_at_utc": "2026-11-17T20:45:20Z",
@@ -123,6 +125,14 @@ class OandaPendingOrderExposureTests(unittest.TestCase):
 
     def test_unknown_position_fill_blocks(self):
         self.assertEqual(assess([entry(positionFill="MAYBE")])["status"], "HALT")
+
+    def test_reported_pending_order_count_mismatch_blocks(self):
+        result = assess([entry()], reported_pending_order_count=0)
+        self.assertEqual(result["status"], "HALT")
+
+    def test_incomplete_remaining_trade_snapshot_blocks(self):
+        result = assess(remaining_open_trade_ids_complete=False)
+        self.assertEqual(result["status"], "HALT")
 
     def test_missing_hedging_mode_blocks(self):
         result = assess(account_hedging_enabled=None)
