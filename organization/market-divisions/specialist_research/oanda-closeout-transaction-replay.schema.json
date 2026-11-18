@@ -87,7 +87,7 @@
     "reported_last_transaction_id": {
       "type": "string",
       "pattern": "^[0-9]+$",
-      "description": "OANDA lastTransactionID; must equal transaction_id_end_inclusive."
+      "description": "OANDA account's latest transaction ID; must not precede transaction_id_end_inclusive. For an idrange query it may be greater than the requested end."
     }
   },
   "$defs": {
