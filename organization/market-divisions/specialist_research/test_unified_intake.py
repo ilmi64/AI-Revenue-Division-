@@ -610,12 +610,12 @@ class UnifiedIntakeTests(unittest.TestCase):
     def oanda_account_changes_replay(self, new_trade=False):
         changes = {
             "ordersCreated": [], "ordersCancelled": [{"id": "sl-gold"}],
-            "ordersFilled": [], "ordersTriggered": [],
+            "ordersFilled": [{"id": "closeout"}], "ordersTriggered": [],
             "tradesOpened": [{"id": "trade-new"}] if new_trade else [],
             "tradesReduced": [], "tradesClosed": [{"id": "trade-gold"}],
             "positions": [],
             "transactions": [
-                {"id": "101", "accountID": "acct-1", "type": "ORDER_FILL", "orderID": "closeout"},
+                {"id": "101", "accountID": "acct-1", "type": "ORDER_FILL", "orderID": "closeout", "reason": "MARKET_ORDER_MARGIN_CLOSEOUT"},
                 {"id": "102", "accountID": "acct-1", "type": "ORDER_CANCEL", "orderID": "sl-gold"},
             ],
         }
@@ -647,6 +647,16 @@ class UnifiedIntakeTests(unittest.TestCase):
         self.assertTrue(result["oanda_post_closeout_account_changes_audit"]["report"]["account_change_reconciliation_complete"])
         self.assertFalse(result["trade_authority"])
         self.assertFalse(result["live_readiness"])
+
+    def test_oanda_malformed_account_snapshot_entry_escalates_global_stop(self):
+        replay = self.oanda_account_changes_replay()
+        replay["post_closeout_account_snapshot"]["account"]["orders"] = ["malformed-order"]
+        result = self.build(oanda_post_closeout_account_changes_replay=replay)
+        audit = result["oanda_post_closeout_account_changes_audit"]
+        self.assertEqual(audit["status"], "HALT")
+        self.assertTrue(any("orders[0] must be an object" in item for item in audit["errors"]))
+        self.assertTrue(result["global_stop_active"])
+        self.assertTrue(any(stop["source"] == "oanda_account_changes" for stop in result["active_stops"]))
 
     def test_oanda_account_changes_new_trade_keeps_global_stop_active(self):
         result = self.build(
