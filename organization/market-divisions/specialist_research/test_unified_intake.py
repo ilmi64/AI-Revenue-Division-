@@ -115,6 +115,23 @@ class UnifiedIntakeTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "must be supplied together"):
             self.build(rows, capital_flow_events=[])
 
+    def test_control_health_paths_must_be_supplied_together(self):
+        rows = self.four_desk_rows()
+        with self.assertRaisesRegex(ValueError, "must be supplied together"):
+            self.build(rows, control_health_snapshot_history=Path("snapshots.jsonl"))
+
+    def test_control_health_integration_fails_closed_when_history_is_missing(self):
+        rows = self.four_desk_rows()
+        result = self.build(
+            rows,
+            control_health_snapshot_history=Path("/definitely/missing/occ-snapshots.jsonl"),
+            control_health_event_ledger=Path("/definitely/missing/occ-events.jsonl"),
+        )
+        self.assertEqual(result["control_health"]["status"], "HALT_AUDIT")
+        self.assertEqual(result["status"], "halt")
+        self.assertFalse(result["trade_authority"])
+        self.assertFalse(result["live_readiness"])
+
     def test_duplicate_evidence_refs_are_indexed_without_losing_sources(self):
         rows = self.four_desk_rows()
         rows[1]["evidence_refs"] = ["fixture:SOL-USDC"]
