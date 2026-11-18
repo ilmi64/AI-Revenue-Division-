@@ -85,6 +85,29 @@ class OrganisationDashboardTests(unittest.TestCase):
         self.assertFalse(report["trade_authority"])
         self.assertFalse(report["live_readiness"])
 
+    def test_gold_specialist_halt_escalates_main_hub_audit(self):
+        snapshot = {
+            "snapshot_type": "unified_occ_research_intelligence",
+            "status": "halt",
+            "global_stop_active": True,
+            "active_stops": [{"source": "gold", "instrument_id": "XAUUSD"}],
+            "gold_specialist_audit": {
+                "status": "HALT", "instrument_count": 1,
+                "instruments": [{"instrument_id": "XAUUSD", "status": "halt"}],
+                "trade_authority": False, "live_readiness": False,
+            },
+            "control_health": {
+                "status": "PASS_AUDIT", "errors": [], "warnings": [],
+                "authority": "research_only_no_execution_authority",
+                "trade_authority": False, "live_readiness": False,
+            },
+        }
+        report = build_occ_control_health_report(snapshot)
+        self.assertEqual(report["status"], "HALT_AUDIT")
+        self.assertTrue(report["global_stop_active"])
+        self.assertEqual(report["gold_specialist_audit"]["status"], "HALT")
+        self.assertFalse(report["trade_authority"])
+
     def test_dashboard_rejects_invalid_occ_authority(self):
         snapshot = {
             "snapshot_type": "unified_occ_research_intelligence",
