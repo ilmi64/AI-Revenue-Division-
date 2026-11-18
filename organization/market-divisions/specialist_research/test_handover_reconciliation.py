@@ -111,6 +111,18 @@ class HandoverReconciliationTests(unittest.TestCase):
         self.assertTrue(result["valid"])
         self.assertTrue(any("continuity gap" in x for x in result["warnings"]))
 
+    def test_shift_chain_uses_occurrence_time_when_events_are_backfilled(self):
+        later = event("evt-h2", details=handover("h-2", "night-1", "day-2"))
+        later["occurred_at_utc"] = "2026-11-18T21:00:00Z"
+        later["recorded_at_utc"] = "2026-11-18T21:00:00Z"
+        earlier = event("evt-h1", details=handover("h-1", "day-1", "night-1"))
+        self.append(later)
+        self.append(earlier)
+        result = self.audit()
+        self.assertTrue(result["valid"], result["errors"])
+        self.assertFalse(any("continuity gap" in x for x in result["warnings"]))
+        self.assertEqual(result["handover_ids"], ["h-1", "h-2"])
+
     def test_missing_evidence_blocks_handover(self):
         self.append(event("evt-h1", details=handover(), refs=[]))
         result = self.audit()
