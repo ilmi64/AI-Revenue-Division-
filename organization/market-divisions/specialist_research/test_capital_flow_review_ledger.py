@@ -108,5 +108,83 @@ class CapitalFlowReviewLedgerTests(unittest.TestCase):
             self.assertNotIn("live_readiness", entry)
 
 
+    def test_challenge_requires_new_evidence_before_correction(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "reviews.jsonl"
+            first = append_review(path, sample())
+            challenged = append_review(path, sample(
+                action="challenge", review_status="unverified",
+                reviewed_at="2026-11-17T12:05:00Z",
+                supersedes_entry_hash=first["entry_hash"],
+            ))
+            with self.assertRaises(ReviewLedgerError):
+                append_review(path, sample(
+                    action="correct", review_status="corroborated",
+                    reviewed_at="2026-11-17T12:06:00Z",
+                    supersedes_entry_hash=challenged["entry_hash"],
+                ))
+
+    def test_fresh_evidence_allows_correction_after_challenge(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "reviews.jsonl"
+            first = append_review(path, sample())
+            challenged = append_review(path, sample(
+                action="challenge", review_status="unverified",
+                reviewed_at="2026-11-17T12:05:00Z",
+                supersedes_entry_hash=first["entry_hash"],
+            ))
+            corrected = append_review(path, sample(
+                action="correct", review_status="corroborated",
+                reviewed_at="2026-11-17T12:06:00Z",
+                evidence_refs=["https://evidence.invalid/new-independent-check"],
+                supersedes_entry_hash=challenged["entry_hash"],
+            ))
+            self.assertEqual(corrected["action"], "correct")
+            self.assertTrue(verify_reviews(read_reviews(path))["valid"])
+            self.assertTrue(verify_review_ledger(read_reviews(path))["valid"])
+
+    def test_reopen_is_only_allowed_after_challenge_and_new_evidence(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "reviews.jsonl"
+            first = append_review(path, sample())
+            with self.assertRaises(ReviewLedgerError):
+                append_review(path, sample(
+                    action="reopen", review_status="research",
+                    reviewed_at="2026-11-17T12:04:00Z",
+                    evidence_refs=["https://evidence.invalid/new"],
+                    supersedes_entry_hash=first["entry_hash"],
+                ))
+            challenged = append_review(path, sample(
+                action="challenge", review_status="unverified",
+                reviewed_at="2026-11-17T12:05:00Z",
+                supersedes_entry_hash=first["entry_hash"],
+            ))
+            reopened = append_review(path, sample(
+                action="reopen", review_status="research",
+                reviewed_at="2026-11-17T12:06:00Z",
+                evidence_refs=["https://evidence.invalid/new"],
+                supersedes_entry_hash=challenged["entry_hash"],
+            ))
+            self.assertEqual(reopened["action"], "reopen")
+            self.assertTrue(verify_review_ledger(read_reviews(path))["valid"])
+
+    def test_rejected_event_cannot_be_reopened(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "reviews.jsonl"
+            first = append_review(path, sample())
+            rejected = append_review(path, sample(
+                action="reject", review_status="rejected",
+                reviewed_at="2026-11-17T12:05:00Z",
+                supersedes_entry_hash=first["entry_hash"],
+            ))
+            with self.assertRaises(ReviewLedgerError):
+                append_review(path, sample(
+                    action="reopen", review_status="research",
+                    reviewed_at="2026-11-17T12:06:00Z",
+                    evidence_refs=["https://evidence.invalid/new"],
+                    supersedes_entry_hash=rejected["entry_hash"],
+                ))
+
+
 if __name__ == "__main__":
     unittest.main()
