@@ -26,45 +26,57 @@
       "title": "Linear Contract Specifications",
       "publisher": "Kraken MTF / Crypto Facilities Ltd",
       "source_class": "official_contract_specification",
-      "source_ref": "turn633863search1",
-      "content_sha256": "6431bddba31e34203ceee88e0cfb1f1ee1329abcf776f32697e833aaa938ee6b",
-      "document_text": "Kraken MTF linear derivatives are margined and cash settled in USD. Perpetuals have no expiry and use hourly counterparty funding; fixed maturities use dated contracts. Perpetual symbols use PF; fixed maturity symbols use FF plus YYMMDD. Minimum lot is in base currency and no multiplier is currently used. Mark price references index and 30-second EMA order-book mid premium. Margin is tiered by product and size; displayed IM ranges 1%-50% and MM 0.5%-25%. Funding direction follows premium: positive premium long pays short; negative premium short pays long. Page states last updated 16 June 2026.",
+      "source_ref": "turn959326view0",
+      "content_sha256": "2bd2d2c6cc975c7024527169deb486cf16722000179e23a64226246cb0cbc135",
+      "document_text": "Kraken MTF (Crypto Facilities Ltd) offers perpetual and fixed-maturity linear derivatives margined and cash settled in USD. Perpetuals have no expiry; fixed maturities include weekly, monthly, quarterly and semiannual contracts. Perpetual symbols use PF; dated contracts use FF plus YYMMDD. Trading is 24/7 excluding maintenance; minimum lot is denominated in base currency and there is no traditional futures multiplier. Mark price is Index Price + EMA30s(Impact Mid Price - Index Price); the page describes maturity-basis treatment. The real-time index updates each second. Perpetual funding is calculated hourly from premium versus index; positive premium means longs pay shorts, negative premium means shorts pay longs. Funding settles hourly in USD or when net position changes. The page gives a permitted hourly funding range of -0.5% to +0.5%, funding multiplier n=8, and says maintenance margin is always half of initial margin. Contract-specific margin categories and product tables apply; examples include BTC 100x and lower leverage classes. Fixed-maturity contracts cash settle in USD at 08:00 UTC on last trading day. The article states last updated 16 June 2026.",
       "extracted_facts": [
         {
           "fact_key": "settlement_currency",
           "value": "USD",
           "unit": "currency",
-          "source_locator": "opening contract description"
+          "source_locator": "lines 10, 35"
         },
         {
           "fact_key": "funding_interval",
           "value": 1,
           "unit": "hour",
-          "source_locator": "funding section"
+          "source_locator": "lines 12, 35, 46-49"
         },
         {
           "fact_key": "contract_multiplier",
-          "value": "no multiplier; base-currency lot",
+          "value": "no traditional multiplier; base-currency minimum lot",
           "unit": "convention",
-          "source_locator": "linear contract information"
+          "source_locator": "line 18"
         },
         {
           "fact_key": "mark_price_rule",
-          "value": "index plus 30-second EMA order-book mid premium; maturity basis treatment",
+          "value": "Index Price + EMA30s(Impact Mid Price - Index Price)",
+          "unit": "formula",
+          "source_locator": "lines 20-24"
+        },
+        {
+          "fact_key": "maintenance_margin_rule",
+          "value": "maintenance margin always half of initial margin",
           "unit": "rule",
-          "source_locator": "mark price section"
+          "source_locator": "lines 32-35"
         },
         {
-          "fact_key": "initial_margin_rate",
-          "value": "tier range 1%-50%; instrument mapping not captured",
+          "fact_key": "funding_rate_range",
+          "value": "-0.5% to +0.5% per hour",
           "unit": "range",
-          "source_locator": "margin schedule"
+          "source_locator": "line 54"
         },
         {
-          "fact_key": "maintenance_margin_rate",
-          "value": "tier range 0.5%-25%; instrument mapping not captured",
-          "unit": "range",
-          "source_locator": "margin schedule"
+          "fact_key": "funding_multiplier",
+          "value": 8,
+          "unit": "coefficient",
+          "source_locator": "line 55"
+        },
+        {
+          "fact_key": "fixed_maturity_settlement",
+          "value": "cash settled in USD at 08:00 UTC on last trading day",
+          "unit": "method",
+          "source_locator": "line 35"
         }
       ],
       "known_gaps": [
@@ -89,7 +101,7 @@
       "title": "Perpetual Futures Product Specifications",
       "publisher": "Coinbase International Exchange",
       "source_class": "official_contract_specification",
-      "source_ref": "turn633863search0",
+      "source_ref": "turn804331view1",
       "content_sha256": "2bac3f1a62d045c7d8b0e562c7afd00b3f55fc0252fe3ad0153d3eb4b38b2333",
       "document_text": "Coinbase International Exchange BTC and ETH examples are linear USDC-settled perpetuals with no expiry and multiplier 1. BTC example shows 0.0001 base increment, 0.1 quote increment, 10 USDC minimum order, 0.0001 BTC minimum quantity, 24/7 excluding maintenance, 50x maximum leverage, default initial margin 20%, and BTC/USD index updated every second. Other listed products have different product-specific increments and default initial margin. Settlement asset is settled every five minutes in USDC.",
       "extracted_facts": [
@@ -361,7 +373,7 @@
       "title": "Gold Futures Contract Specifications",
       "publisher": "CME Group / COMEX",
       "source_class": "official_contract_specification",
-      "source_ref": "turn633863search2",
+      "source_ref": "turn804331view3",
       "content_sha256": "a4b03e568c5da42acc9cc9616eefc90c0eb7439fe1c9b7aa88565aa55ed41e03",
       "document_text": "CME Group lists GC Gold futures at 100 troy ounces and MGC Micro Gold futures at 10 troy ounces. The page also lists 1OZ at 1 troy ounce and QO at 50 troy ounces. Displayed notional and margin are estimates with a July 7, 2026 reference timestamp in the returned excerpt, not fixed exchange margin requirements.",
       "extracted_facts": [
