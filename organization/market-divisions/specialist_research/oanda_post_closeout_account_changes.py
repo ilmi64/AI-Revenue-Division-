@@ -39,7 +39,8 @@ def _halt(errors: list[str], warnings: list[str] | None = None) -> dict[str, Any
         "status": "HALT", "errors": errors, "warnings": warnings or [],
         "newly_opened_trade_ids": [], "unexpectedly_open_trades": [],
         "unexpectedly_remaining_closed_trades": [], "filled_preexisting_order_ids": [],
-        "new_pending_order_ids": [], "position_reconciliation": "blocked",
+        "new_pending_order_ids": [], "current_pending_order_ids": [],
+        "position_reconciliation": "blocked",
         "account_change_reconciliation_complete": False,
         "trade_authority": False, "live_readiness": False,
         "research_only": True, "authority": AUTHORITY,
@@ -176,7 +177,10 @@ def assess_oanda_post_closeout_account_changes(
         if not isinstance(oid, str) or not oid or oid in order_ids:
             errors.append(f"post-closeout account orders[{index}] has missing or duplicate ID")
         else:
-            order_ids[oid] = str(order.get("state", "UNKNOWN"))
+            state = order.get("state")
+            if state != "PENDING":
+                errors.append(f"post-closeout account order {oid} is not in PENDING state")
+            order_ids[oid] = str(state)
     trade_ids: set[str] = set()
     for index, trade in enumerate(current_trades):
         tid = trade.get("id")
@@ -276,6 +280,7 @@ def assess_oanda_post_closeout_account_changes(
             "unexpectedly_remaining_closed_trades": sorted(unexpected_remaining),
             "filled_preexisting_order_ids": filled_preexisting,
             "new_pending_order_ids": new_pending,
+            "current_pending_order_ids": sorted(order_ids),
         })
         return result
 
@@ -290,6 +295,7 @@ def assess_oanda_post_closeout_account_changes(
         "unexpectedly_remaining_closed_trades": [],
         "filled_preexisting_order_ids": filled_preexisting,
         "new_pending_order_ids": new_pending,
+        "current_pending_order_ids": sorted(order_ids),
         "closed_trade_ids_confirmed": sorted(closed),
         "reduced_trade_ids": sorted(reduced),
         "cancelled_order_ids_confirmed": sorted(cancelled_order_ids),
