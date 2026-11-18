@@ -86,6 +86,17 @@ class CapitalFlowHandoffTests(unittest.TestCase):
         with self.assertRaises(HandoffError):
             self.build(reviews=malformed)
 
+    def test_unhashable_action_and_status_values_fail_closed(self):
+        for field, value in (("action", ["review"]), ("review_status", ["corroborated"])):
+            with self.subTest(field=field):
+                malformed = [review()]
+                malformed[0][field] = value
+                malformed[0]["entry_hash"] = _entry_hash(malformed[0])
+                report = verify_review_ledger(malformed)
+                self.assertFalse(report["valid"])
+                with self.assertRaises(HandoffError):
+                    self.build(reviews=malformed)
+
     def test_challenge_blocks_latest_event(self):
         result = self.build(reviews=[review("challenge", None)])
         self.assertEqual(result["event_records"], [])
