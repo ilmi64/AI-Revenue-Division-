@@ -94,6 +94,11 @@ class OandaPostCloseoutAccountChangesTests(unittest.TestCase):
         self.assertEqual(result["status"], "HALT")
         self.assertTrue(any("ORDER_FILL" in item for item in result["errors"]))
 
+    def test_new_pending_order_after_closeout_halts_for_exposure_review(self):
+        result = base(account={"orders": [{"id": "new-entry", "state": "PENDING"}]})
+        self.assertEqual(result["status"], "HALT")
+        self.assertEqual(result["new_pending_order_ids"], ["new-entry"])
+
     def test_expected_linked_order_cancellation_must_be_reported(self):
         result = base(changes={"ordersCancelled": []})
         self.assertEqual(result["status"], "HALT")
