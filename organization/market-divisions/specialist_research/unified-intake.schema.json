@@ -606,6 +606,51 @@
                           "const": "publisher_claim_not_independently_verified"
                         }
                       }
+                    },
+                    "research_priority": {
+                      "type": "object",
+                      "required": [
+                        "priority",
+                        "reasons",
+                        "review_queue_only",
+                        "not_a_directional_signal",
+                        "not_a_market_observation",
+                        "trade_authority",
+                        "live_readiness"
+                      ],
+                      "properties": {
+                        "priority": {
+                          "enum": [
+                            "blocked_from_priority_queue",
+                            "insufficient_provenance",
+                            "insufficient_evidence",
+                            "high_review_priority",
+                            "standard_review_priority",
+                            "low_review_priority"
+                          ]
+                        },
+                        "reasons": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "review_queue_only": {
+                          "const": true
+                        },
+                        "not_a_directional_signal": {
+                          "const": true
+                        },
+                        "not_a_market_observation": {
+                          "const": true
+                        },
+                        "trade_authority": {
+                          "const": false
+                        },
+                        "live_readiness": {
+                          "const": false
+                        }
+                      }
                     }
                   }
                 }
