@@ -139,6 +139,12 @@ class OandaPostCloseoutAccountChangesTests(unittest.TestCase):
         self.assertEqual(result["status"], "HALT")
         self.assertEqual(result["unexpected_filled_order_ids"], ["new-entry"])
 
+    def test_margin_closeout_create_transaction_must_match_orders_created(self):
+        result = base(changes={"ordersCreated": []})
+        self.assertEqual(result["status"], "HALT")
+        self.assertEqual(result["unmatched_closeout_create_order_ids"], ["100"])
+        self.assertTrue(any("missing from changes.ordersCreated" in item for item in result["errors"]))
+
     def test_newly_created_order_halts_even_if_not_pending_at_snapshot(self):
         result = base(
             changes={
