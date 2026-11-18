@@ -109,6 +109,42 @@ def read_reviews(path: Path) -> list[dict[str, Any]]:
     return rows
 
 
+def _validate_lifecycle(entries: list[dict[str, Any]]) -> list[str]:
+    errors: list[str] = []
+    latest: dict[str, dict[str, Any]] = {}
+    blocked: dict[str, str] = {}
+    for index, entry in enumerate(entries, 1):
+        if not isinstance(entry, dict):
+            continue
+        event_id = entry.get("event_id")
+        if not isinstance(event_id, str) or not event_id:
+            continue
+        prior = latest.get(event_id)
+        action = entry.get("action")
+        if prior is None and action != "review":
+            errors.append(f"row {index}: first event decision must be review")
+        if prior is not None:
+            prior_refs = set(prior.get("evidence_refs", [])) if isinstance(prior.get("evidence_refs"), list) else set()
+            new_refs = set(entry.get("evidence_refs", [])) - prior_refs if isinstance(entry.get("evidence_refs"), list) else set()
+            if event_id in blocked:
+                if action not in {"correct", "reopen"}:
+                    errors.append(f"row {index}: blocked event requires correct or reopen")
+                if not new_refs:
+                    errors.append(f"row {index}: resolving a blocked event requires new evidence references")
+                if blocked[event_id] in {"reject", "expire"} and action == "reopen":
+                    errors.append(f"row {index}: rejected or expired event cannot be reopened")
+            elif action == "reopen":
+                errors.append(f"row {index}: reopen is only valid after a blocking challenge")
+            if action == "correct" and not new_refs:
+                errors.append(f"row {index}: correction requires new evidence references")
+        if action in {"challenge", "reject", "expire"}:
+            blocked[event_id] = action
+        elif action in {"correct", "reopen"} and event_id in blocked:
+            blocked.pop(event_id, None)
+        latest[event_id] = entry
+    return errors
+
+
 def verify_reviews(entries: list[dict[str, Any]]) -> dict[str, Any]:
     previous = GENESIS
     errors: list[str] = []
@@ -131,6 +167,7 @@ def verify_reviews(entries: list[dict[str, Any]]) -> dict[str, Any]:
             errors.append(f"row {index}: entry_hash mismatch")
         if isinstance(entry.get("entry_hash"), str):
             previous = entry["entry_hash"]
+    errors.extend(_validate_lifecycle(entries))
     return {"valid": not errors, "errors": errors, "entry_count": len(entries),
             "head_hash": previous, "authority": "integrity_check_only_not_a_digital_signature"}
 
@@ -144,6 +181,12 @@ def append_review(path: Path, review: dict[str, Any]) -> dict[str, Any]:
         raise ReviewLedgerError("existing review ledger invalid: " + "; ".join(report["errors"]))
     prior = [row for row in entries if row.get("event_id") == review["event_id"]]
     expected = prior[-1]["entry_hash"] if prior else None
+    candidate = entries + [{"sequence": len(entries) + 1,
+                            "previous_hash": report["head_hash"], **review,
+                            "entry_hash": "0" * 64}]
+    lifecycle_errors = _validate_lifecycle(candidate)
+    if lifecycle_errors:
+        raise ReviewLedgerError("; ".join(lifecycle_errors))
     if review.get("supersedes_entry_hash") != expected:
         raise ReviewLedgerError("supersedes_entry_hash must reference the latest prior review for this event")
     entry = {
