@@ -95,7 +95,7 @@ class VenueDocumentRevisionTests(unittest.TestCase):
         old = revision("2026-01-01T00:00:00Z")
         latest = revision("2026-01-02T00:00:00Z", text="new terms")
         result = assess_profile_revision_impact(
-            {"source_revision_ids": [old["revision_id"]]}, [latest]
+            {"source_revision_ids": [{"document_id": "oanda-gold", "revision_id": old["revision_id"]}]}, [latest]
         )
         self.assertEqual(result["status"], "STALE_REVIEW_REQUIRED")
         self.assertEqual(result["stale_document_ids"], ["oanda-gold"])
@@ -104,7 +104,7 @@ class VenueDocumentRevisionTests(unittest.TestCase):
     def test_profile_is_current_when_linked_to_latest_revision(self):
         latest = revision("2026-01-02T00:00:00Z")
         result = assess_profile_revision_impact(
-            {"source_revision_ids": [latest["revision_id"]]}, [latest]
+            {"source_revision_ids": [{"document_id": "oanda-gold", "revision_id": latest["revision_id"]}]}, [latest]
         )
         self.assertEqual(result["status"], "CURRENT_SOURCE_REVISIONS")
 
@@ -112,7 +112,7 @@ class VenueDocumentRevisionTests(unittest.TestCase):
         latest = revision("2026-01-02T00:00:00Z")
         duplicate = dict(latest)
         result = assess_profile_revision_impact(
-            {"source_revision_ids": [latest["revision_id"]]}, [latest, duplicate]
+            {"source_revision_ids": [{"document_id": "oanda-gold", "revision_id": latest["revision_id"]}]}, [latest, duplicate]
         )
         self.assertEqual(result["status"], "INVALID_PROFILE_REVISION_INPUT")
 
