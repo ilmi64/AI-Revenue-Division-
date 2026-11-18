@@ -209,7 +209,7 @@ class OandaCloseoutTransactionReconciliationTests(unittest.TestCase):
         self.assertEqual(result["status"], "HALT")
 
     def test_reported_last_transaction_id_must_match_range_end(self):
-        result = assess(reported_last_transaction_id="103")
+        result = assess(reported_last_transaction_id="101")
         self.assertEqual(result["status"], "HALT")
         self.assertTrue(any("reported_last_transaction_id" in error for error in result["errors"]))
 
