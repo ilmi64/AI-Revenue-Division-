@@ -77,6 +77,8 @@ def assess_portfolio_risk(
     currency_totals: dict[str, dict[str, float]] = {}
     group_totals: dict[str, dict[str, float]] = {}
     stop_sources: list[dict[str, str]] = []
+    derivatives_liquidity: list[dict[str, Any]] = []
+    derivatives_unknown: list[str] = []
     missing_risk_desks: list[str] = []
 
     for packet in packets:
@@ -180,6 +182,42 @@ def assess_portfolio_risk(
                     "normalization_status": "INPUTS_VALIDATED_NOT_REPRICED",
                     "note": "Valuation amount remains caller-supplied; no contract pricing or margin model is inferred."
                 })
+            derivative_types = {"crypto_perpetual", "forex_cfd", "index_future", "index_cfd", "gold_future", "gold_cfd"}
+            if instrument_type in derivative_types:
+                overlay_errors_before = len(errors)
+                initial_margin = _number(position.get("initial_margin"), f"{prefix}.initial_margin", errors, minimum=0.0)
+                maintenance_margin = _number(position.get("maintenance_margin"), f"{prefix}.maintenance_margin", errors, minimum=0.0)
+                available_margin = _number(position.get("available_margin"), f"{prefix}.available_margin", errors, minimum=0.0)
+                liquidation_distance = _number(position.get("liquidation_distance_pct"), f"{prefix}.liquidation_distance_pct", errors, minimum=0.0)
+                liquidity_depth = _number(position.get("executable_depth_notional"), f"{prefix}.executable_depth_notional", errors, minimum=0.0)
+                funding_cost = _number(position.get("funding_or_financing_cost"), f"{prefix}.funding_or_financing_cost", errors, minimum=0.0)
+                funding_horizon = position.get("funding_horizon_hours")
+                if isinstance(funding_horizon, bool) or not isinstance(funding_horizon, (int, float)) or not isfinite(float(funding_horizon)) or funding_horizon <= 0:
+                    errors.append(f"{prefix}.funding_horizon_hours must be positive")
+                if initial_margin is not None and maintenance_margin is not None and maintenance_margin > initial_margin:
+                    errors.append(f"{prefix}.maintenance_margin cannot exceed initial_margin")
+                if initial_margin is not None and available_margin is not None and available_margin < initial_margin:
+                    warnings.append(f"{prefix} available margin is below supplied initial margin")
+                if liquidity_depth is not None and isinstance(position.get("notional"), (int, float)) and not isinstance(position.get("notional"), bool):
+                    if liquidity_depth < abs(float(position["notional"])):
+                        warnings.append(f"{prefix} executable depth is below position notional")
+                if len(errors) == overlay_errors_before:
+                    derivatives_liquidity.append({
+                        "position_id": pid,
+                        "initial_margin": initial_margin,
+                        "maintenance_margin": maintenance_margin,
+                        "available_margin": available_margin,
+                        "liquidation_distance_pct": liquidation_distance,
+                        "executable_depth_notional": liquidity_depth,
+                        "funding_or_financing_cost": funding_cost,
+                        "funding_horizon_hours": float(funding_horizon),
+                        "status": "INPUTS_VALIDATED_NOT_LIQUIDATION_MODELLED",
+                        "note": "No broker liquidation formula, execution slippage, order-book impact or financing accrual is inferred."
+                    })
+                else:
+                    derivatives_unknown.append(pid)
+            elif instrument_type in {"crypto_spot", "forex_spot", "fx_spot", "index_cash", "gold_spot", "xauusd_spot"}:
+                derivatives_liquidity.append({"position_id": pid, "status": "NOT_APPLICABLE_CASH_OR_SPOT"})
             timestamp = _utc(position.get("source_timestamp_utc"), f"{prefix}.source_timestamp_utc", errors)
             if timestamp and now and timestamp > now:
                 errors.append(f"{prefix}.source_timestamp_utc is in the future")
@@ -379,7 +417,7 @@ def assess_portfolio_risk(
     stop_active = bool(stop_sources)
     if errors or stop_active or any(x["status"] == "BREACH" for x in limit_results):
         status = "HALT"
-    elif missing_desks or missing_risk_desks or normalization_unknown or config_status != "VALID" or any(x["status"] == "UNKNOWN" for x in limit_results) or not scenario_rows or any(x["status"] != "ASSESSED" for x in scenario_rows):
+    elif missing_desks or missing_risk_desks or normalization_unknown or derivatives_unknown or config_status != "VALID" or any(x["status"] == "UNKNOWN" for x in limit_results) or not scenario_rows or any(x["status"] != "ASSESSED" for x in scenario_rows):
         status = "UNKNOWN"
     elif not correlations or any(x.get("proxy_status") == "UNKNOWN" for x in correlations):
         status = "UNKNOWN"
@@ -394,6 +432,7 @@ def assess_portfolio_risk(
                      "missing_risk_desks": sorted(set(missing_risk_desks))},
         "position_count": len(position_rows),
         "instrument_normalization": {"status": "INPUTS_VALIDATED_NOT_REPRICED" if position_rows and not normalization_unknown and not any(any(token in error for token in (".instrument_type", ".valuation_basis", ".units", ".contract_multiplier", ".leverage", ".margin_amount", ".delta")) for error in errors) else "UNKNOWN", "positions": normalization_rows, "unclassified_position_ids": normalization_unknown},
+        "derivatives_liquidity_risk": {"status": "INPUTS_VALIDATED_NOT_LIQUIDATION_MODELLED" if not derivatives_unknown and derivatives_liquidity else "UNKNOWN", "positions": derivatives_liquidity, "unclassified_position_ids": derivatives_unknown},
         "stress_testing": {"status": "ASSESSED" if scenario_rows and all(x["status"] == "ASSESSED" for x in scenario_rows) else "UNKNOWN", "scenarios": scenario_rows, "errors": scenario_errors},
         "positions": position_rows,
         "desk_exposure": desk_exposure,
