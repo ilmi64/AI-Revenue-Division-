@@ -608,6 +608,29 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
                 consistency_errors.append("expected linked-order cancellations differ between transaction and AccountChanges reconciliations")
             if oanda_closeout_transaction_replay.get("account_id") != oanda_post_closeout_account_changes_replay.get("account_id"):
                 consistency_errors.append("account IDs differ between transaction and AccountChanges reconciliations")
+            tx_pre_orders = oanda_closeout_transaction_replay.get("pre_closeout_pending_orders")
+            changes_pre_ids = oanda_post_closeout_account_changes_replay.get("pre_closeout_pending_order_ids")
+            if (not isinstance(tx_pre_orders, list) or not isinstance(changes_pre_ids, list)
+                    or sorted(item.get("id") for item in tx_pre_orders if isinstance(item, dict)) != sorted(changes_pre_ids)):
+                consistency_errors.append("pre-closeout order IDs differ between transaction and AccountChanges reconciliations")
+            tx_expected_cancelled = transaction_report.get("orders_expected_cancelled")
+            changes_expected_cancelled = oanda_post_closeout_account_changes_replay.get("expected_cancelled_order_ids")
+            if (not isinstance(tx_expected_cancelled, list) or not isinstance(changes_expected_cancelled, list)
+                    or sorted(tx_expected_cancelled) != sorted(changes_expected_cancelled)):
+                consistency_errors.append("expected dependent-order cancellation IDs differ between transaction and AccountChanges replay inputs")
+        if isinstance(oanda_pending_order_snapshot, dict) and isinstance(oanda_account_changes_audit, dict):
+            changes_current_orders = changes_report.get("current_pending_order_ids") if isinstance(changes_report, dict) else None
+            pending_snapshot_orders = oanda_pending_order_snapshot.get("pending_orders")
+            if isinstance(changes_current_orders, list) and isinstance(pending_snapshot_orders, list):
+                pending_ids = sorted(item.get("id") for item in pending_snapshot_orders if isinstance(item, dict))
+                if len(pending_ids) != len(pending_snapshot_orders) or sorted(changes_current_orders) != pending_ids:
+                    consistency_errors.append("full-account pending orders differ from the dedicated post-closeout pending-order snapshot")
+                if consistency_errors:
+                    changes_report["status"] = "HALT"
+                    changes_report.setdefault("errors", []).extend(consistency_errors)
+                    oanda_account_changes_audit["status"] = "HALT"
+                    oanda_account_changes_audit["errors"] = changes_report["errors"]
+
         if consistency_errors:
             changes_report["status"] = "HALT"
             changes_report.setdefault("errors", []).extend(consistency_errors)
