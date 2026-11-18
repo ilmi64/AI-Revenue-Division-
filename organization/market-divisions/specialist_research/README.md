@@ -106,10 +106,18 @@ implementation is re-run from raw inputs; no external gate report is trusted.
 Capital-flow evidence remains opt-in. When all three local inputs are supplied,
 the replay independently runs the Capital Flow -> Crypto adapter for each
 Crypto observation. The adapter verifies canonical event records, the complete
-review-ledger hash chain, latest review decision, source access/cost/terms
-status, event freshness/revalidation, evidence references and independent
-confidence fields. It attaches an event only when base asset, chain ID and
-contract address match exactly. Ticker-only matches are prohibited.
+review-ledger hash chain, latest review decision, source access/cost/terms and
+Canada-review status, allowlisted access mode, event freshness/revalidation,
+evidence references and independent confidence fields. It attaches an event
+only when base asset, chain ID and contract address match exactly. Ticker-only
+matches are prohibited.
+
+The Capital Flow source contract is defined by
+[`capital-flow-source-registry.schema.json`](capital-flow-source-registry.schema.json);
+start from `capital-flow-source-registry.template.json`. The template contains
+no pre-approved providers. Each source must independently pass access, zero-cost,
+terms, Canada-review and operational gates. Registry values remain operator
+assertions, not proof of authenticity or legal rights.
 
 Example with the optional Capital Flow inputs:
 
