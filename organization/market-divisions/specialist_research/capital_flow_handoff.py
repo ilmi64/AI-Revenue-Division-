@@ -138,9 +138,10 @@ def _source_is_eligible(source: dict[str, Any]) -> bool:
     # unreviewed terms in the current candidate registry all fail closed.
     return (
         source.get("access_status") in {"verified", "approved"}
-        and source.get("access_mode") not in {"not_accessible", "unknown", None}
+        and source.get("access_mode") in {"public", "manual", "read_only_api", "public_api", "manual_export"}
         and source.get("cost_status") in {"free", "zero_cost"}
         and source.get("terms_review_status") in {"approved", "reviewed"}
+        and source.get("canada_review_status") in {"approved", "reviewed"}
         and source.get("operational_status") in {"approved", "active", "research_only"}
     )
 
