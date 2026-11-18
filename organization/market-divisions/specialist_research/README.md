@@ -1263,4 +1263,4 @@ or grant live readiness.
 
 ### Current OANDA closeout reconciliation regression inventory
 
-As of the current development branch, the relevant suites contain 36 pending-order tests, 33 transaction-reconciliation tests, 14 AccountChanges/full-account reconciliation tests, 43 unified-intake tests, 16 venue-document-capture tests, and 35 Main Hub dashboard tests. These are authored regression cases only; they have not been executed in this environment. The AccountChanges adapter and both cross-audit layers remain offline and research-only.
+As of the current development branch, the relevant suites contain 36 pending-order tests, 33 transaction-reconciliation tests, 14 AccountChanges/full-account reconciliation tests, 43 unified-intake tests, 16 venue-document-capture tests, and 35 Main Hub dashboard tests. These are 177 authored test methods across the listed suites (suite totals are not a claim of unique end-to-end scenarios). They have not been executed in this environment. The AccountChanges adapter and both cross-audit layers remain offline and research-only.
