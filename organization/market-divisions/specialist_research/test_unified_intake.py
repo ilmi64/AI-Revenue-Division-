@@ -606,5 +606,55 @@ class UnifiedIntakeTests(unittest.TestCase):
         self.assertEqual(result["oanda_pending_order_audit"]["status"], "NOT_PROVIDED")
         self.assertIsNone(result["oanda_pending_order_audit"]["report"])
 
+
+    def oanda_account_changes_replay(self, new_trade=False):
+        changes = {
+            "ordersCreated": [], "ordersCancelled": [{"id": "sl-gold"}],
+            "ordersFilled": [], "ordersTriggered": [],
+            "tradesOpened": [{"id": "trade-new"}] if new_trade else [],
+            "tradesReduced": [], "tradesClosed": [{"id": "trade-gold"}],
+            "positions": [],
+            "transactions": [
+                {"id": "101", "accountID": "acct-1", "type": "ORDER_FILL", "orderID": "closeout"},
+                {"id": "102", "accountID": "acct-1", "type": "ORDER_CANCEL", "orderID": "sl-gold"},
+            ],
+        }
+        return {
+            "account_id": "acct-1", "since_transaction_id": "100",
+            "changes_response": {"lastTransactionID": "102", "changes": changes},
+            "post_closeout_account_snapshot": {
+                "lastTransactionID": "102",
+                "account": {
+                    "id": "acct-1", "lastTransactionID": "102",
+                    "orders": [], "trades": [{"id": "trade-new"}] if new_trade else [],
+                    "positions": [],
+                },
+            },
+            "expected_closeout_trade_ids": ["trade-gold"],
+            "pre_closeout_pending_order_ids": ["sl-gold", "entry-1"],
+            "expected_cancelled_order_ids": ["sl-gold"],
+            "evaluated_at_utc": NOW,
+            "changes_observed_at_utc": "2026-11-17T11:59:59Z",
+            "account_snapshot_observed_at_utc": NOW,
+            "max_snapshot_age_seconds": 60,
+        }
+
+    def test_oanda_account_changes_audit_is_integrated_without_execution_authority(self):
+        result = self.build(
+            oanda_post_closeout_account_changes_replay=self.oanda_account_changes_replay()
+        )
+        self.assertEqual(result["oanda_post_closeout_account_changes_audit"]["status"], "PASS")
+        self.assertTrue(result["oanda_post_closeout_account_changes_audit"]["report"]["account_change_reconciliation_complete"])
+        self.assertFalse(result["trade_authority"])
+        self.assertFalse(result["live_readiness"])
+
+    def test_oanda_account_changes_new_trade_keeps_global_stop_active(self):
+        result = self.build(
+            oanda_post_closeout_account_changes_replay=self.oanda_account_changes_replay(new_trade=True)
+        )
+        self.assertEqual(result["oanda_post_closeout_account_changes_audit"]["status"], "HALT")
+        self.assertTrue(result["global_stop_active"])
+        self.assertTrue(any(stop["source"] == "oanda_account_changes" for stop in result["active_stops"]))
+
 if __name__ == "__main__":
     unittest.main()
