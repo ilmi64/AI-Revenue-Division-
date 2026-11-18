@@ -152,6 +152,14 @@ class ReplayTests(unittest.TestCase):
         for key in ("observations_sha256", "market_source_registry_sha256",
                     "gate_implementation_sha256"):
             self.assertRegex(gate[key], r"^[a-f0-9]{64}$")
+        implementation = gate["implementation_sha256"]
+        self.assertEqual(set(implementation), {
+            "replay", "evidence_gate", "specialist_engines", "gold_specialist",
+            "capital_flow_handoff", "capital_flow_provenance",
+            "capital_flow_priority", "capital_flow_taxonomy",
+        })
+        for digest in implementation.values():
+            self.assertRegex(digest, r"^[a-f0-9]{64}$")
         self.assertIsNone(gate["capital_flow_inputs_sha256"])
         self.assertEqual(gate["evaluation_time_utc"], NOW)
 
