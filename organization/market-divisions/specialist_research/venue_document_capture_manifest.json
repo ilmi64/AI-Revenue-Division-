@@ -1234,7 +1234,8 @@
         "oanda_v20_account_pending_orders_endpoint",
         "oanda_v20_transaction_endpoints",
         "oanda_v20_transaction_definitions",
-        "oanda_v20_account_changes_endpoint"
+        "oanda_v20_account_changes_endpoint",
+        "oanda_v20_account_definitions"
       ]
     },
     {
@@ -1253,7 +1254,8 @@
         "oanda_v20_account_pending_orders_endpoint",
         "oanda_v20_transaction_endpoints",
         "oanda_v20_transaction_definitions",
-        "oanda_v20_account_changes_endpoint"
+        "oanda_v20_account_changes_endpoint",
+        "oanda_v20_account_definitions"
       ]
     },
     {
