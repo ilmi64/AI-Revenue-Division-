@@ -613,3 +613,45 @@ tiers, liquidation engines, mark-price rules, partial liquidation, order-book
 impact, slippage, funding accrual, expiry settlement, contract rolls or gap
 execution. Those remain explicit model gaps and prevent any claim of live
 risk coverage.
+
+
+## Venue-parameterised derivative path simulation
+
+`venue_risk_simulation.py` adds an offline path simulator for explicitly
+specified Crypto perpetual, Forex CFD, index future/CFD and Gold future/CFD
+contracts. It replays caller-supplied UTC mark-price steps, applies the supplied
+maintenance-margin tier schedule, calculates price P&L and funding transfers,
+and estimates liquidation fees and market impact using explicit depth and
+impact parameters. If the venue specification explicitly supports partial
+liquidation, it tests a quantity reduction against the configured maintenance
+buffer; otherwise a trigger is modelled as full liquidation.
+
+The required venue specification includes contract multiplier, initial-margin
+rate, mark-price rule, maintenance tiers, liquidation fee, impact coefficients,
+buffer ratio and partial-liquidation support. Each path step supplies mark,
+depth, funding rate and funding interval. Initial margin is checked against
+the supplied initial-margin rate. Missing/invalid rules, incomplete tier
+coverage, invalid timestamps or invalid path values block the simulation.
+There are no default venue profiles or broker assumptions.
+
+Example interface:
+
+```python
+from specialist_research.venue_risk_simulation import simulate_derivative_path
+
+result = simulate_derivative_path(venue_spec, position, mark_path)
+```
+
+This is a deterministic model harness, not a broker-exact liquidation engine.
+The impact calculation is a configurable heuristic, not an order-book replay.
+It does not model intrabar sequencing, queue priority, insurance funds, ADL,
+bankruptcy pricing, cross-collateral, venue-specific liquidation sequencing,
+or guarantee gap fills. Caller-supplied venue rules and market data are not
+authenticated. Gold, FX, indices and Crypto still require separate reviewed
+venue/contract profiles; one profile must not be copied across instruments.
+
+Synthetic regression cases are in `test_venue_risk_simulation.py`. They cover
+missing model inputs, ordinary price-path P&L, long liquidation, partial
+liquidation, short-side funding, timestamp ordering, gap visibility and the
+research-only authority boundary. Tests are authored and have not yet been
+executed in this environment.
