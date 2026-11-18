@@ -1,0 +1,516 @@
+{
+  "schema_version": "1.0.0",
+  "manifest_status": "PARTIAL_OFFICIAL_EXCERPT_CAPTURE_NOT_FULL_DOCUMENTS",
+  "capture_date": "2026-11-17",
+  "capture_time_precision": "date_only_normalized_to_utc_midnight",
+  "captured_at_utc": "2026-11-17T00:00:00Z",
+  "method": "Official-page search excerpts transcribed into a research manifest; no complete page/PDF byte capture.",
+  "global_controls": {
+    "full_document_capture": false,
+    "source_authentication": "NOT_PERFORMED",
+    "publisher_identity_verified": false,
+    "source_timestamp_trusted": false,
+    "automatic_profile_update": false,
+    "profile_approval": false,
+    "trade_authority": false,
+    "live_readiness": false,
+    "research_only": true
+  },
+  "captures": [
+    {
+      "document_id": "kraken_mtf_linear_contract_specs",
+      "candidate_ids": [
+        "kraken_mtf_crypto_linear_derivatives"
+      ],
+      "canonical_uri": "https://support.mtf.kraken.com/hc/en-us/articles/25499987607837-Linear-Contract-Specifications",
+      "title": "Linear Contract Specifications",
+      "publisher": "Kraken MTF / Crypto Facilities Ltd",
+      "source_class": "official_contract_specification",
+      "source_ref": "turn633863search1",
+      "content_sha256": "6431bddba31e34203ceee88e0cfb1f1ee1329abcf776f32697e833aaa938ee6b",
+      "document_text": "Kraken MTF linear derivatives are margined and cash settled in USD. Perpetuals have no expiry and use hourly counterparty funding; fixed maturities use dated contracts. Perpetual symbols use PF; fixed maturity symbols use FF plus YYMMDD. Minimum lot is in base currency and no multiplier is currently used. Mark price references index and 30-second EMA order-book mid premium. Margin is tiered by product and size; displayed IM ranges 1%-50% and MM 0.5%-25%. Funding direction follows premium: positive premium long pays short; negative premium short pays long. Page states last updated 16 June 2026.",
+      "extracted_facts": [
+        {
+          "fact_key": "settlement_currency",
+          "value": "USD",
+          "unit": "currency",
+          "source_locator": "opening contract description"
+        },
+        {
+          "fact_key": "funding_interval",
+          "value": 1,
+          "unit": "hour",
+          "source_locator": "funding section"
+        },
+        {
+          "fact_key": "contract_multiplier",
+          "value": "no multiplier; base-currency lot",
+          "unit": "convention",
+          "source_locator": "linear contract information"
+        },
+        {
+          "fact_key": "mark_price_rule",
+          "value": "index plus 30-second EMA order-book mid premium; maturity basis treatment",
+          "unit": "rule",
+          "source_locator": "mark price section"
+        },
+        {
+          "fact_key": "initial_margin_rate",
+          "value": "tier range 1%-50%; instrument mapping not captured",
+          "unit": "range",
+          "source_locator": "margin schedule"
+        },
+        {
+          "fact_key": "maintenance_margin_rate",
+          "value": "tier range 0.5%-25%; instrument mapping not captured",
+          "unit": "range",
+          "source_locator": "margin schedule"
+        }
+      ],
+      "known_gaps": [
+        "complete instrument/size tier table",
+        "liquidation fee and closeout",
+        "collateral haircuts",
+        "Canadian eligibility"
+      ],
+      "capture_scope": "official_page_search_excerpt",
+      "full_document_capture": false,
+      "capture_time_precision": "date_only_normalized_to_utc_midnight",
+      "captured_at_utc": "2026-11-17T00:00:00Z",
+      "retrieval_method": "official_web_search_excerpt"
+    },
+    {
+      "document_id": "coinbase_intx_perpetual_product_specs",
+      "candidate_ids": [
+        "coinbase_intx_crypto_perpetuals"
+      ],
+      "canonical_uri": "https://help.coinbase.com/en/global-exchange/perpetual-futures-basics/perpetual-futures-product-specifications",
+      "title": "Perpetual Futures Product Specifications",
+      "publisher": "Coinbase International Exchange",
+      "source_class": "official_contract_specification",
+      "source_ref": "turn633863search0",
+      "content_sha256": "2bac3f1a62d045c7d8b0e562c7afd00b3f55fc0252fe3ad0153d3eb4b38b2333",
+      "document_text": "Coinbase International Exchange BTC and ETH examples are linear USDC-settled perpetuals with no expiry and multiplier 1. BTC example shows 0.0001 base increment, 0.1 quote increment, 10 USDC minimum order, 0.0001 BTC minimum quantity, 24/7 excluding maintenance, 50x maximum leverage, default initial margin 20%, and BTC/USD index updated every second. Other listed products have different product-specific increments and default initial margin. Settlement asset is settled every five minutes in USDC.",
+      "extracted_facts": [
+        {
+          "fact_key": "settlement_currency",
+          "value": "USDC",
+          "unit": "currency",
+          "source_locator": "BTC/ETH product rows"
+        },
+        {
+          "fact_key": "contract_multiplier",
+          "value": 1,
+          "unit": "contract multiplier",
+          "source_locator": "BTC/ETH product rows"
+        },
+        {
+          "fact_key": "expiry",
+          "value": "perpetual/no expiry",
+          "unit": "term",
+          "source_locator": "BTC/ETH product rows"
+        },
+        {
+          "fact_key": "initial_margin_rate",
+          "value": "BTC/ETH example default 20%; other products vary",
+          "unit": "ratio",
+          "source_locator": "BTC/ETH product rows"
+        },
+        {
+          "fact_key": "settlement_interval",
+          "value": 5,
+          "unit": "minutes",
+          "source_locator": "settlement asset"
+        },
+        {
+          "fact_key": "index_price_update_interval",
+          "value": 1,
+          "unit": "second",
+          "source_locator": "index price"
+        }
+      ],
+      "known_gaps": [
+        "maintenance margin schedule",
+        "liquidation and closeout",
+        "funding formula and interval",
+        "fees and collateral haircuts",
+        "Canadian eligibility"
+      ],
+      "capture_scope": "official_page_search_excerpt",
+      "full_document_capture": false,
+      "capture_time_precision": "date_only_normalized_to_utc_midnight",
+      "captured_at_utc": "2026-11-17T00:00:00Z",
+      "retrieval_method": "official_web_search_excerpt"
+    },
+    {
+      "document_id": "oanda_canada_margin_rates",
+      "candidate_ids": [
+        "oanda_canada_fx_cfd",
+        "oanda_canada_index_cfd",
+        "oanda_canada_gold_cfd"
+      ],
+      "canonical_uri": "https://www.oanda.com/ca-en/legal/margin-rates/",
+      "title": "Margin Rates and Leverage Ratios",
+      "publisher": "OANDA (Canada) Corporation",
+      "source_class": "official_margin_schedule",
+      "source_ref": "turn633863search6",
+      "content_sha256": "7364d24bf0e0ec46ae18578c55256fcc44c04cd5dfc4d1104a908945d8434c31",
+      "document_text": "OANDA Canada margin page lists Canadian retail FX, metals, indices and commodity products. Displayed CAD table examples include USD/CAD 50:1, EUR/USD 20:1, Gold 4.5:1, Gold/CAD 5:1, US Wall St 30 8.3:1, US Nas 100 8.3:1 and US SPX 500 8.3:1. Rates vary by instrument and are subject to CIRO retail client requirements; displayed values are dynamic and not fixed profile constants.",
+      "extracted_facts": [
+        {
+          "fact_key": "jurisdiction_scope",
+          "value": "Canada; CAD table",
+          "unit": "jurisdiction",
+          "source_locator": "page heading and CAD selector"
+        },
+        {
+          "fact_key": "usd_cad_example_leverage",
+          "value": "50:1",
+          "unit": "leverage",
+          "source_locator": "Forex CFDs"
+        },
+        {
+          "fact_key": "gold_example_leverage",
+          "value": "4.5:1",
+          "unit": "leverage",
+          "source_locator": "Metals CFDs"
+        },
+        {
+          "fact_key": "us_spx_500_example_leverage",
+          "value": "8.3:1",
+          "unit": "leverage",
+          "source_locator": "Index CFDs"
+        },
+        {
+          "fact_key": "us_nas_100_example_leverage",
+          "value": "8.3:1",
+          "unit": "leverage",
+          "source_locator": "Index CFDs"
+        }
+      ],
+      "known_gaps": [
+        "account-specific schedule",
+        "contract units/minimum lot",
+        "maintenance margin/closeout",
+        "effective-date metadata"
+      ],
+      "capture_scope": "official_page_search_excerpt",
+      "full_document_capture": false,
+      "capture_time_precision": "date_only_normalized_to_utc_midnight",
+      "captured_at_utc": "2026-11-17T00:00:00Z",
+      "retrieval_method": "official_web_search_excerpt"
+    },
+    {
+      "document_id": "oanda_canada_financing_faq",
+      "candidate_ids": [
+        "oanda_canada_fx_cfd",
+        "oanda_canada_gold_cfd"
+      ],
+      "canonical_uri": "https://help.oanda.com/ca/en/faqs/financing-costs-ca.htm",
+      "title": "Financing Costs FAQ",
+      "publisher": "OANDA (Canada) Corporation",
+      "source_class": "official_financing_policy",
+      "source_ref": "turn633863search5",
+      "content_sha256": "9e2469348d96f9e62fefff914561e76b973f0f5d5644914e55804b62ace144c2",
+      "document_text": "OANDA Canada says FX and metals financing is based on liquidity-provider tom-next swap rates adjusted by an instrument-specific admin fee and annualized. Long/buy and short/sell rates are separately determined; actual instrument rates may change.",
+      "extracted_facts": [
+        {
+          "fact_key": "financing_convention",
+          "value": "tom-next swap blend plus instrument admin fee",
+          "unit": "method",
+          "source_locator": "financing methodology"
+        },
+        {
+          "fact_key": "financing_rate_basis",
+          "value": "annualized; separate long and short rates",
+          "unit": "basis",
+          "source_locator": "FX and metals table"
+        },
+        {
+          "fact_key": "financing_rate_freshness",
+          "value": "instrument rates may change",
+          "unit": "dynamic",
+          "source_locator": "FAQ rate description"
+        }
+      ],
+      "known_gaps": [
+        "actual rates per instrument",
+        "triple-day treatment",
+        "charge timestamp and holidays",
+        "client agreement"
+      ],
+      "capture_scope": "official_page_search_excerpt",
+      "full_document_capture": false,
+      "capture_time_precision": "date_only_normalized_to_utc_midnight",
+      "captured_at_utc": "2026-11-17T00:00:00Z",
+      "retrieval_method": "official_web_search_excerpt"
+    },
+    {
+      "document_id": "oanda_canada_index_cfd_faq",
+      "candidate_ids": [
+        "oanda_canada_index_cfd"
+      ],
+      "canonical_uri": "https://help.oanda.com/ca/en/faqs/index-cfds.htm",
+      "title": "Index CFDs FAQ",
+      "publisher": "OANDA (Canada) Corporation",
+      "source_class": "official_help_centre",
+      "source_ref": "turn892521search3",
+      "content_sha256": "4f4cf0e2e32d64f2088c94bb4ede9beac1f6f2c570b6c48cbeb6c7c7efb0e385",
+      "document_text": "OANDA Canada states index exposure is provided as CFDs, not direct index purchases. Index CFD prices reference a combination of relevant futures and cash/spot prices, adjusted for dividends and anticipated corporate actions. Index CFDs have no expiry; clients may short and spreads are dynamic. Margin and trading hours are in separate documentation.",
+      "extracted_facts": [
+        {
+          "fact_key": "mark_price_rule",
+          "value": "relevant futures plus cash/spot reference, adjusted for dividends/corporate actions",
+          "unit": "method",
+          "source_locator": "pricing FAQ"
+        },
+        {
+          "fact_key": "expiry",
+          "value": "no expiry",
+          "unit": "term",
+          "source_locator": "expiry FAQ"
+        },
+        {
+          "fact_key": "short_selling",
+          "value": true,
+          "unit": "boolean",
+          "source_locator": "shorting FAQ"
+        },
+        {
+          "fact_key": "spread_type",
+          "value": "dynamic",
+          "unit": "type",
+          "source_locator": "spread FAQ"
+        }
+      ],
+      "known_gaps": [
+        "instrument-specific index formula",
+        "dividend adjustment details",
+        "trading hours and holidays",
+        "margin/closeout"
+      ],
+      "capture_scope": "official_page_search_excerpt",
+      "full_document_capture": false,
+      "capture_time_precision": "date_only_normalized_to_utc_midnight",
+      "captured_at_utc": "2026-11-17T00:00:00Z",
+      "retrieval_method": "official_web_search_excerpt"
+    },
+    {
+      "document_id": "oanda_canada_financing_costs_page",
+      "candidate_ids": [
+        "oanda_canada_fx_cfd",
+        "oanda_canada_index_cfd",
+        "oanda_canada_gold_cfd"
+      ],
+      "canonical_uri": "https://www.oanda.com/ca-en/trading/financing-costs/",
+      "title": "Financing Costs",
+      "publisher": "OANDA (Canada) Corporation",
+      "source_class": "official_financing_policy",
+      "source_ref": "turn633863search3",
+      "content_sha256": "84f2f8f15f6c0c956d88fe07735b64ee9b8dbefba8c9663ad71da31ffb3ed1c3",
+      "document_text": "OANDA Canada treats positions open at 5pm ET as overnight. FX, gold and silver daily financing is size times applicable annualized rate divided by 365; index financing is position value times rate divided by 365. Rates differ by instrument and long/short side and may change daily. Gold/FX rates reference tom-next swaps plus instrument admin fee.",
+      "extracted_facts": [
+        {
+          "fact_key": "financing_cutoff",
+          "value": "5pm ET",
+          "unit": "time",
+          "source_locator": "Financing Costs"
+        },
+        {
+          "fact_key": "fx_gold_financing_formula",
+          "value": "position size x annualized rate / 365",
+          "unit": "formula",
+          "source_locator": "Financing Costs"
+        },
+        {
+          "fact_key": "index_financing_formula",
+          "value": "position value x annualized rate / 365",
+          "unit": "formula",
+          "source_locator": "Financing Costs"
+        },
+        {
+          "fact_key": "financing_rate_freshness",
+          "value": "instrument-specific and may change daily",
+          "unit": "dynamic",
+          "source_locator": "Funding rates"
+        }
+      ],
+      "known_gaps": [
+        "live instrument rates",
+        "holiday/triple-day handling",
+        "contract unit and closeout"
+      ],
+      "capture_scope": "official_page_search_excerpt",
+      "full_document_capture": false,
+      "capture_time_precision": "date_only_normalized_to_utc_midnight",
+      "captured_at_utc": "2026-11-17T00:00:00Z",
+      "retrieval_method": "official_web_search_excerpt"
+    },
+    {
+      "document_id": "cme_comex_gold_futures_specs",
+      "candidate_ids": [
+        "cme_comex_gold_futures"
+      ],
+      "canonical_uri": "https://www.cmegroup.com/markets/metals/precious/gold-futures.contractSpecs.html",
+      "title": "Gold Futures Contract Specifications",
+      "publisher": "CME Group / COMEX",
+      "source_class": "official_contract_specification",
+      "source_ref": "turn633863search2",
+      "content_sha256": "a4b03e568c5da42acc9cc9616eefc90c0eb7439fe1c9b7aa88565aa55ed41e03",
+      "document_text": "CME Group lists GC Gold futures at 100 troy ounces and MGC Micro Gold futures at 10 troy ounces. The page also lists 1OZ at 1 troy ounce and QO at 50 troy ounces. Displayed notional and margin are estimates with a July 7, 2026 reference timestamp in the returned excerpt, not fixed exchange margin requirements.",
+      "extracted_facts": [
+        {
+          "fact_key": "gc_contract_multiplier",
+          "value": 100,
+          "unit": "troy ounces",
+          "source_locator": "GC product row"
+        },
+        {
+          "fact_key": "mgc_contract_multiplier",
+          "value": 10,
+          "unit": "troy ounces",
+          "source_locator": "MGC product row"
+        },
+        {
+          "fact_key": "margin_requirement",
+          "value": "displayed estimate only; dynamic",
+          "unit": "status",
+          "source_locator": "margin estimate"
+        }
+      ],
+      "known_gaps": [
+        "current expiry schedule",
+        "tick size/value",
+        "delivery and first notice dates",
+        "settlement procedure",
+        "current FCM margin",
+        "Canadian FCM eligibility"
+      ],
+      "capture_scope": "official_page_search_excerpt",
+      "full_document_capture": false,
+      "capture_time_precision": "date_only_normalized_to_utc_midnight",
+      "captured_at_utc": "2026-11-17T00:00:00Z",
+      "retrieval_method": "official_web_search_excerpt"
+    },
+    {
+      "document_id": "cme_equity_index_futures_specs",
+      "candidate_ids": [
+        "cme_equity_index_futures"
+      ],
+      "canonical_uri": "https://www.cmegroup.com/markets/equities/sp-500-and-nasdaq-100-futures.html",
+      "title": "Equity Index Futures Product Specifications",
+      "publisher": "CME Group",
+      "source_class": "official_contract_specification",
+      "source_ref": "turn737148search0",
+      "content_sha256": "74a63475af4d61c2129d8aa0193ff48d4ac0e21050be5c214d1c110b1d2ec9d1",
+      "document_text": "CME lists MES at USD 5 per S&P 500 index point and ES at USD 50 per point. The excerpt gives a 0.25-point minimum tick, worth USD 1.25 for MES and USD 12.50 for ES. Equity index futures trade 23 hours per day Sunday-Friday with a daily halt. Positions may be offset, rolled or settled before expiry; exact contract month/calendar is separate. Displayed margins are dynamic.",
+      "extracted_facts": [
+        {
+          "fact_key": "es_contract_multiplier",
+          "value": 50,
+          "unit": "USD per index point",
+          "source_locator": "S&P 500 contract table"
+        },
+        {
+          "fact_key": "mes_contract_multiplier",
+          "value": 5,
+          "unit": "USD per index point",
+          "source_locator": "S&P 500 contract table"
+        },
+        {
+          "fact_key": "price_tick",
+          "value": 0.25,
+          "unit": "index points",
+          "source_locator": "minimum tick"
+        },
+        {
+          "fact_key": "mes_tick_value",
+          "value": 1.25,
+          "unit": "USD",
+          "source_locator": "minimum tick"
+        },
+        {
+          "fact_key": "es_tick_value",
+          "value": 12.5,
+          "unit": "USD",
+          "source_locator": "minimum tick"
+        },
+        {
+          "fact_key": "trading_hours",
+          "value": "23 hours/day Sunday-Friday; daily halt",
+          "unit": "schedule",
+          "source_locator": "trading hours"
+        },
+        {
+          "fact_key": "roll_method",
+          "value": "offset, roll or settle before expiry; contract-specific calendar needed",
+          "unit": "method",
+          "source_locator": "expiry explanation"
+        }
+      ],
+      "known_gaps": [
+        "exact contract code/month",
+        "last trade timestamp",
+        "final settlement method",
+        "delivery/settlement calendar",
+        "current FCM margin",
+        "Canadian FCM eligibility"
+      ],
+      "capture_scope": "official_page_search_excerpt",
+      "full_document_capture": false,
+      "capture_time_precision": "date_only_normalized_to_utc_midnight",
+      "captured_at_utc": "2026-11-17T00:00:00Z",
+      "retrieval_method": "official_web_search_excerpt"
+    }
+  ],
+  "candidate_coverage": [
+    {
+      "candidate_id": "kraken_mtf_crypto_linear_derivatives",
+      "document_ids": [
+        "kraken_mtf_linear_contract_specs"
+      ]
+    },
+    {
+      "candidate_id": "coinbase_intx_crypto_perpetuals",
+      "document_ids": [
+        "coinbase_intx_perpetual_product_specs"
+      ]
+    },
+    {
+      "candidate_id": "oanda_canada_fx_cfd",
+      "document_ids": [
+        "oanda_canada_margin_rates",
+        "oanda_canada_financing_faq",
+        "oanda_canada_financing_costs_page"
+      ]
+    },
+    {
+      "candidate_id": "oanda_canada_index_cfd",
+      "document_ids": [
+        "oanda_canada_margin_rates",
+        "oanda_canada_index_cfd_faq",
+        "oanda_canada_financing_costs_page"
+      ]
+    },
+    {
+      "candidate_id": "oanda_canada_gold_cfd",
+      "document_ids": [
+        "oanda_canada_margin_rates",
+        "oanda_canada_financing_faq",
+        "oanda_canada_financing_costs_page"
+      ]
+    },
+    {
+      "candidate_id": "cme_comex_gold_futures",
+      "document_ids": [
+        "cme_comex_gold_futures_specs"
+      ]
+    },
+    {
+      "candidate_id": "cme_equity_index_futures",
+      "document_ids": [
+        "cme_equity_index_futures_specs"
+      ]
+    }
+  ]
+}
