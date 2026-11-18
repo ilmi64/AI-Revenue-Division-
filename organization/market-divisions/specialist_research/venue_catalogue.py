@@ -19,11 +19,15 @@ def validate_catalogue(catalogue: Any) -> list[str]:
         errors.append("schema_version must be 1.0.0")
     if catalogue.get("catalogue_status") != "candidate_research_only":
         errors.append("catalogue_status must remain candidate_research_only")
-    if catalogue.get("jurisdiction", {}).get("country") != "Canada":
+    jurisdiction = catalogue.get("jurisdiction")
+    if not isinstance(jurisdiction, dict):
+        errors.append("jurisdiction must be an object")
+        jurisdiction = {}
+    if jurisdiction.get("country") != "Canada":
         errors.append("catalogue jurisdiction must identify Canada")
-    if catalogue.get("jurisdiction", {}).get("province") != "Ontario":
+    if jurisdiction.get("province") != "Ontario":
         errors.append("catalogue jurisdiction must identify Ontario")
-    if catalogue.get("jurisdiction", {}).get("eligibility_status") != "UNVERIFIED_FOR_EACH_PROVIDER_AND_PRODUCT":
+    if jurisdiction.get("eligibility_status") != "UNVERIFIED_FOR_EACH_PROVIDER_AND_PRODUCT":
         errors.append("provider/product eligibility must remain explicitly unverified")
     candidates = catalogue.get("candidates")
     if not isinstance(candidates, list):
@@ -76,7 +80,10 @@ def validate_catalogue(catalogue: Any) -> list[str]:
                 errors.append(f"{sp}.full_document_capture must remain false until actual capture is recorded")
             if source.get("source_content_hash") is not None:
                 errors.append(f"{sp}.source_content_hash must remain null until bytes are captured and hashed")
-    controls = catalogue.get("global_controls", {})
+    controls = catalogue.get("global_controls")
+    if not isinstance(controls, dict):
+        errors.append("global_controls must be an object")
+        controls = {}
     if controls.get("profile_creation") != "not_performed":
         errors.append("profile_creation must remain not_performed")
     if controls.get("profile_approval") != "not_performed":
