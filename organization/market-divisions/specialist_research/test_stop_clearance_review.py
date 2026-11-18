@@ -131,6 +131,28 @@ class StopClearanceReviewTests(unittest.TestCase):
         result = self.audit()
         self.assertEqual(result["stops"][0]["status"], "review_pending_or_incomplete")
 
+    def test_rejected_clearance_request_cannot_become_eligible(self):
+        self.seed_recovery()
+        self.append(event("request-1", "stop_clearance_requested", "operator",
+                          details={"stop_id": self.stop_id, "incident_id": "incident-1",
+                                   "requestor_id": "operator", "approval_status": "rejected",
+                                   "recovery_evidence_event_ids": ["recovery-1"],
+                                   "corrective_action_event_ids": ["corrective-1"]}))
+        self.review("review-risk", "risk-reviewer", "independent_risk")
+        self.review("review-occ", "occ-reviewer", "occ")
+        result = self.audit()
+        self.assertNotEqual(result["stops"][0]["status"], "eligible_for_separate_occ_decision")
+        self.assertTrue(any("marked rejected" in x for x in result["stops"][0]["requests"][0]["errors"]))
+
+    def test_duplicate_stop_id_raises_fail_closed_review(self):
+        self.seed_recovery()
+        self.append(event("stop-raised-again", "stop_raised", "risk-2",
+                          details={"stop_id": self.stop_id}))
+        result = self.audit()
+        self.assertFalse(result["valid"])
+        self.assertEqual(result["status"], "HALT_REVIEW")
+        self.assertTrue(result["global_stop_active"])
+
     def test_unknown_request_review_is_reported(self):
         self.seed_recovery()
         self.append(event("orphan-review", "stop_clearance_reviewed", "occ-reviewer",
