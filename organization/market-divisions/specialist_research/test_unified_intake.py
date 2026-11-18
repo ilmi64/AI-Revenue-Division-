@@ -210,6 +210,8 @@ class UnifiedIntakeTests(unittest.TestCase):
         summary = audit["instruments"][0]["accepted_event_summaries"][0]
         self.assertEqual(summary["event_classification"]["category"], "whale_movement")
         self.assertFalse(summary["event_classification"]["source_independence_verified"])
+        self.assertEqual(summary["evidence_provenance"]["status"], "incomplete")
+        self.assertFalse(summary["evidence_provenance"]["independent_corroboration_established"])
         self.assertFalse(audit["trade_authority"])
         self.assertFalse(audit["live_readiness"])
 
