@@ -1018,3 +1018,12 @@ risk explicit: a GC futures profile must carry first-notice/last-trade and
 broker cutoff controls rather than treating the instrument as a cash-settled
 XAUUSD CFD. The rulebook excerpt does not replace the FCM's own delivery
 instructions or account-specific controls.
+
+
+### OCC venue revision review queue
+
+`build_revision_review_queue` in `venue_document_revisions.py` combines document comparison reports and profile-source freshness reports into a deterministic human-review queue. Changes to critical contract terms (including multiplier, margin, mark price, funding/financing, liquidation, expiry, settlement, roll and tick terms) are ordered ahead of standard document changes. Stale or untracked profile sources also produce review items.
+
+The queue is a prioritization aid, not a risk score, source-authentication mechanism or approval workflow. Invalid comparison/profile-impact input fails closed. An empty queue means only that the supplied reports contain no outstanding items; it does not establish that documents are complete or current. No profile is modified, approved or made eligible for replay. All outputs retain `trade_authority=false` and `live_readiness=false`.
+
+The revision-record schema now accepts either `extraction_method` (manual/synthetic capture) or `retrieval_method` (research manifest capture), while requiring at least one provenance field. Regression coverage includes critical-first ordering, stale-source queueing, invalid-input blocking and the no-authority boundary. Tests are authored and have not yet been executed.
