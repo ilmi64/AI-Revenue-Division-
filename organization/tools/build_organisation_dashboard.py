@@ -338,7 +338,11 @@ def build_occ_control_health_report(snapshot=None):
           or (oanda_pending_audit.get("status") == "NOT_PROVIDED" and oanda_pending_audit.get("report") is not None)
           or (oanda_pending_audit.get("status") in {"PASS", "HALT"} and not isinstance(oanda_pending_audit.get("report"), dict))
           or (oanda_pending_audit.get("status") == "PASS" and oanda_pending_audit.get("report", {}).get("status") != "PASS")
-          or (oanda_pending_audit.get("status") == "HALT" and oanda_pending_audit.get("report", {}).get("status") == "PASS")):
+          or (oanda_pending_audit.get("status") == "HALT" and oanda_pending_audit.get("report", {}).get("status") == "PASS")
+          or (oanda_pending_audit.get("status") in {"PASS", "HALT"} and
+              (oanda_pending_audit.get("report", {}).get("trade_authority") is not False
+               or oanda_pending_audit.get("report", {}).get("live_readiness") is not False
+               or oanda_pending_audit.get("report", {}).get("authority") != "research_only_no_execution_authority"))):
         oanda_pending_audit = dict(oanda_pending_audit) if isinstance(oanda_pending_audit, dict) else {}
         oanda_pending_audit["status"] = "HALT"
         errors.append("OANDA pending-order audit is malformed or violates its research-only authority boundary.")
