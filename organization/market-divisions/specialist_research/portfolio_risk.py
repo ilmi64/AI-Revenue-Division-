@@ -6,7 +6,7 @@ It never invents positions, prices, FX conversions, correlations or risk limits.
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from math import isfinite
+from math import isfinite, sqrt
 from typing import Any
 
 DESKS = ("crypto", "forex", "indices", "gold")
@@ -67,9 +67,10 @@ def assess_portfolio_risk(
 
     position_rows: list[dict[str, Any]] = []
     seen_positions: set[str] = set()
-    desk_exposure: dict[str, dict[str, float]] = {
-        desk: {"gross": 0.0, "net": 0.0, "position_count": 0} for desk in DESKS
+    desk_exposure: dict[str, dict[str, Any]] = {
+        desk: {"by_valuation_currency": {}, "position_count": 0} for desk in DESKS
     }
+    instrument_currency_exposure: dict[str, dict[str, float]] = {}
     currency_totals: dict[str, dict[str, float]] = {}
     group_totals: dict[str, dict[str, float]] = {}
     stop_sources: list[dict[str, str]] = []
@@ -139,10 +140,15 @@ def assess_portfolio_risk(
                 "source_timestamp_utc": position.get("source_timestamp_utc"),
             }
             position_rows.append(row)
-            desk_exposure[desk]["gross"] += amount
-            desk_exposure[desk]["net"] += signed
             desk_exposure[desk]["position_count"] += 1
             if isinstance(valuation_currency, str) and valuation_currency:
+                desk_currency = desk_exposure[desk]["by_valuation_currency"].setdefault(
+                    valuation_currency, {"gross": 0.0, "net": 0.0, "position_count": 0})
+                desk_currency["gross"] += amount
+                desk_currency["net"] += signed
+                desk_currency["position_count"] += 1
+                instrument_currency = instrument_currency_exposure.setdefault(str(packet.get("instrument_id")), {})
+                instrument_currency[valuation_currency] = instrument_currency.get(valuation_currency, 0.0) + signed
                 totals = currency_totals.setdefault(valuation_currency, {"gross": 0.0, "net": 0.0, "position_count": 0})
                 totals["gross"] += amount
                 totals["net"] += signed
@@ -187,12 +193,26 @@ def assess_portfolio_risk(
             correlation_errors.append(f"{prefix}.evidence_refs missing")
         if not isinstance(item.get("source_id"), str) or not item.get("source_id"):
             correlation_errors.append(f"{prefix}.source_id missing")
-        correlations.append({
+        pair = {
             "instrument_id_a": left, "instrument_id_b": right,
             "correlation": float(value), "observed_at_utc": item.get("observed_at_utc"),
             "source_id": item.get("source_id"), "evidence_refs": refs if isinstance(refs, list) else [],
             "authentication_status": "not_authenticated",
-        })
+        }
+        left_values = instrument_currency_exposure.get(left, {})
+        right_values = instrument_currency_exposure.get(right, {})
+        shared_currencies = set(left_values) & set(right_values)
+        if len(shared_currencies) == 1:
+            valuation_currency = next(iter(shared_currencies))
+            a, b = left_values[valuation_currency], right_values[valuation_currency]
+            variance_proxy = a * a + b * b + 2.0 * float(value) * a * b
+            pair["valuation_currency"] = valuation_currency
+            pair["pairwise_correlation_adjusted_exposure_proxy"] = sqrt(max(0.0, variance_proxy))
+            pair["proxy_method"] = "two-instrument signed-exposure covariance proxy; not portfolio VaR"
+        else:
+            pair["pairwise_correlation_adjusted_exposure_proxy"] = None
+            pair["proxy_status"] = "UNKNOWN"
+        correlations.append(pair)
     errors.extend(correlation_errors)
 
     config_status = "NOT_CONFIGURED"
@@ -228,7 +248,7 @@ def assess_portfolio_risk(
                     if scope == "portfolio":
                         totals = currency_totals.get(currency)
                     elif scope.startswith("desk:") and scope.split(":", 1)[1] in DESKS:
-                        totals = desk_exposure.get(scope.split(":", 1)[1])
+                        totals = desk_exposure.get(scope.split(":", 1)[1], {}).get("by_valuation_currency", {}).get(currency)
                     elif scope.startswith("group:") and scope.split(":", 1)[1]:
                         totals = group_totals.get(currency, {}).get(scope.split(":", 1)[1])
                     else:
@@ -252,9 +272,9 @@ def assess_portfolio_risk(
         status = "UNKNOWN"
     elif any(x["status"] == "BREACH" for x in limit_results):
         status = "HALT"
-    elif not correlations:
+    elif not correlations or any(x.get("proxy_status") == "UNKNOWN" for x in correlations):
         status = "UNKNOWN"
-        warnings.append("correlation risk is unknown; absence of evidence is not independence")
+        warnings.append("correlation risk is incomplete; missing comparable exposure is not independence")
     else:
         status = "ASSESSED_WITHIN_CONFIGURED_LIMITS"
 
@@ -269,8 +289,9 @@ def assess_portfolio_risk(
         "exposure_by_valuation_currency": currency_totals,
         "exposure_by_group": group_totals,
         "risk_limits": {"config_status": config_status, "results": limit_results},
-        "correlation_risk": {"status": "EVIDENCE_PROVIDED" if correlations else "UNKNOWN",
-                             "pairs": correlations, "independence_assumed": False},
+        "correlation_risk": {"status": ("EVIDENCE_PROVIDED" if correlations and all(x.get("proxy_status") != "UNKNOWN" for x in correlations) else "UNKNOWN"),
+                             "pairs": correlations, "independence_assumed": False,
+                             "model_limit": "Pairwise proxies are not additive and are not portfolio VaR."},
         "simultaneous_stop_count": len(stop_sources),
         "stop_sources": stop_sources,
         "errors": errors,
