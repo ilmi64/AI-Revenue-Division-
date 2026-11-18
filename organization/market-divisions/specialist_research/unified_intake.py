@@ -478,14 +478,15 @@ def main() -> int:
                 version = int(version)
             except ValueError:
                 pass
+        risk_config = json.loads(args.portfolio_risk_config.read_text(encoding="utf-8")) if args.portfolio_risk_config else None
+        correlations = _read_jsonl(args.correlation_evidence) if args.correlation_evidence else None
         result = build_unified_intake(
             observations, args.now_utc, market_registry, flow_events, flow_reviews,
             flow_registry, handover, version, args.previous_global_stop, args.occ_stop_state,
             args.max_market_age_seconds, args.max_clock_skew_seconds, args.require_full_coverage,
-            args.control_health_snapshot_history, args.control_health_event_ledger,
+            args.control_health_snapshot_history, args.control_health_event_ledger, risk_config, correlations,
         )
-        args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "
-", encoding="utf-8")
+        args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         print(json.dumps({"status": result["status"], "desk_coverage": result["desk_coverage"],
                           "global_stop_active": result["global_stop_active"],
                           "handover": result["handover"]["status"],
