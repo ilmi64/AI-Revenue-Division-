@@ -371,3 +371,18 @@ requires new evidence even when no blocking action preceded it.
 The Crypto adapter independently repeats these lifecycle checks rather than
 trusting the writer. This is still evidence-reference validation, not a
 cryptographic proof that the referenced evidence is authentic or independent.
+
+
+### Unified Capital Flow audit
+
+The unified OCC snapshot now includes a `capital_flow_audit` section with
+per-Crypto-instrument accepted event IDs, rejected-event reasons, review-ledger
+integrity metadata, aggregate accepted/rejected counts and explicit authority
+flags. A malformed handoff boundary is recorded as a packet validation error
+and therefore fails the unified snapshot closed. A validly shaped but blocked
+handoff remains visible as blocked research context; it is not silently
+relabelled as an eligible event.
+
+This audit is distinct from the independent market-data evidence gate. It does
+not promote Capital Flow evidence into a price observation, signal, stop-clearance
+decision or execution permission.
