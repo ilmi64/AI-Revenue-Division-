@@ -8,6 +8,15 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any
 
+try:
+    from .gold_cfd_execution_risk import (
+        assess_gold_cfd_execution_stress, assess_xauusd_weekly_session,
+    )
+except ImportError:
+    from gold_cfd_execution_risk import (
+        assess_gold_cfd_execution_stress, assess_xauusd_weekly_session,
+    )
+
 MACRO_FACTORS = {
     "real_yields": {"real_yield", "real_rate", "inflation_adjusted_yield"},
     "usd": {"dxy", "usd_index", "usd_broad_index", "usd_pair"},
@@ -143,6 +152,37 @@ def build_gold_research_context(observation: dict[str, Any], now_utc: str) -> di
         warnings.append("instrument-specific Shariah/product review not completed")
     if basis == "indicative_bullion_spot":
         warnings.append("indicative bullion spot is not broker-executable XAUUSD")
+    execution_risk = None
+    if observation.get("execution_risk_profile") == "oanda_canada_xauusd":
+        if kind != "gold_cfd" or basis != "gold_cfd":
+            errors.append("OANDA XAU/USD execution-risk profile requires gold_cfd instrument and price basis")
+        session_audit = assess_xauusd_weekly_session(
+            now_utc, observation.get("holiday_status", "unknown")
+        )
+        execution_inputs = observation.get("execution_risk_inputs")
+        if not isinstance(execution_inputs, dict):
+            errors.append("OANDA XAU/USD execution_risk_inputs are required for the selected risk profile")
+            stress_audit = None
+        else:
+            stress_audit = assess_gold_cfd_execution_stress(**execution_inputs)
+            if stress_audit["status"] == "INVALID_STRESS_INPUT":
+                errors.extend(stress_audit["errors"])
+            elif stress_audit["status"] == "HALT_SPREAD_STRESS":
+                errors.append("OANDA XAU/USD spread stress halt threshold breached")
+            elif stress_audit["status"] == "WARN_SPREAD_STRESS":
+                warnings.append("OANDA XAU/USD spread widening exceeds configured warning threshold")
+        if session_audit["status"] == "INVALID_SESSION_INPUT":
+            errors.extend(session_audit["errors"])
+        elif session_audit["scheduled_open_by_weekly_hours"] is False:
+            warnings.append("OANDA XAU/USD is outside the published weekly session schedule")
+        elif session_audit["warnings"]:
+            warnings.extend(session_audit["warnings"])
+        execution_risk = {
+            "session": session_audit, "spread_gap_stress": stress_audit,
+            "profile": "oanda_canada_xauusd",
+            "broker_closeout_modelled": False,
+            "trade_authority": False, "live_readiness": False,
+        }
     return {
         "desk_id": "gold",
         "instrument_id": observation.get("instrument_id"),
@@ -157,6 +197,7 @@ def build_gold_research_context(observation: dict[str, Any], now_utc: str) -> di
             "spread": spread, "currency": quote_currency,
             "quote_age_seconds": observation.get("quote_age_seconds"),
         },
+        "execution_risk": execution_risk,
         "contract": {
             "contract_code": observation.get("contract_code"),
             "expiry_utc": observation.get("expiry_utc"),
