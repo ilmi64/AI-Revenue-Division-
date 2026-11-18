@@ -292,7 +292,7 @@
         "type": "string"
       }
     },
-    "control_health": {
+    "portfolio_risk": {\n      "type": "object",\n      "required": ["schema_version", "status", "coverage", "position_count", "positions", "desk_exposure", "exposure_by_valuation_currency", "exposure_by_group", "risk_limits", "correlation_risk", "simultaneous_stop_count", "stop_sources", "errors", "warnings", "authority", "trade_authority", "live_readiness"],\n      "properties": {\n        "schema_version": {"const": "1.0.0"},\n        "status": {"enum": ["HALT", "UNKNOWN", "ASSESSED_WITHIN_CONFIGURED_LIMITS"]},\n        "position_count": {"type": "integer", "minimum": 0},\n        "positions": {"type": "array"},\n        "coverage": {"type": "object"},\n        "desk_exposure": {"type": "object"},\n        "exposure_by_valuation_currency": {"type": "object"},\n        "exposure_by_group": {"type": "object"},\n        "risk_limits": {"type": "object"},\n        "correlation_risk": {"type": "object"},\n        "simultaneous_stop_count": {"type": "integer", "minimum": 0},\n        "stop_sources": {"type": "array"},\n        "errors": {"type": "array", "items": {"type": "string"}},\n        "warnings": {"type": "array", "items": {"type": "string"}},\n        "authority": {"const": "research_only_no_execution_authority"},\n        "trade_authority": {"const": false},\n        "live_readiness": {"const": false}\n      }\n    },\n    "control_health": {
       "type": "object",
       "additionalProperties": false,
       "required": [
