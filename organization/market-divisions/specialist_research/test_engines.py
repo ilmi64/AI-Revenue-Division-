@@ -114,6 +114,19 @@ class SpecialistEngineTests(unittest.TestCase):
         self.assertEqual(p["status"], "halt")
         self.assertTrue(any("time-aligned" in x for x in p["data_quality"]["errors"]))
 
+    def test_gold_engine_attaches_independent_macro_context_when_supplied(self):
+        o = common("xauusd_spot")
+        o.update(gold_price_basis="broker_executable_xauusd", currency="USD",
+                 gold_session={"session_name": "london", "market_timezone": "Europe/London",
+                               "calendar_status": "verified"},
+                 bid=1999.9, ask=2000.1, spread=0.2,
+                 quote_age_seconds=1, stale_threshold_seconds=30, is_stale=False,
+                 macro_evidence=[])
+        p = assess_gold(o, NOW)
+        self.assertIn("gold_specialist_research", p["context"])
+        self.assertFalse(p["context"]["gold_specialist_research"]["trade_authority"])
+        self.assertEqual(p["context"]["gold_specialist_research"]["macro_factor_count"], 0)
+
     def test_occ_halts_on_desk_stop(self):
         p = assess_crypto(common("crypto_spot"), NOW)
         p["status"] = "halt"
