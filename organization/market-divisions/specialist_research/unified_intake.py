@@ -116,9 +116,14 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
                          occ_stop_state: str | None = None,
                          max_market_age_seconds: float = 120,
                          max_clock_skew_seconds: float = 5,
-                         require_full_coverage: bool = False) -> dict[str, Any]:
+                         require_full_coverage: bool = False,
+                         control_health_snapshot_history: Path | None = None,
+                         control_health_event_ledger: Path | None = None) -> dict[str, Any]:
     """Build one immutable-style research snapshot from local source snapshots."""
     _utc(now_utc, "now_utc")
+    audit_paths = (control_health_snapshot_history, control_health_event_ledger)
+    if any(value is not None for value in audit_paths) and not all(value is not None for value in audit_paths):
+        raise ValueError("control-health snapshot history and event ledger paths must be supplied together")
     flow_args = (capital_flow_events, capital_flow_reviews, capital_flow_source_registry)
     if any(value is not None for value in flow_args) and not all(value is not None for value in flow_args):
         raise ValueError("Capital Flow events, reviews and source registry must be supplied together")
@@ -244,6 +249,18 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
     }
 
 
+    if control_health_snapshot_history is not None and control_health_event_ledger is not None:
+        try:
+            from .control_health import build_control_health
+        except ImportError:
+            from control_health import build_control_health
+        result = build_control_health(
+            result, Path(control_health_snapshot_history), Path(control_health_event_ledger)
+        )
+    return result
+
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Build unified offline OCC research-intelligence snapshot")
     parser.add_argument("--observations", type=Path, required=True)
@@ -257,6 +274,8 @@ def main() -> int:
     parser.add_argument("--previous-global-stop", action="store_true")
     parser.add_argument("--occ-stop-state")
     parser.add_argument("--require-full-coverage", action="store_true")
+    parser.add_argument("--control-health-snapshot-history", type=Path)
+    parser.add_argument("--control-health-event-ledger", type=Path)
     parser.add_argument("--max-market-age-seconds", type=float, default=120)
     parser.add_argument("--max-clock-skew-seconds", type=float, default=5)
     parser.add_argument("--output", type=Path, required=True)
@@ -281,11 +300,14 @@ def main() -> int:
             observations, args.now_utc, market_registry, flow_events, flow_reviews,
             flow_registry, handover, version, args.previous_global_stop, args.occ_stop_state,
             args.max_market_age_seconds, args.max_clock_skew_seconds, args.require_full_coverage,
+            args.control_health_snapshot_history, args.control_health_event_ledger,
         )
         args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         print(json.dumps({"status": result["status"], "desk_coverage": result["desk_coverage"],
                           "global_stop_active": result["global_stop_active"],
-                          "handover": result["handover"]["status"], "output": str(args.output),
+                          "handover": result["handover"]["status"],
+                          "control_health": result.get("control_health", {}).get("status", "not_requested"),
+                          "output": str(args.output),
                           "authority": result["authority"]}, indent=2))
         return 0 if result["status"] in {"research", "unverified"} else 1
     except (OSError, json.JSONDecodeError, TypeError, ValueError) as exc:
