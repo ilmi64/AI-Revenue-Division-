@@ -432,5 +432,40 @@ class UnifiedIntakeTests(unittest.TestCase):
         self.assertFalse(audit["trade_authority"])
 
 
+    def test_oanda_pending_entry_order_survives_closeout_and_escalates_occ(self):
+        snapshot = {
+            "pending_orders": [{
+                "id": "pending-gold-entry", "state": "PENDING", "type": "STOP",
+                "instrument": "XAU_USD", "units": "10", "positionFill": "OPEN_ONLY",
+            }],
+            "liquidated_trade_ids": ["trade-gold"],
+            "account_hedging_enabled": False,
+            "source_timestamp_utc": NOW,
+            "evaluated_at_utc": NOW,
+            "max_snapshot_age_seconds": 60,
+            "closeout_occurred": True,
+        }
+        result = self.build(oanda_pending_order_snapshot=snapshot)
+        self.assertEqual(result["oanda_pending_order_audit"]["status"], "HALT")
+        self.assertTrue(result["global_stop_active"])
+        self.assertTrue(any(stop["source"] == "oanda_pending_orders" for stop in result["active_stops"]))
+        self.assertFalse(result["oanda_pending_order_audit"]["trade_authority"])
+
+    def test_oanda_pending_snapshot_with_no_orders_is_pass(self):
+        snapshot = {
+            "pending_orders": [], "liquidated_trade_ids": ["trade-gold"],
+            "account_hedging_enabled": False, "source_timestamp_utc": NOW,
+            "evaluated_at_utc": NOW, "max_snapshot_age_seconds": 60,
+            "closeout_occurred": True,
+        }
+        result = self.build(oanda_pending_order_snapshot=snapshot)
+        self.assertEqual(result["oanda_pending_order_audit"]["status"], "PASS")
+        self.assertFalse(any(stop["source"] == "oanda_pending_orders" for stop in result["active_stops"]))
+
+    def test_oanda_pending_order_audit_is_not_provided_without_snapshot(self):
+        result = self.build()
+        self.assertEqual(result["oanda_pending_order_audit"]["status"], "NOT_PROVIDED")
+        self.assertIsNone(result["oanda_pending_order_audit"]["report"])
+
 if __name__ == "__main__":
     unittest.main()
