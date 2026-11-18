@@ -49,8 +49,8 @@ def simulate_unified_derivative(
     """Run both research engines and reconcile their outputs without double-counting.
 
     price_path funding_rate must be exactly zero: all carry belongs in
-    lifecycle_events. Cashflow is kept in settlement_currency and is not added
-    to mark-to-market equity unless currencies are explicitly the same.
+    lifecycle_events. Venue equity and lifecycle cashflows always remain
+    separate because the supplied settlement cashflow may include price P&L.
     """
     errors: list[str] = []
     errors.extend(f"venue: {item}" for item in validate_venue_spec(venue_spec))
@@ -64,6 +64,8 @@ def simulate_unified_derivative(
     if not isinstance(lifecycle_events, list):
         errors.append("lifecycle_events must be an array")
         lifecycle_events = []
+    if venue_spec.get("venue_id") != contract_profile.get("venue_id"):
+        errors.append("venue_spec.venue_id and contract_profile.venue_id must match")
     if venue_spec.get("instrument_type") != contract_profile.get("instrument_type"):
         errors.append("venue and contract instrument_type must match")
     if position.get("instrument_id") != contract_profile.get("instrument_id"):
@@ -161,11 +163,8 @@ def simulate_unified_derivative(
 
     # Keep unlike currencies separate; no implicit FX conversion or equity merge.
     settlement_cashflow = lifecycle_result.get("cashflow_total")
-    same_currency = contract_profile.get("settlement_currency") == venue_spec.get("quote_currency")
     # Settlement cashflow may already include realized price P&L. Never add it
     # to path equity without a separately specified accounting bridge.
-    combined_equity = None
-
     return {
         "status": status, "errors": errors,
         "position_id": position.get("position_id"),
@@ -187,7 +186,7 @@ def simulate_unified_derivative(
         "limitations": [
             "The venue and contract profiles and all market/event inputs are caller-supplied and unauthenticated.",
             "Venue path equity excludes carry; lifecycle cashflows are reconciled separately.",
-            "Combined equity is shown only when quote and settlement currencies match.",
+            "Venue equity and lifecycle cashflows remain separate; no accounting bridge is supplied.",
             "A successful reconciliation validates internal consistency, not venue accuracy or model validity.",
             "No broker/exchange connection, order routing, live risk authority or stop clearance exists.",
         ],
