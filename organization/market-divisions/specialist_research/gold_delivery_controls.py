@@ -59,7 +59,7 @@ def assess_gold_delivery_controls(contract: Any, position: Any, evaluation_utc: 
     date_keys = ("first_position_date", "first_notice_date", "last_trade_date",
                  "delivery_start_date", "delivery_end_date",
                  "fcm_long_position_cutoff_date", "fcm_short_position_cutoff_date",
-                 "new_position_freeze_date")
+                 "last_intent_date", "new_position_freeze_date")
     dates = {key: _date(contract.get(key)) for key in date_keys}
     for key, parsed in dates.items():
         if parsed is None:
