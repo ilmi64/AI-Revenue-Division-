@@ -25,11 +25,13 @@ EVENT_TYPES = {
     "recovery_evidence_added",
     "handover_recorded",
     "stop_clearance_requested",
+    "stop_clearance_reviewed",
     "incident_closed",
 }
 REQUIRES_EVIDENCE = {
     "stop_raised", "stop_challenged", "corrective_action_verified",
     "recovery_evidence_added", "handover_recorded", "stop_clearance_requested",
+    "stop_clearance_reviewed",
 }
 
 
@@ -97,8 +99,31 @@ def validate_event(event: dict[str, Any]) -> None:
     if "live_readiness" in event["details"] and event["details"]["live_readiness"] is not False:
         raise EventLedgerError("event cannot grant live readiness")
     if event["event_type"] == "stop_clearance_requested":
-        if event["details"].get("approval_status") not in {"pending", "rejected"}:
+        details = event["details"]
+        if details.get("approval_status") not in {"pending", "rejected"}:
             raise EventLedgerError("stop-clearance request must remain pending or rejected")
+        for key in ("stop_id", "incident_id", "requestor_id"):
+            if not isinstance(details.get(key), str) or not details[key].strip():
+                raise EventLedgerError(f"stop-clearance request requires non-empty {key}")
+        if details["requestor_id"] != event["actor_id"]:
+            raise EventLedgerError("requestor_id must match event actor_id")
+        for key in ("recovery_evidence_event_ids", "corrective_action_event_ids"):
+            values = details.get(key)
+            if (not isinstance(values, list) or not values
+                    or any(not isinstance(x, str) or not x.strip() for x in values)
+                    or len(values) != len(set(values))):
+                raise EventLedgerError(f"{key} must be a non-empty array of unique event IDs")
+    if event["event_type"] == "stop_clearance_reviewed":
+        details = event["details"]
+        for key in ("request_event_id", "stop_id", "reviewer_id", "reason"):
+            if not isinstance(details.get(key), str) or not details[key].strip():
+                raise EventLedgerError(f"stop-clearance review requires non-empty {key}")
+        if details["reviewer_id"] != event["actor_id"]:
+            raise EventLedgerError("reviewer_id must match event actor_id")
+        if details.get("reviewer_role") not in {"independent_risk", "occ"}:
+            raise EventLedgerError("reviewer_role must be independent_risk or occ")
+        if details.get("decision") not in {"eligible", "rejected"}:
+            raise EventLedgerError("review decision must be eligible or rejected")
 
 
 def read_events(path: Path) -> list[dict[str, Any]]:
