@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OCC Incident and Control Event",
+  "description": "One immutable research-only event wrapped in a hash-linked local journal entry.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "ledger_version",
+    "sequence",
+    "previous_hash",
+    "event_sha256",
+    "event",
+    "authority",
+    "entry_hash"
+  ],
+  "properties": {
+    "ledger_version": {
+      "const": "1.0.0"
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "previous_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "event_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "authority": {
+      "const": "research_only_no_execution_authority"
+    },
+    "entry_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "event_id",
+        "event_type",
+        "occurred_at_utc",
+        "recorded_at_utc",
+        "actor_id",
+        "subject_id",
+        "summary",
+        "evidence_refs",
+        "details"
+      ],
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "event_type": {
+          "enum": [
+            "incident_opened",
+            "stop_raised",
+            "stop_challenged",
+            "corrective_action_proposed",
+            "corrective_action_verified",
+            "recovery_evidence_added",
+            "handover_recorded",
+            "stop_clearance_requested",
+            "incident_closed"
+          ]
+        },
+        "occurred_at_utc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "recorded_at_utc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "actor_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subject_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "details": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}
