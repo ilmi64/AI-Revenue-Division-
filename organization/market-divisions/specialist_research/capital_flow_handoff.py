@@ -66,6 +66,10 @@ def verify_review_ledger(entries: list[dict[str, Any]]) -> dict[str, Any]:
             errors.append(f"ledger row {sequence} reject action/status mismatch")
         if action == "expire" and status != "expired":
             errors.append(f"ledger row {sequence} expire action/status mismatch")
+        if action == "challenge" and status not in {None, "unverified", "rejected"}:
+            errors.append(f"ledger row {sequence} challenge status invalid")
+        if action in {"review", "corroborate", "correct"} and status not in ALLOWED_HANDOFF_STATES:
+            errors.append(f"ledger row {sequence} research action status invalid")
         if action == "reopen" and status not in {"watch", "research", "unverified"}:
             errors.append(f"ledger row {sequence} reopen status invalid")
         if entry.get("authority") != "research_review_only_no_trade_or_execution_authority":
@@ -75,7 +79,7 @@ def verify_review_ledger(entries: list[dict[str, Any]]) -> dict[str, Any]:
         if not isinstance(entry.get("reason"), str) or not entry["reason"].strip():
             errors.append(f"ledger row {sequence} reason missing")
         refs = entry.get("evidence_refs")
-        if not isinstance(refs, list) or any(not isinstance(ref, str) or not ref.strip() for ref in refs):
+        if not isinstance(refs, list) or not refs or any(not isinstance(ref, str) or not ref.strip() for ref in refs) or len(refs) != len(set(refs)):
             errors.append(f"ledger row {sequence} evidence_refs malformed")
         try:
             _parse_utc(entry.get("reviewed_at"), "reviewed_at")
