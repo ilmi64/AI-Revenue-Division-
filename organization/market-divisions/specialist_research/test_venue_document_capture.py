@@ -20,8 +20,8 @@ class VenueDocumentCaptureTests(unittest.TestCase):
     def test_manifest_validates(self):
         self.assertEqual(validate_capture_manifest(self.manifest), [])
 
-    def test_all_nine_excerpt_digests_match_captured_text(self):
-        self.assertEqual(len(self.manifest["captures"]), 9)
+    def test_all_thirteen_excerpt_digests_match_captured_text(self):
+        self.assertEqual(len(self.manifest["captures"]), 13)
         for capture in self.manifest["captures"]:
             self.assertEqual(validate_revision(capture), [])
 
@@ -44,12 +44,28 @@ class VenueDocumentCaptureTests(unittest.TestCase):
     def test_report_discloses_partial_capture_and_no_profile_eligibility(self):
         report = build_capture_report(self.manifest)
         self.assertEqual(report["status"], "PARTIAL_EVIDENCE_CAPTURE_VALID")
-        self.assertEqual(report["document_count"], 9)
+        self.assertEqual(report["document_count"], 13)
         self.assertEqual(report["candidate_count"], 7)
         self.assertFalse(report["full_document_capture"])
         self.assertTrue(all(not item["profile_eligible"] for item in report["documents"]))
         self.assertFalse(report["trade_authority"])
         self.assertFalse(report["live_readiness"])
+
+    def test_gold_cfd_evidence_covers_hours_closeout_and_account_eligibility(self):
+        captures = {item["document_id"]: item for item in self.manifest["captures"]}
+        expected = {
+            "oanda_xauusd_instrument_page",
+            "oanda_canada_trading_hours_and_gap_risk",
+            "oanda_canada_margin_closeout",
+            "oanda_canada_cfd_account_eligibility",
+        }
+        self.assertTrue(expected.issubset(captures))
+        self.assertEqual(captures["oanda_canada_trading_hours_and_gap_risk"]["extracted_facts"][1]["value"], "Sunday-Friday 18:05-16:59")
+        self.assertTrue(any(f["fact_key"] == "margin_closeout_policy" for f in captures["oanda_canada_margin_closeout"]["extracted_facts"]))
+
+    def test_gold_cfd_capture_does_not_claim_physical_ownership(self):
+        item = next(x for x in self.manifest["captures"] if x["document_id"] == "oanda_xauusd_instrument_page")
+        self.assertIn({"fact_key": "physical_ownership", "value": False, "unit": "ownership_right"}, item["extracted_facts"])
 
     def test_tampered_excerpt_digest_fails_closed(self):
         altered = json.loads(json.dumps(self.manifest))
