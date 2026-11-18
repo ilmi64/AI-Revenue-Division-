@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -31,6 +32,11 @@ def _handover_details(event: dict[str, Any]) -> tuple[dict[str, Any] | None, lis
     return details, errors
 
 
+def _event_time(event: dict[str, Any]) -> datetime:
+    """Parse a timestamp already validated by verify_events as UTC ending in Z."""
+    return datetime.fromisoformat(event["occurred_at_utc"][:-1] + "+00:00")
+
+
 def audit_handovers(event_records: list[dict[str, Any]]) -> dict[str, Any]:
     ledger = verify_events(event_records)
     errors: list[str] = []
@@ -39,31 +45,39 @@ def audit_handovers(event_records: list[dict[str, Any]]) -> dict[str, Any]:
         errors.append("incident event ledger integrity failed; handover semantics cannot be trusted")
 
     handovers = []
-    raised_stop_ids: set[str] = set()
-    unkeyed_stop_events = False
     if ledger["valid"]:
-        for row in event_records:
-            event = row["event"]
-            if event["event_type"] == "stop_raised":
-                stop_id = event["details"].get("stop_id")
-                if isinstance(stop_id, str) and stop_id.strip():
-                    raised_stop_ids.add(stop_id)
-                else:
-                    unkeyed_stop_events = True
         for row in event_records:
             event = row["event"]
             if event["event_type"] != "handover_recorded":
                 continue
             details, missing = _handover_details(event)
             errors.extend(missing)
-            if details is None:
-                continue
-            handovers.append((event, details))
+            if details is not None:
+                handovers.append((event, details))
 
     seen_handover_ids: set[str] = set()
     seen_transitions: set[tuple[str, str]] = set()
     for event, details in handovers:
         event_id = event["event_id"]
+        handover_time = _event_time(event)
+
+        # Evaluate the stop state as it existed when this handover occurred.
+        # Later stop events must not retroactively invalidate an earlier shift
+        # transition, while stops already raised by this time remain latched.
+        raised_stop_ids: set[str] = set()
+        unkeyed_prior_stop = False
+        for row in event_records:
+            prior_event = row["event"]
+            if prior_event["event_type"] != "stop_raised":
+                continue
+            if _event_time(prior_event) > handover_time:
+                continue
+            stop_id = prior_event["details"].get("stop_id")
+            if isinstance(stop_id, str) and stop_id.strip():
+                raised_stop_ids.add(stop_id)
+            else:
+                unkeyed_prior_stop = True
+
         outgoing = details.get("outgoing_shift_id")
         incoming = details.get("incoming_shift_id")
         if not isinstance(outgoing, str) or not outgoing.strip():
@@ -99,13 +113,13 @@ def audit_handovers(event_records: list[dict[str, Any]]) -> dict[str, Any]:
             warnings.append(f"handover {event_id}: active vetoes carried forward: {', '.join(sorted(set(vetoes)))}")
         if isinstance(vetoes, list):
             missing_vetoes = raised_stop_ids - set(vetoes)
-            if missing_vetoes and not unkeyed_stop_events:
+            if missing_vetoes and not unkeyed_prior_stop:
                 errors.append(
                     f"handover {event_id}: active stop IDs not carried forward: {', '.join(sorted(missing_vetoes))}"
                 )
             elif missing_vetoes:
                 warnings.append(
-                    f"handover {event_id}: stop-ID carry-forward cannot be fully checked because a stop event lacks an ID"
+                    f"handover {event_id}: stop-ID carry-forward cannot be fully checked because a prior stop event lacks an ID"
                 )
 
         critical = details.get("unresolved_critical_items")
