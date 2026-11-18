@@ -29,7 +29,8 @@
     "trade_authority",
     "live_readiness",
     "limitations",
-    "control_health"
+    "control_health",
+    "portfolio_risk"
   ],
   "properties": {
     "schema_version": {
