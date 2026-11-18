@@ -154,5 +154,33 @@ class CapitalFlowEndToEndTests(unittest.TestCase):
                       result["rejected_matching_events"][0]["reason"])
 
 
+    def test_corrected_challenge_with_new_evidence_can_reenter_research_handoff(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            ledger = Path(tmp) / "reviews.jsonl"
+            first = append_review(ledger, review())
+            challenged = append_review(ledger, review(
+                reviewed_at="2026-11-17T12:05:00Z",
+                action="challenge",
+                review_status="unverified",
+                reason="Synthetic challenge requiring independent corroboration",
+                supersedes_entry_hash=first["entry_hash"],
+            ))
+            append_review(ledger, review(
+                reviewed_at="2026-11-17T12:10:00Z",
+                action="correct",
+                review_status="corroborated",
+                reason="Independent synthetic evidence resolves the challenge",
+                evidence_refs=["https://synthetic.invalid/independent/002"],
+                supersedes_entry_hash=challenged["entry_hash"],
+            ))
+            result = build_handoff(
+                [sample_event()], read_reviews(ledger), source_registry(),
+                observation(), "2026-11-17T12:11:00Z",
+            )
+            self.assertEqual(len(result["event_records"]), 1)
+            self.assertIn("https://synthetic.invalid/independent/002",
+                          result["event_records"][0]["evidence_refs"])
+
+
 if __name__ == "__main__":
     unittest.main()
