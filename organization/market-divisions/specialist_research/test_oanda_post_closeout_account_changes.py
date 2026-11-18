@@ -24,7 +24,8 @@ def base(changes=None, account=None, **overrides):
     if changes:
         arrays.update(changes)
     account_data = {
-        "id": "acct-1", "orders": [], "trades": [], "positions": [],
+        "id": "acct-1", "lastTransactionID": "102",
+        "orders": [], "trades": [], "positions": [],
     }
     if account:
         account_data.update(account)
