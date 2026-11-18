@@ -76,6 +76,16 @@ class CapitalFlowHandoffTests(unittest.TestCase):
         with self.assertRaises(HandoffError):
             self.build(reviews=bad)
 
+    def test_boolean_sequence_is_rejected_even_when_equal_to_one(self):
+        malformed = [review()]
+        malformed[0]["sequence"] = True
+        malformed[0]["entry_hash"] = _entry_hash(malformed[0])
+        report = verify_review_ledger(malformed)
+        self.assertFalse(report["valid"])
+        self.assertTrue(any("invalid sequence" in error for error in report["errors"]))
+        with self.assertRaises(HandoffError):
+            self.build(reviews=malformed)
+
     def test_challenge_blocks_latest_event(self):
         result = self.build(reviews=[review("challenge", None)])
         self.assertEqual(result["event_records"], [])
