@@ -154,6 +154,22 @@ class UnifiedIntakeTests(unittest.TestCase):
         record["incoming_acknowledged"] = False
         self.assertFalse(validate_handover(record, NOW, 7)["accepted"])
 
+    def test_handover_requires_every_desk_and_per_desk_position_reconciliation(self):
+        record = {
+            "outgoing_shift_id": "day", "incoming_shift_id": "night",
+            "handover_at_utc": NOW, "snapshot_id": "snapshot-1",
+            "portfolio_version": 7, "active_veto_ids": [],
+            "unresolved_critical_items": [], "dependency_health": "healthy",
+            "outgoing_acknowledged": True, "incoming_acknowledged": True,
+            "positions_reconciled": True,
+            "desk_coverage": {"crypto": 1, "forex": 1, "indices": 1},
+            "positions_reconciled_by_desk": {"crypto": True, "forex": True, "indices": True, "gold": False},
+        }
+        result = validate_handover(record, NOW, 7)
+        self.assertFalse(result["accepted"])
+        self.assertTrue(any("desk_coverage" in error for error in result["errors"]))
+        self.assertTrue(any("positions_reconciled_by_desk" in error for error in result["errors"]))
+
     def test_missing_handover_is_not_assumed_accepted(self):
         result = self.build()
         self.assertEqual(result["handover"]["status"], "not_provided")
@@ -210,6 +226,8 @@ class UnifiedIntakeTests(unittest.TestCase):
                     "outgoing_acknowledged": True,
                     "incoming_acknowledged": True,
                     "positions_reconciled": True,
+                    "desk_coverage": {"crypto": 1, "forex": 1, "indices": 1, "gold": 1},
+                    "positions_reconciled_by_desk": {"crypto": True, "forex": True, "indices": True, "gold": True},
                     "dependency_health": "healthy",
                     "active_veto_ids": [],
                     "unresolved_critical_items": [],
