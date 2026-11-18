@@ -20,7 +20,7 @@ class VenueDocumentCaptureTests(unittest.TestCase):
     def test_manifest_validates(self):
         self.assertEqual(validate_capture_manifest(self.manifest), [])
 
-    def test_all_eight_excerpt_digests_match_captured_text(self):
+    def test_all_nine_excerpt_digests_match_captured_text(self):
         self.assertEqual(len(self.manifest["captures"]), 9)
         for capture in self.manifest["captures"]:
             self.assertEqual(validate_revision(capture), [])
