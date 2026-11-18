@@ -109,8 +109,8 @@ def assess_oanda_closeout_transaction_reconciliation(
     reported_last_id = _id(reported_last_transaction_id)
     if start_id is None or end_id is None or end_id <= start_id:
         errors.append("transaction ID bounds must be numeric strings with end greater than start")
-    if reported_last_id is None or reported_last_id != end_id:
-        errors.append("reported_last_transaction_id must match the inclusive transaction range end")
+    if reported_last_id is None or (end_id is not None and reported_last_id < end_id):
+        errors.append("reported_last_transaction_id cannot precede the requested inclusive transaction range end")
     pre_time = _utc(pre_closeout_snapshot_timestamp_utc)
     post_time = _utc(post_closeout_snapshot_timestamp_utc)
     evaluated_time = _utc(evaluated_at_utc)
