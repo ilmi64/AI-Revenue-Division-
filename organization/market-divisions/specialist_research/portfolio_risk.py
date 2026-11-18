@@ -275,8 +275,8 @@ def assess_portfolio_risk(
         if not isinstance(left, str) or not left or not isinstance(right, str) or not right or left == right:
             correlation_errors.append(f"{prefix} instrument pair invalid")
             continue
-        corr = _number(value, f"{prefix}.correlation_abs", [], minimum=0.0) if isinstance(value, (int, float)) and not isinstance(value, bool) else None
-        if corr is None or abs(float(value)) > 1:
+        corr = float(value) if isinstance(value, (int, float)) and not isinstance(value, bool) and isfinite(float(value)) else None
+        if corr is None or abs(corr) > 1:
             correlation_errors.append(f"{prefix}.correlation must be between -1 and 1")
             continue
         stamp = _utc(item.get("observed_at_utc"), f"{prefix}.observed_at_utc", correlation_errors)
