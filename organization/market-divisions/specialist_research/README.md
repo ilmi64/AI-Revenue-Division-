@@ -1097,3 +1097,6 @@ The output contract is `oanda-account-margin-closeout.schema.json`. The replay i
 
 
 The CLI accepts `--oanda-account-margin-replay path/to/account-margin-replay.json`. The input contract is `oanda-account-margin-replay-input.schema.json`; it requires the account currency, complete initial position identifiers and per-observation market-availability state. Daily checks must be supplied at 15:45 New York time with a consecutive trading-day sequence and a caller-verified calendar. The CLI summary reports `oanda_account_margin` as NOT_PROVIDED, PASS or HALT.
+
+
+The Main Hub dashboard's `build_occ_control_health_report` now surfaces `oanda_account_margin_audit`. A HALT, malformed report, inconsistent PASS/report pair or invalid authority boundary escalates the Main Hub audit to `HALT_AUDIT`. An omitted audit is visible as `NOT_PROVIDED`; it cannot be mistaken for a successful margin check. The dashboard never receives or exercises broker authority.
