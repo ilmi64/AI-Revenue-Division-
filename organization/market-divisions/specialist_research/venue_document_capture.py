@@ -68,7 +68,7 @@ def validate_capture_manifest(manifest: Any) -> list[str]:
             errors.append(f"{prefix}.capture_scope must disclose official-page excerpt")
         if capture.get("full_document_capture") is not False:
             errors.append(f"{prefix}.full_document_capture must be false")
-        if capture.get("retrieval_method") != "official_web_search_excerpt":
+        if capture.get("retrieval_method") not in {"official_web_search_excerpt", "official_web_open_excerpt"}:
             errors.append(f"{prefix}.retrieval_method is unsupported")
         if not isinstance(capture.get("source_ref"), str) or not capture["source_ref"].startswith("turn"):
             errors.append(f"{prefix}.source_ref must preserve the research reference")
