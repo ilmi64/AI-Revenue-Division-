@@ -288,7 +288,7 @@ def assess_oanda_post_closeout_account_changes(
         return result
 
     return {
-        "status": "HALT" if newly_opened or filled_preexisting else "PASS",
+        "status": "HALT" if newly_opened or filled_preexisting or new_pending else "PASS",
         "errors": [],
         "warnings": warnings,
         "since_transaction_id": str(since_id),
