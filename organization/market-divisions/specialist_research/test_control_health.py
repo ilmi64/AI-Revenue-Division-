@@ -84,6 +84,7 @@ class ControlHealthTests(unittest.TestCase):
         self.events.write_text("".join(json.dumps(x) + "\n" for x in rows))
         result = self.integrate()
         self.assertEqual(result["control_health"]["status"], "HALT_AUDIT")
+        self.assertEqual(result["control_health"]["handover_acceptance"], "blocked")
         self.assertFalse(result["global_stop_active"])
         self.assertEqual(result["active_stops"], [])
 
