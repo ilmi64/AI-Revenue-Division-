@@ -139,10 +139,13 @@ def assess_portfolio_risk(
                 "crypto_spot": ("spot_mark_to_market", False, False, False),
                 "crypto_perpetual": ("mark_to_market_notional", False, True, True),
                 "forex_spot": ("base_currency_units", False, False, False),
+                "fx_spot": ("base_currency_units", False, False, False),
                 "forex_cfd": ("broker_contract_notional", True, True, True),
+                "index_cash": ("cash_index_mark_to_market", False, False, False),
                 "index_future": ("futures_contract_notional", True, False, True),
                 "index_cfd": ("broker_contract_notional", True, True, True),
                 "gold_spot": ("spot_ounces_or_grams", False, False, False),
+                "xauusd_spot": ("spot_ounces_or_grams", False, False, False),
                 "gold_future": ("futures_contract_notional", True, False, True),
                 "gold_cfd": ("broker_contract_notional", True, True, True),
             }
