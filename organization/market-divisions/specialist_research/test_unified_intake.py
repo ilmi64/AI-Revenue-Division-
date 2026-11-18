@@ -212,6 +212,8 @@ class UnifiedIntakeTests(unittest.TestCase):
         self.assertFalse(summary["event_classification"]["source_independence_verified"])
         self.assertEqual(summary["evidence_provenance"]["status"], "incomplete")
         self.assertFalse(summary["evidence_provenance"]["independent_corroboration_established"])
+        self.assertEqual(summary["research_priority"]["priority"], "insufficient_provenance")
+        self.assertTrue(summary["research_priority"]["not_a_directional_signal"])
         self.assertFalse(audit["trade_authority"])
         self.assertFalse(audit["live_readiness"])
 
