@@ -42,6 +42,7 @@ def _halt(errors: list[str], warnings: list[str] | None = None) -> dict[str, Any
         "unexpectedly_remaining_closed_trades": [], "filled_preexisting_order_ids": [],
         "new_pending_order_ids": [], "current_pending_order_ids": [],
         "unexpected_filled_order_ids": [], "unmatched_transaction_fill_order_ids": [],
+        "unmatched_closeout_create_order_ids": [],
         "newly_created_order_ids": [], "triggered_order_ids": [],
         "position_reconciliation": "blocked",
         "account_change_reconciliation_complete": False,
@@ -315,6 +316,9 @@ def assess_oanda_post_closeout_account_changes(
         and isinstance(tx.get("id"), str)
     }
     confirmed_closeout_created_ids = closeout_create_order_ids & closeout_fill_order_ids
+    unmatched_closeout_creates = sorted(closeout_create_order_ids - created_order_ids)
+    if unmatched_closeout_creates:
+        errors.append("MARGIN_CLOSEOUT MARKET_ORDER transactions are missing from changes.ordersCreated: " + ", ".join(unmatched_closeout_creates))
     unexpected_filled = sorted(filled_order_ids - closeout_fill_order_ids)
     newly_created = sorted(created_order_ids - pre_order_ids - confirmed_closeout_created_ids)
     triggered = sorted(triggered_order_ids)
@@ -344,6 +348,8 @@ def assess_oanda_post_closeout_account_changes(
             "current_pending_order_ids": sorted(order_ids),
             "unexpected_filled_order_ids": unexpected_filled,
             "unmatched_transaction_fill_order_ids": sorted(unmatched_transaction_fills),
+        "unmatched_closeout_create_order_ids": unmatched_closeout_creates,
+            "unmatched_closeout_create_order_ids": unmatched_closeout_creates,
             "newly_created_order_ids": newly_created,
             "triggered_order_ids": triggered,
         })
