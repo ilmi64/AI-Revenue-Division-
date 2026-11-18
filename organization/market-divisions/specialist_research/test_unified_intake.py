@@ -217,6 +217,32 @@ class UnifiedIntakeTests(unittest.TestCase):
         self.assertTrue(result["global_stop_active"])
         self.assertEqual(result["status"], "halt")
 
+    def test_oanda_margin_replay_rejects_future_observations(self):
+        account_replay = {
+            "account_currency": "CAD",
+            "initial_positions": [{"position_id": "gold", "desk_id": "gold", "instrument_id": "XAUUSD"}],
+            "observations": [{
+                "timestamp_utc": "2026-11-17T12:00:01Z", "nav_mid": 1200, "margin_used": 1000,
+                "position_market_status": {"gold": "open"}, "trading_day_check": False,
+            }],
+        }
+        result = self.build(oanda_account_margin_replay=account_replay)
+        self.assertEqual(result["oanda_account_margin_audit"]["status"], "HALT")
+        self.assertTrue(any("later than the unified snapshot" in error
+                            for error in result["oanda_account_margin_audit"]["errors"]))
+
+    def test_oanda_pending_order_audit_rejects_future_evaluation_time(self):
+        snapshot = self.oanda_pending_snapshot()
+        snapshot["evaluated_at_utc"] = "2026-11-17T12:00:01Z"
+        result = self.build(oanda_pending_order_snapshot=snapshot)
+        self.assertEqual(result["oanda_pending_order_audit"]["status"], "HALT")
+
+    def test_oanda_transaction_audit_rejects_future_evaluation_time(self):
+        replay = self.oanda_closeout_transaction_replay()
+        replay["evaluated_at_utc"] = "2026-11-17T12:00:01Z"
+        result = self.build(oanda_closeout_transaction_replay=replay)
+        self.assertEqual(result["oanda_closeout_transaction_audit"]["status"], "HALT")
+
     def test_oanda_recovered_margin_call_still_latches_occ_stop(self):
         account_replay = {
             "account_currency": "CAD",
