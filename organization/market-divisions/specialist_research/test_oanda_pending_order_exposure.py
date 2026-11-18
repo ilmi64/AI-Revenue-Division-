@@ -12,6 +12,7 @@ def assess(orders=None, liquidated=None, **overrides):
         "source_timestamp_utc": "2026-11-17T20:45:00Z",
         "evaluated_at_utc": "2026-11-17T20:45:20Z",
         "max_snapshot_age_seconds": 60,
+        "pending_orders_complete": True,
         "closeout_occurred": True,
     }
     args.update(overrides)
@@ -118,9 +119,17 @@ class OandaPendingOrderExposureTests(unittest.TestCase):
         result = assess(closeout_occurred=False)
         self.assertEqual(result["status"], "HALT")
 
+    def test_explicit_empty_liquidated_trade_list_is_valid(self):
+        result = assess(liquidated=[])
+        self.assertEqual(result["status"], "PASS")
+
     def test_missing_liquidated_trade_list_blocks(self):
-        result = assess(liquidated=None)
-        self.assertEqual(result["status"], "PASS")  # Explicit empty list means no trade IDs supplied.
+        result = assess(liquidated_trade_ids=None)
+        self.assertEqual(result["status"], "HALT")
+
+    def test_incomplete_pending_order_snapshot_blocks(self):
+        result = assess(pending_orders_complete=False)
+        self.assertEqual(result["status"], "HALT")
 
     def test_missing_snapshot_timestamp_blocks(self):
         self.assertEqual(assess(source_timestamp_utc=None)["status"], "HALT")
