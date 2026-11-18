@@ -252,9 +252,12 @@ def replay_oanda_account_margin_closeout(
         for pid, p in positions.items() if p["position_state"] == "open"
     ]
     closed_ids = [pid for pid, p in positions.items() if p["position_state"] == "closed_by_model"]
+    margin_call_observed = any(item["margin_state"]["margin_call"] for item in timeline)
+    current_margin_call = bool(timeline and timeline[-1]["margin_state"]["margin_call"])
     overall = "CLOSEOUT_TRIGGERED" if closeout_batches else (
-        "MARGIN_CALL_ACTIVE" if timeline and timeline[-1]["margin_state"]["margin_call"]
-        else "WITHIN_MARGIN_REQUIREMENTS"
+        "MARGIN_CALL_ACTIVE" if current_margin_call else
+        "MARGIN_CALL_OBSERVED_RECOVERED" if margin_call_observed else
+        "WITHIN_MARGIN_REQUIREMENTS"
     )
     return {
         "status": overall,
@@ -264,6 +267,8 @@ def replay_oanda_account_margin_closeout(
         "position_ids_closed_by_model": closed_ids,
         "remaining_open_positions": remaining,
         "consecutive_under_margined_trading_days": daily_under_margin_days,
+        "margin_call_observed": margin_call_observed,
+        "current_margin_call_active": current_margin_call,
         "rules_basis": {
             "margin_call": "NAV_mid < Margin Used",
             "margin_closeout_percentage": "(50% * Margin Used / NAV_mid) * 100",
