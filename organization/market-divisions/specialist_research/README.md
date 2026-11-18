@@ -305,3 +305,36 @@ Example final build flags:
 
 This is an explicit operator-run, offline sequence. The intake does not append
 history or events automatically, and it does not create a scheduler or daemon.
+
+
+## Canonical Capital Flow review ledger
+
+The append-only review journal is implemented in
+`capital_flow_review_ledger.py`, with its record contract in
+`capital-flow-review-ledger.schema.json`. It uses the exact entry-hash
+construction and field names consumed by `capital_flow_handoff.py`.
+
+Create one review JSON object containing `reviewed_at` (UTC ending in Z),
+`event_id`, `action`, `reviewer_id`, `reason`, `review_status`,
+non-empty `evidence_refs`, `supersedes_entry_hash` and the fixed
+research-only `authority` marker. For the first review of an event,
+`supersedes_entry_hash` must be null; every later review must reference the
+latest prior entry hash for that event. This prevents silent replacement of
+prior review decisions.
+
+Example commands (from `organization/market-divisions`):
+
+```sh
+python -m specialist_research.capital_flow_review_ledger append \
+  --ledger /path/to/private/capital-flow-reviews.jsonl \
+  --review /path/to/review.json
+
+python -m specialist_research.capital_flow_review_ledger verify \
+  --ledger /path/to/private/capital-flow-reviews.jsonl
+```
+
+The adapter independently verifies the resulting hash chain before using
+reviews. The journal is offline and single-writer; it has no identity
+authentication, trusted timestamp, locking, network access or stop/trade
+authority. A hash chain is not a digital signature or tamper-proof storage.
+Tests are authored but have not been executed.
