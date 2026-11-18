@@ -77,7 +77,8 @@ class OrganisationDashboardTests(unittest.TestCase):
         self.assertEqual(report["status"], "HALT_AUDIT")
         self.assertEqual(report["portfolio_risk"]["status"], "HALT")
         self.assertTrue(report["global_stop_active"])
-\n    def test_dashboard_accepts_integrated_occ_snapshot(self):
+
+    def test_dashboard_accepts_integrated_occ_snapshot(self):
         snapshot = {
             "snapshot_type": "unified_occ_research_intelligence",
             "status": "unverified",
