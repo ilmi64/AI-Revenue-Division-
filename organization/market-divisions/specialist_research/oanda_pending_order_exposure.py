@@ -46,6 +46,7 @@ def assess_oanda_post_closeout_pending_orders(
     source_timestamp_utc: Any,
     evaluated_at_utc: Any,
     max_snapshot_age_seconds: Any,
+    pending_orders_complete: Any,
     closeout_occurred: Any = True,
 ) -> dict[str, Any]:
     """Classify a complete post-closeout pending-order snapshot.
@@ -63,6 +64,8 @@ def assess_oanda_post_closeout_pending_orders(
     warnings: list[str] = []
     if closeout_occurred is not True:
         errors.append("closeout_occurred must be explicitly true for post-closeout reconciliation")
+    if pending_orders_complete is not True:
+        errors.append("pending_orders_complete must be explicitly true; partial order lists cannot establish safety")
     if not isinstance(account_hedging_enabled, bool):
         errors.append("account_hedging_enabled must be supplied from the account snapshot")
     source_time = _utc(source_timestamp_utc)
@@ -130,6 +133,10 @@ def assess_oanda_post_closeout_pending_orders(
             errors.append(f"{order_id}: tradeID must be a non-empty string when supplied")
             continue
 
+        if order_type in PENDING_TYPES and (not isinstance(order.get("instrument"), str) or not order["instrument"].strip()):
+            errors.append(f"{order_id}: entry order instrument is required")
+            continue
+
         if order_type in DEPENDENT_CLOSE_TYPES:
             if trade_id is None:
                 errors.append(f"{order_id}: dependent close order is missing its required tradeID")
@@ -194,7 +201,7 @@ def assess_oanda_post_closeout_pending_orders(
         "snapshot_age_seconds": (evaluated_time - source_time).total_seconds(),
         "max_snapshot_age_seconds": float(max_snapshot_age_seconds),
         "account_hedging_enabled": account_hedging_enabled,
-        "closeout_occurred": True,
+        "closeout_occurred": True, "pending_orders_complete": True,
         "pending_order_count": len(pending_orders),
         "liquidated_trade_count": len(liquidated),
         "orders_expected_cancelled": expected_cancelled,
