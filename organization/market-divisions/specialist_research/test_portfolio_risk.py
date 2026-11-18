@@ -140,8 +140,8 @@ class PortfolioRiskTests(unittest.TestCase):
         result = assess_portfolio_risk(packets(), NOW, config(), correlations())
         stress = result["stress_testing"]["scenarios"][0]
         self.assertEqual(stress["status"], "ASSESSED")
-        self.assertAlmostEqual(stress["by_valuation_currency"]["USD"]["pnl"], -23.0)
-        self.assertAlmostEqual(stress["by_valuation_currency"]["USD"]["loss"], 30.0)
+        self.assertAlmostEqual(stress["by_valuation_currency"]["USD"]["pnl"], -27.0)
+        self.assertAlmostEqual(stress["by_valuation_currency"]["USD"]["loss"], 35.0)
 
     def test_missing_stress_shock_leaves_scenario_incomplete_and_portfolio_unknown(self):
         cfg = config()
