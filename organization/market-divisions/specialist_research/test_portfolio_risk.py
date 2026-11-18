@@ -103,6 +103,25 @@ class PortfolioRiskTests(unittest.TestCase):
         self.assertEqual(result["status"], "HALT")
         self.assertTrue(any("max_value" in error for error in result["errors"]))
 
+
+    def test_desk_scoped_limit_uses_only_that_desk_and_currency(self):
+        scoped = {"schema_version": "1.0.0", "limits": [{
+            "scope": "desk:forex", "metric": "gross_exposure",
+            "valuation_currency": "USD", "max_value": 99.0,
+        }]}
+        result = assess_portfolio_risk(packets(), NOW, scoped, correlations())
+        self.assertEqual(result["status"], "HALT")
+        self.assertEqual(result["risk_limits"]["results"][0]["actual"], 100.0)
+
+    def test_group_scoped_limit_uses_currency_partitioned_group_exposure(self):
+        scoped = {"schema_version": "1.0.0", "limits": [{
+            "scope": "group:macro-risk", "metric": "gross_exposure",
+            "valuation_currency": "USD", "max_value": 299.0,
+        }]}
+        result = assess_portfolio_risk(packets(), NOW, scoped, correlations())
+        self.assertEqual(result["status"], "HALT")
+        self.assertEqual(result["risk_limits"]["results"][0]["actual"], 300.0)
+
     def test_currency_buckets_are_not_combined(self):
         rows = packets()
         rows[1]["context"]["portfolio_risk"]["positions"][0]["valuation_currency"] = "EUR"
