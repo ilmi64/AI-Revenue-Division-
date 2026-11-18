@@ -156,7 +156,7 @@ class ReplayTests(unittest.TestCase):
         self.assertEqual(set(implementation), {
             "replay", "evidence_gate", "specialist_engines", "gold_specialist",
             "capital_flow_handoff", "capital_flow_provenance",
-            "capital_flow_priority", "capital_flow_taxonomy",
+            "capital_flow_priority", "capital_flow_taxonomy", "stop_clearance_review",
         })
         for digest in implementation.values():
             self.assertRegex(digest, r"^[a-f0-9]{64}$")
