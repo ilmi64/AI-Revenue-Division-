@@ -28,7 +28,8 @@ def _utc(value: Any) -> datetime | None:
 def _blocked(errors: list[str], warnings: list[str] | None = None) -> dict[str, Any]:
     return {
         "status": "HALT", "errors": errors, "warnings": warnings or [],
-        "closeout_occurred": True, "pending_order_count": 0,
+        "closeout_occurred": None, "pending_orders_complete": False,
+        "pending_order_count": 0,
         "orders_expected_cancelled": [], "orders_still_linked_to_open_trades": [],
         "orders_surviving_and_potentially_opening": [],
         "orders_surviving_but_reduce_only": [], "unclassified_orders": [],
