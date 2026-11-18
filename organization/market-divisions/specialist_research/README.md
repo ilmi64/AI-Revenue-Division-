@@ -1121,7 +1121,7 @@ The audit is wired into unified OCC intake as optional `oanda_pending_order_snap
 
 Input contract: `oanda-pending-order-snapshot.schema.json`. Official API excerpts `oanda_v20_order_definition` and `oanda_v20_account_pending_orders_endpoint` extend the evidence inventory to twenty-one excerpts. The capture remains partial: no full API document bytes, publisher authentication, live account access, or customer-specific terms have been captured.
 
-Regression suites: `test_oanda_pending_order_exposure.py` (36 methods), `test_oanda_closeout_transaction_reconciliation.py` (33 methods), `test_oanda_post_closeout_account_changes.py` (14 methods), `test_unified_intake.py` (43 methods), `test_venue_document_capture.py` (16 methods), and `organization/tests/test_build_organisation_dashboard.py` (35 methods). Tests are authored but have not been executed. No API token, account connection, order cancellation, modification or execution action is implemented.
+Regression suites: `test_oanda_pending_order_exposure.py` (36 methods), `test_oanda_closeout_transaction_reconciliation.py` (33 methods), `test_oanda_post_closeout_account_changes.py` (15 methods), `test_unified_intake.py` (43 methods), `test_venue_document_capture.py` (16 methods), and `organization/tests/test_build_organisation_dashboard.py` (35 methods). Tests are authored but have not been executed. No API token, account connection, order cancellation, modification or execution action is implemented.
 
 
 ## OANDA post-margin-closeout pending-order exposure audit
@@ -1263,4 +1263,4 @@ or grant live readiness.
 
 ### Current OANDA closeout reconciliation regression inventory
 
-As of the current development branch, the relevant suites contain 36 pending-order tests, 33 transaction-reconciliation tests, 14 AccountChanges/full-account reconciliation tests, 43 unified-intake tests, 16 venue-document-capture tests, and 35 Main Hub dashboard tests. These are 177 authored test methods across the listed suites (suite totals are not a claim of unique end-to-end scenarios). They have not been executed in this environment. The AccountChanges adapter and both cross-audit layers remain offline and research-only.
+As of the current development branch, the relevant suites contain 36 pending-order tests, 33 transaction-reconciliation tests, 15 AccountChanges/full-account reconciliation tests, 43 unified-intake tests, 16 venue-document-capture tests, and 35 Main Hub dashboard tests. These are 178 authored test methods across the listed suites (suite totals are not a claim of unique end-to-end scenarios). They have not been executed in this environment. The AccountChanges adapter and both cross-audit layers remain offline and research-only.
