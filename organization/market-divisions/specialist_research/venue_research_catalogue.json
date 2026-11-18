@@ -1,0 +1,204 @@
+{
+  "schema_version": "1.0.0",
+  "catalogue_status": "candidate_research_only",
+  "jurisdiction": {
+    "country": "Canada",
+    "province": "Ontario",
+    "eligibility_status": "UNVERIFIED_FOR_EACH_PROVIDER_AND_PRODUCT",
+    "note": "Public documentation does not establish that a specific account type or derivative product is available to this user in Ontario."
+  },
+  "checked_at_utc": "2026-11-17T00:00:00Z",
+  "candidates": [
+    {
+      "candidate_id": "kraken_mtf_crypto_linear_derivatives",
+      "provider": "Kraken MTF (Crypto Facilities Ltd)",
+      "division": "crypto",
+      "instrument_types": ["crypto_perpetual"],
+      "jurisdiction_status": "UNVERIFIED_FOR_CANADA_ON",
+      "candidate_status": "official_product_documentation_located",
+      "sources": [
+        {
+          "source_id": "kraken_linear_contract_specs",
+          "source_uri": "https://support.mtf.kraken.com/hc/en-us/articles/25499987607837-Linear-Contract-Specifications",
+          "source_class": "official_contract_specification",
+          "reviewed_at_utc": "2026-11-17T00:00:00Z",
+          "observed_scope": ["perpetual and fixed-maturity distinction", "USD margin and cash settlement", "hourly funding description", "contract symbols", "minimum lot", "mark price description"],
+          "source_content_hash": null,
+          "full_document_capture": false
+        }
+      ],
+      "known_gaps": ["Ontario client eligibility", "current instrument-specific maintenance tiers", "current funding parameters", "liquidation fee schedule", "collateral eligibility", "client agreement and regulatory perimeter"],
+      "next_action": "Capture current official contract, margin, funding and legal terms; independently verify Canadian eligibility."
+    },
+    {
+      "candidate_id": "coinbase_intx_crypto_perpetuals",
+      "provider": "Coinbase International Exchange",
+      "division": "crypto",
+      "instrument_types": ["crypto_perpetual"],
+      "jurisdiction_status": "UNVERIFIED_FOR_CANADA_ON",
+      "candidate_status": "official_product_documentation_located",
+      "sources": [
+        {
+          "source_id": "coinbase_perpetual_specs",
+          "source_uri": "https://help.coinbase.com/en/global-exchange/perpetual-futures-basics/perpetual-futures-product-specifications",
+          "source_class": "official_contract_specification",
+          "reviewed_at_utc": "2026-11-17T00:00:00Z",
+          "observed_scope": ["BTC and ETH perpetual contract examples", "USDC settlement", "contract multipliers and increments", "minimum order and quantity", "default initial margin and leverage descriptions", "index price description"],
+          "source_content_hash": null,
+          "full_document_capture": false
+        }
+      ],
+      "known_gaps": ["Ontario client eligibility", "current per-instrument margin tiers", "maintenance margin and liquidation rules", "funding rate formula and schedule", "fees and collateral haircuts", "legal entity and account restrictions"],
+      "next_action": "Capture current official product, risk, margin and legal terms; verify jurisdiction and entity before any profile preparation."
+    },
+    {
+      "candidate_id": "oanda_canada_fx_cfd",
+      "provider": "OANDA (Canada) Corporation",
+      "division": "forex",
+      "instrument_types": ["forex_cfd"],
+      "jurisdiction_status": "CANADIAN_ENTITY_DOCUMENTATION_LOCATED_ACCOUNT_ELIGIBILITY_UNVERIFIED",
+      "candidate_status": "official_canada_documentation_located",
+      "sources": [
+        {
+          "source_id": "oanda_ca_margin_rates",
+          "source_uri": "https://www.oanda.com/ca-en/legal/margin-rates/",
+          "source_class": "official_margin_schedule",
+          "reviewed_at_utc": "2026-11-17T00:00:00Z",
+          "observed_scope": ["Canada-specific margin and leverage table for forex, indices, commodities and metals"],
+          "source_content_hash": null,
+          "full_document_capture": false
+        },
+        {
+          "source_id": "oanda_ca_financing_faq",
+          "source_uri": "https://help.oanda.com/ca/en/faqs/financing-costs-ca.htm",
+          "source_class": "official_financing_policy",
+          "reviewed_at_utc": "2026-11-17T00:00:00Z",
+          "observed_scope": ["FX and metals financing based on tom-next rates and instrument admin fees", "index financing methodology", "Canada Corporation context"],
+          "source_content_hash": null,
+          "full_document_capture": false
+        }
+      ],
+      "known_gaps": ["current pair-specific margin rates", "pair-specific lot and unit rules", "long/short financing values and triple-day handling", "margin close-out and negative balance terms", "current client agreement and account classification"],
+      "next_action": "Capture the relevant pair-specific schedule, complete client agreement and current financing data; verify the exact account entity."
+    },
+    {
+      "candidate_id": "oanda_canada_index_cfd",
+      "provider": "OANDA (Canada) Corporation",
+      "division": "indices",
+      "instrument_types": ["index_cfd"],
+      "jurisdiction_status": "CANADIAN_ENTITY_DOCUMENTATION_LOCATED_ACCOUNT_ELIGIBILITY_UNVERIFIED",
+      "candidate_status": "official_canada_documentation_located",
+      "sources": [
+        {
+          "source_id": "oanda_ca_margin_rates",
+          "source_uri": "https://www.oanda.com/ca-en/legal/margin-rates/",
+          "source_class": "official_margin_schedule",
+          "reviewed_at_utc": "2026-11-17T00:00:00Z",
+          "observed_scope": ["Canada-specific index CFD margin and leverage table"],
+          "source_content_hash": null,
+          "full_document_capture": false
+        },
+        {
+          "source_id": "oanda_ca_financing",
+          "source_uri": "https://www.oanda.com/ca-en/trading/financing-costs/",
+          "source_class": "official_financing_policy",
+          "reviewed_at_utc": "2026-11-17T00:00:00Z",
+          "observed_scope": ["overnight financing timing", "index financing calculation basis", "rates vary by instrument and may change daily"],
+          "source_content_hash": null,
+          "full_document_capture": false
+        }
+      ],
+      "known_gaps": ["individual index contract units", "cash index price source and mark methodology", "trading hours and holidays", "corporate action adjustments", "close-out policy and account terms"],
+      "next_action": "Capture instrument-specific specifications and full account terms; independently verify margin and close-out details."
+    },
+    {
+      "candidate_id": "oanda_canada_gold_cfd",
+      "provider": "OANDA (Canada) Corporation",
+      "division": "gold",
+      "instrument_types": ["gold_cfd"],
+      "jurisdiction_status": "CANADIAN_ENTITY_DOCUMENTATION_LOCATED_ACCOUNT_ELIGIBILITY_UNVERIFIED",
+      "candidate_status": "official_canada_documentation_located",
+      "sources": [
+        {
+          "source_id": "oanda_ca_margin_rates",
+          "source_uri": "https://www.oanda.com/ca-en/legal/margin-rates/",
+          "source_class": "official_margin_schedule",
+          "reviewed_at_utc": "2026-11-17T00:00:00Z",
+          "observed_scope": ["Canada-specific metals and commodities margin schedule"],
+          "source_content_hash": null,
+          "full_document_capture": false
+        },
+        {
+          "source_id": "oanda_ca_financing_faq",
+          "source_uri": "https://help.oanda.com/ca/en/faqs/financing-costs-ca.htm",
+          "source_class": "official_financing_policy",
+          "reviewed_at_utc": "2026-11-17T00:00:00Z",
+          "observed_scope": ["metals financing methodology for long and short positions"],
+          "source_content_hash": null,
+          "full_document_capture": false
+        }
+      ],
+      "known_gaps": ["gold contract unit and lot size", "quote and settlement currency", "spot reference and mark methodology", "long/short financing values", "trading hours and gap policy", "Shariah review of CFD structure and financing"],
+      "next_action": "Capture the exact XAUUSD contract and account terms; separate conventional financing mechanics from any Shariah assessment."
+    },
+    {
+      "candidate_id": "cme_comex_gold_futures",
+      "provider": "CME Group / COMEX",
+      "division": "gold",
+      "instrument_types": ["gold_future"],
+      "jurisdiction_status": "ACCESS_DEPENDS_ON_CANADIAN_FCM_AND_ACCOUNT_APPROVAL",
+      "candidate_status": "official_contract_documentation_located",
+      "sources": [
+        {
+          "source_id": "cme_gold_contract_specs",
+          "source_uri": "https://www.cmegroup.com/markets/metals/precious/gold-futures.contractSpecs.html",
+          "source_class": "official_contract_specification",
+          "reviewed_at_utc": "2026-11-17T00:00:00Z",
+          "observed_scope": ["GC standard contract 100 troy ounces", "MGC micro contract 10 troy ounces", "product family and indicative margin content"],
+          "source_content_hash": null,
+          "full_document_capture": false
+        },
+        {
+          "source_id": "comex_rulebook_gold",
+          "source_uri": "https://www.cmegroup.com/content/dam/cmegroup/market-regulation/rule-filings/2024/8/24-283_1.pdf",
+          "source_class": "exchange_rulebook",
+          "reviewed_at_utc": "2026-11-17T00:00:00Z",
+          "observed_scope": ["COMEX Gold Futures delivery specifications and rule text"],
+          "source_content_hash": null,
+          "full_document_capture": false
+        }
+      ],
+      "known_gaps": ["current contract month and expiry calendar", "current tick and settlement details for chosen contract", "current exchange and FCM margin", "delivery notices and first notice controls", "Canadian FCM access and account requirements"],
+      "next_action": "Select exact contract month and capture current rulebook, calendar, settlement and FCM margin data."
+    },
+    {
+      "candidate_id": "cme_equity_index_futures",
+      "provider": "CME Group",
+      "division": "indices",
+      "instrument_types": ["index_future"],
+      "jurisdiction_status": "ACCESS_DEPENDS_ON_CANADIAN_FCM_AND_ACCOUNT_APPROVAL",
+      "candidate_status": "official_contract_documentation_located",
+      "sources": [
+        {
+          "source_id": "cme_equity_index_specs",
+          "source_uri": "https://www.cmegroup.com/markets/equities/sp-500-and-nasdaq-100-futures.html",
+          "source_class": "official_contract_specification",
+          "reviewed_at_utc": "2026-11-17T00:00:00Z",
+          "observed_scope": ["ES and MES contract codes", "ES 50 USD and MES 5 USD multipliers", "0.25 point minimum tick examples", "trading hours and roll/expiry context"],
+          "source_content_hash": null,
+          "full_document_capture": false
+        }
+      ],
+      "known_gaps": ["exact selected index product and contract month", "current expiry and last trade timestamps", "current exchange and FCM margin", "settlement and final settlement methodology", "Canadian FCM access and account requirements"],
+      "next_action": "Choose exact index contract and month; capture current exchange rulebook, expiry calendar and FCM margin."
+    }
+  ],
+  "global_controls": {
+    "profile_creation": "not_performed",
+    "profile_approval": "not_performed",
+    "source_authentication": "not_performed",
+    "trade_authority": false,
+    "live_readiness": false,
+    "research_only": true
+  }
+}
