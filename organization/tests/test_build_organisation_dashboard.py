@@ -103,7 +103,7 @@ class OrganisationDashboardTests(unittest.TestCase):
             },
         }
         report = self.build(occ_control_health=snapshot)
-        self.assertEqual(report["occ_control_health"]["status"], "PASS_AUDIT")
+        self.assertEqual(report["occ_control_health"]["status"], "WARN_AUDIT")
         self.assertEqual(report["occ_control_health"]["snapshot_id"], "occ-fixture")
         self.assertFalse(report["occ_control_health"]["global_stop_active"])
         self.assertEqual(report["occ_control_health"]["gold_specialist_audit"]["status"], "WARN")
