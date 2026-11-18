@@ -133,8 +133,11 @@ def verify_events(entries: list[dict[str, Any]]) -> dict[str, Any]:
         if not isinstance(entry, dict):
             errors.append(f"row {index}: entry must be object")
             continue
-        if entry.get("sequence") != index:
+        sequence = entry.get("sequence")
+        if isinstance(sequence, bool) or not isinstance(sequence, int) or sequence != index:
             errors.append(f"row {index}: invalid sequence")
+        if entry.get("ledger_version") != "1.0.0":
+            errors.append(f"row {index}: unsupported ledger_version")
         if entry.get("previous_hash") != previous:
             errors.append(f"row {index}: previous_hash mismatch")
         if entry.get("authority") != AUTHORITY:
