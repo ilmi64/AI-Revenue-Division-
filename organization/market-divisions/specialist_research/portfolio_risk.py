@@ -193,10 +193,17 @@ def assess_portfolio_risk(
             correlation_errors.append(f"{prefix}.evidence_refs missing")
         if not isinstance(item.get("source_id"), str) or not item.get("source_id"):
             correlation_errors.append(f"{prefix}.source_id missing")
+        sample_count = item.get("sample_count")
+        if not isinstance(sample_count, int) or isinstance(sample_count, bool) or sample_count < 2:
+            correlation_errors.append(f"{prefix}.sample_count must be an integer >= 2")
+        if not isinstance(item.get("lookback_window"), str) or not item.get("lookback_window").strip():
+            correlation_errors.append(f"{prefix}.lookback_window missing")
+        if not isinstance(item.get("methodology"), str) or not item.get("methodology").strip():
+            correlation_errors.append(f"{prefix}.methodology missing")
         pair = {
             "instrument_id_a": left, "instrument_id_b": right,
             "correlation": float(value), "observed_at_utc": item.get("observed_at_utc"),
-            "source_id": item.get("source_id"), "evidence_refs": refs if isinstance(refs, list) else [],
+            "source_id": item.get("source_id"), "sample_count": item.get("sample_count"),\n            "lookback_window": item.get("lookback_window"), "methodology": item.get("methodology"),\n            "evidence_refs": refs if isinstance(refs, list) else [],
             "authentication_status": "not_authenticated",
         }
         left_values = instrument_currency_exposure.get(left, {})
