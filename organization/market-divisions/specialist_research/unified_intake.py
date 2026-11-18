@@ -136,7 +136,8 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
                          correlation_evidence: list[dict[str, Any]] | None = None,
                          oanda_account_margin_replay: dict[str, Any] | None = None,
                          oanda_pending_order_snapshot: dict[str, Any] | None = None,
-                         oanda_closeout_transaction_replay: dict[str, Any] | None = None) -> dict[str, Any]:
+                         oanda_closeout_transaction_replay: dict[str, Any] | None = None,
+                         oanda_post_closeout_account_changes_replay: dict[str, Any] | None = None) -> dict[str, Any]:
     """Build one immutable-style research snapshot from local source snapshots."""
     evaluation_time = _utc(now_utc, "now_utc")
     audit_paths = (control_health_snapshot_history, control_health_event_ledger)
@@ -543,6 +544,85 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
                 "source": "oanda_closeout_transactions", "instrument_id": "account",
                 "reason": "OANDA_CLOSEOUT_ORDER_TRANSACTION_RECONCILIATION_FAILED_OR_INVALID",
             })
+    oanda_account_changes_audit = {
+        "status": "NOT_PROVIDED", "report": None,
+        "errors": ["OANDA post-closeout account-change reconciliation was not supplied"],
+        "trade_authority": False, "live_readiness": False,
+    }
+    if isinstance(closeout_batches, list) and closeout_batches and oanda_post_closeout_account_changes_replay is None:
+        missing_changes_report = {
+            "status": "HALT",
+            "errors": ["A margin closeout was recorded but no post-closeout AccountChanges/full-account reconciliation was supplied."],
+            "warnings": [], "account_change_reconciliation_complete": False,
+            "trade_authority": False, "live_readiness": False,
+            "research_only": True, "authority": "research_only_no_execution_authority",
+        }
+        oanda_account_changes_audit = {
+            "status": "HALT", "report": missing_changes_report,
+            "errors": missing_changes_report["errors"],
+            "trade_authority": False, "live_readiness": False,
+        }
+        active_stops.append({
+            "source": "oanda_account_changes", "instrument_id": "account",
+            "reason": "POST_CLOSEOUT_ACCOUNT_CHANGES_RECONCILIATION_MISSING",
+        })
+    if oanda_post_closeout_account_changes_replay is not None:
+        try:
+            from .oanda_post_closeout_account_changes import assess_oanda_post_closeout_account_changes
+        except ImportError:
+            from oanda_post_closeout_account_changes import assess_oanda_post_closeout_account_changes
+        if not isinstance(oanda_post_closeout_account_changes_replay, dict):
+            changes_report = {
+                "status": "HALT", "errors": ["oanda_post_closeout_account_changes_replay must be an object"],
+                "warnings": [], "trade_authority": False, "live_readiness": False,
+                "research_only": True, "authority": "research_only_no_execution_authority",
+            }
+        else:
+            try:
+                changes_report = assess_oanda_post_closeout_account_changes(**oanda_post_closeout_account_changes_replay)
+            except TypeError as exc:
+                changes_report = {
+                    "status": "HALT", "errors": [f"invalid OANDA account-change replay input shape: {exc}"],
+                    "warnings": [], "trade_authority": False, "live_readiness": False,
+                    "research_only": True, "authority": "research_only_no_execution_authority",
+                }
+        if isinstance(oanda_post_closeout_account_changes_replay, dict):
+            try:
+                if _utc(oanda_post_closeout_account_changes_replay.get("evaluated_at_utc"), "oanda_post_closeout_account_changes_replay.evaluated_at_utc") > evaluation_time:
+                    changes_report["status"] = "HALT"
+                    changes_report.setdefault("errors", []).append("OANDA account-change audit evaluation cannot be later than the unified snapshot time")
+            except ValueError:
+                changes_report["status"] = "HALT"
+                changes_report.setdefault("errors", []).append("OANDA account-change audit evaluation timestamp is invalid")
+        consistency_errors = []
+        if isinstance(oanda_closeout_transaction_replay, dict) and isinstance(transaction_report, dict):
+            tx_closed = transaction_report.get("liquidated_trade_ids")
+            change_closed = changes_report.get("closed_trade_ids_confirmed")
+            if (not isinstance(tx_closed, list) or not isinstance(change_closed, list)
+                    or sorted(tx_closed) != sorted(change_closed)):
+                consistency_errors.append("closed trade IDs differ between transaction and AccountChanges reconciliations")
+            tx_cancelled = transaction_report.get("orders_expected_cancelled")
+            change_cancelled = changes_report.get("cancelled_order_ids_confirmed")
+            if (not isinstance(tx_cancelled, list) or not isinstance(change_cancelled, list)
+                    or sorted(tx_cancelled) != sorted(change_cancelled)):
+                consistency_errors.append("expected linked-order cancellations differ between transaction and AccountChanges reconciliations")
+            if oanda_closeout_transaction_replay.get("account_id") != oanda_post_closeout_account_changes_replay.get("account_id"):
+                consistency_errors.append("account IDs differ between transaction and AccountChanges reconciliations")
+        if consistency_errors:
+            changes_report["status"] = "HALT"
+            changes_report.setdefault("errors", []).extend(consistency_errors)
+        changes_status = changes_report.get("status")
+        oanda_account_changes_audit = {
+            "status": "PASS" if changes_status == "PASS" else "HALT",
+            "report": changes_report,
+            "errors": changes_report.get("errors", []),
+            "trade_authority": False, "live_readiness": False,
+        }
+        if oanda_account_changes_audit["status"] == "HALT":
+            active_stops.append({
+                "source": "oanda_account_changes", "instrument_id": "account",
+                "reason": "OANDA_POST_CLOSEOUT_ACCOUNT_STATE_RECONCILIATION_FAILED_OR_INVALID",
+            })
     if portfolio_risk_audit["status"] == "HALT":
         active_stops.append({"source": "portfolio_risk", "instrument_id": "portfolio",
                              "reason": "portfolio_risk_halt_or_limit_breach"})
@@ -582,6 +662,7 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
         "oanda_account_margin_audit": oanda_account_margin_audit,
         "oanda_pending_order_audit": oanda_pending_order_audit,
         "oanda_closeout_transaction_audit": oanda_closeout_transaction_audit,
+        "oanda_post_closeout_account_changes_audit": oanda_account_changes_audit,
         "capital_flow_context": replay_result.get("capital_flow_handoff", {
             "status": "not_consumed", "accepted_event_count": 0, "trade_authority": False,
         }),
@@ -613,6 +694,7 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
             "Missing desk coverage is visible and prevents a fully covered research status",
             "Portfolio exposure, risk limits and correlation are unknown unless explicit comparable evidence and OCC limits are supplied",
             "OANDA account-level margin rules are audited only when an explicit same-account position set and verified trading-day observations are supplied",
+            "OANDA post-closeout AccountChanges are caller-supplied transaction-driven changes; price-dependent account state requires a separate current-state and margin assessment",
         ],
     }
 
@@ -673,6 +755,8 @@ def main() -> int:
                         help="Complete post-closeout pending-order snapshot JSON")
     parser.add_argument("--oanda-closeout-transaction-replay", type=Path,
                         help="JSON object with pre/post pending-order snapshots and complete OANDA transaction-ID range")
+    parser.add_argument("--oanda-post-closeout-account-changes-replay", type=Path,
+                        help="JSON object with OANDA AccountChanges response and subsequent full account snapshot")
     parser.add_argument("--max-market-age-seconds", type=float, default=120)
     parser.add_argument("--max-clock-skew-seconds", type=float, default=5)
     parser.add_argument("--output", type=Path, required=True)
@@ -698,6 +782,7 @@ def main() -> int:
         oanda_margin_replay = json.loads(args.oanda_account_margin_replay.read_text(encoding="utf-8")) if args.oanda_account_margin_replay else None
         oanda_pending_snapshot = json.loads(args.oanda_pending_order_snapshot.read_text(encoding="utf-8")) if args.oanda_pending_order_snapshot else None
         oanda_transaction_replay = json.loads(args.oanda_closeout_transaction_replay.read_text(encoding="utf-8")) if args.oanda_closeout_transaction_replay else None
+        oanda_account_changes_replay = json.loads(args.oanda_post_closeout_account_changes_replay.read_text(encoding="utf-8")) if args.oanda_post_closeout_account_changes_replay else None
         result = build_unified_intake(
             observations, args.now_utc, market_registry, flow_events, flow_reviews,
             flow_registry, handover, version, args.previous_global_stop, args.occ_stop_state,
@@ -706,6 +791,7 @@ def main() -> int:
             oanda_account_margin_replay=oanda_margin_replay,
             oanda_pending_order_snapshot=oanda_pending_snapshot,
             oanda_closeout_transaction_replay=oanda_transaction_replay,
+            oanda_post_closeout_account_changes_replay=oanda_account_changes_replay,
         )
         args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         print(json.dumps({"status": result["status"], "desk_coverage": result["desk_coverage"],
@@ -716,6 +802,7 @@ def main() -> int:
                           "oanda_account_margin": result.get("oanda_account_margin_audit", {}).get("status", "not_provided"),
                           "oanda_pending_orders": result.get("oanda_pending_order_audit", {}).get("status", "not_provided"),
                           "oanda_closeout_transactions": result.get("oanda_closeout_transaction_audit", {}).get("status", "not_provided"),
+                          "oanda_account_changes": result.get("oanda_post_closeout_account_changes_audit", {}).get("status", "not_provided"),
                           "output": str(args.output),
                           "authority": result["authority"]}, indent=2))
         return 0 if result["status"] in {"research", "unverified"} else 1
