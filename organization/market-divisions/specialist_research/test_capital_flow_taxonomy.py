@@ -9,6 +9,9 @@ class CapitalFlowTaxonomyTests(unittest.TestCase):
                                  "source_ids": ["a", "b"], "corroboration_count": 2})
         self.assertEqual(result["category"], "whale_movement")
         self.assertEqual(result["materiality_tier"], "high")
+        self.assertEqual(result["source_reliability_score"], 4)
+        self.assertEqual(result["attribution_confidence_score"], 3)
+        self.assertEqual(result["event_confidence_score"], 4)
         self.assertFalse(result["source_independence_verified"])
         self.assertEqual(result["corroboration_assessment"],
                          "multiple_sources_claimed_independence_not_verified")
