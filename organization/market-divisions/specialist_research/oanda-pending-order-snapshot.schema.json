@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OANDA v20 Post-Margin-Closeout Pending-Order Snapshot",
+  "description": "Caller-supplied complete read-only pending-order snapshot. Never used to cancel or modify orders.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "pending_orders",
+    "liquidated_trade_ids",
+    "account_hedging_enabled",
+    "source_timestamp_utc",
+    "evaluated_at_utc",
+    "max_snapshot_age_seconds",
+    "closeout_occurred"
+  ],
+  "properties": {
+    "pending_orders": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/order"
+      }
+    },
+    "liquidated_trade_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "account_hedging_enabled": {
+      "type": "boolean"
+    },
+    "source_timestamp_utc": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "evaluated_at_utc": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "max_snapshot_age_seconds": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "closeout_occurred": {
+      "const": true
+    }
+  },
+  "$defs": {
+    "order": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "state",
+        "type"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "state": {
+          "const": "PENDING"
+        },
+        "type": {
+          "enum": [
+            "LIMIT",
+            "STOP",
+            "MARKET_IF_TOUCHED",
+            "TAKE_PROFIT",
+            "STOP_LOSS",
+            "GUARANTEED_STOP_LOSS",
+            "TRAILING_STOP_LOSS"
+          ]
+        },
+        "instrument": {
+          "type": "string",
+          "minLength": 1
+        },
+        "units": {
+          "type": [
+            "string",
+            "number"
+          ]
+        },
+        "positionFill": {
+          "enum": [
+            "OPEN_ONLY",
+            "REDUCE_FIRST",
+            "REDUCE_ONLY",
+            "DEFAULT"
+          ]
+        },
+        "tradeID": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "enum": [
+                  "LIMIT",
+                  "STOP",
+                  "MARKET_IF_TOUCHED"
+                ]
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "required": [
+              "units"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "enum": [
+                  "TAKE_PROFIT",
+                  "STOP_LOSS",
+                  "GUARANTEED_STOP_LOSS",
+                  "TRAILING_STOP_LOSS"
+                ]
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "required": [
+              "tradeID"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
