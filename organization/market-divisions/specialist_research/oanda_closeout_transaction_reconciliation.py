@@ -189,8 +189,8 @@ def assess_oanda_closeout_transaction_reconciliation(
         errors.append("closeout fill transactions do not identify any closed trade IDs")
     if pre_time is not None and any(pre_time > item[1] for item in closeout_fills):
         errors.append("pre-closeout snapshot timestamp is later than a margin-closeout fill")
-    if post_time is not None and any(post_time < item[1] for item in parsed_transactions):
-        errors.append("post-closeout snapshot timestamp precedes one or more supplied transactions")
+    if post_time is not None and any(post_time < item[1] for item in closeout_fills):
+        errors.append("post-closeout snapshot timestamp precedes a margin-closeout fill")
     if errors:
         return _blocked(errors, warnings)
 
@@ -232,6 +232,8 @@ def assess_oanda_closeout_transaction_reconciliation(
                 if not valid_cancel:
                     errors.append(f"dependent order {order_id} cancellation predates the margin-closeout fill")
                 else:
+                    if post_time is not None and valid_cancel[-1][1] > post_time:
+                        errors.append(f"post-closeout snapshot for dependent order {order_id} predates its linked-trade cancellation")
                     confirmed_cancelled.append({
                         "order_id": order_id, "trade_id": linked_trade,
                         "transaction_id": str(valid_cancel[-1][0]),
@@ -242,10 +244,17 @@ def assess_oanda_closeout_transaction_reconciliation(
             if len(terminal) != 1:
                 disappeared_unexplained.append(order_id)
                 errors.append(f"pre-closeout order {order_id} disappeared without exactly one terminal ORDER_CANCEL or ORDER_FILL")
+            elif post_time is not None and terminal[0][1] > post_time:
+                disappeared_unexplained.append(order_id)
+                errors.append(f"terminal transaction for disappeared order {order_id} occurred after the post-closeout snapshot")
             elif terminal[0][2].get("type") == "ORDER_FILL":
                 filled_orders.append(order_id)
         elif any(item[2].get("type") in {"ORDER_CANCEL", "ORDER_FILL"} for item in events):
-            errors.append(f"order {order_id} is still pending post-closeout but also has a terminal transaction")
+            terminal_events = [item for item in events if item[2].get("type") in {"ORDER_CANCEL", "ORDER_FILL"}]
+            if any(post_time is not None and item[1] <= post_time for item in terminal_events):
+                errors.append(f"order {order_id} is still pending post-closeout but also has a terminal transaction by snapshot time")
+            elif terminal_events:
+                errors.append(f"post-closeout snapshot for order {order_id} predates its terminal transaction; refresh required")
 
     new_pending = sorted(post_ids - pre_ids)
     if new_pending:
