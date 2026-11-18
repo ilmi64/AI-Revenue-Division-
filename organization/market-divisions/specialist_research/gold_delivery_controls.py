@@ -75,6 +75,11 @@ def assess_gold_delivery_controls(contract: Any, position: Any, evaluation_utc: 
             errors.append("First Position/First Notice/delivery date sequence is inconsistent")
         if not (dates["delivery_start_date"] <= dates["delivery_end_date"]):
             errors.append("delivery_start_date must not exceed delivery_end_date")
+        if dates["first_notice_date"] > dates["delivery_start_date"]:
+            errors.append("First Notice Date must not occur after delivery start")
+        contract_month = contract.get("contract_month")
+        if dates["delivery_start_date"].strftime("%Y-%m") != contract_month or dates["delivery_end_date"].strftime("%Y-%m") != contract_month:
+            errors.append("delivery window must fall within the specified contract month")
         if dates["last_trade_date"] > dates["delivery_end_date"]:
             errors.append("last_trade_date must not exceed delivery_end_date")
         if dates["fcm_long_position_cutoff_date"] > dates["first_position_date"]:
