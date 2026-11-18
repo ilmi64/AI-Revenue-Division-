@@ -298,17 +298,25 @@ def assess_oanda_post_closeout_account_changes(
                 errors.append(f"position {instrument} {side} units differ between changes and full account snapshot")
 
     filled_preexisting = sorted(filled_order_ids & pre_order_ids)
-    # Only the explicit margin-closeout ORDER_FILL is expected. Any other fill
-    # after the supplied closeout boundary requires independent exposure review,
-    # including fills from orders created after that boundary.
+    # OANDA AccountChanges includes orders created during the interval even
+    # when they are immediately filled. Exempt only a market order whose
+    # creation transaction explicitly says MARGIN_CLOSEOUT and whose matching
+    # fill transaction explicitly says MARKET_ORDER_MARGIN_CLOSEOUT.
     closeout_fill_order_ids = {
         tx.get("orderID") for tx in arrays["transactions"]
         if tx.get("type") == "ORDER_FILL"
         and tx.get("reason") == "MARKET_ORDER_MARGIN_CLOSEOUT"
         and isinstance(tx.get("orderID"), str)
     }
+    closeout_create_order_ids = {
+        tx.get("id") for tx in arrays["transactions"]
+        if tx.get("type") == "MARKET_ORDER"
+        and tx.get("reason") == "MARGIN_CLOSEOUT"
+        and isinstance(tx.get("id"), str)
+    }
+    confirmed_closeout_created_ids = closeout_create_order_ids & closeout_fill_order_ids
     unexpected_filled = sorted(filled_order_ids - closeout_fill_order_ids)
-    newly_created = sorted(created_order_ids - pre_order_ids)
+    newly_created = sorted(created_order_ids - pre_order_ids - confirmed_closeout_created_ids)
     triggered = sorted(triggered_order_ids)
     new_pending = sorted(set(order_ids) - pre_order_ids)
     newly_opened = sorted(opened)
