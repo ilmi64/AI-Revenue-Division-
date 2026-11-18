@@ -94,6 +94,50 @@ class OandaPostCloseoutAccountChangesTests(unittest.TestCase):
         self.assertEqual(result["status"], "HALT")
         self.assertTrue(any("ORDER_FILL" in item for item in result["errors"]))
 
+    def test_new_order_fill_after_closeout_halts_even_without_open_trade(self):
+        result = base(
+            changes={
+                "ordersFilled": [{"id": "new-entry"}],
+                "transactions": [
+                    {"id": "101", "accountID": "acct-1", "type": "ORDER_FILL",
+                     "orderID": "closeout", "reason": "MARKET_ORDER_MARGIN_CLOSEOUT"},
+                    {"id": "102", "accountID": "acct-1", "type": "ORDER_FILL",
+                     "orderID": "new-entry", "reason": "CLIENT_ORDER"},
+                ],
+            }
+        )
+        self.assertEqual(result["status"], "HALT")
+        self.assertEqual(result["unexpected_filled_order_ids"], ["new-entry"])
+
+    def test_newly_created_order_halts_even_if_not_pending_at_snapshot(self):
+        result = base(
+            changes={
+                "ordersCreated": [{"id": "new-order"}],
+                "ordersCancelled": [{"id": "sl-1"}, {"id": "new-order"}],
+            }
+        )
+        self.assertEqual(result["status"], "HALT")
+        self.assertEqual(result["newly_created_order_ids"], ["new-order"])
+
+    def test_triggered_order_after_closeout_halts(self):
+        result = base(changes={"ordersTriggered": [{"id": "entry-1"}]})
+        self.assertEqual(result["status"], "HALT")
+        self.assertEqual(result["triggered_order_ids"], ["entry-1"])
+
+    def test_explicit_margin_closeout_fill_is_not_classified_as_unexpected(self):
+        result = base(
+            changes={
+                "ordersFilled": [{"id": "closeout"}],
+                "transactions": [
+                    {"id": "101", "accountID": "acct-1", "type": "ORDER_FILL",
+                     "orderID": "closeout", "reason": "MARKET_ORDER_MARGIN_CLOSEOUT"},
+                    {"id": "102", "accountID": "acct-1", "type": "ORDER_CANCEL", "orderID": "sl-1"},
+                ],
+            }
+        )
+        self.assertEqual(result["status"], "PASS")
+        self.assertEqual(result["unexpected_filled_order_ids"], [])
+
     def test_new_pending_order_after_closeout_halts_for_exposure_review(self):
         result = base(account={"orders": [{"id": "new-entry", "state": "PENDING"}]})
         self.assertEqual(result["status"], "HALT")
