@@ -122,8 +122,10 @@ def _source_map(registry: dict[str, Any]) -> dict[str, dict[str, Any]]:
         raise HandoffError("source registry must contain a sources array")
     result: dict[str, dict[str, Any]] = {}
     for source in registry["sources"]:
-        if not isinstance(source, dict) or not isinstance(source.get("source_id"), str):
-            raise HandoffError("source registry contains malformed source")
+        if (not isinstance(source, dict)
+                or not isinstance(source.get("source_id"), str)
+                or not source["source_id"].strip()):
+            raise HandoffError("source registry contains malformed or empty source_id")
         source_id = source["source_id"]
         if source_id in result:
             raise HandoffError(f"duplicate source_id: {source_id}")
