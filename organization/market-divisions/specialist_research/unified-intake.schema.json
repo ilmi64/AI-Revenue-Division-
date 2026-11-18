@@ -531,6 +531,81 @@
                           "const": false
                         }
                       }
+                    },
+                    "evidence_provenance": {
+                      "type": "object",
+                      "required": [
+                        "status",
+                        "evidence_item_count",
+                        "evidence_refs_without_metadata",
+                        "metadata_errors",
+                        "distinct_declared_publishers",
+                        "distinct_canonical_sources",
+                        "distinct_source_families",
+                        "declared_independence_groups",
+                        "independent_corroboration_established",
+                        "independence_assessment",
+                        "authentication_status",
+                        "timestamp_trust_status"
+                      ],
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "metadata_complete_unverified",
+                            "incomplete"
+                          ]
+                        },
+                        "evidence_item_count": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "evidence_refs_without_metadata": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "metadata_errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "distinct_declared_publishers": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "distinct_canonical_sources": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "distinct_source_families": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "declared_independence_groups": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "independent_corroboration_established": {
+                          "const": false
+                        },
+                        "independence_assessment": {
+                          "type": "string"
+                        },
+                        "evidence": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        },
+                        "authentication_status": {
+                          "const": "not_authenticated"
+                        },
+                        "timestamp_trust_status": {
+                          "const": "publisher_claim_not_independently_verified"
+                        }
+                      }
                     }
                   }
                 }
