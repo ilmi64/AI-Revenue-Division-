@@ -171,6 +171,7 @@ def replay_oanda_account_margin_closeout(
     daily_under_margin_days = 0
     closeout_batches: list[dict[str, Any]] = []
     timeline: list[dict[str, Any]] = []
+    deferred_closeout_retry_pending = False
     for moment, event, index in parsed_events:
         state = assess_oanda_margin_state(event["nav_mid"], event["margin_used"])
         for pid, market_status in event["position_market_status"].items():
@@ -183,9 +184,15 @@ def replay_oanda_account_margin_closeout(
             else:
                 daily_under_margin_days = 0
 
+        if deferred_closeout_retry_pending and not state["margin_call"]:
+            deferred_closeout_retry_pending = False
+        retry_pending = deferred_closeout_retry_pending and state["margin_call"]
         time_based = daily_under_margin_days >= TIME_BASED_TRADING_DAYS and state["margin_call"]
         early = state["early_closeout_triggered"]
-        trigger = early or time_based
+        trigger = early or time_based or retry_pending
+        trigger_reason = ("EARLY_100_PERCENT_MARGIN_CLOSEOUT" if early else
+                          "SIX_CONSECUTIVE_UNDERMARGINED_TRADING_DAYS" if time_based else
+                          "RETRY_DEFERRED_CLOSEOUT_WHILE_UNDERMARGINED")
         open_positions = [
             pid for pid, p in positions.items()
             if p["position_state"] == "open"
@@ -205,23 +212,23 @@ def replay_oanda_account_margin_closeout(
                 closed_now.append(pid)
             closeout_batches.append({
                 "timestamp_utc": event["timestamp_utc"],
-                "trigger": "EARLY_100_PERCENT_MARGIN_CLOSEOUT" if early
-                           else "SIX_CONSECUTIVE_UNDERMARGINED_TRADING_DAYS",
+                "trigger": trigger_reason,
                 "position_ids_closed_as_batch": closed_now,
                 "position_ids_deferred_market_closed_or_halted": deferred,
                 "execution_prices": "NOT_MODELLED_CURRENT_BROKER_RATES_UNAVAILABLE",
                 "position_ordering": "NO_SEQUENCE_ASSUMED_BATCH_CLOSEOUT",
             })
+            deferred_closeout_retry_pending = bool(deferred)
         elif trigger and deferred:
             closeout_batches.append({
                 "timestamp_utc": event["timestamp_utc"],
-                "trigger": "EARLY_100_PERCENT_MARGIN_CLOSEOUT" if early
-                           else "SIX_CONSECUTIVE_UNDERMARGINED_TRADING_DAYS",
+                "trigger": trigger_reason,
                 "position_ids_closed_as_batch": [],
                 "position_ids_deferred_market_closed_or_halted": deferred,
                 "execution_prices": "NOT_MODELLED_CURRENT_BROKER_RATES_UNAVAILABLE",
                 "position_ordering": "NO_SEQUENCE_ASSUMED_BATCH_CLOSEOUT",
             })
+            deferred_closeout_retry_pending = True
             warnings.append(
                 f"{event['timestamp_utc']}: closeout threshold reached but all remaining positions are closed or halted"
             )
@@ -234,6 +241,7 @@ def replay_oanda_account_margin_closeout(
             "time_based_closeout_threshold_reached": time_based,
             "early_closeout_threshold_reached": early,
             "closeout_triggered": trigger,
+            "deferred_closeout_retry_pending": deferred_closeout_retry_pending,
             "position_ids_closed": closed_now,
             "position_ids_deferred": deferred if trigger else [],
         })
@@ -261,7 +269,7 @@ def replay_oanda_account_margin_closeout(
             "margin_closeout_percentage": "(50% * Margin Used / NAV_mid) * 100",
             "early_closeout": "NAV_mid <= 50% of Margin Used (100% margin closeout percentage)",
             "time_based_closeout": "six consecutive caller-verified trading-day checks at 15:45 America/New_York while under-margined",
-            "market_unavailable": "closed/halted positions remain open and are monitored for a later closeout",
+            "market_unavailable": "closed/halted positions remain open; retry on reopening if NAV_mid remains below Margin Used",
         },
         "pending_orders": "NOT_MODELLED; unrelated pending orders are not assumed cancelled",
         "calendar_authentication": False,
@@ -276,7 +284,7 @@ def replay_oanda_account_margin_closeout(
             "Trading-day sequence and holiday calendar are caller-supplied and not authenticated.",
             "The six-day rule is replayed only when every consecutive daily 15:45 ET checkpoint is supplied.",
             "The model closes all currently tradable positions as one batch; it does not infer broker liquidation order or execution prices.",
-            "Positions in closed or halted markets remain open and require later observations.",
+            "Positions in closed or halted markets remain open; a deferred closeout is retried on reopening while NAV_mid remains below Margin Used, and is cancelled from the replay if the account recovers.",
             "This model does not cancel pending orders, calculate margin requirements, or reproduce account-specific exceptions.",
         ],
     }
