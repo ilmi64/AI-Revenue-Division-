@@ -249,14 +249,17 @@
         "research_only",
         "authority",
         "warnings",
-        "limitations"
+        "limitations",
+        "margin_call_observed",
+        "current_margin_call_active"
       ],
       "properties": {
         "status": {
           "enum": [
             "CLOSEOUT_TRIGGERED",
             "MARGIN_CALL_ACTIVE",
-            "WITHIN_MARGIN_REQUIREMENTS"
+            "WITHIN_MARGIN_REQUIREMENTS",
+            "MARGIN_CALL_OBSERVED_RECOVERED"
           ]
         },
         "account_currency": {
@@ -332,6 +335,12 @@
           "items": {
             "type": "string"
           }
+        },
+        "margin_call_observed": {
+          "type": "boolean"
+        },
+        "current_margin_call_active": {
+          "type": "boolean"
         }
       },
       "additionalProperties": false
