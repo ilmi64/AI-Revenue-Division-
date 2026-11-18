@@ -21,7 +21,7 @@ class VenueDocumentCaptureTests(unittest.TestCase):
         self.assertEqual(validate_capture_manifest(self.manifest), [])
 
     def test_all_eight_excerpt_digests_match_captured_text(self):
-        self.assertEqual(len(self.manifest["captures"]), 8)
+        self.assertEqual(len(self.manifest["captures"]), 9)
         for capture in self.manifest["captures"]:
             self.assertEqual(validate_revision(capture), [])
 
@@ -44,7 +44,7 @@ class VenueDocumentCaptureTests(unittest.TestCase):
     def test_report_discloses_partial_capture_and_no_profile_eligibility(self):
         report = build_capture_report(self.manifest)
         self.assertEqual(report["status"], "PARTIAL_EVIDENCE_CAPTURE_VALID")
-        self.assertEqual(report["document_count"], 8)
+        self.assertEqual(report["document_count"], 9)
         self.assertEqual(report["candidate_count"], 7)
         self.assertFalse(report["full_document_capture"])
         self.assertTrue(all(not item["profile_eligible"] for item in report["documents"]))
