@@ -473,8 +473,11 @@ state and active handover veto IDs are accumulated; a CLEAR/INACTIVE/NONE
 observation cannot remove a prior stop. The intake does not perform stop
 clearance. Handover records must explicitly acknowledge both shifts, reconcile
 positions, report healthy dependencies, carry active veto IDs and contain no
-unresolved critical items. Missing handover evidence is never interpreted as
-acceptance.
+unresolved critical items. It must also declare positive instrument coverage
+for Crypto, Forex, indices and Gold, plus a separate
+`positions_reconciled_by_desk=true` confirmation for every desk. A single
+aggregate positions-reconciled flag is not sufficient. Missing handover
+evidence is never interpreted as acceptance.
 
 Structured Gold specialist results are summarized under
 `gold_specialist_audit` in the unified snapshot, including per-instrument
