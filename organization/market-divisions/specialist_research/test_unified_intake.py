@@ -631,7 +631,7 @@ class UnifiedIntakeTests(unittest.TestCase):
                 },
             },
             "expected_closeout_trade_ids": ["trade-gold"],
-            "pre_closeout_pending_order_ids": ["sl-gold", "entry-1"],
+            "pre_closeout_pending_order_ids": ["sl-gold"],
             "expected_cancelled_order_ids": ["sl-gold"],
             "evaluated_at_utc": NOW,
             "changes_observed_at_utc": "2026-11-17T11:59:59Z",
@@ -655,6 +655,16 @@ class UnifiedIntakeTests(unittest.TestCase):
         self.assertEqual(result["oanda_post_closeout_account_changes_audit"]["status"], "HALT")
         self.assertTrue(result["global_stop_active"])
         self.assertTrue(any(stop["source"] == "oanda_account_changes" for stop in result["active_stops"]))
+
+    def test_oanda_account_changes_cross_checks_transaction_and_pending_order_audits(self):
+        result = self.build(
+            oanda_pending_order_snapshot=self.oanda_pending_snapshot(),
+            oanda_closeout_transaction_replay=self.oanda_closeout_transaction_replay(),
+            oanda_post_closeout_account_changes_replay=self.oanda_account_changes_replay(),
+        )
+        self.assertEqual(result["oanda_closeout_transaction_audit"]["status"], "PASS")
+        self.assertEqual(result["oanda_pending_order_audit"]["status"], "PASS")
+        self.assertEqual(result["oanda_post_closeout_account_changes_audit"]["status"], "PASS")
 
 if __name__ == "__main__":
     unittest.main()
