@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OCC Capital Flow Review Ledger Entry",
+  "description": "One append-only, hash-chained research review record. The journal is local, single-writer and grants no execution authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "sequence",
+    "previous_hash",
+    "reviewed_at",
+    "event_id",
+    "action",
+    "reviewer_id",
+    "reason",
+    "review_status",
+    "evidence_refs",
+    "supersedes_entry_hash",
+    "authority",
+    "entry_hash"
+  ],
+  "properties": {
+    "sequence": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "previous_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "reviewed_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "event_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "action": {
+      "enum": [
+        "review",
+        "corroborate",
+        "challenge",
+        "correct",
+        "reject",
+        "expire",
+        "reopen"
+      ]
+    },
+    "reviewer_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "review_status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "watch",
+        "research",
+        "unverified",
+        "corroborated",
+        "rejected",
+        "expired",
+        null
+      ]
+    },
+    "evidence_refs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "supersedes_entry_hash": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "authority": {
+      "const": "research_review_only_no_trade_or_execution_authority"
+    },
+    "entry_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "$comment": "Hash chaining detects accidental or unsophisticated modification; it is not a digital signature, trusted identity, trusted timestamp, tamper-proof storage, access control, multi-writer lock or trade authority."
+}
