@@ -445,6 +445,95 @@
               },
               "live_readiness": {
                 "const": false
+              },
+              "accepted_event_summaries": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "event_id",
+                    "event_classification"
+                  ],
+                  "properties": {
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "event_classification": {
+                      "type": "object",
+                      "required": [
+                        "category",
+                        "subtype",
+                        "classification_status",
+                        "materiality_tier",
+                        "source_independence_verified",
+                        "research_only",
+                        "trade_authority"
+                      ],
+                      "properties": {
+                        "category": {
+                          "type": "string"
+                        },
+                        "subtype": {
+                          "type": "string"
+                        },
+                        "classification_status": {
+                          "enum": [
+                            "classified",
+                            "unclassified"
+                          ]
+                        },
+                        "materiality_score": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ],
+                          "minimum": 0,
+                          "maximum": 5
+                        },
+                        "materiality_tier": {
+                          "enum": [
+                            "unknown",
+                            "low",
+                            "moderate",
+                            "high",
+                            "critical"
+                          ]
+                        },
+                        "source_count": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "claimed_corroboration_count": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ],
+                          "minimum": 0
+                        },
+                        "corroboration_assessment": {
+                          "type": "string"
+                        },
+                        "source_independence_verified": {
+                          "const": false
+                        },
+                        "direction": {
+                          "enum": [
+                            "inflow",
+                            "outflow",
+                            "internal",
+                            "unknown"
+                          ]
+                        },
+                        "research_only": {
+                          "const": true
+                        },
+                        "trade_authority": {
+                          "const": false
+                        }
+                      }
+                    }
+                  }
+                }
               }
             }
           }
