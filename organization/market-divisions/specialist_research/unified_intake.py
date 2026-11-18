@@ -214,7 +214,7 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
                               "errors": capital_flow_boundary_errors})
 
     capital_flow_audit = {
-        "status": ("blocked" if capital_flow_boundary_errors else
+        "status": ("blocked" if capital_flow_boundary_errors or any(x["status"] == "blocked" for x in capital_flow_packets) else
                    "consumed_research_context" if any(x["accepted_event_ids"] for x in capital_flow_packets) else
                    "provided_no_eligible_match" if capital_flow_packets else "not_consumed"),
         "instrument_count": len(capital_flow_packets),
