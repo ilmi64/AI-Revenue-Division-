@@ -532,7 +532,8 @@ assumed to be zero exposure.
 
 The intake accepts an optional versioned OCC risk configuration
 (`--portfolio-risk-config`; contract: `portfolio-risk-config.schema.json`) and optional timestamped correlation evidence
-(`--correlation-evidence`, JSONL). Limits support portfolio, individual desk and named exposure-group scopes, and are evaluated only against exposure
+(`--correlation-evidence`, JSONL; each pair requires a source ID, sample count,
+lookback window, methodology, timestamp and evidence references). Limits support portfolio, individual desk and named exposure-group scopes, and are evaluated only against exposure
 already expressed in the configured valuation currency. Desk/group totals are partitioned by currency. The module does not
 invent FX conversions, leverage, contract multipliers, prices, margin, or
 positions. Currency buckets are kept separate. Invalid inputs and configured
