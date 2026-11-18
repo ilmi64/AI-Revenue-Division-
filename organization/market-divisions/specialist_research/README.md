@@ -386,3 +386,21 @@ relabelled as an eligible event.
 This audit is distinct from the independent market-data evidence gate. It does
 not promote Capital Flow evidence into a price observation, signal, stop-clearance
 decision or execution permission.
+
+
+## Capital Flow classification and materiality
+
+`capital_flow_taxonomy.py` adds deterministic descriptive categories for whale
+movements, exchange flows, treasury activity, supply unlocks, fundraising,
+launch activity, institutional capital, ecosystem funding, cross-chain flows
+and protocol fundamentals. Unknown event types remain explicitly unclassified.
+A bounded 0–5 materiality annotation is mapped to low/moderate/high/critical
+tiers; it is not a directional score or a trade trigger.
+
+Source reliability, attribution confidence, event confidence and materiality
+remain separate dimensions. The taxonomy reports source counts and any
+corroboration count as claims, but always marks source independence as
+unverified: multiple source IDs do not establish independent ownership,
+collection or provenance. The unified OCC audit carries the classifications
+alongside accepted event IDs so the Crypto desk can inspect the context without
+converting it into a market observation or execution instruction.
