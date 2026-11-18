@@ -8,6 +8,7 @@ def assess(orders=None, liquidated=None, **overrides):
     args = {
         "pending_orders": orders or [],
         "liquidated_trade_ids": liquidated if liquidated is not None else ["trade-1"],
+        "remaining_open_trade_ids": ["trade-2"],
         "account_hedging_enabled": False,
         "source_timestamp_utc": "2026-11-17T20:45:00Z",
         "evaluated_at_utc": "2026-11-17T20:45:20Z",
@@ -74,6 +75,18 @@ class OandaPendingOrderExposureTests(unittest.TestCase):
         result = assess([linked(trade_id="trade-2")])
         self.assertEqual(result["status"], "PASS")
         self.assertEqual(result["orders_still_linked_to_open_trades"][0]["trade_id"], "trade-2")
+
+    def test_dependent_order_for_unknown_trade_id_blocks(self):
+        result = assess([linked(trade_id="trade-unknown")])
+        self.assertEqual(result["status"], "HALT")
+        self.assertTrue(any("neither confirmed liquidated nor confirmed open" in item for item in result["errors"]))
+
+    def test_liquidated_and_remaining_trade_sets_must_be_disjoint(self):
+        result = assess(remaining_open_trade_ids=["trade-1"])
+        self.assertEqual(result["status"], "HALT")
+
+    def test_boolean_order_units_are_rejected(self):
+        self.assertEqual(assess([entry(units=True)])["status"], "HALT")
 
     def test_trailing_stop_for_non_liquidated_trade_remains_linked(self):
         result = assess([linked(trade_id="trade-2", order_type="TRAILING_STOP_LOSS")])
