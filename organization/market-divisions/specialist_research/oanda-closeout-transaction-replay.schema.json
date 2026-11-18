@@ -1,0 +1,297 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OANDA v20 Closeout Transaction Reconciliation Replay Input",
+  "description": "Offline caller-supplied before/after pending-order snapshots and a complete, unfiltered transaction-ID range.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "account_id",
+    "pre_closeout_pending_orders",
+    "post_closeout_pending_orders",
+    "transactions",
+    "transaction_id_start_exclusive",
+    "transaction_id_end_inclusive",
+    "transaction_range_complete",
+    "transaction_range_unfiltered",
+    "pre_closeout_orders_complete",
+    "post_closeout_orders_complete",
+    "pre_closeout_snapshot_timestamp_utc",
+    "post_closeout_snapshot_timestamp_utc",
+    "evaluated_at_utc",
+    "max_snapshot_age_seconds"
+  ],
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "pre_closeout_pending_orders": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/order"
+      }
+    },
+    "post_closeout_pending_orders": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/order"
+      }
+    },
+    "transactions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/transaction"
+      }
+    },
+    "transaction_id_start_exclusive": {
+      "type": "string",
+      "pattern": "^[0-9]+$"
+    },
+    "transaction_id_end_inclusive": {
+      "type": "string",
+      "pattern": "^[0-9]+$"
+    },
+    "transaction_range_complete": {
+      "const": true
+    },
+    "transaction_range_unfiltered": {
+      "const": true
+    },
+    "pre_closeout_orders_complete": {
+      "const": true
+    },
+    "post_closeout_orders_complete": {
+      "const": true
+    },
+    "pre_closeout_snapshot_timestamp_utc": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "post_closeout_snapshot_timestamp_utc": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "evaluated_at_utc": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "max_snapshot_age_seconds": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    }
+  },
+  "$defs": {
+    "order": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "state",
+        "type"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "state": {
+          "const": "PENDING"
+        },
+        "type": {
+          "enum": [
+            "LIMIT",
+            "STOP",
+            "MARKET_IF_TOUCHED",
+            "TAKE_PROFIT",
+            "STOP_LOSS",
+            "GUARANTEED_STOP_LOSS",
+            "TRAILING_STOP_LOSS"
+          ]
+        },
+        "tradeID": {
+          "type": "string",
+          "minLength": 1
+        },
+        "instrument": {
+          "type": "string",
+          "minLength": 1
+        },
+        "units": {
+          "type": [
+            "string",
+            "number"
+          ]
+        },
+        "positionFill": {
+          "enum": [
+            "OPEN_ONLY",
+            "REDUCE_FIRST",
+            "REDUCE_ONLY",
+            "DEFAULT"
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "enum": [
+                  "TAKE_PROFIT",
+                  "STOP_LOSS",
+                  "GUARANTEED_STOP_LOSS",
+                  "TRAILING_STOP_LOSS"
+                ]
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "required": [
+              "tradeID"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "enum": [
+                  "LIMIT",
+                  "STOP",
+                  "MARKET_IF_TOUCHED"
+                ]
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "required": [
+              "instrument",
+              "units"
+            ]
+          }
+        }
+      ]
+    },
+    "transaction": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "accountID",
+        "time",
+        "type"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        },
+        "accountID": {
+          "type": "string",
+          "minLength": 1
+        },
+        "time": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "orderID": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tradesClosed": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "tradeID"
+            ],
+            "properties": {
+              "tradeID": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "ORDER_CANCEL"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "required": [
+              "orderID",
+              "reason"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "ORDER_FILL"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "required": [
+              "orderID",
+              "reason"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "ORDER_FILL"
+              },
+              "reason": {
+                "const": "MARKET_ORDER_MARGIN_CLOSEOUT"
+              }
+            },
+            "required": [
+              "type",
+              "reason"
+            ]
+          },
+          "then": {
+            "required": [
+              "tradesClosed"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
