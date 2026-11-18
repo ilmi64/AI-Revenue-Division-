@@ -655,3 +655,47 @@ missing model inputs, ordinary price-path P&L, long liquidation, partial
 liquidation, short-side funding, timestamp ordering, gap visibility and the
 research-only authority boundary. Tests are authored and have not yet been
 executed in this environment.
+
+
+## Explicit contract lifecycle and carry replay
+
+`contract_lifecycle.py` separates product lifecycle events from generic
+liquidation mechanics. It validates a venue/instrument profile and replays
+caller-supplied funding, financing, roll and expiry-settlement events in strict
+timestamp order. The profile contract is documented in
+`contract-lifecycle-profile.schema.json`.
+
+Profiles distinguish Crypto perpetuals, Forex CFDs, index CFDs, Gold CFDs,
+index futures and Gold futures. Dated futures require an explicit contract
+code, UTC expiry, settlement method and roll method. Crypto perpetuals require
+a funding-rate convention. CFDs require an explicit annualized, daily or no
+financing convention. The module never supplies a default calendar, triple
+swap rule, funding sign, settlement formula or broker close-out convention.
+
+Carry events may provide a signed cashflow directly, or a rate/notional/basis
+tuple whose sign is interpreted literally as cashflow to the position.
+Roll events must identify the current and next contract, both reference prices,
+and an explicit cash adjustment. Expiry settlement must occur on or after the
+profile expiry and must provide the matching contract, settlement method,
+settlement price and realized cashflow. Settlement closes the simulated
+quantity; no cash/physical delivery calculation is inferred.
+
+Example interface:
+
+```python
+from specialist_research.contract_lifecycle import replay_contract_lifecycle
+
+result = replay_contract_lifecycle(contract_profile, position, lifecycle_events)
+```
+
+This is a research ledger replay, not a venue calendar or accounting engine.
+Event values and currency are caller-supplied and unauthenticated. The module
+does not infer triple-swap calendars, financing accrual, tax, fees, delivery
+logistics, margin release or settlement cashflows. It is not connected to the
+derivative path simulator automatically; a future integration must reconcile
+both outputs without double-counting carry or settlement cashflows.
+
+Synthetic regression coverage is in `test_contract_lifecycle.py`, including
+profile validation, contract roll continuity, expiry settlement, invalid event
+ordering, financing conventions and the research-only authority boundary.
+Tests are authored and have not yet been executed.
