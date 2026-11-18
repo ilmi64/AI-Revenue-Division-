@@ -8,7 +8,7 @@ from specialist_research.oanda_post_closeout_account_changes import (
 
 def base(changes=None, account=None, **overrides):
     arrays = {
-        "ordersCreated": [],
+        "ordersCreated": [{"id": "closeout"}],
         "ordersCancelled": [{"id": "sl-1"}],
         "ordersFilled": [{"id": "closeout"}],
         "ordersTriggered": [],
@@ -17,6 +17,7 @@ def base(changes=None, account=None, **overrides):
         "tradesClosed": [{"id": "T1"}],
         "positions": [],
         "transactions": [
+            {"id": "100", "accountID": "acct-1", "type": "MARKET_ORDER", "reason": "MARGIN_CLOSEOUT"},
             {"id": "101", "accountID": "acct-1", "type": "ORDER_FILL", "orderID": "closeout", "reason": "MARKET_ORDER_MARGIN_CLOSEOUT"},
             {"id": "102", "accountID": "acct-1", "type": "ORDER_CANCEL", "orderID": "sl-1"},
         ],
@@ -31,7 +32,7 @@ def base(changes=None, account=None, **overrides):
         account_data.update(account)
     args = {
         "account_id": "acct-1",
-        "since_transaction_id": "100",
+        "since_transaction_id": "99",
         "changes_response": {"lastTransactionID": "102", "changes": arrays},
         "post_closeout_account_snapshot": {
             "lastTransactionID": "102", "account": account_data,
@@ -141,7 +142,7 @@ class OandaPostCloseoutAccountChangesTests(unittest.TestCase):
     def test_newly_created_order_halts_even_if_not_pending_at_snapshot(self):
         result = base(
             changes={
-                "ordersCreated": [{"id": "new-order"}],
+                "ordersCreated": [{"id": "closeout"}, {"id": "new-order"}],
                 "ordersCancelled": [{"id": "sl-1"}, {"id": "new-order"}],
             }
         )
@@ -158,6 +159,7 @@ class OandaPostCloseoutAccountChangesTests(unittest.TestCase):
             changes={
                 "ordersFilled": [{"id": "closeout"}],
                 "transactions": [
+                    {"id": "100", "accountID": "acct-1", "type": "MARKET_ORDER", "reason": "MARGIN_CLOSEOUT"},
                     {"id": "101", "accountID": "acct-1", "type": "ORDER_FILL",
                      "orderID": "closeout", "reason": "MARKET_ORDER_MARGIN_CLOSEOUT"},
                     {"id": "102", "accountID": "acct-1", "type": "ORDER_CANCEL", "orderID": "sl-1"},
