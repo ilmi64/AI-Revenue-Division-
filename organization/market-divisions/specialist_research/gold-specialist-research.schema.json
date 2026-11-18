@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "gold-specialist-research.schema.json",
+  "title": "Gold specialist research context",
+  "type": "object",
+  "required": [
+    "desk_id",
+    "instrument_id",
+    "instrument_type",
+    "price_basis",
+    "macro_evidence",
+    "macro_factor_coverage",
+    "macro_factor_count",
+    "session",
+    "microstructure",
+    "contract",
+    "source_independence_verified",
+    "errors",
+    "warnings",
+    "status",
+    "authority",
+    "trade_authority",
+    "live_readiness",
+    "directional_signal"
+  ],
+  "properties": {
+    "desk_id": {
+      "const": "gold"
+    },
+    "instrument_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "instrument_type": {
+      "enum": [
+        "xauusd_spot",
+        "gold_future",
+        "gold_cfd"
+      ]
+    },
+    "price_basis": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "macro_evidence": {
+      "type": "object",
+      "properties": {
+        "real_yields": {
+          "type": "array"
+        },
+        "usd": {
+          "type": "array"
+        },
+        "central_bank_demand": {
+          "type": "array"
+        },
+        "etf_flows": {
+          "type": "array"
+        },
+        "positioning": {
+          "type": "array"
+        },
+        "physical_demand": {
+          "type": "array"
+        },
+        "geopolitical_risk": {
+          "type": "array"
+        },
+        "rates_policy": {
+          "type": "array"
+        }
+      },
+      "additionalProperties": false
+    },
+    "macro_factor_coverage": {
+      "type": "object",
+      "properties": {
+        "real_yields": {
+          "type": "boolean"
+        },
+        "usd": {
+          "type": "boolean"
+        },
+        "central_bank_demand": {
+          "type": "boolean"
+        },
+        "etf_flows": {
+          "type": "boolean"
+        },
+        "positioning": {
+          "type": "boolean"
+        },
+        "physical_demand": {
+          "type": "boolean"
+        },
+        "geopolitical_risk": {
+          "type": "boolean"
+        },
+        "rates_policy": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "macro_factor_count": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 8
+    },
+    "session": {
+      "type": "object"
+    },
+    "microstructure": {
+      "type": "object"
+    },
+    "contract": {
+      "type": "object"
+    },
+    "source_independence_verified": {
+      "const": false
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "status": {
+      "enum": [
+        "research",
+        "unverified",
+        "halt"
+      ]
+    },
+    "authority": {
+      "const": "research_only_no_execution_authority"
+    },
+    "trade_authority": {
+      "const": false
+    },
+    "live_readiness": {
+      "const": false
+    },
+    "directional_signal": {
+      "type": "null"
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false
+}
