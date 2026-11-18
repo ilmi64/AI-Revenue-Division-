@@ -487,14 +487,21 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
                     "research_only": True, "authority": "research_only_no_execution_authority",
                 }
         consistency_errors = []
-        if oanda_pending_order_snapshot is not None and isinstance(oanda_pending_order_snapshot, dict):
-            if transaction_report.get("status") == "PASS":
-                if oanda_pending_order_snapshot.get("pending_orders") != oanda_closeout_transaction_replay.get("post_closeout_pending_orders"):
-                    consistency_errors.append("post-closeout pending-order snapshot differs between the exposure and transaction audits")
-                if sorted(oanda_pending_order_snapshot.get("liquidated_trade_ids", [])) != transaction_report.get("liquidated_trade_ids", []):
-                    consistency_errors.append("liquidated trade IDs differ between the pending-order and transaction audits")
-                if oanda_pending_order_snapshot.get("source_timestamp_utc") != oanda_closeout_transaction_replay.get("post_closeout_snapshot_timestamp_utc"):
-                    consistency_errors.append("post-closeout snapshot timestamps differ between the exposure and transaction audits")
+        if (isinstance(oanda_pending_order_snapshot, dict)
+                and isinstance(oanda_closeout_transaction_replay, dict)
+                and transaction_report.get("status") == "PASS"):
+            pending_list = oanda_pending_order_snapshot.get("pending_orders")
+            transaction_pending_list = oanda_closeout_transaction_replay.get("post_closeout_pending_orders")
+            if not isinstance(pending_list, list) or not isinstance(transaction_pending_list, list) or pending_list != transaction_pending_list:
+                consistency_errors.append("post-closeout pending-order snapshot differs between the exposure and transaction audits")
+            pending_liquidated = oanda_pending_order_snapshot.get("liquidated_trade_ids")
+            transaction_liquidated = transaction_report.get("liquidated_trade_ids")
+            if (not isinstance(pending_liquidated, list) or not isinstance(transaction_liquidated, list)
+                    or any(not isinstance(item, str) for item in pending_liquidated + transaction_liquidated)
+                    or sorted(pending_liquidated) != sorted(transaction_liquidated)):
+                consistency_errors.append("liquidated trade IDs differ between the pending-order and transaction audits")
+            if oanda_pending_order_snapshot.get("source_timestamp_utc") != oanda_closeout_transaction_replay.get("post_closeout_snapshot_timestamp_utc"):
+                consistency_errors.append("post-closeout snapshot timestamps differ between the exposure and transaction audits")
         if consistency_errors:
             transaction_report["status"] = "HALT"
             transaction_report.setdefault("errors", []).extend(consistency_errors)
