@@ -66,6 +66,16 @@ class VenueDocumentCaptureTests(unittest.TestCase):
         altered["candidate_coverage"].pop()
         self.assertTrue(validate_capture_manifest(altered))
 
+    def test_candidate_document_link_mismatch_is_rejected(self):
+        altered = json.loads(json.dumps(self.manifest))
+        altered["candidate_coverage"][0]["candidate_id"] = "cme_comex_gold_futures"
+        self.assertTrue(validate_capture_manifest(altered))
+
+    def test_capture_timestamp_precision_must_be_consistent(self):
+        altered = json.loads(json.dumps(self.manifest))
+        altered["captures"][0]["captured_at_utc"] = "2026-11-17T12:30:00Z"
+        self.assertTrue(validate_capture_manifest(altered))
+
     def test_unknown_capture_scope_is_rejected(self):
         altered = json.loads(json.dumps(self.manifest))
         altered["captures"][0]["capture_scope"] = "full_document"
