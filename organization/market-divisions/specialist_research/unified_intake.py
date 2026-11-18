@@ -135,7 +135,8 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
                          portfolio_risk_config: dict[str, Any] | None = None,
                          correlation_evidence: list[dict[str, Any]] | None = None,
                          oanda_account_margin_replay: dict[str, Any] | None = None,
-                         oanda_pending_order_snapshot: dict[str, Any] | None = None) -> dict[str, Any]:
+                         oanda_pending_order_snapshot: dict[str, Any] | None = None,
+                         oanda_closeout_transaction_replay: dict[str, Any] | None = None) -> dict[str, Any]:
     """Build one immutable-style research snapshot from local source snapshots."""
     _utc(now_utc, "now_utc")
     audit_paths = (control_health_snapshot_history, control_health_event_ledger)
@@ -439,6 +440,76 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
                 "source": "oanda_pending_orders", "instrument_id": "account",
                 "reason": "OANDA_POST_CLOSEOUT_PENDING_ORDERS_MAY_REOPEN_EXPOSURE_OR_AUDIT_INVALID",
             })
+    oanda_closeout_transaction_audit = {
+        "status": "NOT_PROVIDED", "report": None,
+        "errors": ["OANDA closeout transaction reconciliation was not supplied"],
+        "trade_authority": False, "live_readiness": False,
+    }
+    if isinstance(closeout_batches, list) and closeout_batches and oanda_closeout_transaction_replay is None:
+        missing_tx_report = {
+            "status": "HALT",
+            "errors": ["A margin closeout was recorded but no complete OANDA transaction-ID range was supplied."],
+            "warnings": [], "transaction_range_complete": False,
+            "cancellation_reconciliation_complete": False,
+            "order_cancellation_performed": False, "trade_authority": False,
+            "live_readiness": False, "research_only": True,
+            "authority": "research_only_no_execution_authority",
+        }
+        oanda_closeout_transaction_audit = {
+            "status": "HALT", "report": missing_tx_report,
+            "errors": missing_tx_report["errors"],
+            "trade_authority": False, "live_readiness": False,
+        }
+        active_stops.append({
+            "source": "oanda_closeout_transactions", "instrument_id": "account",
+            "reason": "POST_CLOSEOUT_TRANSACTION_RECONCILIATION_MISSING",
+        })
+    if oanda_closeout_transaction_replay is not None:
+        try:
+            from .oanda_closeout_transaction_reconciliation import assess_oanda_closeout_transaction_reconciliation
+        except ImportError:
+            from oanda_closeout_transaction_reconciliation import assess_oanda_closeout_transaction_reconciliation
+        if not isinstance(oanda_closeout_transaction_replay, dict):
+            transaction_report = {
+                "status": "HALT", "errors": ["oanda_closeout_transaction_replay must be an object"],
+                "warnings": [], "order_cancellation_performed": False,
+                "trade_authority": False, "live_readiness": False,
+                "research_only": True, "authority": "research_only_no_execution_authority",
+            }
+        else:
+            try:
+                transaction_report = assess_oanda_closeout_transaction_reconciliation(**oanda_closeout_transaction_replay)
+            except TypeError as exc:
+                transaction_report = {
+                    "status": "HALT", "errors": [f"invalid OANDA closeout transaction replay input shape: {exc}"],
+                    "warnings": [], "order_cancellation_performed": False,
+                    "trade_authority": False, "live_readiness": False,
+                    "research_only": True, "authority": "research_only_no_execution_authority",
+                }
+        consistency_errors = []
+        if oanda_pending_order_snapshot is not None and isinstance(oanda_pending_order_snapshot, dict):
+            if transaction_report.get("status") == "PASS":
+                if oanda_pending_order_snapshot.get("pending_orders") != oanda_closeout_transaction_replay.get("post_closeout_pending_orders"):
+                    consistency_errors.append("post-closeout pending-order snapshot differs between the exposure and transaction audits")
+                if sorted(oanda_pending_order_snapshot.get("liquidated_trade_ids", [])) != transaction_report.get("liquidated_trade_ids", []):
+                    consistency_errors.append("liquidated trade IDs differ between the pending-order and transaction audits")
+                if oanda_pending_order_snapshot.get("source_timestamp_utc") != oanda_closeout_transaction_replay.get("post_closeout_snapshot_timestamp_utc"):
+                    consistency_errors.append("post-closeout snapshot timestamps differ between the exposure and transaction audits")
+        if consistency_errors:
+            transaction_report["status"] = "HALT"
+            transaction_report.setdefault("errors", []).extend(consistency_errors)
+        transaction_status = transaction_report.get("status")
+        oanda_closeout_transaction_audit = {
+            "status": "PASS" if transaction_status == "PASS" else "HALT",
+            "report": transaction_report,
+            "errors": transaction_report.get("errors", []),
+            "trade_authority": False, "live_readiness": False,
+        }
+        if oanda_closeout_transaction_audit["status"] == "HALT":
+            active_stops.append({
+                "source": "oanda_closeout_transactions", "instrument_id": "account",
+                "reason": "OANDA_CLOSEOUT_ORDER_TRANSACTION_RECONCILIATION_FAILED_OR_INVALID",
+            })
     if portfolio_risk_audit["status"] == "HALT":
         active_stops.append({"source": "portfolio_risk", "instrument_id": "portfolio",
                              "reason": "portfolio_risk_halt_or_limit_breach"})
@@ -477,6 +548,7 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
         "portfolio_risk": portfolio_risk_audit,
         "oanda_account_margin_audit": oanda_account_margin_audit,
         "oanda_pending_order_audit": oanda_pending_order_audit,
+        "oanda_closeout_transaction_audit": oanda_closeout_transaction_audit,
         "capital_flow_context": replay_result.get("capital_flow_handoff", {
             "status": "not_consumed", "accepted_event_count": 0, "trade_authority": False,
         }),
@@ -566,6 +638,8 @@ def main() -> int:
                         help="JSON object with account_currency, initial_positions and observations")
     parser.add_argument("--oanda-pending-order-snapshot", type=Path,
                         help="Complete post-closeout pending-order snapshot JSON")
+    parser.add_argument("--oanda-closeout-transaction-replay", type=Path,
+                        help="JSON object with pre/post pending-order snapshots and complete OANDA transaction-ID range")
     parser.add_argument("--max-market-age-seconds", type=float, default=120)
     parser.add_argument("--max-clock-skew-seconds", type=float, default=5)
     parser.add_argument("--output", type=Path, required=True)
@@ -590,6 +664,7 @@ def main() -> int:
         correlations = _read_jsonl(args.correlation_evidence) if args.correlation_evidence else None
         oanda_margin_replay = json.loads(args.oanda_account_margin_replay.read_text(encoding="utf-8")) if args.oanda_account_margin_replay else None
         oanda_pending_snapshot = json.loads(args.oanda_pending_order_snapshot.read_text(encoding="utf-8")) if args.oanda_pending_order_snapshot else None
+        oanda_transaction_replay = json.loads(args.oanda_closeout_transaction_replay.read_text(encoding="utf-8")) if args.oanda_closeout_transaction_replay else None
         result = build_unified_intake(
             observations, args.now_utc, market_registry, flow_events, flow_reviews,
             flow_registry, handover, version, args.previous_global_stop, args.occ_stop_state,
@@ -597,6 +672,7 @@ def main() -> int:
             args.control_health_snapshot_history, args.control_health_event_ledger, risk_config, correlations,
             oanda_account_margin_replay=oanda_margin_replay,
             oanda_pending_order_snapshot=oanda_pending_snapshot,
+            oanda_closeout_transaction_replay=oanda_transaction_replay,
         )
         args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         print(json.dumps({"status": result["status"], "desk_coverage": result["desk_coverage"],
@@ -606,6 +682,7 @@ def main() -> int:
                           "portfolio_risk": result.get("portfolio_risk", {}).get("status", "not_provided"),
                           "oanda_account_margin": result.get("oanda_account_margin_audit", {}).get("status", "not_provided"),
                           "oanda_pending_orders": result.get("oanda_pending_order_audit", {}).get("status", "not_provided"),
+                          "oanda_closeout_transactions": result.get("oanda_closeout_transaction_audit", {}).get("status", "not_provided"),
                           "output": str(args.output),
                           "authority": result["authority"]}, indent=2))
         return 0 if result["status"] in {"research", "unverified"} else 1
