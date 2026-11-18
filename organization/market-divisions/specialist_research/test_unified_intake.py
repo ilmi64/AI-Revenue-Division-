@@ -83,6 +83,8 @@ class UnifiedIntakeTests(unittest.TestCase):
         result = self.build(rows, portfolio_risk_config=risk_config,
                             correlation_evidence=correlations)
         self.assertEqual(result["portfolio_risk"]["status"], "HALT")
+        self.assertEqual(result["portfolio_risk"]["instrument_normalization"]["status"], "INPUTS_VALIDATED_NOT_REPRICED")
+        self.assertEqual(result["portfolio_risk"]["stress_testing"]["status"], "ASSESSED")
         self.assertTrue(result["global_stop_active"])
         self.assertEqual(result["status"], "halt")
         self.assertTrue(any(stop["source"] == "portfolio_risk" for stop in result["active_stops"]))
