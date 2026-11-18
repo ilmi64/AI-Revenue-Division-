@@ -69,6 +69,8 @@ class CapitalFlowHandoffTests(unittest.TestCase):
         self.assertFalse(record["event_classification"]["source_independence_verified"])
         self.assertEqual(record["evidence_provenance"]["status"], "incomplete")
         self.assertFalse(record["evidence_provenance"]["independent_corroboration_established"])
+        self.assertEqual(record["research_priority"]["priority"], "insufficient_provenance")
+        self.assertTrue(record["research_priority"]["not_a_directional_signal"])
         self.assertEqual(result["mode"], "research_only")
 
     def test_no_explicit_review_blocks_event(self):
