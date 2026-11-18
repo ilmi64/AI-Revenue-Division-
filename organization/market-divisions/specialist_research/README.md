@@ -231,3 +231,37 @@ The event JSON Schema now defines the required handover details. Regression
 cases are in `test_handover_reconciliation.py`; tests are authored, not
 executed. The audit is offline and does not connect to live positions or a
 shift scheduler.
+
+
+## Unified OCC control-health integration
+
+The read-only adapter in [`control_health.py`](control_health.py) composes
+snapshot-history integrity, incident-event integrity, cross-ledger stop
+reconciliation and day/night handover acceptance into the unified OCC snapshot.
+It adds the required `control_health` object defined in
+[`unified-intake.schema.json`](unified-intake.schema.json).
+
+The adapter reads both local JSONL journals and never writes to either one.
+Missing/corrupt history, cross-ledger disagreement or a missing/blocked
+handover produces `HALT_AUDIT` and promotes the snapshot research status to
+`halt`. A continuity warning produces `WARN_AUDIT`; only fully consistent
+ledgers and an explicitly accepted handover produce `PASS_AUDIT`. Audit
+holds do not invent a `stop_raised` event or alter the specialist/global-stop
+fields. Existing stop IDs are surfaced and remain unchanged.
+
+Example (from `organization/market-divisions`):
+
+```python
+from pathlib import Path
+from specialist_research.control_health import build_control_health
+
+integrated = build_control_health(
+    unified_snapshot,
+    Path("/path/to/private/occ-snapshots.jsonl"),
+    Path("/path/to/private/occ-events.jsonl"),
+)
+```
+
+Regression cases are in `test_control_health.py`; they are authored and have
+not yet been executed. This is an offline integration adapter, not a live
+monitor, position reconciler, trusted-signature system or execution control.
