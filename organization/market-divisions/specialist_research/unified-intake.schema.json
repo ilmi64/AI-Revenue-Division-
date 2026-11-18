@@ -6,75 +6,362 @@
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "schema_version", "snapshot_type", "generated_at_utc", "status", "mode",
-    "desk_coverage", "missing_desks", "coverage_complete", "specialist_packets",
-    "capital_flow_context", "evidence_index", "packet_validation_errors",
-    "active_stops", "global_stop_active", "handover", "replay_evidence_gate",
-    "occ", "authority", "trade_authority", "live_readiness", "limitations"
+    "schema_version",
+    "snapshot_type",
+    "generated_at_utc",
+    "status",
+    "mode",
+    "desk_coverage",
+    "missing_desks",
+    "coverage_complete",
+    "specialist_packets",
+    "capital_flow_context",
+    "evidence_index",
+    "packet_validation_errors",
+    "active_stops",
+    "global_stop_active",
+    "handover",
+    "replay_evidence_gate",
+    "occ",
+    "authority",
+    "trade_authority",
+    "live_readiness",
+    "limitations",
+    "control_health"
   ],
   "properties": {
-    "schema_version": {"const": "1.0.0"},
-    "snapshot_type": {"const": "unified_occ_research_intelligence"},
-    "generated_at_utc": {"type": "string", "format": "date-time"},
-    "status": {"enum": ["research", "unverified", "halt"]},
-    "mode": {"const": "research_only"},
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "snapshot_type": {
+      "const": "unified_occ_research_intelligence"
+    },
+    "generated_at_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "enum": [
+        "research",
+        "unverified",
+        "halt"
+      ]
+    },
+    "mode": {
+      "const": "research_only"
+    },
     "desk_coverage": {
-      "type": "object", "additionalProperties": false,
-      "required": ["crypto", "forex", "indices", "gold"],
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "crypto",
+        "forex",
+        "indices",
+        "gold"
+      ],
       "properties": {
-        "crypto": {"type": "integer", "minimum": 0},
-        "forex": {"type": "integer", "minimum": 0},
-        "indices": {"type": "integer", "minimum": 0},
-        "gold": {"type": "integer", "minimum": 0}
+        "crypto": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "forex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "indices": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "gold": {
+          "type": "integer",
+          "minimum": 0
+        }
       }
     },
-    "missing_desks": {"type": "array", "uniqueItems": true, "items": {"enum": ["crypto", "forex", "indices", "gold"]}},
-    "coverage_complete": {"type": "boolean"},
-    "specialist_packets": {"type": "array", "items": {"type": "object"}},
-    "capital_flow_context": {"type": "object"},
+    "missing_desks": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "crypto",
+          "forex",
+          "indices",
+          "gold"
+        ]
+      }
+    },
+    "coverage_complete": {
+      "type": "boolean"
+    },
+    "specialist_packets": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "capital_flow_context": {
+      "type": "object"
+    },
     "evidence_index": {
       "type": "object",
       "additionalProperties": {
         "type": "array",
         "items": {
-          "type": "object", "additionalProperties": false,
-          "required": ["desk_id", "instrument_id", "evidence_type"],
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "desk_id",
+            "instrument_id",
+            "evidence_type"
+          ],
           "properties": {
-            "desk_id": {"type": "string"},
-            "instrument_id": {"type": "string"},
-            "evidence_type": {"enum": ["market_observation", "capital_flow_event"]}
+            "desk_id": {
+              "type": "string"
+            },
+            "instrument_id": {
+              "type": "string"
+            },
+            "evidence_type": {
+              "enum": [
+                "market_observation",
+                "capital_flow_event"
+              ]
+            }
           }
         }
       }
     },
-    "packet_validation_errors": {"type": "array", "items": {"type": "object"}},
-    "active_stops": {"type": "array", "items": {"type": "object"}},
-    "global_stop_active": {"type": "boolean"},
+    "packet_validation_errors": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "active_stops": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "global_stop_active": {
+      "type": "boolean"
+    },
     "handover": {
-      "type": "object", "required": ["status", "accepted", "errors"],
+      "type": "object",
+      "required": [
+        "status",
+        "accepted",
+        "errors"
+      ],
       "properties": {
-        "status": {"enum": ["not_provided", "accepted", "blocked"]},
-        "accepted": {"type": "boolean"},
-        "errors": {"type": "array", "items": {"type": "string"}},
-        "active_veto_ids": {"type": "array", "items": {"type": "string"}}
+        "status": {
+          "enum": [
+            "not_provided",
+            "accepted",
+            "blocked"
+          ]
+        },
+        "accepted": {
+          "type": "boolean"
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "active_veto_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
       }
     },
-    "replay_evidence_gate": {"type": "object"},
+    "replay_evidence_gate": {
+      "type": "object"
+    },
     "occ": {
-      "type": "object", "required": ["status", "desk_count", "packet_count", "authority", "trade_authority", "live_readiness"],
+      "type": "object",
+      "required": [
+        "status",
+        "desk_count",
+        "packet_count",
+        "authority",
+        "trade_authority",
+        "live_readiness"
+      ],
       "properties": {
-        "status": {"enum": ["research", "unverified", "halt"]},
-        "desk_count": {"type": "integer", "minimum": 0},
-        "packet_count": {"type": "integer", "minimum": 0},
-        "portfolio_version": {"type": ["integer", "string", "null"]},
-        "authority": {"const": "coordination_and_stop_veto_only"},
-        "trade_authority": {"const": false},
-        "live_readiness": {"const": false}
+        "status": {
+          "enum": [
+            "research",
+            "unverified",
+            "halt"
+          ]
+        },
+        "desk_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "packet_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "portfolio_version": {
+          "type": [
+            "integer",
+            "string",
+            "null"
+          ]
+        },
+        "authority": {
+          "const": "coordination_and_stop_veto_only"
+        },
+        "trade_authority": {
+          "const": false
+        },
+        "live_readiness": {
+          "const": false
+        }
       }
     },
-    "authority": {"const": "research_only_no_execution_authority"},
-    "trade_authority": {"const": false},
-    "live_readiness": {"const": false},
-    "limitations": {"type": "array", "items": {"type": "string"}}
+    "authority": {
+      "const": "research_only_no_execution_authority"
+    },
+    "trade_authority": {
+      "const": false
+    },
+    "live_readiness": {
+      "const": false
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "control_health": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "status",
+        "snapshot_history_integrity",
+        "event_ledger_integrity",
+        "cross_ledger_consistency",
+        "handover_acceptance",
+        "handover_count",
+        "latest_verified_snapshot_id",
+        "active_stop_ids",
+        "open_incidents",
+        "unresolved_critical_items",
+        "continuity_gaps",
+        "errors",
+        "warnings",
+        "authority",
+        "trade_authority",
+        "live_readiness",
+        "limitations"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "status": {
+          "enum": [
+            "PASS_AUDIT",
+            "WARN_AUDIT",
+            "HALT_AUDIT"
+          ]
+        },
+        "snapshot_history_integrity": {
+          "enum": [
+            "valid",
+            "invalid_or_missing"
+          ]
+        },
+        "event_ledger_integrity": {
+          "enum": [
+            "valid",
+            "invalid_or_missing"
+          ]
+        },
+        "cross_ledger_consistency": {
+          "enum": [
+            "consistent",
+            "inconsistent"
+          ]
+        },
+        "handover_acceptance": {
+          "enum": [
+            "accepted",
+            "blocked",
+            "not_provided"
+          ]
+        },
+        "handover_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "latest_verified_snapshot_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "active_stop_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "open_incidents": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "unresolved_critical_items": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "continuity_gaps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "authority": {
+          "const": "research_only_no_execution_authority"
+        },
+        "trade_authority": {
+          "const": false
+        },
+        "live_readiness": {
+          "const": false
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
   }
 }
