@@ -1,0 +1,388 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/oanda-account-margin-closeout.schema.json",
+  "title": "OANDA Canada Account Margin Closeout Replay",
+  "description": "Offline research-only replay of caller-supplied OANDA Canada v20/v20 MT4 account margin observations. Not a broker API or execution instruction.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/validReplay"
+    },
+    {
+      "$ref": "#/$defs/blockedReplay"
+    }
+  ],
+  "$defs": {
+    "authority": {
+      "type": "object",
+      "required": [
+        "trade_authority",
+        "live_readiness",
+        "research_only",
+        "authority"
+      ],
+      "properties": {
+        "trade_authority": {
+          "const": false
+        },
+        "live_readiness": {
+          "const": false
+        },
+        "research_only": {
+          "const": true
+        },
+        "authority": {
+          "const": "research_only_no_execution_authority"
+        }
+      },
+      "additionalProperties": true
+    },
+    "marginState": {
+      "type": "object",
+      "required": [
+        "status",
+        "nav_mid",
+        "margin_used",
+        "margin_call",
+        "margin_closeout_percentage",
+        "margin_closeout_percentage_unbounded",
+        "early_closeout_threshold",
+        "early_closeout_triggered",
+        "trade_authority",
+        "live_readiness",
+        "research_only",
+        "authority"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "EARLY_CLOSEOUT_THRESHOLD_REACHED",
+            "MARGIN_CALL_THRESHOLD_REACHED",
+            "WITHIN_MARGIN_REQUIREMENTS"
+          ]
+        },
+        "nav_mid": {
+          "type": "number",
+          "minimum": 0
+        },
+        "margin_used": {
+          "type": "number",
+          "minimum": 0
+        },
+        "margin_call": {
+          "type": "boolean"
+        },
+        "margin_closeout_percentage": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "margin_closeout_percentage_unbounded": {
+          "type": "boolean"
+        },
+        "early_closeout_threshold": {
+          "const": "NAV_mid <= 50% of Margin Used"
+        },
+        "early_closeout_triggered": {
+          "type": "boolean"
+        },
+        "trade_authority": {
+          "const": false
+        },
+        "live_readiness": {
+          "const": false
+        },
+        "research_only": {
+          "const": true
+        },
+        "authority": {
+          "const": "research_only_no_execution_authority"
+        }
+      },
+      "additionalProperties": false
+    },
+    "timelineItem": {
+      "type": "object",
+      "required": [
+        "timestamp_utc",
+        "margin_state",
+        "trading_day_check",
+        "consecutive_under_margined_trading_days",
+        "time_based_closeout_threshold_reached",
+        "early_closeout_threshold_reached",
+        "closeout_triggered",
+        "position_ids_closed",
+        "position_ids_deferred"
+      ],
+      "properties": {
+        "timestamp_utc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "margin_state": {
+          "$ref": "#/$defs/marginState"
+        },
+        "trading_day_check": {
+          "type": "boolean"
+        },
+        "consecutive_under_margined_trading_days": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "time_based_closeout_threshold_reached": {
+          "type": "boolean"
+        },
+        "early_closeout_threshold_reached": {
+          "type": "boolean"
+        },
+        "closeout_triggered": {
+          "type": "boolean"
+        },
+        "position_ids_closed": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "position_ids_deferred": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "closeoutBatch": {
+      "type": "object",
+      "required": [
+        "timestamp_utc",
+        "trigger",
+        "position_ids_closed_as_batch",
+        "position_ids_deferred_market_closed_or_halted",
+        "execution_prices",
+        "position_ordering"
+      ],
+      "properties": {
+        "timestamp_utc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "trigger": {
+          "enum": [
+            "EARLY_100_PERCENT_MARGIN_CLOSEOUT",
+            "SIX_CONSECUTIVE_UNDERMARGINED_TRADING_DAYS"
+          ]
+        },
+        "position_ids_closed_as_batch": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "position_ids_deferred_market_closed_or_halted": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "execution_prices": {
+          "const": "NOT_MODELLED_CURRENT_BROKER_RATES_UNAVAILABLE"
+        },
+        "position_ordering": {
+          "const": "NO_SEQUENCE_ASSUMED_BATCH_CLOSEOUT"
+        }
+      },
+      "additionalProperties": false
+    },
+    "remainingPosition": {
+      "type": "object",
+      "required": [
+        "position_id",
+        "desk_id",
+        "instrument_id",
+        "market_status"
+      ],
+      "properties": {
+        "position_id": {
+          "type": "string"
+        },
+        "desk_id": {
+          "type": "string"
+        },
+        "instrument_id": {
+          "type": "string"
+        },
+        "market_status": {
+          "enum": [
+            "open",
+            "closed",
+            "halted"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "validReplay": {
+      "type": "object",
+      "required": [
+        "status",
+        "account_currency",
+        "timeline",
+        "closeout_batches",
+        "position_ids_closed_by_model",
+        "remaining_open_positions",
+        "consecutive_under_margined_trading_days",
+        "rules_basis",
+        "pending_orders",
+        "calendar_authentication",
+        "account_values_authenticated",
+        "broker_execution_prices_modelled",
+        "position_action_performed",
+        "trade_authority",
+        "live_readiness",
+        "research_only",
+        "authority",
+        "warnings",
+        "limitations"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "CLOSEOUT_TRIGGERED",
+            "MARGIN_CALL_ACTIVE",
+            "WITHIN_MARGIN_REQUIREMENTS"
+          ]
+        },
+        "account_currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        },
+        "timeline": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/timelineItem"
+          }
+        },
+        "closeout_batches": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/closeoutBatch"
+          }
+        },
+        "position_ids_closed_by_model": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "remaining_open_positions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/remainingPosition"
+          }
+        },
+        "consecutive_under_margined_trading_days": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "rules_basis": {
+          "type": "object"
+        },
+        "pending_orders": {
+          "const": "NOT_MODELLED; unrelated pending orders are not assumed cancelled"
+        },
+        "calendar_authentication": {
+          "const": false
+        },
+        "account_values_authenticated": {
+          "const": false
+        },
+        "broker_execution_prices_modelled": {
+          "const": false
+        },
+        "position_action_performed": {
+          "const": false
+        },
+        "trade_authority": {
+          "const": false
+        },
+        "live_readiness": {
+          "const": false
+        },
+        "research_only": {
+          "const": true
+        },
+        "authority": {
+          "const": "research_only_no_execution_authority"
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "blockedReplay": {
+      "type": "object",
+      "required": [
+        "status",
+        "errors",
+        "warnings",
+        "closeout_batches",
+        "position_action_performed",
+        "trade_authority",
+        "live_readiness",
+        "research_only",
+        "authority"
+      ],
+      "properties": {
+        "status": {
+          "const": "BLOCKED_INVALID_OR_INCOMPLETE_INPUT"
+        },
+        "errors": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "closeout_batches": {
+          "type": "array",
+          "maxItems": 0
+        },
+        "position_action_performed": {
+          "const": false
+        },
+        "trade_authority": {
+          "const": false
+        },
+        "live_readiness": {
+          "const": false
+        },
+        "research_only": {
+          "const": true
+        },
+        "authority": {
+          "const": "research_only_no_execution_authority"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
