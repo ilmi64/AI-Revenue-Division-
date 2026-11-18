@@ -1121,7 +1121,7 @@ The audit is wired into unified OCC intake as optional `oanda_pending_order_snap
 
 Input contract: `oanda-pending-order-snapshot.schema.json`. Official API excerpts `oanda_v20_order_definition` and `oanda_v20_account_pending_orders_endpoint` extend the evidence inventory to twenty excerpts. The capture remains partial: no full API document bytes, publisher authentication, live account access, or customer-specific terms have been captured.
 
-Regression suites: `test_oanda_pending_order_exposure.py` (36 methods), `test_oanda_closeout_transaction_reconciliation.py` (32 methods), `test_unified_intake.py` (37 methods), `test_venue_document_capture.py` (15 methods), and `organization/tests/test_build_organisation_dashboard.py` (32 methods). Tests are authored but have not been executed. No API token, account connection, order cancellation, modification or execution action is implemented.
+Regression suites: `test_oanda_pending_order_exposure.py` (36 methods), `test_oanda_closeout_transaction_reconciliation.py` (32 methods), `test_unified_intake.py` (40 methods), `test_venue_document_capture.py` (15 methods), and `organization/tests/test_build_organisation_dashboard.py` (32 methods). Tests are authored but have not been executed. No API token, account connection, order cancellation, modification or execution action is implemented.
 
 
 ## OANDA post-margin-closeout pending-order exposure audit
@@ -1192,3 +1192,5 @@ clears the original margin-call stop.
 Input/output contracts:
 `oanda-closeout-transaction-replay.schema.json` and
 `oanda-closeout-transaction-audit.schema.json`.
+
+Unified intake also rejects OANDA account-margin observations, pending-order evaluation timestamps, or transaction-replay evaluation timestamps later than the unified snapshot's own `now_utc`. This prevents a snapshot from incorporating evidence that was recorded after its declared evaluation time.
