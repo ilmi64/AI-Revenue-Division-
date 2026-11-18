@@ -98,6 +98,12 @@ class OandaPostCloseoutAccountChangesTests(unittest.TestCase):
         result = base(changes={"ordersCancelled": []})
         self.assertEqual(result["status"], "HALT")
 
+    def test_unrelated_cancellations_do_not_expand_expected_linked_order_subset(self):
+        result = base(changes={"ordersCancelled": [{"id": "sl-1"}, {"id": "unrelated-2"}]})
+        self.assertEqual(result["status"], "PASS")
+        self.assertEqual(result["cancelled_order_ids_confirmed"], ["sl-1", "unrelated-2"])
+        self.assertEqual(result["expected_cancelled_order_ids_confirmed"], ["sl-1"])
+
     def test_account_snapshot_and_changes_last_transaction_id_must_match(self):
         result = base(account={"lastTransactionID": "103"})
         result["post_closeout_account_snapshot"]["lastTransactionID"] = "103"
