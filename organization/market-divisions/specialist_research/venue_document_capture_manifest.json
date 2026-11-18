@@ -764,6 +764,115 @@
         "product-specific terms for the exact account",
         "account entity and customer classification"
       ]
+    },
+    {
+      "document_id": "oanda_canada_margin_rules_faq",
+      "canonical_uri": "https://help.oanda.com/ca/en/faqs/margin-rules.htm",
+      "title": "What are OANDA's margin rules?",
+      "publisher": "OANDA (Canada) Corporation",
+      "source_class": "official_help_centre",
+      "source_ref": "turn467510search1",
+      "revision_id": "oanda_canada_margin_rules_faq:excerpt-20261117",
+      "candidate_ids": [
+        "oanda_canada_fx_cfd",
+        "oanda_canada_index_cfd",
+        "oanda_canada_gold_cfd"
+      ],
+      "content_sha256": "9613310889a4973ecaa3ee5b93297018599fddb6c43730ab6f278c295c1bf8e3",
+      "document_text": "OANDA Canada's FAQ defines Margin Close-Out Percentage as (50% × Margin Used) / NAV_mid, with values up to 100% as the closeout trigger. A margin call occurs when NAV_mid falls below Margin Used; the account is checked at 3:45 p.m. ET. If the account remains under-margined for six consecutive trading days, all open positions are automatically closed at current OANDA rates. If NAV_mid falls to half or less of Margin Used (Margin Close-Out Percentage ≥100%), all open positions are automatically closed at current rates. Positions whose markets are unavailable remain open and monitored; another closeout may occur when markets reopen if the account remains under-margined. The FAQ warns that fast markets may leave little or no time for alerts.",
+      "extracted_facts": [
+        {
+          "fact_key": "margin_closeout_percentage_formula",
+          "value": "(0.5 * Margin Used) / NAV_mid * 100",
+          "unit": "percent"
+        },
+        {
+          "fact_key": "margin_call_threshold",
+          "value": "NAV_mid < Margin Used",
+          "unit": "account-currency comparison"
+        },
+        {
+          "fact_key": "daily_margin_check_time",
+          "value": "15:45",
+          "unit": "America/New_York"
+        },
+        {
+          "fact_key": "time_based_closeout_days",
+          "value": 6,
+          "unit": "consecutive trading days"
+        },
+        {
+          "fact_key": "early_closeout_threshold",
+          "value": "NAV_mid <= 0.5 * Margin Used",
+          "unit": "account-currency comparison"
+        },
+        {
+          "fact_key": "closeout_scope",
+          "value": "all open positions",
+          "unit": "account-wide"
+        },
+        {
+          "fact_key": "market_unavailable_handling",
+          "value": "remain open and monitored; possible later closeout on reopen",
+          "unit": "policy"
+        }
+      ],
+      "known_gaps": [
+        "current signed customer agreement and account-specific amendments",
+        "exact account platform/sub-account applicability",
+        "current margin rates by instrument and net open position",
+        "actual broker liquidation order and execution prices",
+        "holiday/trading-day calendar authentication"
+      ],
+      "capture_scope": "official_page_search_excerpt",
+      "full_document_capture": false,
+      "capture_time_precision": "date_only_normalized_to_utc_midnight",
+      "captured_at_utc": "2026-11-17T00:00:00Z",
+      "retrieval_method": "official_web_search_excerpt"
+    },
+    {
+      "document_id": "oanda_canada_subaccount_closeout_differences",
+      "canonical_uri": "https://www.oanda.com/ca-en/account-support/sub-account-differences/",
+      "title": "Sub-account differences: margin closeout and pending orders",
+      "publisher": "OANDA (Canada) Corporation",
+      "source_class": "official_help_centre",
+      "source_ref": "turn467510search3",
+      "revision_id": "oanda_canada_subaccount_closeout_differences:excerpt-20261117",
+      "candidate_ids": [
+        "oanda_canada_fx_cfd",
+        "oanda_canada_index_cfd",
+        "oanda_canada_gold_cfd"
+      ],
+      "content_sha256": "f7a109dc486a742e84e019278441cf71f438b07ad7f7152496da0f2f693575f9",
+      "document_text": "OANDA Canada's sub-account comparison states that for v20 and v20 MT4 accounts, a Margin Close-Out event triggers full liquidation of all open positions except positions whose underlying markets are closed or halted. Pending orders not linked or related to liquidated trades are not cancelled and remain active. For offsetting long and short positions in the same instrument, normal/full margin is calculated on the larger leg, or on the long leg when quantities exactly offset.",
+      "extracted_facts": [
+        {
+          "fact_key": "v20_closeout_scope",
+          "value": "full liquidation of all open positions except closed/halted markets",
+          "unit": "account policy"
+        },
+        {
+          "fact_key": "unrelated_pending_orders",
+          "value": "remain active",
+          "unit": "order handling"
+        },
+        {
+          "fact_key": "hedged_position_margin",
+          "value": "full margin on larger leg; long leg if exactly offset",
+          "unit": "margin calculation"
+        }
+      ],
+      "known_gaps": [
+        "customer account platform and sub-account type",
+        "order linkage/related-order semantics for exact account",
+        "broker execution sequencing and partial fills",
+        "customer agreement and account-specific exceptions"
+      ],
+      "capture_scope": "official_page_search_excerpt",
+      "full_document_capture": false,
+      "capture_time_precision": "date_only_normalized_to_utc_midnight",
+      "captured_at_utc": "2026-11-17T00:00:00Z",
+      "retrieval_method": "official_web_search_excerpt"
     }
   ],
   "candidate_coverage": [
@@ -784,7 +893,9 @@
       "document_ids": [
         "oanda_canada_margin_rates",
         "oanda_canada_financing_faq",
-        "oanda_canada_financing_costs_page"
+        "oanda_canada_financing_costs_page",
+        "oanda_canada_margin_rules_faq",
+        "oanda_canada_subaccount_closeout_differences"
       ]
     },
     {
@@ -792,7 +903,9 @@
       "document_ids": [
         "oanda_canada_margin_rates",
         "oanda_canada_index_cfd_faq",
-        "oanda_canada_financing_costs_page"
+        "oanda_canada_financing_costs_page",
+        "oanda_canada_margin_rules_faq",
+        "oanda_canada_subaccount_closeout_differences"
       ]
     },
     {
@@ -804,7 +917,9 @@
         "oanda_xauusd_instrument_page",
         "oanda_canada_trading_hours_and_gap_risk",
         "oanda_canada_margin_closeout",
-        "oanda_canada_cfd_account_eligibility"
+        "oanda_canada_cfd_account_eligibility",
+        "oanda_canada_margin_rules_faq",
+        "oanda_canada_subaccount_closeout_differences"
       ]
     },
     {
