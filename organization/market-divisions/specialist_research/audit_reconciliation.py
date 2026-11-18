@@ -62,6 +62,7 @@ def reconcile(snapshot_records: list[dict[str, Any]],
         snapshot_ids, stop_warnings = _stop_ids(latest_snapshot)
         warnings.extend(stop_warnings)
         raised_ids: set[str] = set()
+        unkeyed_stop_events = False
         for row in event_records:
             event = row["event"]
             if event["event_type"] == "stop_raised":
@@ -69,6 +70,7 @@ def reconcile(snapshot_records: list[dict[str, Any]],
                 if isinstance(stop_id, str) and stop_id.strip():
                     raised_ids.add(stop_id)
                 else:
+                    unkeyed_stop_events = True
                     warnings.append(
                         f"stop_raised event {event['event_id']} has no details.stop_id"
                     )
@@ -77,7 +79,12 @@ def reconcile(snapshot_records: list[dict[str, Any]],
             if not snapshot_ids:
                 warnings.append("active global stop has no correlatable stop_id")
             for stop_id in sorted(snapshot_ids - raised_ids):
-                errors.append(f"snapshot active stop has no matching stop_raised event: {stop_id}")
+                if unkeyed_stop_events:
+                    warnings.append(
+                        f"snapshot stop {stop_id} cannot be exactly correlated because a stop_raised event has no stop_id"
+                    )
+                else:
+                    errors.append(f"snapshot active stop has no matching stop_raised event: {stop_id}")
         for stop_id in sorted(raised_ids - snapshot_ids):
             # Event ledger is monotonic, so a stop raised at any point must
             # remain represented by the latest active snapshot in this model.
