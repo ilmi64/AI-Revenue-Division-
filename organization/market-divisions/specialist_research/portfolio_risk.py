@@ -147,8 +147,9 @@ def assess_portfolio_risk(
                 totals["gross"] += amount
                 totals["net"] += signed
                 totals["position_count"] += 1
-            if isinstance(group, str) and group:
-                totals = group_totals.setdefault(group, {"gross": 0.0, "net": 0.0, "position_count": 0})
+            if isinstance(group, str) and group and isinstance(valuation_currency, str) and valuation_currency:
+                currency_groups = group_totals.setdefault(valuation_currency, {})
+                totals = currency_groups.setdefault(group, {"gross": 0.0, "net": 0.0, "position_count": 0})
                 totals["gross"] += amount
                 totals["net"] += signed
                 totals["position_count"] += 1
@@ -223,14 +224,24 @@ def assess_portfolio_risk(
                         errors.append(f"risk_config.limits[{i}] requires valuation_currency and valid max_value")
                         config_status = "INVALID"
                         continue
-                    totals = currency_totals.get(currency)
+                    scope = limit["scope"]
+                    if scope == "portfolio":
+                        totals = currency_totals.get(currency)
+                    elif scope.startswith("desk:") and scope.split(":", 1)[1] in DESKS:
+                        totals = desk_exposure.get(scope.split(":", 1)[1])
+                    elif scope.startswith("group:") and scope.split(":", 1)[1]:
+                        totals = group_totals.get(currency, {}).get(scope.split(":", 1)[1])
+                    else:
+                        errors.append(f"risk_config.limits[{i}].scope must be portfolio, desk:<desk>, or group:<name>")
+                        config_status = "INVALID"
+                        continue
                     if totals is None:
-                        limit_results.append({"scope": limit["scope"], "metric": metric, "status": "UNKNOWN",
+                        limit_results.append({"scope": scope, "metric": metric, "status": "UNKNOWN",
                                               "reason": f"no comparable exposure in {currency}"})
                         continue
                     actual = totals["gross"] if metric == "gross_exposure" else abs(totals["net"])
                     breached = actual > threshold
-                    limit_results.append({"scope": limit["scope"], "metric": metric, "valuation_currency": currency,
+                    limit_results.append({"scope": scope, "metric": metric, "valuation_currency": currency,
                                           "actual": actual, "limit": threshold,
                                           "status": "BREACH" if breached else "WITHIN_LIMIT"})
 
