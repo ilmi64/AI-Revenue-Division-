@@ -43,6 +43,8 @@ def assess_oanda_post_closeout_pending_orders(
     pending_orders: Any,
     liquidated_trade_ids: Any,
     remaining_open_trade_ids: Any,
+    remaining_open_trade_ids_complete: Any,
+    reported_pending_order_count: Any,
     account_hedging_enabled: Any,
     source_timestamp_utc: Any,
     evaluated_at_utc: Any,
@@ -93,6 +95,11 @@ def assess_oanda_post_closeout_pending_orders(
           or len(set(liquidated_trade_ids)) != len(liquidated_trade_ids)):
         errors.append("liquidated_trade_ids must contain unique non-empty strings")
 
+    if remaining_open_trade_ids_complete is not True:
+        errors.append("remaining_open_trade_ids_complete must be explicitly true")
+    if (isinstance(reported_pending_order_count, bool)
+            or not isinstance(reported_pending_order_count, int) or reported_pending_order_count < 0):
+        errors.append("reported_pending_order_count must be a non-negative integer from the account snapshot")
     if not isinstance(remaining_open_trade_ids, list):
         errors.append("remaining_open_trade_ids must be a complete array")
         remaining_open_trade_ids = []
@@ -105,6 +112,8 @@ def assess_oanda_post_closeout_pending_orders(
 
     if errors:
         return _blocked(errors, warnings)
+    if reported_pending_order_count != len(pending_orders):
+        return _blocked(["reported_pending_order_count does not match the supplied complete pending_orders array"], warnings)
 
     liquidated = set(liquidated_trade_ids)
     remaining = set(remaining_open_trade_ids)
@@ -216,6 +225,8 @@ def assess_oanda_post_closeout_pending_orders(
         "account_hedging_enabled": account_hedging_enabled,
         "closeout_occurred": True, "pending_orders_complete": True,
         "pending_order_count": len(pending_orders),
+        "reported_pending_order_count": reported_pending_order_count,
+        "remaining_open_trade_ids_complete": True,
         "liquidated_trade_count": len(liquidated),
         "remaining_open_trade_count": len(remaining),
         "orders_expected_cancelled": expected_cancelled,
