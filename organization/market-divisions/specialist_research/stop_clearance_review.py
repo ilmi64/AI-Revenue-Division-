@@ -50,6 +50,7 @@ def assess_stop_clearance(event_records: list[dict[str, Any]]) -> dict[str, Any]
         request_errors: list[str] = []
         if stop is None:
             request_errors.append("request references no known latched stop")
+            errors.append(f"clearance request {event['event_id']} references unknown stop_id {stop_id!r}")
         else:
             if details.get("incident_id") != stop["incident_id"]:
                 request_errors.append("request incident_id does not match the stop incident")
