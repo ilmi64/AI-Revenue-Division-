@@ -12,6 +12,7 @@ from typing import Any
 
 from specialist_research.venue_risk_simulation import validate_venue_spec
 from specialist_research.contract_lifecycle import validate_contract_profile
+from specialist_research.venue_document_revisions import assess_profile_revision_impact
 
 AUTHORITY = "research_only_no_execution_authority"
 REGISTRY_VERSION = "1.0.0"
@@ -114,6 +115,12 @@ def validate_profile_record(record: Any) -> list[str]:
             digest = item.get("evidence_sha256")
             if not isinstance(digest, str) or len(digest) != 64 or any(ch not in "0123456789abcdef" for ch in digest):
                 errors.append(f"{prefix}.evidence_sha256 must be a lowercase SHA-256 hex digest")
+            if ("document_id" in item) != ("revision_id" in item):
+                errors.append(f"{prefix} document_id and revision_id must be supplied together")
+            if "document_id" in item and (
+                not _nonempty(item.get("document_id")) or not _nonempty(item.get("revision_id"))
+            ):
+                errors.append(f"{prefix} document_id and revision_id must be non-empty strings")
             ref = item.get("source_uri")
             if _nonempty(ref):
                 if ref in seen_refs:
@@ -167,8 +174,8 @@ def validate_registry(registry: Any) -> list[str]:
 
 
 def resolve_profile(registry: Any, venue_id: str, instrument_id: str,
-                    as_of_utc: str) -> dict[str, Any]:
-    """Resolve the latest effective profile; never promote it to operational use."""
+                    as_of_utc: str, latest_document_revisions: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+    """Resolve a reviewed profile; optionally fail closed on stale captured source documents."""
     errors = validate_registry(registry)
     as_of = _utc(as_of_utc)
     if as_of is None:
@@ -203,9 +210,36 @@ def resolve_profile(registry: Any, venue_id: str, instrument_id: str,
         state = "BLOCKED_UNREVIEWED_PROFILE"
     else:
         state = "RESEARCH_ELIGIBLE_REVIEWED_PROFILE"
+    freshness = {
+        "status": "NOT_PROVIDED",
+        "human_review_required": True,
+        "note": "Document revision freshness was not assessed for this resolution.",
+    }
+    if latest_document_revisions is not None and state == "RESEARCH_ELIGIBLE_REVIEWED_PROFILE":
+        source_revision_ids = []
+        for item in selected.get("provenance", []):
+            if "document_id" in item and "revision_id" in item:
+                source_revision_ids.append({
+                    "document_id": item["document_id"],
+                    "revision_id": item["revision_id"],
+                })
+        if not source_revision_ids:
+            freshness = {
+                "status": "BLOCKED_MISSING_SOURCE_REVISION_LINKS",
+                "human_review_required": True,
+                "errors": ["profile provenance has no document_id/revision_id links"],
+            }
+            state = "BLOCKED_MISSING_SOURCE_REVISION_LINKS"
+        else:
+            freshness = assess_profile_revision_impact(
+                {"source_revision_ids": source_revision_ids}, latest_document_revisions
+            )
+            if freshness.get("status") != "CURRENT_SOURCE_REVISIONS":
+                state = "BLOCKED_STALE_SOURCE_DOCUMENTS"
     eligible = state == "RESEARCH_ELIGIBLE_REVIEWED_PROFILE"
     return {
         "status": state, "errors": [], "profile": selected if eligible else None,
+        "document_freshness": freshness,
         "selected_profile_id": selected["profile_id"],
         "selected_revision": selected["revision"],
         "research_eligible": eligible, "operational_readiness": False,
