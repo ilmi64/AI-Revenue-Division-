@@ -97,7 +97,7 @@ class OandaCloseoutTransactionReconciliationTests(unittest.TestCase):
                 "id": "103", "accountID": "acct-1", "time": "2026-11-18T05:00:05Z",
                 "type": "MARGIN_CALL_EXIT",
             }],
-            transaction_id_end_inclusive="103", reported_last_transaction_id="103",
+            transaction_id_end_inclusive="103", reported_last_transaction_id="103",,
             evaluated_at_utc="2026-11-18T05:00:06Z",
         )
         self.assertEqual(result["status"], "PASS")
@@ -116,7 +116,7 @@ class OandaCloseoutTransactionReconciliationTests(unittest.TestCase):
                 "id": "103", "accountID": "acct-1", "time": "2026-11-18T05:00:03Z",
                 "type": "ORDER_CANCEL", "orderID": "entry-1", "reason": "CLIENT_REQUEST",
             }],
-            transaction_id_end_inclusive="103",
+            transaction_id_end_inclusive="103", reported_last_transaction_id="103",
         )
         self.assertEqual(result["status"], "HALT")
         self.assertTrue(any("occurred after the post-closeout snapshot" in error for error in result["errors"]))
@@ -141,7 +141,7 @@ class OandaCloseoutTransactionReconciliationTests(unittest.TestCase):
                 "id": "103", "accountID": "acct-1", "time": "2026-11-18T05:00:01Z",
                 "type": "ORDER_CANCEL", "orderID": "entry-1", "reason": "CLIENT_REQUEST",
             }],
-            transaction_id_end_inclusive="103",
+            transaction_id_end_inclusive="103", reported_last_transaction_id="103",
         )
         self.assertEqual(result["status"], "PASS")
 
@@ -160,7 +160,7 @@ class OandaCloseoutTransactionReconciliationTests(unittest.TestCase):
                 "id": "103", "accountID": "acct-1", "time": "2026-11-18T05:00:01Z",
                 "type": "ORDER_FILL", "orderID": "entry-1", "reason": "STOP_ORDER",
             }],
-            transaction_id_end_inclusive="103",
+            transaction_id_end_inclusive="103", reported_last_transaction_id="103",
         )
         self.assertEqual(result["status"], "PASS")
         self.assertEqual(result["orders_filled_during_reconciliation"], ["entry-1"])
@@ -186,7 +186,7 @@ class OandaCloseoutTransactionReconciliationTests(unittest.TestCase):
         result = assess(tx=[
             closeout_fill(), cancel(),
             cancel(transaction_id="103", time="2026-11-18T05:00:02Z"),
-        ], transaction_id_end_inclusive="103")
+        ], transaction_id_end_inclusive="103", reported_last_transaction_id="103")
         self.assertEqual(result["status"], "HALT")
 
     def test_duplicate_transaction_id_halts(self):
