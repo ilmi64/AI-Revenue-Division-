@@ -8,9 +8,9 @@ from specialist_research.oanda_post_closeout_account_changes import (
 
 def base(changes=None, account=None, **overrides):
     arrays = {
-        "ordersCreated": [{"id": "closeout"}],
+        "ordersCreated": [{"id": "100"}],
         "ordersCancelled": [{"id": "sl-1"}],
-        "ordersFilled": [{"id": "closeout"}],
+        "ordersFilled": [{"id": "100"}],
         "ordersTriggered": [],
         "tradesOpened": [],
         "tradesReduced": [],
@@ -18,7 +18,7 @@ def base(changes=None, account=None, **overrides):
         "positions": [],
         "transactions": [
             {"id": "100", "accountID": "acct-1", "type": "MARKET_ORDER", "reason": "MARGIN_CLOSEOUT"},
-            {"id": "101", "accountID": "acct-1", "type": "ORDER_FILL", "orderID": "closeout", "reason": "MARKET_ORDER_MARGIN_CLOSEOUT"},
+            {"id": "101", "accountID": "acct-1", "type": "ORDER_FILL", "orderID": "100", "reason": "MARKET_ORDER_MARGIN_CLOSEOUT"},
             {"id": "102", "accountID": "acct-1", "type": "ORDER_CANCEL", "orderID": "sl-1"},
         ],
     }
@@ -70,11 +70,11 @@ class OandaPostCloseoutAccountChangesTests(unittest.TestCase):
     def test_new_trade_opened_after_closeout_halts(self):
         result = base(
             changes={
-                "ordersFilled": [{"id": "closeout"}, {"id": "entry-1"}],
+                "ordersFilled": [{"id": "100"}, {"id": "entry-1"}],
                 "tradesOpened": [{"id": "T2"}],
                 "transactions": [
                     {"id": "101", "accountID": "acct-1", "type": "ORDER_FILL",
-                     "orderID": "closeout"},
+                     "orderID": "100"},
                     {"id": "102", "accountID": "acct-1", "type": "ORDER_FILL",
                      "orderID": "entry-1", "tradeOpened": {"tradeID": "T2"}},
                 ],
@@ -106,10 +106,10 @@ class OandaPostCloseoutAccountChangesTests(unittest.TestCase):
     def test_fill_transaction_missing_from_orders_filled_array_halts(self):
         result = base(
             changes={
-                "ordersFilled": [{"id": "closeout"}],
+                "ordersFilled": [{"id": "100"}],
                 "transactions": [
                     {"id": "101", "accountID": "acct-1", "type": "ORDER_FILL",
-                     "orderID": "closeout", "reason": "MARKET_ORDER_MARGIN_CLOSEOUT"},
+                     "orderID": "100", "reason": "MARKET_ORDER_MARGIN_CLOSEOUT"},
                     {"id": "102", "accountID": "acct-1", "type": "ORDER_FILL",
                      "orderID": "omitted-fill", "reason": "CLIENT_ORDER"},
                 ],
@@ -127,10 +127,10 @@ class OandaPostCloseoutAccountChangesTests(unittest.TestCase):
     def test_new_order_fill_after_closeout_halts_even_without_open_trade(self):
         result = base(
             changes={
-                "ordersFilled": [{"id": "closeout"}, {"id": "new-entry"}],
+                "ordersFilled": [{"id": "100"}, {"id": "new-entry"}],
                 "transactions": [
                     {"id": "101", "accountID": "acct-1", "type": "ORDER_FILL",
-                     "orderID": "closeout", "reason": "MARKET_ORDER_MARGIN_CLOSEOUT"},
+                     "orderID": "100", "reason": "MARKET_ORDER_MARGIN_CLOSEOUT"},
                     {"id": "102", "accountID": "acct-1", "type": "ORDER_FILL",
                      "orderID": "new-entry", "reason": "CLIENT_ORDER"},
                 ],
@@ -142,7 +142,7 @@ class OandaPostCloseoutAccountChangesTests(unittest.TestCase):
     def test_newly_created_order_halts_even_if_not_pending_at_snapshot(self):
         result = base(
             changes={
-                "ordersCreated": [{"id": "closeout"}, {"id": "new-order"}],
+                "ordersCreated": [{"id": "100"}, {"id": "new-order"}],
                 "ordersCancelled": [{"id": "sl-1"}, {"id": "new-order"}],
             }
         )
@@ -157,11 +157,11 @@ class OandaPostCloseoutAccountChangesTests(unittest.TestCase):
     def test_explicit_margin_closeout_fill_is_not_classified_as_unexpected(self):
         result = base(
             changes={
-                "ordersFilled": [{"id": "closeout"}],
+                "ordersFilled": [{"id": "100"}],
                 "transactions": [
                     {"id": "100", "accountID": "acct-1", "type": "MARKET_ORDER", "reason": "MARGIN_CLOSEOUT"},
                     {"id": "101", "accountID": "acct-1", "type": "ORDER_FILL",
-                     "orderID": "closeout", "reason": "MARKET_ORDER_MARGIN_CLOSEOUT"},
+                     "orderID": "100", "reason": "MARKET_ORDER_MARGIN_CLOSEOUT"},
                     {"id": "102", "accountID": "acct-1", "type": "ORDER_CANCEL", "orderID": "sl-1"},
                 ],
             }
