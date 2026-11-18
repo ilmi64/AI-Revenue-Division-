@@ -42,6 +42,7 @@ def _blocked(errors: list[str], warnings: list[str] | None = None) -> dict[str, 
 def assess_oanda_post_closeout_pending_orders(
     pending_orders: Any,
     liquidated_trade_ids: Any,
+    remaining_open_trade_ids: Any,
     account_hedging_enabled: Any,
     source_timestamp_utc: Any,
     evaluated_at_utc: Any,
@@ -92,6 +93,12 @@ def assess_oanda_post_closeout_pending_orders(
           or len(set(liquidated_trade_ids)) != len(liquidated_trade_ids)):
         errors.append("liquidated_trade_ids must contain unique non-empty strings")
 
+    if not isinstance(remaining_open_trade_ids, list):
+        errors.append("remaining_open_trade_ids must be a complete array")
+        remaining_open_trade_ids = []
+    elif (any(not isinstance(item, str) or not item.strip() for item in remaining_open_trade_ids)
+          or len(set(remaining_open_trade_ids)) != len(remaining_open_trade_ids)):
+        errors.append("remaining_open_trade_ids must contain unique non-empty strings")
     if not isinstance(pending_orders, list):
         errors.append("pending_orders must be a complete array, including an empty array when none remain")
         pending_orders = []
@@ -100,6 +107,9 @@ def assess_oanda_post_closeout_pending_orders(
         return _blocked(errors, warnings)
 
     liquidated = set(liquidated_trade_ids)
+    remaining = set(remaining_open_trade_ids)
+    if liquidated & remaining:
+        return _blocked(["liquidated_trade_ids and remaining_open_trade_ids must be disjoint"], warnings)
     expected_cancelled: list[str] = []
     linked_survivors: list[dict[str, Any]] = []
     exposure_survivors: list[dict[str, Any]] = []
@@ -144,6 +154,9 @@ def assess_oanda_post_closeout_pending_orders(
             if trade_id in liquidated:
                 errors.append(f"{order_id}: order linked to a liquidated trade is still pending; expected cancellation is not reflected")
                 continue
+            if trade_id not in remaining:
+                errors.append(f"{order_id}: tradeID is neither confirmed liquidated nor confirmed open")
+                continue
             linked_survivors.append({
                 "order_id": order_id, "type": order_type, "trade_id": trade_id,
                 "classification": "DEPENDENT_CLOSE_ORDER_ON_NON_LIQUIDATED_TRADE",
@@ -157,7 +170,7 @@ def assess_oanda_post_closeout_pending_orders(
 
         raw_units = order.get("units")
         try:
-            units = float(raw_units)
+            units = float(raw_units) if not isinstance(raw_units, bool) else float("nan")
         except (TypeError, ValueError, OverflowError):
             units = float("nan")
         if not isfinite(units) or units == 0:
@@ -204,6 +217,7 @@ def assess_oanda_post_closeout_pending_orders(
         "closeout_occurred": True, "pending_orders_complete": True,
         "pending_order_count": len(pending_orders),
         "liquidated_trade_count": len(liquidated),
+        "remaining_open_trade_count": len(remaining),
         "orders_expected_cancelled": expected_cancelled,
         "orders_still_linked_to_open_trades": linked_survivors,
         "orders_surviving_and_potentially_opening": exposure_survivors,
