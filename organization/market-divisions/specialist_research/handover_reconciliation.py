@@ -39,7 +39,17 @@ def audit_handovers(event_records: list[dict[str, Any]]) -> dict[str, Any]:
         errors.append("incident event ledger integrity failed; handover semantics cannot be trusted")
 
     handovers = []
+    raised_stop_ids: set[str] = set()
+    unkeyed_stop_events = False
     if ledger["valid"]:
+        for row in event_records:
+            event = row["event"]
+            if event["event_type"] == "stop_raised":
+                stop_id = event["details"].get("stop_id")
+                if isinstance(stop_id, str) and stop_id.strip():
+                    raised_stop_ids.add(stop_id)
+                else:
+                    unkeyed_stop_events = True
         for row in event_records:
             event = row["event"]
             if event["event_type"] != "handover_recorded":
@@ -87,6 +97,16 @@ def audit_handovers(event_records: list[dict[str, Any]]) -> dict[str, Any]:
             errors.append(f"handover {event_id}: active_veto_ids must be an array of non-empty IDs")
         elif vetoes:
             warnings.append(f"handover {event_id}: active vetoes carried forward: {', '.join(sorted(set(vetoes)))}")
+        if isinstance(vetoes, list):
+            missing_vetoes = raised_stop_ids - set(vetoes)
+            if missing_vetoes and not unkeyed_stop_events:
+                errors.append(
+                    f"handover {event_id}: active stop IDs not carried forward: {', '.join(sorted(missing_vetoes))}"
+                )
+            elif missing_vetoes:
+                warnings.append(
+                    f"handover {event_id}: stop-ID carry-forward cannot be fully checked because a stop event lacks an ID"
+                )
 
         critical = details.get("unresolved_critical_items")
         if not isinstance(critical, list) or any(not isinstance(x, str) or not x.strip() for x in critical):
