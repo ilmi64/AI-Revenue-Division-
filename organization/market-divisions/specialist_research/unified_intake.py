@@ -21,9 +21,11 @@ if str(MARKET_DIVISIONS) not in sys.path:
 try:
     from .replay import replay
     from .capital_flow_handoff import _read_jsonl
+    from .portfolio_risk import assess_portfolio_risk
 except ImportError:
     from replay import replay
     from capital_flow_handoff import _read_jsonl
+    from portfolio_risk import assess_portfolio_risk
 
 
 DESK_IDS = ("crypto", "forex", "indices", "gold")
@@ -129,7 +131,7 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
                          max_clock_skew_seconds: float = 5,
                          require_full_coverage: bool = False,
                          control_health_snapshot_history: Path | None = None,
-                         control_health_event_ledger: Path | None = None) -> dict[str, Any]:
+                         control_health_event_ledger: Path | None = None,\n                         portfolio_risk_config: dict[str, Any] | None = None,\n                         correlation_evidence: list[dict[str, Any]] | None = None) -> dict[str, Any]:
     """Build one immutable-style research snapshot from local source snapshots."""
     _utc(now_utc, "now_utc")
     audit_paths = (control_health_snapshot_history, control_health_event_ledger)
@@ -333,7 +335,7 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
                                  "reason": "explicit_OCC_stop_state_" + normalized_stop})
         elif normalized_stop not in {"CLEAR", "INACTIVE", "NONE"}:
             packet_errors.append({"instrument_id": "occ_control", "errors": ["unknown OCC stop state"]})
-    handover_result = validate_handover(handover, now_utc, expected_portfolio_version)
+    portfolio_risk_audit = assess_portfolio_risk(packets, now_utc, portfolio_risk_config, correlation_evidence)\n    if portfolio_risk_audit["status"] == "HALT":\n        active_stops.append({"source": "portfolio_risk", "instrument_id": "portfolio",\n                             "reason": "portfolio_risk_halt_or_limit_breach"})\n    handover_result = validate_handover(handover, now_utc, expected_portfolio_version)
     if handover_result.get("active_veto_ids"):
         active_stops.extend({"source": "handover", "instrument_id": "all",
                              "reason": "active_handover_veto:" + str(veto)}
@@ -363,7 +365,7 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
         "coverage_complete": coverage_complete,
         "specialist_packets": packets,
         "capital_flow_audit": capital_flow_audit,
-        "gold_specialist_audit": gold_specialist_audit,
+        "gold_specialist_audit": gold_specialist_audit,\n        "portfolio_risk": portfolio_risk_audit,
         "capital_flow_context": replay_result.get("capital_flow_handoff", {
             "status": "not_consumed", "accepted_event_count": 0, "trade_authority": False,
         }),
@@ -392,7 +394,7 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
             "Day/night handover requires explicit acknowledgements and position reconciliation",
             "Capital Flow is research context only and is attached only by the separate exact-identity adapter",
             "Gold macro and instrument context is descriptive research only and is not independently authenticated",
-            "Missing desk coverage is visible and prevents a fully covered research status",
+            "Missing desk coverage is visible and prevents a fully covered research status",\n            "Portfolio exposure, risk limits and correlation are unknown unless explicit comparable evidence and OCC limits are supplied",
         ],
     }
 
@@ -444,7 +446,7 @@ def main() -> int:
     parser.add_argument("--occ-stop-state")
     parser.add_argument("--require-full-coverage", action="store_true")
     parser.add_argument("--control-health-snapshot-history", type=Path)
-    parser.add_argument("--control-health-event-ledger", type=Path)
+    parser.add_argument("--control-health-event-ledger", type=Path)\n    parser.add_argument("--portfolio-risk-config", type=Path)\n    parser.add_argument("--correlation-evidence", type=Path)
     parser.add_argument("--max-market-age-seconds", type=float, default=120)
     parser.add_argument("--max-clock-skew-seconds", type=float, default=5)
     parser.add_argument("--output", type=Path, required=True)
@@ -475,7 +477,7 @@ def main() -> int:
         print(json.dumps({"status": result["status"], "desk_coverage": result["desk_coverage"],
                           "global_stop_active": result["global_stop_active"],
                           "handover": result["handover"]["status"],
-                          "control_health": result.get("control_health", {}).get("status", "not_requested"),
+                          "control_health": result.get("control_health", {}).get("status", "not_requested"),\n                          "portfolio_risk": result.get("portfolio_risk", {}).get("status", "not_provided"),
                           "output": str(args.output),
                           "authority": result["authority"]}, indent=2))
         return 0 if result["status"] in {"research", "unverified"} else 1
