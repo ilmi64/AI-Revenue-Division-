@@ -3,7 +3,7 @@ import tempfile
 from pathlib import Path
 
 from specialist_research.unified_intake import build_unified_intake, validate_handover
-from specialist_research.test_replay import NOW, obs, source_registry
+from specialist_research.test_replay import NOW, obs, source_registry, flow_event, flow_review, FLOW_REGISTRY
 from specialist_research.snapshot_history import append_snapshot
 from specialist_research.incident_event_ledger import append_event
 
@@ -191,6 +191,42 @@ class UnifiedIntakeTests(unittest.TestCase):
         result = self.build(rows)
         entries = result["evidence_index"]["fixture:SOL-USDC"]
         self.assertEqual({x["desk_id"] for x in entries}, {"crypto", "forex"})
+
+
+    def test_capital_flow_acceptance_is_audited_per_crypto_instrument(self):
+        rows = self.four_desk_rows()
+        result = self.build(
+            rows,
+            capital_flow_events=[flow_event(contract_address="fixture-mint")],
+            capital_flow_reviews=[flow_review()],
+            capital_flow_source_registry=FLOW_REGISTRY,
+        )
+        audit = result["capital_flow_audit"]
+        self.assertEqual(audit["status"], "consumed_research_context")
+        self.assertEqual(audit["accepted_event_count"], 1)
+        self.assertEqual(audit["instrument_count"], 1)
+        self.assertEqual(audit["instruments"][0]["instrument_id"], "SOL-USDC")
+        self.assertEqual(len(audit["instruments"][0]["accepted_event_ids"]), 1)
+        self.assertFalse(audit["trade_authority"])
+        self.assertFalse(audit["live_readiness"])
+
+    def test_blocked_capital_flow_handoff_is_visible_in_unified_audit(self):
+        rows = self.four_desk_rows()
+        bad_review = flow_review()
+        bad_review["reason"] = "tampered after signing"
+        result = self.build(
+            rows,
+            capital_flow_events=[flow_event(contract_address="fixture-mint")],
+            capital_flow_reviews=[bad_review],
+            capital_flow_source_registry=FLOW_REGISTRY,
+        )
+        audit = result["capital_flow_audit"]
+        self.assertEqual(audit["status"], "provided_no_eligible_match")
+        self.assertEqual(audit["accepted_event_count"], 0)
+        self.assertEqual(audit["instrument_count"], 1)
+        self.assertIn("CAPITAL_FLOW_HANDOFF_REJECTED",
+                      result["specialist_packets"][0]["risk_flags"])
+        self.assertFalse(audit["trade_authority"])
 
 
 if __name__ == "__main__":
