@@ -673,12 +673,19 @@ financing convention. The module never supplies a default calendar, triple
 swap rule, funding sign, settlement formula or broker close-out convention.
 
 Carry events may provide a signed cashflow directly, or a rate/notional/basis
-tuple whose sign is interpreted literally as cashflow to the position.
-Roll events must identify the current and next contract, both reference prices,
-and an explicit cash adjustment. Expiry settlement must occur on or after the
-profile expiry and must provide the matching contract, settlement method,
-settlement price and realized cashflow. Settlement closes the simulated
-quantity; no cash/physical delivery calculation is inferred.
+tuple whose sign is already normalized by the caller as signed cashflow to the
+position. The replay does not multiply by long/short side a second time; venue
+payer/receiver conventions must be normalized before input. Roll events must
+identify the current and next contract, both reference prices, an explicit cash
+adjustment, and a complete validated `new_contract_profile`. The successor
+profile must preserve venue/instrument/currency/settlement identity, use a
+distinct profile ID, match the new contract code, and for dated futures have a
+later expiry. The active profile is advanced after each valid roll so later
+expiry and settlement checks use the successor contract. Expiry settlement
+must occur on or after the active profile expiry and provide the matching
+contract, settlement method, settlement price and realized cashflow.
+Settlement closes the simulated quantity; no cash/physical delivery
+calculation is inferred.
 
 Example interface:
 
