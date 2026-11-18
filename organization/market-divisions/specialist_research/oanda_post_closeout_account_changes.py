@@ -154,6 +154,9 @@ def assess_oanda_post_closeout_account_changes(
         account_snapshot = {}
     if account_snapshot.get("id") != account_id:
         errors.append("post-closeout account snapshot ID does not match account_id")
+    account_last_id = _numeric_id(account_snapshot.get("lastTransactionID"))
+    if account_last_id is None or (last_id is not None and account_last_id != last_id):
+        errors.append("account.lastTransactionID must match the changes response lastTransactionID")
 
     current_orders = account_snapshot.get("orders")
     current_trades = account_snapshot.get("trades")
