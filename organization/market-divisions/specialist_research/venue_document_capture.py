@@ -70,8 +70,14 @@ def validate_capture_manifest(manifest: Any) -> list[str]:
             errors.append(f"{prefix}.capture_scope must disclose official-page or API-definition excerpt")
         if capture.get("capture_time_precision") != "date_only_normalized_to_utc_midnight":
             errors.append(f"{prefix}.capture_time_precision must disclose date-only normalization")
-        if capture.get("captured_at_utc") != manifest.get("captured_at_utc"):
-            errors.append(f"{prefix}.captured_at_utc must match manifest capture date")
+        capture_timestamp = capture.get("captured_at_utc")
+        if not isinstance(capture_timestamp, str) or len(capture_timestamp) != 20 or not capture_timestamp.endswith("T00:00:00Z"):
+            errors.append(f"{prefix}.captured_at_utc must disclose its own date-only UTC-midnight normalization")
+        else:
+            try:
+                date.fromisoformat(capture_timestamp[:10])
+            except ValueError:
+                errors.append(f"{prefix}.captured_at_utc must contain an ISO date")
         if capture.get("full_document_capture") is not False:
             errors.append(f"{prefix}.full_document_capture must be false")
         if capture.get("retrieval_method") not in {"official_web_search_excerpt", "official_web_open_excerpt"}:
