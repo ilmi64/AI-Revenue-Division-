@@ -49,7 +49,9 @@
         "exchange_rulebook",
         "broker_client_agreement",
         "third_party_reference",
-        "research_note"
+        "research_note",
+        "official_api_schema",
+        "official_api_endpoint_definition"
       ]
     },
     "captured_at_utc": {
