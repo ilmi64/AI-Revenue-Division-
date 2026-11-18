@@ -2,7 +2,7 @@
 import unittest
 
 from specialist_research.venue_document_revisions import (
-    assess_profile_revision_impact, build_revision_review_queue,
+    assess_document_freshness, assess_profile_revision_impact, build_revision_review_queue,
     capture_document_revision, compare_document_revisions,
 )
 
@@ -193,6 +193,43 @@ class VenueDocumentRevisionTests(unittest.TestCase):
         self.assertFalse(queue["human_review_required"])
         self.assertFalse(queue["trade_authority"])
         self.assertFalse(queue["live_readiness"])
+
+    def test_explicit_freshness_policy_flags_stale_capture(self):
+        captured = revision("2026-01-01T00:00:00Z")
+        result = assess_document_freshness(
+            [captured], "2026-01-03T00:00:00Z",
+            [{"document_id": "oanda-gold", "max_age_days": 1}],
+        )
+        self.assertEqual(result["status"], "STALE_EVIDENCE_REVIEW_REQUIRED")
+        self.assertEqual(result["stale_document_ids"], ["oanda-gold"])
+
+    def test_missing_ttl_is_not_assumed_fresh_or_stale(self):
+        captured = revision("2026-01-01T00:00:00Z")
+        result = assess_document_freshness([captured], "2026-01-30T00:00:00Z", [])
+        self.assertEqual(result["status"], "NOT_ASSESSED_NO_TTL")
+        self.assertEqual(result["unassessed_document_ids"], ["oanda-gold"])
+        self.assertFalse(result["human_review_required"])
+
+    def test_future_capture_and_invalid_ttl_fail_closed(self):
+        captured = revision("2026-01-02T00:00:00Z")
+        future = assess_document_freshness([captured], "2026-01-01T00:00:00Z", [])
+        self.assertEqual(future["status"], "INVALID_FRESHNESS_INPUT")
+        invalid_ttl = assess_document_freshness(
+            [revision("2026-01-01T00:00:00Z")], "2026-01-02T00:00:00Z",
+            [{"document_id": "oanda-gold", "max_age_days": True}],
+        )
+        self.assertEqual(invalid_ttl["status"], "INVALID_FRESHNESS_INPUT")
+
+    def test_stale_capture_enters_review_queue_as_critical(self):
+        captured = revision("2026-01-01T00:00:00Z")
+        freshness = assess_document_freshness(
+            [captured], "2026-01-03T00:00:00Z",
+            [{"document_id": "oanda-gold", "max_age_days": 1}],
+        )
+        queue = build_revision_review_queue([], freshness_reports=[freshness])
+        self.assertEqual(queue["status"], "REVIEW_REQUIRED")
+        self.assertEqual(queue["items"][0]["review_type"], "DOCUMENT_CAPTURE_FRESHNESS")
+        self.assertEqual(queue["items"][0]["priority"], "CRITICAL")
 
     def test_authority_never_upgraded(self):
         old = revision("2026-01-01T00:00:00Z")
