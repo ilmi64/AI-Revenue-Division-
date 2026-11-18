@@ -43,6 +43,8 @@ def reconcile(snapshot_records: list[dict[str, Any]],
         errors.append("snapshot history integrity failed")
     if not event_report["valid"]:
         errors.append("incident event ledger integrity failed")
+    if not snapshot_records:
+        errors.append("no snapshot history is available; current OCC state cannot be reconciled")
 
     latest_snapshot = snapshot_records[-1].get("snapshot") if snapshot_records else None
     if snapshot_records and not isinstance(latest_snapshot, dict):
