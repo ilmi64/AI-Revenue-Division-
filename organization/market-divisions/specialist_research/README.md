@@ -1043,3 +1043,20 @@ The current venue catalogue records two explicit Canadian crypto-derivatives gat
 OANDA Canada's published margin schedule lists Gold at 4.5:1. This is a dated public schedule reference, not an account-specific guarantee or a static simulator constant. The live spread/margin display can change, and exact contract unit, closeout terms and account treatment remain to be captured. Conventional CFD financing is not a Shariah approval.
 
 `gold_delivery_controls.py` adds a fail-closed GC/MGC physical-delivery gate. It requires the exact contract month, exchange calendar revision, FCM policy revision, First Position/First Notice/last-trade/delivery dates, and explicit FCM long/short/new-position cutoff dates and UTC times. It validates GC against COMEX Chapter 113 and MGC against Chapter 120. The module also enforces the MGC rule that delivery quantities are multiples of ten contracts except on the last intent day, with Chapter 120's ACE-based delivery structure documented separately. It does not calculate exchange dates, infer FCM deadlines, roll or liquidate positions, or submit delivery instructions. Missing or inconsistent calendar/policy inputs halt the assessment. The test fixtures are synthetic and do not represent a real contract calendar or broker policy.
+
+
+### OANDA Canada Gold CFD: hours, gaps, closeout and instrument identity
+
+The official-page excerpt manifest has been extended from nine to thirteen captures. Four new OANDA Canada excerpts record:
+
+- XAU/USD is a Gold CFD quoted against USD and measured in troy ounces; it does not convey physical ownership of bullion. The page does not establish a universal account-independent contract multiplier.
+- The published XAU/USD metal-CFD hours are Sunday-Friday 18:05-16:59 New York time. Hours may change for daylight saving time and holidays. The displayed MT4 lot size is 100, which is platform-specific and must not be generalized to every account/platform.
+- OANDA warns that spreads can widen around market close, prices can gap on reopening, and stops may execute at a worse prevailing price. Positions cannot be opened or closed while markets are closed.
+- Under-margined accounts can be subject to automatic closeout of all tradable open positions at current rates. The customer agreement gives OANDA discretion to close positions without providing time to respond when it considers immediate action necessary.
+- OANDA's general Canada FAQ says CFDs and precious metals are automatically enabled on accounts, but this does not verify an individual customer's account status or the applicable instrument terms.
+
+The new excerpts are stored as oanda_xauusd_instrument_page, oanda_canada_trading_hours_and_gap_risk, oanda_canada_margin_closeout, and oanda_canada_cfd_account_eligibility. The capture manifest still explicitly contains partial excerpts only: no complete client agreement, page bytes, authenticated publisher proof or trusted publisher timestamp has been captured.
+
+These facts imply additional Gold risk-model requirements: session-aware close/reopen windows; spread-widening and gap stress scenarios; stop execution slippage/gap assumptions; and a broker-level forced-closeout scenario that can close multiple positions at current rates. The existing venue simulator's generic liquidation heuristic is not an OANDA margin-closeout implementation. Do not equate the two or treat a stop as guaranteed protection. Account-specific contract size, margin threshold, closeout sequence and financing remain unresolved.
+
+The XAU/USD CFD remains distinct from GC/MGC futures. It is a price-difference contract and does not provide the same delivery/ownership rights as physical bullion. Conventional CFD financing is still not a Shariah approval. No venue profile was created or approved, and no account connection or live trading permission was obtained.
