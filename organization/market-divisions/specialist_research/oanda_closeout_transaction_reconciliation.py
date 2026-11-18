@@ -160,10 +160,15 @@ def assess_oanda_closeout_transaction_reconciliation(
         return _blocked(errors, warnings)
     parsed_transactions.sort(key=lambda item: item[0])
     ids = [item[0] for item in parsed_transactions]
-    contiguous = (len(ids) == end_id - start_id and
-                  all(transaction_id == start_id + index + 1 for index, transaction_id in enumerate(ids)))
-    if not contiguous:
-        return _blocked(["transaction IDs are not a complete contiguous range from the supplied exclusive start to inclusive end"], warnings)
+    # OANDA documents TransactionID as a unique account-local identifier and
+    # exposes ID-range/since-ID retrieval. It does not promise that every integer
+    # between two IDs must correspond to a transaction. Do not infer missing
+    # records from numeric gaps; require an explicitly complete, unfiltered
+    # caller export and verify its boundaries/order instead.
+    if (not ids or ids[0] <= start_id or ids[-1] != end_id
+            or any(transaction_id <= start_id or transaction_id > end_id for transaction_id in ids)
+            or any(ids[index] >= ids[index + 1] for index in range(len(ids) - 1))):
+        return _blocked(["transaction records do not match the supplied exclusive start and inclusive lastTransactionID boundary"], warnings)
     if any(parsed_transactions[index][1] > parsed_transactions[index + 1][1]
            for index in range(len(parsed_transactions) - 1)):
         return _blocked(["transaction timestamps move backwards as transaction IDs increase"], warnings)
@@ -302,7 +307,7 @@ def assess_oanda_closeout_transaction_reconciliation(
         "research_only": True, "authority": AUTHORITY,
         "limitations": [
             "This replay consumes caller-supplied transaction history; it does not call OANDA or authenticate the account, data export or API response.",
-            "A contiguous transaction ID range is a caller-asserted complete, unfiltered range; the module cannot independently prove that no records were omitted before export.",
+            "Transaction IDs are unique account-local identifiers; numeric gaps are not treated as missing records. Completeness and absence of filtering remain caller assertions that this offline module cannot independently prove.",
             "It verifies cancellation records for dependent orders linked to trades closed by MARKET_ORDER_MARGIN_CLOSEOUT fills; it does not validate every possible account-side order lifecycle.",
             "Filled unrelated orders are listed but their resulting trade/position state requires separate account-change reconciliation.",
             "This is a historical evidence audit only; it never submits, cancels, modifies or closes orders.",
