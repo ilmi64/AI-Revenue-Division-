@@ -135,8 +135,10 @@ def replay(observations: list[dict[str, Any]], now_utc: str,
             except (ValueError, TypeError) as exc:
                 packet["capital_flow_handoff"] = {
                     "status": "blocked", "reason": str(exc),
-                    "event_records": [], "mode": "research_only",
-                    "trade_authority": False,
+                    "destination_desk": "crypto",
+                    "event_records": [], "rejected_matching_events": [],
+                    "mode": "research_only",
+                    "trade_authority": False, "live_readiness": False,
                 }
                 packet["data_quality"]["warnings"].append("Capital Flow handoff validation failed")
                 packet["risk_flags"].append("CAPITAL_FLOW_HANDOFF_REJECTED")
