@@ -45,7 +45,10 @@ the audit is blocked; `2` means an input or parsing/validation error occurred.
   this tool has no schedule source. It reports gaps between recorded shift
   transitions as warnings, not proof that an event was omitted.
 - Duplicate handover IDs or repeated shift transitions are errors.
-- An active veto is preserved and reported. A handover does not clear it.
+- Active vetoes are preserved and reported. Every identified `stop_raised`
+  event's `details.stop_id` must be present in the handover's
+  `active_veto_ids`; missing carry-forward blocks acceptance. A handover does
+  not clear a stop.
 - Open incidents remain visible in the report.
 - Missing acknowledgements, unreconciled positions, unhealthy dependencies,
   missing evidence, or unresolved critical items block acceptance.
