@@ -971,6 +971,168 @@
       "captured_at_utc": "2026-11-17T00:00:00Z",
       "retrieval_method": "official_web_search_excerpt",
       "revision_id": "oanda_v20_account_pending_orders_endpoint:excerpt-20261117"
+    },
+    {
+      "document_id": "oanda_v20_transaction_endpoints",
+      "candidate_ids": [
+        "oanda_canada_fx_cfd",
+        "oanda_canada_index_cfd",
+        "oanda_canada_gold_cfd"
+      ],
+      "canonical_uri": "https://developer.oanda.com/rest-live-v20/transaction-ep/",
+      "title": "OANDA v20 Transaction Endpoints",
+      "publisher": "OANDA",
+      "source_class": "official_api_endpoint_definition",
+      "source_ref": "turn543951search0",
+      "content_sha256": "bc93be31c515975bf417b0db3e4b75309e61de590f8e816f849bcceef46ff98e",
+      "document_text": "OANDA v20 exposes GET /v3/accounts/{accountID}/transactions for a time-based transaction query (maximum requested interval 365 days), GET /transactions/{transactionID} for one transaction, GET /transactions/idrange for an inclusive numeric transaction-ID range, and GET /transactions/sinceid for transactions newer than a supplied transaction ID. The transaction responses include lastTransactionID. The sinceid endpoint is documented as returning all transactions newer than the supplied ID.",
+      "extracted_facts": [
+        {
+          "fact_key": "transaction_since_id_endpoint",
+          "value": "GET /v3/accounts/{accountID}/transactions/sinceid",
+          "unit": "API endpoint",
+          "source_locator": "Transactions sinceid endpoint"
+        },
+        {
+          "fact_key": "transaction_id_range_endpoint",
+          "value": "GET /v3/accounts/{accountID}/transactions/idrange",
+          "unit": "API endpoint",
+          "source_locator": "Transactions idrange endpoint"
+        },
+        {
+          "fact_key": "transaction_last_id",
+          "value": "lastTransactionID",
+          "unit": "API field",
+          "source_locator": "Transaction endpoint response"
+        },
+        {
+          "fact_key": "maximum_time_query_range",
+          "value": 365,
+          "unit": "days",
+          "source_locator": "Transactions endpoint request parameters"
+        }
+      ],
+      "known_gaps": [
+        "no connected API access or account token",
+        "transaction export completeness must be checked by the caller",
+        "source authentication not performed"
+      ],
+      "capture_scope": "official_api_endpoint_excerpt",
+      "full_document_capture": false,
+      "capture_time_precision": "date_only_normalized_to_utc_midnight",
+      "captured_at_utc": "2026-11-17T00:00:00Z",
+      "retrieval_method": "official_web_search_excerpt",
+      "revision_id": "oanda_v20_transaction_endpoints:excerpt-20261117"
+    },
+    {
+      "document_id": "oanda_v20_transaction_definitions",
+      "candidate_ids": [
+        "oanda_canada_fx_cfd",
+        "oanda_canada_index_cfd",
+        "oanda_canada_gold_cfd"
+      ],
+      "canonical_uri": "https://developer.oanda.com/rest-live-v20/transaction-df/",
+      "title": "OANDA v20 Transaction Definitions",
+      "publisher": "OANDA",
+      "source_class": "official_api_schema",
+      "source_ref": "turn543951search2",
+      "content_sha256": "fb5f0cbff67498a81b9896d7e92b9d932ec54d21264417a6ee0aba575eb01c5a",
+      "document_text": "OANDA v20 OrderCancelTransaction records contain type ORDER_CANCEL, orderID and reason. OrderFillTransaction records contain type ORDER_FILL, orderID, reason and trade details including tradesClosed. The documented OrderCancelReason LINKED_TRADE_CLOSED means the order is linked to an open trade that was closed. The documented OrderFillReason MARKET_ORDER_MARGIN_CLOSEOUT means the market order was filled as part of a margin closeout.",
+      "extracted_facts": [
+        {
+          "fact_key": "order_cancel_transaction_fields",
+          "value": "ORDER_CANCEL, orderID, reason",
+          "unit": "transaction fields",
+          "source_locator": "OrderCancelTransaction"
+        },
+        {
+          "fact_key": "order_fill_transaction_fields",
+          "value": "ORDER_FILL, orderID, reason, tradesClosed",
+          "unit": "transaction fields",
+          "source_locator": "OrderFillTransaction"
+        },
+        {
+          "fact_key": "linked_trade_closed_reason",
+          "value": "LINKED_TRADE_CLOSED",
+          "unit": "OrderCancelReason",
+          "source_locator": "OrderCancelReason"
+        },
+        {
+          "fact_key": "margin_closeout_fill_reason",
+          "value": "MARKET_ORDER_MARGIN_CLOSEOUT",
+          "unit": "OrderFillReason",
+          "source_locator": "OrderFillReason"
+        }
+      ],
+      "known_gaps": [
+        "full event pagination and account data are not connected",
+        "API source is not authenticated in this project",
+        "transaction reasons do not by themselves prove account snapshot completeness"
+      ],
+      "capture_scope": "official_api_definition_excerpt",
+      "full_document_capture": false,
+      "capture_time_precision": "date_only_normalized_to_utc_midnight",
+      "captured_at_utc": "2026-11-17T00:00:00Z",
+      "retrieval_method": "official_web_search_excerpt",
+      "revision_id": "oanda_v20_transaction_definitions:excerpt-20261117"
+    },
+    {
+      "document_id": "oanda_v20_account_changes_endpoint",
+      "candidate_ids": [
+        "oanda_canada_fx_cfd",
+        "oanda_canada_index_cfd",
+        "oanda_canada_gold_cfd"
+      ],
+      "canonical_uri": "https://developer.oanda.com/rest-live-v20/account-ep/",
+      "title": "OANDA v20 Account Changes Endpoint",
+      "publisher": "OANDA",
+      "source_class": "official_api_endpoint_definition",
+      "source_ref": "turn543951search1",
+      "content_sha256": "a2b230c8b19068221d416aebb72fdacb678df412934aae7ba3acff8394211758",
+      "document_text": "OANDA v20 Account changes are requested using sinceTransactionID. The response includes changes to orders and trades since that transaction: ordersCreated, ordersCancelled, ordersFilled, ordersTriggered, tradesOpened, tradesReduced, tradesClosed and transactions. The response also includes lastTransactionID, which should be used for future polling after the returned changes have been observed.",
+      "extracted_facts": [
+        {
+          "fact_key": "account_changes_cursor",
+          "value": "sinceTransactionID",
+          "unit": "API query parameter",
+          "source_locator": "Account changes endpoint"
+        },
+        {
+          "fact_key": "account_changes_cancelled_orders",
+          "value": "ordersCancelled",
+          "unit": "API response field",
+          "source_locator": "AccountChanges"
+        },
+        {
+          "fact_key": "account_changes_filled_orders",
+          "value": "ordersFilled",
+          "unit": "API response field",
+          "source_locator": "AccountChanges"
+        },
+        {
+          "fact_key": "account_changes_closed_trades",
+          "value": "tradesClosed",
+          "unit": "API response field",
+          "source_locator": "AccountChanges"
+        },
+        {
+          "fact_key": "account_changes_last_transaction",
+          "value": "lastTransactionID",
+          "unit": "API response field",
+          "source_locator": "Account changes endpoint response"
+        }
+      ],
+      "known_gaps": [
+        "no live account poll or API token connected",
+        "account changes response is not authenticated in this project",
+        "full order and trade state still requires caller-supplied complete snapshot"
+      ],
+      "capture_scope": "official_api_endpoint_excerpt",
+      "full_document_capture": false,
+      "capture_time_precision": "date_only_normalized_to_utc_midnight",
+      "captured_at_utc": "2026-11-17T00:00:00Z",
+      "retrieval_method": "official_web_search_excerpt",
+      "revision_id": "oanda_v20_account_changes_endpoint:excerpt-20261117"
     }
   ],
   "candidate_coverage": [
@@ -995,7 +1157,10 @@
         "oanda_canada_margin_rules_faq",
         "oanda_canada_subaccount_closeout_differences",
         "oanda_v20_order_definition",
-        "oanda_v20_account_pending_orders_endpoint"
+        "oanda_v20_account_pending_orders_endpoint",
+        "oanda_v20_transaction_endpoints",
+        "oanda_v20_transaction_definitions",
+        "oanda_v20_account_changes_endpoint"
       ]
     },
     {
@@ -1007,7 +1172,10 @@
         "oanda_canada_margin_rules_faq",
         "oanda_canada_subaccount_closeout_differences",
         "oanda_v20_order_definition",
-        "oanda_v20_account_pending_orders_endpoint"
+        "oanda_v20_account_pending_orders_endpoint",
+        "oanda_v20_transaction_endpoints",
+        "oanda_v20_transaction_definitions",
+        "oanda_v20_account_changes_endpoint"
       ]
     },
     {
@@ -1023,7 +1191,10 @@
         "oanda_canada_margin_rules_faq",
         "oanda_canada_subaccount_closeout_differences",
         "oanda_v20_order_definition",
-        "oanda_v20_account_pending_orders_endpoint"
+        "oanda_v20_account_pending_orders_endpoint",
+        "oanda_v20_transaction_endpoints",
+        "oanda_v20_transaction_definitions",
+        "oanda_v20_account_changes_endpoint"
       ]
     },
     {
