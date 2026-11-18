@@ -53,7 +53,7 @@ def path(**overrides):
 class SimulationOrchestratorTests(unittest.TestCase):
     def test_price_and_carry_ledgers_reconcile_without_double_count(self):
         result = simulate_unified_derivative(
-            venue(), profile(), position(), path(), [{
+            venue(), profile(), position(), path(timestamp_utc="2026-11-01T03:00:00Z"), [{
                 "event_id": "fund-1", "event_type": "funding",
                 "timestamp_utc": "2026-11-01T02:00:00Z",
                 "cashflow": -1.25, "currency": "USD",
@@ -87,6 +87,15 @@ class SimulationOrchestratorTests(unittest.TestCase):
         result = simulate_unified_derivative(venue(), other, position(), path(), [])
         self.assertEqual(result["status"], "BLOCKED_INPUT_RECONCILIATION")
 
+    def test_carry_event_after_path_horizon_blocks(self):
+        result = simulate_unified_derivative(
+            venue(), profile(), position(), path(), [{
+                "event_type": "funding", "timestamp_utc": "2026-11-01T02:00:00Z",
+                "cashflow": -1.0, "currency": "USD",
+            }]
+        )
+        self.assertEqual(result["status"], "BLOCKED_INPUT_RECONCILIATION")
+
     def test_component_failure_blocks_reconciliation(self):
         bad = path()
         bad[0]["mark_price_basis"] = "last"
@@ -97,7 +106,7 @@ class SimulationOrchestratorTests(unittest.TestCase):
     def test_cashflow_currency_mismatch_blocks_component(self):
         result = simulate_unified_derivative(
             venue(), profile(), position(), path(), [{
-                "event_type": "funding", "timestamp_utc": "2026-11-01T02:00:00Z",
+                "event_type": "funding", "timestamp_utc": "2026-11-01T00:30:00Z",
                 "cashflow": -1.0, "currency": "EUR",
             }]
         )
