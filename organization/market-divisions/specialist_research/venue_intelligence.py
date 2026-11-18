@@ -88,14 +88,15 @@ def validate_source_record(source: Any) -> list[str]:
     if not isinstance(source, dict):
         return ["source record must be an object"]
     for field in ("source_id", "source_uri", "source_class", "publisher",
-                  "published_at_utc", "captured_at_utc", "content_sha256"):
+                  "captured_at_utc", "content_sha256"):
         if not _nonempty(source.get(field)):
             errors.append(f"{field} is required")
     if source.get("source_class") not in SOURCE_CLASSES:
         errors.append("source_class is unsupported")
-    for field in ("published_at_utc", "captured_at_utc"):
-        if source.get(field) is not None and _utc(source.get(field)) is None:
-            errors.append(f"{field} must be UTC ISO-8601 ending Z")
+    if source.get("published_at_utc") is not None and _utc(source.get("published_at_utc")) is None:
+        errors.append("published_at_utc must be UTC ISO-8601 ending Z when supplied")
+    if _utc(source.get("captured_at_utc")) is None:
+        errors.append("captured_at_utc must be UTC ISO-8601 ending Z")
     digest = source.get("content_sha256")
     if not isinstance(digest, str) or len(digest) != 64 or any(ch not in "0123456789abcdef" for ch in digest):
         errors.append("content_sha256 must be a lowercase SHA-256 hex digest")
