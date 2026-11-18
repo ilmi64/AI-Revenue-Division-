@@ -594,3 +594,22 @@ Example risk configuration shape:
 
 All thresholds and shocks are illustrative configuration examples, not
 approved limits or forecasts. The module remains offline and research-only.
+
+
+## Derivative margin, liquidation-distance and liquidity overlays
+
+Derivative positions (Crypto perpetuals, Forex/Index/Gold CFDs and futures)
+must carry explicit initial margin, maintenance margin, available margin,
+liquidation-distance percentage, executable depth notional, financing/funding
+cost and funding horizon. Invalid or missing fields keep the derivative
+overlay UNKNOWN. Available margin below the supplied initial-margin amount
+and executable depth below position notional generate risk warnings; they do
+not fabricate a liquidation price or slippage estimate.
+
+These fields are caller-supplied and must be sourced from the relevant venue,
+broker or contract specification. The current adapter validates the supplied
+metadata only. It does not implement broker-specific maintenance-margin
+tiers, liquidation engines, mark-price rules, partial liquidation, order-book
+impact, slippage, funding accrual, expiry settlement, contract rolls or gap
+execution. Those remain explicit model gaps and prevent any claim of live
+risk coverage.
