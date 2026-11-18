@@ -811,3 +811,58 @@ or connected.
 
 Regression coverage is in `test_venue_intelligence.py`; tests are authored
 and have not yet been executed.
+
+
+## Candidate venue research catalogue
+
+`venue_research_catalogue.json` seeds the venue intelligence workstream with
+official public-documentation candidates across all four divisions. The first
+candidate set includes Kraken MTF and Coinbase International Exchange for
+Crypto perpetual documentation; OANDA (Canada) Corporation for Forex, index
+and Gold CFD documentation; and CME Group/COMEX for Gold and equity-index
+futures specifications.
+
+The seed catalogue records source URLs and the specific documentation topics
+located during initial research, plus unresolved contract, margin, funding,
+settlement and legal-entity questions. It deliberately does not copy dynamic
+margin/leverage figures into static profile fields. Source content hashes are
+null and full-document capture is false because the source bytes have not been
+captured and hashed into the evidence-intake format. Therefore these entries
+are documentation leads, not verified profiles.
+
+Canada/Ontario access is unverified for every candidate product. CME futures
+access depends on an eligible Canadian FCM and account approval; a public
+exchange contract specification does not establish broker access. The OANDA
+references are Canada-specific, but the user's account entity, exact product
+availability and current contract terms still require confirmation. Kraken
+MTF and Coinbase International Exchange eligibility must be checked separately
+for Canadian residents and exact legal entities.
+
+`venue_catalogue.py` validates catalogue structure and reports whether
+documentation has merely been located or actually captured. It does not
+authenticate publishers, retrieve source documents, verify eligibility, or
+create/approve registry profiles. The catalogue schema is
+`venue-research-catalogue.schema.json`; synthetic regression coverage is in
+`test_venue_catalogue.py`.
+
+Initial official-source research references:
+- Kraken MTF linear contract specifications:
+  https://support.mtf.kraken.com/hc/en-us/articles/25499987607837-Linear-Contract-Specifications
+- Coinbase International Exchange perpetual specifications:
+  https://help.coinbase.com/en/global-exchange/perpetual-futures-basics/perpetual-futures-product-specifications
+- OANDA Canada margin rates:
+  https://www.oanda.com/ca-en/legal/margin-rates/
+- OANDA Canada financing methodology:
+  https://help.oanda.com/ca/en/faqs/financing-costs-ca.htm
+- OANDA Canada financing costs:
+  https://www.oanda.com/ca-en/trading/financing-costs/
+- CME Group Gold futures specifications:
+  https://www.cmegroup.com/markets/metals/precious/gold-futures.contractSpecs.html
+- CME Group equity-index futures information:
+  https://www.cmegroup.com/markets/equities/sp-500-and-nasdaq-100-futures.html
+- COMEX Gold futures rulebook:
+  https://www.cmegroup.com/content/dam/cmegroup/market-regulation/rule-filings/2024/8/24-283_1.pdf
+
+These references are starting points only. Product terms and margins change;
+the exact current contract, exchange notices, broker/FCM terms and account
+jurisdiction must be checked before a profile can be prepared or approved.
