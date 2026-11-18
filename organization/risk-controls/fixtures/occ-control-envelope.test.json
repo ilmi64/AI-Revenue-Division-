@@ -1,0 +1,23 @@
+{
+  "purpose": "TEST ONLY cross-repository HMAC-SHA256 interoperability vector. The secret is public and MUST NEVER be reused outside tests.",
+  "secret_hex": "6f63632d706f6c79626f742d7368617265642d746573742d766563746f722d6f6e6c792d33326279746573",
+  "envelope": {
+    "snapshot": {
+      "schema_version": 1,
+      "source_system": "OCC",
+      "snapshot_id": "occ-test-vector-001",
+      "generated_at_epoch": 1700000000,
+      "expires_at_epoch": 1700000120,
+      "policy_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "portfolio_version": 7,
+      "status": "HALT",
+      "stop_conditions": [
+        "position_or_order_state_uncertain"
+      ],
+      "evidence_refs": [
+        "occ:test-vector:incident-001"
+      ]
+    },
+    "signature_hex": "41d76f26d833988b08865d0ffcd98778f1d573916ba6c71eb4a1283d4b31cbe1"
+  }
+}
