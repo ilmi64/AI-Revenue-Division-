@@ -10,14 +10,14 @@ def base(changes=None, account=None, **overrides):
     arrays = {
         "ordersCreated": [],
         "ordersCancelled": [{"id": "sl-1"}],
-        "ordersFilled": [],
+        "ordersFilled": [{"id": "closeout"}],
         "ordersTriggered": [],
         "tradesOpened": [],
         "tradesReduced": [],
         "tradesClosed": [{"id": "T1"}],
         "positions": [],
         "transactions": [
-            {"id": "101", "accountID": "acct-1", "type": "ORDER_FILL", "orderID": "closeout"},
+            {"id": "101", "accountID": "acct-1", "type": "ORDER_FILL", "orderID": "closeout", "reason": "MARKET_ORDER_MARGIN_CLOSEOUT"},
             {"id": "102", "accountID": "acct-1", "type": "ORDER_CANCEL", "orderID": "sl-1"},
         ],
     }
@@ -69,7 +69,7 @@ class OandaPostCloseoutAccountChangesTests(unittest.TestCase):
     def test_new_trade_opened_after_closeout_halts(self):
         result = base(
             changes={
-                "ordersFilled": [{"id": "entry-1"}],
+                "ordersFilled": [{"id": "closeout"}, {"id": "entry-1"}],
                 "tradesOpened": [{"id": "T2"}],
                 "transactions": [
                     {"id": "101", "accountID": "acct-1", "type": "ORDER_FILL",
@@ -89,6 +89,22 @@ class OandaPostCloseoutAccountChangesTests(unittest.TestCase):
         self.assertEqual(result["status"], "HALT")
         self.assertTrue(any("absent from the full account" in item for item in result["errors"]))
 
+    def test_fill_transaction_missing_from_orders_filled_array_halts(self):
+        result = base(
+            changes={
+                "ordersFilled": [{"id": "closeout"}],
+                "transactions": [
+                    {"id": "101", "accountID": "acct-1", "type": "ORDER_FILL",
+                     "orderID": "closeout", "reason": "MARKET_ORDER_MARGIN_CLOSEOUT"},
+                    {"id": "102", "accountID": "acct-1", "type": "ORDER_FILL",
+                     "orderID": "omitted-fill", "reason": "CLIENT_ORDER"},
+                ],
+            }
+        )
+        self.assertEqual(result["status"], "HALT")
+        self.assertEqual(result["unmatched_transaction_fill_order_ids"], ["omitted-fill"])
+        self.assertTrue(any("missing from changes.ordersFilled" in item for item in result["errors"]))
+
     def test_filled_order_requires_matching_fill_transaction(self):
         result = base(changes={"ordersFilled": [{"id": "entry-1"}]})
         self.assertEqual(result["status"], "HALT")
@@ -97,7 +113,7 @@ class OandaPostCloseoutAccountChangesTests(unittest.TestCase):
     def test_new_order_fill_after_closeout_halts_even_without_open_trade(self):
         result = base(
             changes={
-                "ordersFilled": [{"id": "new-entry"}],
+                "ordersFilled": [{"id": "closeout"}, {"id": "new-entry"}],
                 "transactions": [
                     {"id": "101", "accountID": "acct-1", "type": "ORDER_FILL",
                      "orderID": "closeout", "reason": "MARKET_ORDER_MARGIN_CLOSEOUT"},
