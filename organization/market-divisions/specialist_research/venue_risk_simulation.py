@@ -75,6 +75,8 @@ def validate_venue_spec(spec: Any) -> list[str]:
                 errors.append(f"maintenance_tiers[{index}].notional_cap must increase")
             if cap is None and index != len(tiers) - 1:
                 errors.append("only the final maintenance tier may have an unbounded cap")
+            if index == len(tiers) - 1 and cap is not None:
+                errors.append("final maintenance tier must have an unbounded cap")
             if not _finite(rate) or not 0 < float(rate) <= 1:
                 errors.append(f"maintenance_tiers[{index}].maintenance_rate must be in (0, 1]")
             if cap is not None and _positive(cap):
@@ -102,8 +104,7 @@ def _impact_cost(notional: float, depth: float, spec: dict[str, Any]) -> tuple[f
 def _partial_reduction(quantity: float, multiplier: float, price: float,
                        equity: float, spec: dict[str, Any], depth: float) -> float:
     """Find the smallest quantity reduction meeting the configured equity buffer."""
-    target = equity / float(spec["liquidation_buffer_ratio"])
-    if target <= 0:
+    if equity <= 0:
         return quantity
     low, high = 0.0, quantity
     for _ in range(64):
@@ -112,7 +113,7 @@ def _partial_reduction(quantity: float, multiplier: float, price: float,
         maintenance = _maintenance(remaining_notional, spec["maintenance_tiers"])
         cost, _ = _impact_cost(reduce_qty * multiplier * price, depth, spec)
         fee = reduce_qty * multiplier * price * float(spec["liquidation_fee_rate"])
-        if maintenance <= equity - cost - fee and maintenance * float(spec["liquidation_buffer_ratio"]) <= equity - cost - fee:
+        if maintenance * float(spec["liquidation_buffer_ratio"]) <= equity - cost - fee:
             high = reduce_qty
         else:
             low = reduce_qty
@@ -138,7 +139,10 @@ def simulate_derivative_path(venue_spec: dict[str, Any], position: dict[str, Any
         if not isinstance(position.get(key), str) or not position[key].strip():
             errors.append(f"position.{key} is required")
     for key in ("quantity", "entry_price", "initial_margin", "available_margin"):
-        if not _positive(position.get(key)):
+        if key == "available_margin":
+            if not _finite(position.get(key)) or float(position[key]) < 0:
+                errors.append("position.available_margin must be finite and non-negative")
+        elif not _positive(position.get(key)):
             errors.append(f"position.{key} must be greater than zero")
     if not isinstance(path, list) or not path:
         errors.append("path must be a non-empty array")
@@ -156,6 +160,15 @@ def simulate_derivative_path(venue_spec: dict[str, Any], position: dict[str, Any
     initial_quantity = quantity
     entry = float(position["entry_price"])
     side_sign = 1.0 if position["side"] == "long" else -1.0
+    required_initial_margin = quantity * multiplier * entry * float(venue_spec["initial_margin_rate"])
+    if float(position["initial_margin"]) < required_initial_margin:
+        return {
+            "status": "BLOCKED_INVALID_MODEL_INPUTS",
+            "errors": ["position.initial_margin is below the venue-spec initial-margin requirement"],
+            "steps": [], "final_position_quantity": None,
+            "authority": AUTHORITY, "trade_authority": False,
+            "live_readiness": False, "simulation_only": True,
+        }
     equity = float(position["initial_margin"]) + float(position["available_margin"])
     cumulative_funding = cumulative_fees = cumulative_impact = 0.0
     previous_time: datetime | None = None
@@ -195,7 +208,8 @@ def simulate_derivative_path(venue_spec: dict[str, Any], position: dict[str, Any
             break
 
         mark = float(mark)
-        notional = quantity * multiplier * mark
+        quantity_before = quantity
+        notional = quantity_before * multiplier * mark
         price_pnl = quantity * multiplier * (mark - previous_mark) * side_sign
         elapsed_hours = (current_time - previous_time).total_seconds() / 3600.0 if previous_time else 0.0
         funding_intervals = elapsed_hours / float(interval)
@@ -214,7 +228,13 @@ def simulate_derivative_path(venue_spec: dict[str, Any], position: dict[str, Any
             if venue_spec["partial_liquidation_supported"] and quantity > 0:
                 reduce_qty = _partial_reduction(
                     quantity, multiplier, mark, equity, venue_spec, float(depth))
-                if 0 < reduce_qty < quantity:
+                remaining_notional = max(0.0, (quantity - reduce_qty) * multiplier * mark)
+                reduction_cost, _ = _impact_cost(reduce_qty * multiplier * mark, float(depth), venue_spec)
+                reduction_fee = reduce_qty * multiplier * mark * float(venue_spec["liquidation_fee_rate"])
+                restored = (_maintenance(remaining_notional, venue_spec["maintenance_tiers"])
+                            * float(venue_spec["liquidation_buffer_ratio"])
+                            <= equity - reduction_cost - reduction_fee)
+                if 0 < reduce_qty < quantity and restored:
                     reduced_notional = reduce_qty * multiplier * mark
                     step_impact, impact_bps = _impact_cost(reduced_notional, float(depth), venue_spec)
                     step_fee = reduced_notional * float(venue_spec["liquidation_fee_rate"])
@@ -238,8 +258,7 @@ def simulate_derivative_path(venue_spec: dict[str, Any], position: dict[str, Any
         cumulative_impact += step_impact
         rows.append({
             "timestamp_utc": timestamp, "mark_price": mark,
-            "quantity_before": quantity if event == "NONE" else (
-                quantity if event == "PARTIAL_LIQUIDATION" else initial_quantity if index == 0 else 0.0),
+            "quantity_before": quantity_before,
             "quantity_after": quantity, "notional_before": notional,
             "price_pnl": price_pnl, "funding_cost": funding_cost,
             "maintenance_requirement": maintenance, "equity_after_costs": equity,
