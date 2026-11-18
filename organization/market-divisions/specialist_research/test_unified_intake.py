@@ -110,6 +110,21 @@ class UnifiedIntakeTests(unittest.TestCase):
         self.assertTrue(any(stop["source"] == "oanda_account_margin" for stop in result["active_stops"]))
         self.assertFalse(result["oanda_account_margin_audit"]["trade_authority"])
 
+    def test_oanda_closeout_without_pending_order_snapshot_escalates_missing_reconciliation(self):
+        account_replay = {
+            "account_currency": "CAD",
+            "initial_positions": [{"position_id": "gold", "desk_id": "gold", "instrument_id": "XAUUSD"}],
+            "observations": [{
+                "timestamp_utc": "2026-11-17T20:45:00Z", "nav_mid": 400, "margin_used": 1000,
+                "position_market_status": {"gold": "open"}, "trading_day_check": False,
+            }],
+        }
+        result = self.build(oanda_account_margin_replay=account_replay)
+        self.assertEqual(result["oanda_account_margin_audit"]["report"]["status"], "CLOSEOUT_TRIGGERED")
+        self.assertEqual(result["oanda_pending_order_audit"]["status"], "HALT")
+        self.assertTrue(any(stop["reason"] == "POST_CLOSEOUT_PENDING_ORDER_RECONCILIATION_MISSING"
+                            for stop in result["active_stops"]))
+
     def test_oanda_recovered_margin_call_still_latches_occ_stop(self):
         account_replay = {
             "account_currency": "CAD",
