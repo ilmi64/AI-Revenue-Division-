@@ -103,6 +103,23 @@ class OandaAccountCloseoutReplayTests(unittest.TestCase):
         self.assertEqual(len(result["closeout_batches"]), 2)
         self.assertEqual(set(result["position_ids_closed_by_model"]), {"gold-xau", "fx-eurusd", "index-spx"})
 
+    def test_deferred_early_closeout_retries_at_market_reopen_while_still_under_margin(self):
+        events = [
+            observation(17, nav=500, used=1000, statuses={
+                "gold-xau": "open", "fx-eurusd": "closed", "index-spx": "halted",
+            }),
+            {
+                "timestamp_utc": "2026-11-18T14:00:00Z",
+                "nav_mid": 900, "margin_used": 1000,
+                "position_market_status": {"fx-eurusd": "open", "index-spx": "open"},
+                "trading_day_check": False,
+            },
+        ]
+        result = replay_oanda_account_margin_closeout("CAD", positions(), events)
+        self.assertEqual(len(result["closeout_batches"]), 2)
+        self.assertEqual(result["closeout_batches"][1]["trigger"], "RETRY_DEFERRED_CLOSEOUT_WHILE_UNDERMARGINED")
+        self.assertEqual(set(result["position_ids_closed_by_model"]), {"gold-xau", "fx-eurusd", "index-spx"})
+
     def test_six_consecutive_under_margined_daily_checks_trigger_closeout(self):
         events = [observation(i, nav=900, used=1000, sequence=i, trading_date=date) for i, date in enumerate(["2026-11-17", "2026-11-18", "2026-11-19", "2026-11-20", "2026-11-23", "2026-11-24"], 1)]
         result = replay_oanda_account_margin_closeout("CAD", positions(), events)
