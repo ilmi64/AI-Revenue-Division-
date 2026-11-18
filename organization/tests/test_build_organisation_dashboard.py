@@ -290,6 +290,69 @@ class OrganisationDashboardTests(unittest.TestCase):
         self.assertEqual(report["status"], "HALT_AUDIT")
         self.assertEqual(report["oanda_pending_order_audit"]["status"], "HALT")
 
+    def test_oanda_closeout_transaction_halt_escalates_main_hub(self):
+        snapshot = {
+            "snapshot_type": "unified_occ_research_intelligence",
+            "status": "halt", "global_stop_active": True,
+            "active_stops": [{"source": "oanda_closeout_transactions"}],
+            "control_health": {
+                "status": "PASS_AUDIT", "errors": [], "warnings": [],
+                "authority": "research_only_no_execution_authority",
+                "trade_authority": False, "live_readiness": False,
+            },
+            "oanda_closeout_transaction_audit": {
+                "status": "HALT", "report": {"status": "HALT",
+                    "authority": "research_only_no_execution_authority",
+                    "trade_authority": False, "live_readiness": False},
+                "errors": ["Missing cancellation evidence"],
+                "trade_authority": False, "live_readiness": False,
+            },
+        }
+        report = build_occ_control_health_report(snapshot)
+        self.assertEqual(report["status"], "HALT_AUDIT")
+        self.assertEqual(report["oanda_closeout_transaction_audit"]["status"], "HALT")
+        self.assertTrue(report["global_stop_active"])
+
+    def test_oanda_closeout_transaction_pass_never_promotes_authority(self):
+        snapshot = {
+            "snapshot_type": "unified_occ_research_intelligence",
+            "status": "unverified", "global_stop_active": False, "active_stops": [],
+            "control_health": {
+                "status": "PASS_AUDIT", "errors": [], "warnings": [],
+                "authority": "research_only_no_execution_authority",
+                "trade_authority": False, "live_readiness": False,
+            },
+            "oanda_closeout_transaction_audit": {
+                "status": "PASS", "report": {"status": "PASS",
+                    "authority": "research_only_no_execution_authority",
+                    "trade_authority": False, "live_readiness": False},
+                "errors": [], "trade_authority": False, "live_readiness": False,
+            },
+        }
+        report = build_occ_control_health_report(snapshot)
+        self.assertEqual(report["oanda_closeout_transaction_audit"]["status"], "PASS")
+        self.assertFalse(report["trade_authority"])
+        self.assertFalse(report["live_readiness"])
+
+    def test_dashboard_rejects_inconsistent_oanda_closeout_transaction_audit(self):
+        snapshot = {
+            "snapshot_type": "unified_occ_research_intelligence",
+            "control_health": {
+                "status": "PASS_AUDIT", "errors": [], "warnings": [],
+                "authority": "research_only_no_execution_authority",
+                "trade_authority": False, "live_readiness": False,
+            },
+            "oanda_closeout_transaction_audit": {
+                "status": "PASS", "report": {"status": "HALT",
+                    "authority": "research_only_no_execution_authority",
+                    "trade_authority": False, "live_readiness": False},
+                "errors": [], "trade_authority": False, "live_readiness": False,
+            },
+        }
+        report = build_occ_control_health_report(snapshot)
+        self.assertEqual(report["status"], "HALT_AUDIT")
+        self.assertEqual(report["oanda_closeout_transaction_audit"]["status"], "HALT")
+
     def test_dashboard_rejects_invalid_occ_authority(self):
         snapshot = {
             "snapshot_type": "unified_occ_research_intelligence",
