@@ -433,3 +433,30 @@ mint/burns and internal treasury movements are excluded from the priority queue.
 Priority labels are not directional signals, market observations, risk limits,
 position sizing or execution instructions. Metadata completeness is not
 evidence authenticity, and declared source independence remains unverified.
+
+
+## Dedicated Gold/XAUUSD specialist research contract
+
+`gold_specialist.py` adds an independent, optional structured research layer
+for Gold. When a Gold observation supplies structured session metadata or
+macro evidence, `assess_gold` attaches this layer to the Gold desk packet.
+The contract separates eight context families: real yields, USD, central-bank
+demand, ETF flows, futures positioning, physical demand, geopolitical context
+and rates/policy. Each evidence item carries a factor/type, reference, source,
+UTC observation timestamp, value/unit and declared source status.
+
+The layer also validates XAUUSD USD quote basis, bid/ask and spread
+reconciliation, quote freshness, session/calendar fields, futures expiry and
+roll status, CFD broker symbol/contract unit, financing, settlement and
+instrument-specific Shariah review status. Macro evidence older than seven
+days or future-dated is flagged for review. Missing macro factors are warnings;
+identity, quote, basis and contract defects halt the Gold packet.
+
+The macro factors are coverage/context only. The module deliberately produces
+no directional score or forecast. Source IDs and declared groups do not prove
+independent ownership or collection paths. Evidence is caller-supplied and not
+independently authenticated. Indicative bullion, broker-executable XAUUSD,
+COMEX futures and broker CFDs remain distinct instrument bases.
+
+New offline tests are in `test_gold_specialist.py`; engine integration is also
+covered in `test_engines.py`. These tests are authored, not yet executed.
