@@ -1,8 +1,11 @@
 import unittest
+import tempfile
 from pathlib import Path
 
 from specialist_research.unified_intake import build_unified_intake, validate_handover
 from specialist_research.test_replay import NOW, obs, source_registry
+from specialist_research.snapshot_history import append_snapshot
+from specialist_research.incident_event_ledger import append_event
 
 
 class UnifiedIntakeTests(unittest.TestCase):
@@ -115,6 +118,49 @@ class UnifiedIntakeTests(unittest.TestCase):
         rows = self.four_desk_rows()
         with self.assertRaisesRegex(ValueError, "must be supplied together"):
             self.build(rows, capital_flow_events=[])
+
+    def test_unified_intake_connects_audits_to_exact_persisted_snapshot(self):
+        rows = self.four_desk_rows()
+        base = self.build(rows)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            snapshot_path = root / "snapshots.jsonl"
+            event_path = root / "events.jsonl"
+            record = append_snapshot(snapshot_path, base, NOW)
+            event = {
+                "event_id": "handover-event-1",
+                "event_type": "handover_recorded",
+                "occurred_at_utc": NOW,
+                "recorded_at_utc": NOW,
+                "actor_id": "day-shift",
+                "subject_id": "day-to-night",
+                "summary": "Synthetic accepted shift handover",
+                "evidence_refs": ["fixture:handover"],
+                "details": {
+                    "handover_id": "handover-1",
+                    "outgoing_shift_id": "day",
+                    "incoming_shift_id": "night",
+                    "snapshot_id": record["snapshot_id"],
+                    "portfolio_version": 7,
+                    "outgoing_acknowledged": True,
+                    "incoming_acknowledged": True,
+                    "positions_reconciled": True,
+                    "dependency_health": "healthy",
+                    "active_veto_ids": [],
+                    "unresolved_critical_items": [],
+                },
+            }
+            append_event(event_path, event)
+            integrated = self.build(
+                rows,
+                control_health_snapshot_history=snapshot_path,
+                control_health_event_ledger=event_path,
+            )
+            self.assertEqual(integrated["control_health"]["status"], "PASS_AUDIT")
+            self.assertEqual(integrated["control_health"]["handover_acceptance"], "accepted")
+            self.assertEqual(integrated["control_health"]["latest_verified_snapshot_id"], record["snapshot_id"])
+            self.assertFalse(integrated["trade_authority"])
+            self.assertFalse(integrated["live_readiness"])
 
     def test_control_health_is_explicitly_not_provided_without_audit_paths(self):
         result = self.build()
