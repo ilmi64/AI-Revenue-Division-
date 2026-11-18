@@ -119,6 +119,11 @@ class CapitalFlowHandoffTests(unittest.TestCase):
         registry = {"sources": [{**REGISTRY["sources"][0], "access_status": "unverified"}]}
         self.assertEqual(self.build(registry=registry)["event_records"], [])
 
+    def test_empty_source_identifier_fails_closed(self):
+        registry = {"sources": [{**REGISTRY["sources"][0], "source_id": " "}]}
+        with self.assertRaises(HandoffError):
+            self.build(registry=registry)
+
     def test_unknown_or_unreviewed_source_terms_rejected(self):
         registry = {"sources": [{**REGISTRY["sources"][0], "terms_review_status": "not_reviewed"}]}
         self.assertEqual(self.build(registry=registry)["event_records"], [])
