@@ -20,8 +20,8 @@ class VenueDocumentCaptureTests(unittest.TestCase):
     def test_manifest_validates(self):
         self.assertEqual(validate_capture_manifest(self.manifest), [])
 
-    def test_all_thirteen_excerpt_digests_match_captured_text(self):
-        self.assertEqual(len(self.manifest["captures"]), 13)
+    def test_all_fifteen_excerpt_digests_match_captured_text(self):
+        self.assertEqual(len(self.manifest["captures"]), 15)
         for capture in self.manifest["captures"]:
             self.assertEqual(validate_revision(capture), [])
 
@@ -44,7 +44,7 @@ class VenueDocumentCaptureTests(unittest.TestCase):
     def test_report_discloses_partial_capture_and_no_profile_eligibility(self):
         report = build_capture_report(self.manifest)
         self.assertEqual(report["status"], "PARTIAL_EVIDENCE_CAPTURE_VALID")
-        self.assertEqual(report["document_count"], 13)
+        self.assertEqual(report["document_count"], 15)
         self.assertEqual(report["candidate_count"], 7)
         self.assertFalse(report["full_document_capture"])
         self.assertTrue(all(not item["profile_eligible"] for item in report["documents"]))
@@ -62,6 +62,16 @@ class VenueDocumentCaptureTests(unittest.TestCase):
         self.assertTrue(expected.issubset(captures))
         self.assertEqual(captures["oanda_canada_trading_hours_and_gap_risk"]["extracted_facts"][1]["value"], "Sunday-Friday 18:05-16:59")
         self.assertTrue(any(f["fact_key"] == "margin_closeout_policy" for f in captures["oanda_canada_margin_closeout"]["extracted_facts"]))
+
+    def test_account_level_margin_rule_excerpts_capture_threshold_and_scope(self):
+        captures = {item["document_id"]: item for item in self.manifest["captures"]}
+        rules = captures["oanda_canada_margin_rules_faq"]
+        facts = {item["fact_key"]: item["value"] for item in rules["extracted_facts"]}
+        self.assertEqual(facts["daily_margin_check_time"], "15:45")
+        self.assertEqual(facts["time_based_closeout_days"], 6)
+        self.assertEqual(facts["closeout_scope"], "all open positions")
+        account = captures["oanda_canada_subaccount_closeout_differences"]
+        self.assertTrue(any(item["fact_key"] == "unrelated_pending_orders" for item in account["extracted_facts"]))
 
     def test_gold_cfd_capture_does_not_claim_physical_ownership(self):
         item = next(x for x in self.manifest["captures"] if x["document_id"] == "oanda_xauusd_instrument_page")
