@@ -21,6 +21,13 @@ def packets(status_overrides=None):
                 "asset_class": desk,
                 "side": "long" if desk != "forex" else "short",
                 "notional": 100.0,
+                "instrument_type": {"crypto": "crypto_spot", "forex": "forex_spot", "indices": "index_future", "gold": "gold_future"}[desk],
+                "valuation_basis": {"crypto": "spot_mark_to_market", "forex": "base_currency_units", "indices": "futures_contract_notional", "gold": "futures_contract_notional"}[desk],
+                "units": 1.0,
+                "contract_multiplier": 1.0 if desk in {"indices", "gold"} else None,
+                "leverage": None,
+                "margin_amount": 10.0 if desk in {"indices", "gold"} else None,
+                "delta": 1.0,
                 "currency": "USD",
                 "valuation_currency": "USD",
                 "valuation_amount": 100.0,
@@ -36,6 +43,9 @@ def config(maximum=1000.0):
     return {"schema_version": "1.0.0", "limits": [{
         "scope": "portfolio", "metric": "gross_exposure",
         "valuation_currency": "USD", "max_value": maximum,
+    }], "stress_scenarios": [{
+        "scenario_id": "risk_off",
+        "shocks_by_asset_class": {"crypto": -0.2, "forex": 0.05, "indices": -0.1, "gold": 0.08},
     }]}
 
 
@@ -53,6 +63,8 @@ class PortfolioRiskTests(unittest.TestCase):
     def test_comparable_exposures_limits_and_signed_correlation_are_reported(self):
         result = assess_portfolio_risk(packets(), NOW, config(), correlations())
         self.assertEqual(result["status"], "ASSESSED_WITHIN_CONFIGURED_LIMITS")
+        self.assertEqual(result["instrument_normalization"]["status"], "INPUTS_VALIDATED_NOT_REPRICED")
+        self.assertEqual(result["stress_testing"]["status"], "ASSESSED")
         self.assertEqual(result["position_count"], 4)
         self.assertEqual(result["exposure_by_valuation_currency"]["USD"]["gross"], 400.0)
         self.assertEqual(result["exposure_by_valuation_currency"]["USD"]["net"], 200.0)
@@ -123,6 +135,28 @@ class PortfolioRiskTests(unittest.TestCase):
         result = assess_portfolio_risk(packets(), NOW, scoped, correlations())
         self.assertEqual(result["status"], "HALT")
         self.assertEqual(result["risk_limits"]["results"][0]["actual"], 300.0)
+
+    def test_stress_scenario_reports_currency_partitioned_pnl_and_loss(self):
+        result = assess_portfolio_risk(packets(), NOW, config(), correlations())
+        stress = result["stress_testing"]["scenarios"][0]
+        self.assertEqual(stress["status"], "ASSESSED")
+        self.assertAlmostEqual(stress["by_valuation_currency"]["USD"]["pnl"], -23.0)
+        self.assertAlmostEqual(stress["by_valuation_currency"]["USD"]["loss"], 30.0)
+
+    def test_missing_stress_shock_leaves_scenario_incomplete_and_portfolio_unknown(self):
+        cfg = config()
+        cfg["stress_scenarios"][0]["shocks_by_asset_class"].pop("gold")
+        result = assess_portfolio_risk(packets(), NOW, cfg, correlations())
+        self.assertEqual(result["status"], "UNKNOWN")
+        self.assertEqual(result["stress_testing"]["scenarios"][0]["status"], "INCOMPLETE")
+        self.assertIn("position-gold", result["stress_testing"]["scenarios"][0]["uncovered_position_ids"])
+
+    def test_instrument_specific_basis_is_enforced(self):
+        rows = packets()
+        rows[2]["context"]["portfolio_risk"]["positions"][0]["valuation_basis"] = "spot_mark_to_market"
+        result = assess_portfolio_risk(rows, NOW, config(), correlations())
+        self.assertEqual(result["status"], "HALT")
+        self.assertTrue(any("valuation_basis" in error for error in result["errors"]))
 
     def test_currency_buckets_are_not_combined(self):
         rows = packets()
