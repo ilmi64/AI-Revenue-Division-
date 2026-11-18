@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0.0",
   "manifest_status": "PARTIAL_OFFICIAL_EXCERPT_CAPTURE_NOT_FULL_DOCUMENTS",
-  "capture_date": "2026-11-17",
+  "capture_date": "2026-11-18",
   "capture_time_precision": "date_only_normalized_to_utc_midnight",
-  "captured_at_utc": "2026-11-17T00:00:00Z",
+  "captured_at_utc": "2026-11-18T00:00:00Z",
   "method": "Official-page excerpts retrieved through public web search and opened-page text, then transcribed into a research manifest; no complete page/PDF byte capture.",
   "global_controls": {
     "full_document_capture": false,
@@ -1020,7 +1020,7 @@
       "capture_scope": "official_api_endpoint_excerpt",
       "full_document_capture": false,
       "capture_time_precision": "date_only_normalized_to_utc_midnight",
-      "captured_at_utc": "2026-11-17T00:00:00Z",
+      "captured_at_utc": "2026-11-18T00:00:00Z",
       "retrieval_method": "official_web_search_excerpt",
       "revision_id": "oanda_v20_transaction_endpoints:excerpt-20261117"
     },
@@ -1072,7 +1072,7 @@
       "capture_scope": "official_api_definition_excerpt",
       "full_document_capture": false,
       "capture_time_precision": "date_only_normalized_to_utc_midnight",
-      "captured_at_utc": "2026-11-17T00:00:00Z",
+      "captured_at_utc": "2026-11-18T00:00:00Z",
       "retrieval_method": "official_web_search_excerpt",
       "revision_id": "oanda_v20_transaction_definitions:excerpt-20261117"
     },
@@ -1130,7 +1130,7 @@
       "capture_scope": "official_api_endpoint_excerpt",
       "full_document_capture": false,
       "capture_time_precision": "date_only_normalized_to_utc_midnight",
-      "captured_at_utc": "2026-11-17T00:00:00Z",
+      "captured_at_utc": "2026-11-18T00:00:00Z",
       "retrieval_method": "official_web_search_excerpt",
       "revision_id": "oanda_v20_account_changes_endpoint:excerpt-20261117"
     }
