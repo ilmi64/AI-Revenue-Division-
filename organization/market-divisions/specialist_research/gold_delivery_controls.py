@@ -77,6 +77,8 @@ def assess_gold_delivery_controls(contract: Any, position: Any, evaluation_utc: 
             errors.append("delivery_start_date must not exceed delivery_end_date")
         if dates["first_notice_date"] > dates["delivery_start_date"]:
             errors.append("First Notice Date must not occur after delivery start")
+        if not (dates["delivery_start_date"] <= dates["last_intent_date"] <= dates["delivery_end_date"]):
+            errors.append("last_intent_date must fall within the delivery window")
         contract_month = contract.get("contract_month")
         if dates["delivery_start_date"].strftime("%Y-%m") != contract_month or dates["delivery_end_date"].strftime("%Y-%m") != contract_month:
             errors.append("delivery window must fall within the specified contract month")
@@ -101,6 +103,11 @@ def assess_gold_delivery_controls(contract: Any, position: Any, evaluation_utc: 
         errors.append("position.is_open must be boolean")
     if side == "flat" and is_open is True:
         errors.append("flat position cannot be marked open")
+    quantity = position.get("contracts")
+    if is_open is True and (isinstance(quantity, bool) or not isinstance(quantity, int) or quantity <= 0):
+        errors.append("open position contracts must be a positive integer")
+    if is_open is False and quantity is not None and (isinstance(quantity, bool) or not isinstance(quantity, int) or quantity < 0):
+        errors.append("flat position contracts, when supplied, must be a non-negative integer")
 
     if errors:
         return _result("HALT_DELIVERY_CONTROLS", errors, [], False)
@@ -108,6 +115,8 @@ def assess_gold_delivery_controls(contract: Any, position: Any, evaluation_utc: 
     warnings: list[str] = []
     blocks: list[str] = []
     if is_open:
+        if product == "MGC" and evaluation.date() != dates["last_intent_date"] and quantity % 10 != 0:
+            blocks.append("MGC_DELIVERY_QUANTITY_MUST_BE_MULTIPLE_OF_TEN_EXCEPT_LAST_INTENT_DAY")
         if side == "long" and evaluation >= _utc(contract["fcm_long_cutoff_utc"]):
             blocks.append("LONG_POSITION_AT_OR_AFTER_FCM_RECEIVE_CUTOFF")
         if side == "short" and evaluation >= _utc(contract["fcm_short_cutoff_utc"]):
