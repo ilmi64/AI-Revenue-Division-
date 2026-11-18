@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "contract-lifecycle-profile.schema.json",
+  "title": "OCC Contract Lifecycle Profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "profile_id", "venue_id", "instrument_id",
+    "instrument_type", "quote_currency", "settlement_currency",
+    "settlement_method", "roll_method", "financing_convention"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "profile_id": {"type": "string", "minLength": 1},
+    "venue_id": {"type": "string", "minLength": 1},
+    "instrument_id": {"type": "string", "minLength": 1},
+    "instrument_type": {
+      "enum": ["crypto_perpetual", "forex_cfd", "index_future", "index_cfd", "gold_future", "gold_cfd"]
+    },
+    "quote_currency": {"type": "string", "minLength": 1},
+    "settlement_currency": {"type": "string", "minLength": 1},
+    "settlement_method": {
+      "enum": ["cash", "physical", "broker_cash_adjustment", "not_applicable"]
+    },
+    "roll_method": {
+      "enum": ["manual_close_open", "venue_defined", "not_applicable"]
+    },
+    "financing_convention": {
+      "enum": ["funding_rate", "annualized_rate", "daily_rate", "none"]
+    },
+    "contract_code": {"type": "string", "minLength": 1},
+    "expiry_utc": {"type": "string", "format": "date-time"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"instrument_type": {"enum": ["index_future", "gold_future"]}}},
+      "then": {
+        "required": ["contract_code", "expiry_utc"],
+        "properties": {
+          "settlement_method": {"enum": ["cash", "physical", "broker_cash_adjustment"]},
+          "roll_method": {"enum": ["manual_close_open", "venue_defined"]}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"instrument_type": {"const": "crypto_perpetual"}}},
+      "then": {
+        "properties": {
+          "financing_convention": {"const": "funding_rate"},
+          "settlement_method": {"const": "not_applicable"},
+          "roll_method": {"const": "not_applicable"}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"instrument_type": {"enum": ["forex_cfd", "index_cfd", "gold_cfd"]}}},
+      "then": {
+        "properties": {
+          "settlement_method": {"enum": ["cash", "broker_cash_adjustment", "not_applicable"]},
+          "financing_convention": {"enum": ["annualized_rate", "daily_rate", "none"]}
+        }
+      }
+    }
+  ]
+}
