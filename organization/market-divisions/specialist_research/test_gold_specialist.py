@@ -114,6 +114,54 @@ class GoldSpecialistTests(unittest.TestCase):
         result = build_gold_research_context(o, NOW)
         self.assertEqual(result["status"], "halt")
 
+    def test_oanda_gold_cfd_execution_risk_is_attached(self):
+        o = observation(
+            instrument_type="gold_cfd", gold_price_basis="gold_cfd",
+            broker_symbol="XAU/USD", contract_unit="account-specific-unverified",
+            execution_risk_profile="oanda_canada_xauusd", holiday_status="open",
+            execution_risk_inputs={
+                "current_spread": 0.3, "reference_spread": 0.2,
+                "spread_warning_multiple": 2.0, "spread_halt_multiple": 3.0,
+                "gap_shock_bps": 150, "position_notional": 10000,
+                "quote_currency": "USD",
+            },
+            gold_session={"session_name": "new_york", "market_timezone": "America/New_York",
+                          "calendar_status": "verified"},
+        )
+        result = build_gold_research_context(o, NOW)
+        self.assertIsNotNone(result["execution_risk"])
+        self.assertEqual(result["execution_risk"]["session"]["status"], "SCHEDULE_OPEN_STATUS_CONFIRMED_BY_CALLER")
+        self.assertEqual(result["execution_risk"]["spread_gap_stress"]["status"], "STRESS_INPUTS_WITHIN_CONFIGURED_SPREAD_THRESHOLDS")
+        self.assertFalse(result["execution_risk"]["broker_closeout_modelled"])
+
+    def test_oanda_gold_cfd_spread_halt_propagates_to_gold_halt(self):
+        o = observation(
+            instrument_type="gold_cfd", gold_price_basis="gold_cfd",
+            broker_symbol="XAU/USD", contract_unit="account-specific-unverified",
+            execution_risk_profile="oanda_canada_xauusd", holiday_status="open",
+            execution_risk_inputs={
+                "current_spread": 0.8, "reference_spread": 0.2,
+                "spread_warning_multiple": 2.0, "spread_halt_multiple": 3.0,
+                "gap_shock_bps": 150, "position_notional": 10000,
+                "quote_currency": "USD",
+            },
+            gold_session={"session_name": "new_york", "market_timezone": "America/New_York",
+                          "calendar_status": "verified"},
+        )
+        result = build_gold_research_context(o, NOW)
+        self.assertEqual(result["status"], "halt")
+        self.assertTrue(any("spread stress halt" in x for x in result["errors"]))
+
+    def test_oanda_gold_cfd_profile_without_stress_inputs_halts(self):
+        o = observation(
+            instrument_type="gold_cfd", gold_price_basis="gold_cfd",
+            broker_symbol="XAU/USD", contract_unit="account-specific-unverified",
+            execution_risk_profile="oanda_canada_xauusd", holiday_status="open",
+        )
+        result = build_gold_research_context(o, NOW)
+        self.assertEqual(result["status"], "halt")
+        self.assertTrue(any("execution_risk_inputs are required" in x for x in result["errors"]))
+
     def test_missing_structured_session_halts(self):
         result = build_gold_research_context(observation(gold_session="london"), NOW)
         self.assertEqual(result["status"], "halt")
