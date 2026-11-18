@@ -5,42 +5,116 @@
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "revision_id", "document_id", "canonical_uri", "title", "publisher",
-    "source_class", "captured_at_utc", "extraction_method",
-    "document_text", "content_sha256", "extracted_facts"
+    "revision_id",
+    "document_id",
+    "canonical_uri",
+    "title",
+    "publisher",
+    "source_class",
+    "captured_at_utc",
+    "document_text",
+    "content_sha256",
+    "extracted_facts"
   ],
   "properties": {
-    "revision_id": {"type": "string", "minLength": 1},
-    "document_id": {"type": "string", "minLength": 1},
-    "canonical_uri": {"type": "string", "format": "uri", "pattern": "^https://"},
-    "title": {"type": "string", "minLength": 1},
-    "publisher": {"type": "string", "minLength": 1},
+    "revision_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "document_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "canonical_uri": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "publisher": {
+      "type": "string",
+      "minLength": 1
+    },
     "source_class": {
       "enum": [
-        "official_contract_specification", "official_margin_schedule",
-        "official_financing_policy", "official_product_page",
-        "official_help_centre", "regulator_notice", "exchange_rulebook",
-        "broker_client_agreement", "third_party_reference", "research_note"
+        "official_contract_specification",
+        "official_margin_schedule",
+        "official_financing_policy",
+        "official_product_page",
+        "official_help_centre",
+        "regulator_notice",
+        "exchange_rulebook",
+        "broker_client_agreement",
+        "third_party_reference",
+        "research_note"
       ]
     },
-    "captured_at_utc": {"type": "string", "format": "date-time", "pattern": "Z$"},
-    "published_at_utc": {"type": ["string", "null"], "format": "date-time"},
-    "extraction_method": {"type": "string", "minLength": 1},
-    "document_text": {"type": "string", "minLength": 1},
-    "content_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "captured_at_utc": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "published_at_utc": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "extraction_method": {
+      "type": "string",
+      "minLength": 1
+    },
+    "document_text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "content_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
     "extracted_facts": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["fact_key", "value"],
+        "required": [
+          "fact_key",
+          "value"
+        ],
         "properties": {
-          "fact_key": {"type": "string", "minLength": 1},
+          "fact_key": {
+            "type": "string",
+            "minLength": 1
+          },
           "value": {},
-          "unit": {"type": "string"},
-          "source_locator": {"type": "string"}
+          "unit": {
+            "type": "string"
+          },
+          "source_locator": {
+            "type": "string"
+          }
         },
         "additionalProperties": false
       }
+    },
+    "retrieval_method": {
+      "type": "string",
+      "minLength": 1
     }
-  }
+  },
+  "anyOf": [
+    {
+      "required": [
+        "extraction_method"
+      ]
+    },
+    {
+      "required": [
+        "retrieval_method"
+      ]
+    }
+  ]
 }
