@@ -1119,3 +1119,36 @@ The audit is wired into unified OCC intake as optional `oanda_pending_order_snap
 Input contract: `oanda-pending-order-snapshot.schema.json`. Official API excerpts `oanda_v20_order_definition` and `oanda_v20_account_pending_orders_endpoint` extend the evidence inventory to seventeen excerpts. The capture remains partial: no full API document bytes, publisher authentication, live account access, or customer-specific terms have been captured.
 
 Regression suites: `test_oanda_pending_order_exposure.py` (34 methods), `test_unified_intake.py` (33 methods), `test_venue_document_capture.py` (14 methods), and `organization/tests/test_build_organisation_dashboard.py` (29 methods). Tests are authored but have not been executed. No API token, account connection, order cancellation, modification or execution action is implemented.
+
+
+## OANDA post-margin-closeout pending-order exposure audit
+
+`oanda_pending_order_exposure.py` classifies a caller-supplied complete OANDA v20
+pending-order snapshot after an account-level margin closeout. It reconciles
+the reported pending-order count, requires a complete remaining-open-trade ID
+set, and checks the account hedging mode and snapshot freshness.
+
+- Entry orders using `OPEN_ONLY`, `REDUCE_FIRST`, or the account-dependent
+  `DEFAULT` are treated as capable of opening or extending exposure and
+  escalate OCC to HALT.
+- `REDUCE_ONLY` orders are separated because they cannot open a new position.
+- Trade-dependent stop-loss/take-profit orders still pending for a liquidated
+  trade are an inconsistency and halt.
+- Dependent orders attached to explicitly identified remaining open trades
+  are reported separately from entry orders.
+- If an account-level margin replay records a closeout but no complete
+  post-closeout pending-order snapshot is supplied, unified intake creates a
+  missing-reconciliation HALT.
+
+The audit is read-only. It never cancels or changes orders, does not fetch a
+broker account, and does not authenticate the supplied snapshot. It does not
+prove why an order disappeared from the pending list: absence is not proof of
+a cancellation transaction. Transaction-history reconciliation is a separate
+future control. A PASS is limited to the supplied snapshot and is not account
+safety, broker confirmation, trade authority, or live readiness.
+
+Official evidence excerpts for the OANDA v20 order definitions and pending
+orders endpoint are captured in `venue_document_capture_manifest.json`.
+They document `tradeID` linkage, `positionFill` semantics, and the account
+pending-order count/endpoint. The manifest stores excerpt fingerprints, not
+authenticated full documents or a connected broker feed.
