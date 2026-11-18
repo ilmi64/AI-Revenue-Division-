@@ -16,6 +16,7 @@
     "coverage_complete",
     "specialist_packets",
     "capital_flow_audit",
+    "gold_specialist_audit",
     "capital_flow_context",
     "evidence_index",
     "packet_validation_errors",
@@ -98,6 +99,56 @@
       "type": "array",
       "items": {
         "type": "object"
+      }
+    },
+    "gold_specialist_audit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "instrument_count",
+        "instruments",
+        "trade_authority",
+        "live_readiness"
+      ],
+      "properties": {
+        "status": {
+          "enum": ["PASS", "WARN", "HALT", "NOT_PROVIDED"]
+        },
+        "instrument_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "instruments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "instrument_id",
+              "status",
+              "macro_factor_count",
+              "macro_factor_coverage",
+              "errors",
+              "warnings",
+              "trade_authority",
+              "live_readiness"
+            ],
+            "properties": {
+              "instrument_id": {"type": ["string", "null"]},
+              "status": {"enum": ["research", "unverified", "halt", "NOT_PROVIDED"]},
+              "price_basis": {"type": ["string", "null"]},
+              "macro_factor_count": {"type": "integer", "minimum": 0, "maximum": 8},
+              "macro_factor_coverage": {"type": "object"},
+              "source_independence_verified": {"const": false},
+              "errors": {"type": "array", "items": {"type": "string"}},
+              "warnings": {"type": "array", "items": {"type": "string"}},
+              "trade_authority": {"const": false},
+              "live_readiness": {"const": false}
+            }
+          }
+        },
+        "trade_authority": {"const": false},
+        "live_readiness": {"const": false}
       }
     },
     "capital_flow_context": {
