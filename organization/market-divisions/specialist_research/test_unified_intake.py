@@ -445,6 +445,8 @@ class UnifiedIntakeTests(unittest.TestCase):
             "max_snapshot_age_seconds": 60,
             "pending_orders_complete": True,
             "remaining_open_trade_ids": [],
+            "remaining_open_trade_ids_complete": True,
+            "reported_pending_order_count": 1,
             "closeout_occurred": True,
         }
         result = self.build(oanda_pending_order_snapshot=snapshot)
@@ -458,6 +460,8 @@ class UnifiedIntakeTests(unittest.TestCase):
             "pending_orders": [], "liquidated_trade_ids": ["trade-gold"],
             "account_hedging_enabled": False, "source_timestamp_utc": NOW,
             "evaluated_at_utc": NOW, "max_snapshot_age_seconds": 60,
+            "remaining_open_trade_ids": [], "remaining_open_trade_ids_complete": True,
+            "reported_pending_order_count": 0,
             "closeout_occurred": True,
         }
         result = self.build(oanda_pending_order_snapshot=snapshot)
