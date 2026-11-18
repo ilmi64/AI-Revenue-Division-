@@ -213,3 +213,28 @@ All eleven divisions are active programme workstreams. Finance, Ecommerce and An
 
 ## Controlled task packet preparation
 The OCC dashboard now derives read-only task packets from the proposed work queue and canonical division-to-role map. Packets expose dependencies, input evidence, expected outputs, approval gates and acknowledgement states. A role template is not a staffed owner; packets remain undispatched and non-executable until ownership and required acknowledgements are genuinely recorded. Invalid queue records or role mappings fail closed.
+
+
+## Unified OCC audit → Main Hub connection
+
+The unified research-intelligence builder accepts paired
+`--control-health-snapshot-history` and `--control-health-event-ledger`
+inputs. It attaches read-only snapshot/event integrity, stop reconciliation,
+handover acceptance, open incidents and continuity findings. The
+`control_health` field is explicitly `NOT_PROVIDED` when the audit inputs
+are omitted; missing audit evidence is never represented as a pass.
+
+The consolidated Main Hub dashboard accepts an integrated unified snapshot
+through `--occ-control-health-snapshot /path/to/unified-intelligence.json`.
+It exposes the audit state, snapshot status, global stop and active stop
+records under `occ_control_health`. Invalid authority markers or an
+unrecognized audit state are surfaced as `HALT_AUDIT`. The dashboard is
+read-only and cannot clear or create a stop.
+
+A safe local regression runner is available at
+`organization/tools/run_occ_regression_tests.sh`. From the repository root,
+run it with `bash organization/tools/run_occ_regression_tests.sh`. It runs the
+specialist-research test package and the Main Hub dashboard tests using local
+Python unittest discovery. The runner does not call the network, trigger
+GitHub Actions, or modify persistent OCC ledgers; the tests use temporary
+fixtures. Test execution still requires a local Python environment.
