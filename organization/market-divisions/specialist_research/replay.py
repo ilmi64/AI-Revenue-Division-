@@ -15,6 +15,7 @@ try:
     from . import capital_flow_provenance as _capital_flow_provenance
     from . import capital_flow_priority as _capital_flow_priority
     from . import capital_flow_taxonomy as _capital_flow_taxonomy
+    from . import stop_clearance_review as _stop_clearance_review
     from .engines import ASSESSORS, coordinate
     from .capital_flow_handoff import build_handoff, _read_jsonl
 except ImportError:  # direct script execution
@@ -24,6 +25,7 @@ except ImportError:  # direct script execution
     import capital_flow_provenance as _capital_flow_provenance
     import capital_flow_priority as _capital_flow_priority
     import capital_flow_taxonomy as _capital_flow_taxonomy
+    import stop_clearance_review as _stop_clearance_review
     from engines import ASSESSORS, coordinate
     from capital_flow_handoff import build_handoff, _read_jsonl
 
@@ -188,6 +190,7 @@ def replay(observations: list[dict[str, Any]], now_utc: str,
         "capital_flow_provenance": Path(_capital_flow_provenance.__file__).resolve(),
         "capital_flow_priority": Path(_capital_flow_priority.__file__).resolve(),
         "capital_flow_taxonomy": Path(_capital_flow_taxonomy.__file__).resolve(),
+        "stop_clearance_review": Path(_stop_clearance_review.__file__).resolve(),
     }
     implementation_sha256 = {
         name: hashlib.sha256(path.read_bytes()).hexdigest()
