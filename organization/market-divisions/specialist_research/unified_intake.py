@@ -134,7 +134,8 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
                          control_health_event_ledger: Path | None = None,
                          portfolio_risk_config: dict[str, Any] | None = None,
                          correlation_evidence: list[dict[str, Any]] | None = None,
-                         oanda_account_margin_replay: dict[str, Any] | None = None) -> dict[str, Any]:
+                         oanda_account_margin_replay: dict[str, Any] | None = None,
+                         oanda_pending_order_snapshot: dict[str, Any] | None = None) -> dict[str, Any]:
     """Build one immutable-style research snapshot from local source snapshots."""
     _utc(now_utc, "now_utc")
     audit_paths = (control_health_snapshot_history, control_health_event_ledger)
@@ -380,6 +381,43 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
                 "source": "oanda_account_margin", "instrument_id": "account",
                 "reason": "OANDA_ACCOUNT_MARGIN_CALL_CLOSEOUT_OR_INVALID_REPLAY",
             })
+    oanda_pending_order_audit = {
+        "status": "NOT_PROVIDED", "report": None,
+        "errors": ["OANDA post-closeout pending-order snapshot was not supplied"],
+        "trade_authority": False, "live_readiness": False,
+    }
+    if oanda_pending_order_snapshot is not None:
+        try:
+            from .oanda_pending_order_exposure import assess_oanda_post_closeout_pending_orders
+        except ImportError:
+            from oanda_pending_order_exposure import assess_oanda_post_closeout_pending_orders
+        if not isinstance(oanda_pending_order_snapshot, dict):
+            pending_report = {
+                "status": "HALT", "errors": ["oanda_pending_order_snapshot must be an object"],
+                "warnings": [], "trade_authority": False, "live_readiness": False,
+                "research_only": True, "authority": "research_only_no_execution_authority",
+            }
+        else:
+            try:
+                pending_report = assess_oanda_post_closeout_pending_orders(**oanda_pending_order_snapshot)
+            except TypeError as exc:
+                pending_report = {
+                    "status": "HALT", "errors": [f"invalid OANDA pending-order snapshot shape: {exc}"],
+                    "warnings": [], "trade_authority": False, "live_readiness": False,
+                    "research_only": True, "authority": "research_only_no_execution_authority",
+                }
+        pending_status = pending_report.get("status")
+        oanda_pending_order_audit = {
+            "status": "PASS" if pending_status == "PASS" else "HALT",
+            "report": pending_report,
+            "errors": pending_report.get("errors", []),
+            "trade_authority": False, "live_readiness": False,
+        }
+        if oanda_pending_order_audit["status"] == "HALT":
+            active_stops.append({
+                "source": "oanda_pending_orders", "instrument_id": "account",
+                "reason": "OANDA_POST_CLOSEOUT_PENDING_ORDERS_MAY_REOPEN_EXPOSURE_OR_AUDIT_INVALID",
+            })
     if portfolio_risk_audit["status"] == "HALT":
         active_stops.append({"source": "portfolio_risk", "instrument_id": "portfolio",
                              "reason": "portfolio_risk_halt_or_limit_breach"})
@@ -417,6 +455,7 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
         "gold_specialist_audit": gold_specialist_audit,
         "portfolio_risk": portfolio_risk_audit,
         "oanda_account_margin_audit": oanda_account_margin_audit,
+        "oanda_pending_order_audit": oanda_pending_order_audit,
         "capital_flow_context": replay_result.get("capital_flow_handoff", {
             "status": "not_consumed", "accepted_event_count": 0, "trade_authority": False,
         }),
@@ -504,6 +543,8 @@ def main() -> int:
     parser.add_argument("--correlation-evidence", type=Path)
     parser.add_argument("--oanda-account-margin-replay", type=Path,
                         help="JSON object with account_currency, initial_positions and observations")
+    parser.add_argument("--oanda-pending-order-snapshot", type=Path,
+                        help="Complete post-closeout pending-order snapshot JSON")
     parser.add_argument("--max-market-age-seconds", type=float, default=120)
     parser.add_argument("--max-clock-skew-seconds", type=float, default=5)
     parser.add_argument("--output", type=Path, required=True)
@@ -527,12 +568,14 @@ def main() -> int:
         risk_config = json.loads(args.portfolio_risk_config.read_text(encoding="utf-8")) if args.portfolio_risk_config else None
         correlations = _read_jsonl(args.correlation_evidence) if args.correlation_evidence else None
         oanda_margin_replay = json.loads(args.oanda_account_margin_replay.read_text(encoding="utf-8")) if args.oanda_account_margin_replay else None
+        oanda_pending_snapshot = json.loads(args.oanda_pending_order_snapshot.read_text(encoding="utf-8")) if args.oanda_pending_order_snapshot else None
         result = build_unified_intake(
             observations, args.now_utc, market_registry, flow_events, flow_reviews,
             flow_registry, handover, version, args.previous_global_stop, args.occ_stop_state,
             args.max_market_age_seconds, args.max_clock_skew_seconds, args.require_full_coverage,
             args.control_health_snapshot_history, args.control_health_event_ledger, risk_config, correlations,
             oanda_account_margin_replay=oanda_margin_replay,
+            oanda_pending_order_snapshot=oanda_pending_snapshot,
         )
         args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         print(json.dumps({"status": result["status"], "desk_coverage": result["desk_coverage"],
@@ -541,6 +584,7 @@ def main() -> int:
                           "control_health": result.get("control_health", {}).get("status", "not_requested"),
                           "portfolio_risk": result.get("portfolio_risk", {}).get("status", "not_provided"),
                           "oanda_account_margin": result.get("oanda_account_margin_audit", {}).get("status", "not_provided"),
+                          "oanda_pending_orders": result.get("oanda_pending_order_audit", {}).get("status", "not_provided"),
                           "output": str(args.output),
                           "authority": result["authority"]}, indent=2))
         return 0 if result["status"] in {"research", "unverified"} else 1
