@@ -1174,7 +1174,8 @@ pending snapshot. A rejected cancellation, wrong reason, missing event,
 unexplained disappearance, or order both pending and terminal fails closed.
 
 The transaction range must be numeric, contiguous, unfiltered and explicitly
-declared complete. The module cross-checks account IDs and pre/post snapshot
+declared complete. Its inclusive end must match the API's reported
+`lastTransactionID`. The module cross-checks account IDs and pre/post snapshot
 times. This is still caller-asserted evidence: it does not authenticate the
 export, connect to OANDA, poll the transaction stream, or prove the caller
 retrieved every page. Filled unrelated orders are reported but require a
