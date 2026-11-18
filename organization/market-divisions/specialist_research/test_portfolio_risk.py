@@ -43,7 +43,9 @@ def correlations():
     return [{
         "instrument_id_a": "EUR-USD", "instrument_id_b": "XAUUSD",
         "correlation": -0.35, "observed_at_utc": NOW,
-        "source_id": "fixture-correlation", "evidence_refs": ["fixture:corr"],
+        "source_id": "fixture-correlation", "sample_count": 30,
+        "lookback_window": "30d", "methodology": "pearson_returns",
+        "evidence_refs": ["fixture:corr"],
     }]
 
 
