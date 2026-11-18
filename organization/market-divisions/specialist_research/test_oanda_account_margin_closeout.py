@@ -14,9 +14,10 @@ def positions():
     ]
 
 
-def observation(day, nav=1000, used=1000, statuses=None, sequence=None, daily=True):
+def observation(day, nav=1000, used=1000, statuses=None, sequence=None, daily=True, trading_date=None):
+    date_value = trading_date or f"2026-11-{day:02d}"
     event = {
-        "timestamp_utc": f"2026-11-{day:02d}T20:45:00Z",
+        "timestamp_utc": f"{date_value}T20:45:00Z",
         "nav_mid": nav,
         "margin_used": used,
         "position_market_status": statuses or {
@@ -103,30 +104,48 @@ class OandaAccountCloseoutReplayTests(unittest.TestCase):
         self.assertEqual(set(result["position_ids_closed_by_model"]), {"gold-xau", "fx-eurusd", "index-spx"})
 
     def test_six_consecutive_under_margined_daily_checks_trigger_closeout(self):
-        events = [observation(day, nav=900, used=1000, sequence=i) for i, day in enumerate(range(17, 23), 1)]
+        events = [observation(i, nav=900, used=1000, sequence=i, trading_date=date) for i, date in enumerate(["2026-11-17", "2026-11-18", "2026-11-19", "2026-11-20", "2026-11-23", "2026-11-24"], 1)]
         result = replay_oanda_account_margin_closeout("CAD", positions(), events)
         self.assertEqual(result["status"], "CLOSEOUT_TRIGGERED")
         self.assertEqual(result["closeout_batches"][0]["trigger"], "SIX_CONSECUTIVE_UNDERMARGINED_TRADING_DAYS")
 
     def test_five_under_margined_days_do_not_trigger_time_closeout(self):
-        events = [observation(day, nav=900, used=1000, sequence=i) for i, day in enumerate(range(17, 22), 1)]
+        events = [observation(i, nav=900, used=1000, sequence=i, trading_date=date) for i, date in enumerate(["2026-11-17", "2026-11-18", "2026-11-19", "2026-11-20", "2026-11-23"], 1)]
         result = replay_oanda_account_margin_closeout("CAD", positions(), events)
         self.assertEqual(result["status"], "MARGIN_CALL_ACTIVE")
         self.assertEqual(result["closeout_batches"], [])
 
     def test_recovery_resets_consecutive_day_counter(self):
         events = [
-            observation(17, nav=900, used=1000, sequence=1),
-            observation(18, nav=900, used=1000, sequence=2),
-            observation(19, nav=1100, used=1000, sequence=3),
-            observation(20, nav=900, used=1000, sequence=4),
-            observation(21, nav=900, used=1000, sequence=5),
-            observation(22, nav=900, used=1000, sequence=6),
-            observation(23, nav=900, used=1000, sequence=7),
+            observation(1, nav=900, used=1000, sequence=1, trading_date="2026-11-17"),
+            observation(2, nav=900, used=1000, sequence=2, trading_date="2026-11-18"),
+            observation(3, nav=1100, used=1000, sequence=3, trading_date="2026-11-19"),
+            observation(4, nav=900, used=1000, sequence=4, trading_date="2026-11-20"),
+            observation(5, nav=900, used=1000, sequence=5, trading_date="2026-11-23"),
+            observation(6, nav=900, used=1000, sequence=6, trading_date="2026-11-24"),
+            observation(7, nav=900, used=1000, sequence=7, trading_date="2026-11-25"),
         ]
         result = replay_oanda_account_margin_closeout("CAD", positions(), events)
         self.assertEqual(result["consecutive_under_margined_trading_days"], 5)
         self.assertEqual(result["closeout_batches"], [])
+
+    def test_weekend_daily_check_blocks(self):
+        result = replay_oanda_account_margin_closeout("CAD", positions(), [observation(21)])
+        self.assertEqual(result["status"], "BLOCKED_INVALID_OR_INCOMPLETE_INPUT")
+
+    def test_six_day_closeout_deferred_until_market_reopens_while_still_undermargined(self):
+        dates = ["2026-11-17", "2026-11-18", "2026-11-19", "2026-11-20", "2026-11-23", "2026-11-24"]
+        events = [observation(i, nav=900, used=1000, sequence=i, trading_date=date,
+                              statuses={"gold-xau": "closed", "fx-eurusd": "closed", "index-spx": "closed"} if i == 6 else None)
+                  for i, date in enumerate(dates, 1)]
+        events.append({
+            "timestamp_utc": "2026-11-25T14:00:00Z", "nav_mid": 900, "margin_used": 1000,
+            "position_market_status": {"gold-xau": "open", "fx-eurusd": "open", "index-spx": "open"},
+            "trading_day_check": False,
+        })
+        result = replay_oanda_account_margin_closeout("CAD", positions(), events)
+        self.assertEqual(len(result["closeout_batches"]), 2)
+        self.assertEqual(set(result["position_ids_closed_by_model"]), {"gold-xau", "fx-eurusd", "index-spx"})
 
     def test_wrong_daily_check_time_blocks(self):
         event = observation(17)
@@ -173,12 +192,12 @@ class OandaAccountCloseoutReplayTests(unittest.TestCase):
         self.assertEqual(result["status"], "CLOSEOUT_TRIGGERED")
 
     def test_intraday_recovery_after_six_day_trigger_does_not_close_deferred_positions(self):
-        events = [observation(day, nav=900, used=1000, sequence=i) for i, day in enumerate(range(17, 23), 1)]
+        events = [observation(i, nav=900, used=1000, sequence=i, trading_date=date) for i, date in enumerate(["2026-11-17", "2026-11-18", "2026-11-19", "2026-11-20", "2026-11-23", "2026-11-24"], 1)]
         events[5]["position_market_status"] = {
             "gold-xau": "closed", "fx-eurusd": "closed", "index-spx": "closed",
         }
         events.append({
-            "timestamp_utc": "2026-11-23T14:00:00Z",
+            "timestamp_utc": "2026-11-25T14:00:00Z",
             "nav_mid": 1200, "margin_used": 1000,
             "position_market_status": {
                 "gold-xau": "open", "fx-eurusd": "open", "index-spx": "open",
