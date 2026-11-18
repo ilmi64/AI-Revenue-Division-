@@ -699,3 +699,42 @@ Synthetic regression coverage is in `test_contract_lifecycle.py`, including
 profile validation, contract roll continuity, expiry settlement, invalid event
 ordering, financing conventions and the research-only authority boundary.
 Tests are authored and have not yet been executed.
+
+
+## Unified derivative simulation orchestration
+
+`simulation_orchestrator.py` coordinates the venue path simulator and the
+contract lifecycle replay under one fail-closed interface. It checks that the
+venue and contract profiles agree on instrument type and quote currency, and
+that the position identity matches the contract profile. The price path owns
+mark-to-market P&L, maintenance margin, liquidation fees and estimated impact.
+The lifecycle ledger exclusively owns funding/financing, rolls and expiry
+settlement.
+
+To prevent carry from being counted twice, every price-path funding rate must
+be exactly zero. Funding and financing cashflows are supplied only through
+lifecycle events. Dated contracts cannot run through expiry without an explicit
+settlement event. The path may not continue after settlement. Lifecycle
+cashflows and venue equity are reported separately; the orchestrator does not
+add settlement cashflows to path equity because a supplied settlement amount
+may already include realized price P&L. It does not perform implicit FX
+conversion or merge unlike currencies.
+
+The unified input contract is
+`simulation-orchestrator-input.schema.json`. The interface is:
+
+```python
+from specialist_research.simulation_orchestrator import simulate_unified_derivative
+
+result = simulate_unified_derivative(
+    venue_spec, contract_profile, position, price_path, lifecycle_events
+)
+```
+
+A passing reconciliation means only that the two model outputs are internally
+consistent under the supplied inputs. It does not validate venue accuracy,
+authenticate evidence, establish correct accounting, or grant operational
+readiness. No broker or exchange connection, order routing, stop clearance or
+trade authority is present. Regression coverage is in
+`test_simulation_orchestrator.py`; tests are authored and have not yet been
+executed.
