@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OANDA v20 Closeout Transaction Reconciliation Audit",
+  "description": "Read-only audit of dependent-order cancellation transactions after a margin closeout.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "status",
+    "errors",
+    "warnings",
+    "closeout_transaction_ids",
+    "liquidated_trade_ids",
+    "orders_expected_cancelled",
+    "orders_confirmed_cancelled",
+    "orders_unexpectedly_still_pending",
+    "orders_disappeared_without_terminal_event",
+    "orders_filled_during_reconciliation",
+    "new_pending_order_ids",
+    "transaction_range_complete",
+    "cancellation_reconciliation_complete",
+    "order_cancellation_performed",
+    "trade_authority",
+    "live_readiness",
+    "research_only",
+    "authority"
+  ],
+  "properties": {
+    "status": {
+      "enum": [
+        "PASS",
+        "HALT"
+      ]
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "closeout_transaction_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "liquidated_trade_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "orders_expected_cancelled": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "orders_confirmed_cancelled": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "order_id",
+          "trade_id",
+          "transaction_id",
+          "reason"
+        ],
+        "properties": {
+          "order_id": {
+            "type": "string"
+          },
+          "trade_id": {
+            "type": "string"
+          },
+          "transaction_id": {
+            "type": "string"
+          },
+          "reason": {
+            "const": "LINKED_TRADE_CLOSED"
+          }
+        }
+      }
+    },
+    "orders_unexpectedly_still_pending": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "orders_disappeared_without_terminal_event": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "orders_filled_during_reconciliation": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "new_pending_order_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "transaction_range_complete": {
+      "type": "boolean"
+    },
+    "cancellation_reconciliation_complete": {
+      "type": "boolean"
+    },
+    "order_cancellation_performed": {
+      "const": false
+    },
+    "trade_authority": {
+      "const": false
+    },
+    "live_readiness": {
+      "const": false
+    },
+    "research_only": {
+      "const": true
+    },
+    "authority": {
+      "const": "research_only_no_execution_authority"
+    }
+  }
+}
