@@ -102,6 +102,9 @@ def audit_handovers(event_records: list[dict[str, Any]]) -> dict[str, Any]:
         if not event.get("evidence_refs"):
             errors.append(f"handover {event_id}: evidence references missing")
 
+    if ledger["valid"] and not handovers:
+        errors.append("no explicit handover events are recorded; acceptance cannot be inferred")
+
     # Handover events must describe one continuous chain. A discontinuity is
     # a warning because this offline ledger cannot know whether a shift was
     # intentionally skipped or whether an expected shift record is missing.
