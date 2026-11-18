@@ -16,8 +16,8 @@ except ImportError:
 REQUIRED_HANDOVER_FIELDS = (
     "handover_id", "outgoing_shift_id", "incoming_shift_id", "snapshot_id",
     "portfolio_version", "outgoing_acknowledged", "incoming_acknowledged",
-    "positions_reconciled", "dependency_health", "active_veto_ids",
-    "unresolved_critical_items",
+    "positions_reconciled", "desk_coverage", "positions_reconciled_by_desk",
+    "dependency_health", "active_veto_ids", "unresolved_critical_items",
 )
 
 
@@ -107,6 +107,21 @@ def audit_handovers(event_records: list[dict[str, Any]]) -> dict[str, Any]:
         for key in ("outgoing_acknowledged", "incoming_acknowledged", "positions_reconciled"):
             if details.get(key) is not True:
                 errors.append(f"handover {event_id}: {key} is not explicitly true")
+        expected_desks = {"crypto", "forex", "indices", "gold"}
+        coverage = details.get("desk_coverage")
+        if (not isinstance(coverage, dict) or set(coverage) != expected_desks
+                or any(not isinstance(coverage.get(desk), int)
+                       or isinstance(coverage.get(desk), bool)
+                       or coverage[desk] < 1 for desk in expected_desks)):
+            errors.append(
+                f"handover {event_id}: desk_coverage must include positive instrument counts for all four desks"
+            )
+        reconciled = details.get("positions_reconciled_by_desk")
+        if (not isinstance(reconciled, dict) or set(reconciled) != expected_desks
+                or any(reconciled.get(desk) is not True for desk in expected_desks)):
+            errors.append(
+                f"handover {event_id}: positions_reconciled_by_desk must explicitly confirm all four desks"
+            )
         if details.get("dependency_health") != "healthy":
             errors.append(f"handover {event_id}: dependency health is not explicitly healthy")
 
