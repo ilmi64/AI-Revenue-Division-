@@ -65,7 +65,9 @@ class UnifiedIntakeTests(unittest.TestCase):
         correlations = [{
             "instrument_id_a": "SOL-USDC", "instrument_id_b": "EUR-USD",
             "correlation": 0.25, "observed_at_utc": NOW,
-            "source_id": "fixture-correlation", "evidence_refs": ["fixture:corr"],
+            "source_id": "fixture-correlation", "sample_count": 30,
+            "lookback_window": "30d", "methodology": "pearson_returns",
+            "evidence_refs": ["fixture:corr"],
         }]
         result = self.build(rows, portfolio_risk_config=risk_config,
                             correlation_evidence=correlations)
