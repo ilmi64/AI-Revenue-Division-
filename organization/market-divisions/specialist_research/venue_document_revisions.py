@@ -203,15 +203,27 @@ def compare_document_revisions(previous: Any, current: Any) -> dict[str, Any]:
 
 
 def assess_profile_revision_impact(profile: Any, latest_revisions: Any) -> dict[str, Any]:
-    """Flag profiles whose recorded source revision is no longer the latest captured revision."""
+    """Flag profiles whose recorded source revision is no longer the latest captured revision.
+
+    Profile source_revision_ids is an array of objects with document_id and
+    revision_id; explicit pairing avoids relying on revision-ID naming.
+    """
     errors: list[str] = []
     if not isinstance(profile, dict):
         errors.append("profile must be an object")
         profile = {}
     linked = profile.get("source_revision_ids")
-    if not isinstance(linked, list) or not linked or any(not _nonempty(x) for x in linked):
-        errors.append("profile.source_revision_ids must be a non-empty string array")
+    if not isinstance(linked, list) or not linked:
+        errors.append("profile.source_revision_ids must be a non-empty array")
         linked = []
+    linked_by_document: dict[str, str] = {}
+    for index, item in enumerate(linked):
+        if not isinstance(item, dict) or not _nonempty(item.get("document_id")) or not _nonempty(item.get("revision_id")):
+            errors.append(f"profile.source_revision_ids[{index}] must contain document_id and revision_id")
+            continue
+        if item["document_id"] in linked_by_document:
+            errors.append(f"duplicate profile source document_id {item['document_id']}")
+        linked_by_document[item["document_id"]] = item["revision_id"]
     if not isinstance(latest_revisions, list):
         errors.append("latest_revisions must be an array")
         latest_revisions = []
@@ -231,28 +243,27 @@ def assess_profile_revision_impact(profile: Any, latest_revisions: Any) -> dict[
             "profile_update_performed": False, "trade_authority": False,
             "live_readiness": False, "authority": AUTHORITY,
         }
-    linked_set = set(linked)
-    stale, untracked = [], []
-    for document_id, revision in sorted(valid_latest.items()):
-        if revision["revision_id"] not in linked_set:
+    stale, missing_latest = [], []
+    for document_id, revision_id in sorted(linked_by_document.items()):
+        latest = valid_latest.get(document_id)
+        if latest is None:
+            missing_latest.append(document_id)
+        elif latest["revision_id"] != revision_id:
             stale.append({
                 "document_id": document_id,
-                "profile_revision_ids_for_document": [
-                    item for item in linked if item.startswith(document_id + ":")
-                ],
-                "latest_revision_id": revision["revision_id"],
-                "content_sha256": revision["content_sha256"],
+                "profile_revision_id": revision_id,
+                "latest_revision_id": latest["revision_id"],
+                "content_sha256": latest["content_sha256"],
                 "impact": "FACT_DIFF_REQUIRED_BEFORE_PROFILE_REUSE",
             })
-    known_docs = set(valid_latest)
-    for revision_id in linked:
-        if not any(revision_id.startswith(doc_id + ":") for doc_id in known_docs):
-            untracked.append(revision_id)
+    untracked_latest = sorted(set(valid_latest) - set(linked_by_document))
+    stale_ids = sorted(set([item["document_id"] for item in stale] + missing_latest + untracked_latest))
     return {
-        "status": "STALE_REVIEW_REQUIRED" if stale or untracked else "CURRENT_SOURCE_REVISIONS",
-        "errors": [], "stale_document_ids": [item["document_id"] for item in stale],
-        "stale_sources": stale, "untracked_profile_revision_ids": untracked,
-        "human_review_required": bool(stale or untracked),
+        "status": "STALE_REVIEW_REQUIRED" if stale_ids else "CURRENT_SOURCE_REVISIONS",
+        "errors": [], "stale_document_ids": stale_ids,
+        "stale_sources": stale, "missing_latest_document_ids": missing_latest,
+        "untracked_latest_document_ids": untracked_latest,
+        "human_review_required": bool(stale_ids),
         "profile_update_performed": False, "profile_approval_performed": False,
         "trade_authority": False, "live_readiness": False, "authority": AUTHORITY,
         "note": "Any new source revision requires fact comparison and human review; profile values are never auto-updated.",
