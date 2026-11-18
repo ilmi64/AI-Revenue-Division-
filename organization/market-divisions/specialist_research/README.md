@@ -1121,7 +1121,7 @@ The audit is wired into unified OCC intake as optional `oanda_pending_order_snap
 
 Input contract: `oanda-pending-order-snapshot.schema.json`. Official API excerpts `oanda_v20_order_definition` and `oanda_v20_account_pending_orders_endpoint` extend the evidence inventory to twenty excerpts. The capture remains partial: no full API document bytes, publisher authentication, live account access, or customer-specific terms have been captured.
 
-Regression suites: `test_oanda_pending_order_exposure.py` (36 methods), `test_unified_intake.py` (37 methods), `test_venue_document_capture.py` (15 methods), and `organization/tests/test_build_organisation_dashboard.py` (32 methods). Tests are authored but have not been executed. No API token, account connection, order cancellation, modification or execution action is implemented.
+Regression suites: `test_oanda_pending_order_exposure.py` (36 methods), `test_oanda_closeout_transaction_reconciliation.py` (31 methods), `test_unified_intake.py` (37 methods), `test_venue_document_capture.py` (15 methods), and `organization/tests/test_build_organisation_dashboard.py` (32 methods). Tests are authored but have not been executed. No API token, account connection, order cancellation, modification or execution action is implemented.
 
 
 ## OANDA post-margin-closeout pending-order exposure audit
