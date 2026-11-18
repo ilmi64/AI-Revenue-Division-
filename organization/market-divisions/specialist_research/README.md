@@ -1203,8 +1203,11 @@ caller-supplied OANDA v20 `GET /v3/accounts/{accountID}/changes` response and
 a subsequent full account snapshot. It reconciles the returned transaction
 cursor, closed margin-closeout trades, linked dependent-order cancellations,
 filled pre-existing orders, newly opened/reduced/closed trades, and changed
-long/short position units against the full snapshot. A newly opened trade, a filled pre-existing pending order, or a newly remaining
-pending order keeps the audit at HALT for independent OCC exposure review. It never connects to OANDA or changes an order or position.
+long/short position units against the full snapshot. A newly opened trade, any non-closeout order fill, any order created or triggered
+after the supplied closeout boundary, or a newly remaining pending order keeps
+the audit at HALT for independent OCC exposure review. Only an ORDER_FILL
+explicitly identified by a matching transaction reason of
+`MARKET_ORDER_MARGIN_CLOSEOUT` is exempt from the unexpected-fill check. It never connects to OANDA or changes an order or position.
 
 The input contract is defined in
 `oanda-post-closeout-account-changes.schema.json`; synthetic regression
@@ -1262,4 +1265,4 @@ or grant live readiness.
 
 ### Current OANDA closeout reconciliation regression inventory
 
-As of the current development branch, the relevant suites contain 36 pending-order tests, 33 transaction-reconciliation tests, 15 AccountChanges/full-account reconciliation tests, 43 unified-intake tests, 16 venue-document-capture tests, and 35 Main Hub dashboard tests. These are 178 authored test methods across the listed suites (suite totals are not a claim of unique end-to-end scenarios). They have not been executed in this environment. The AccountChanges adapter and both cross-audit layers remain offline and research-only.
+As of the current development branch, the relevant suites contain 36 pending-order tests, 33 transaction-reconciliation tests, 15 AccountChanges/full-account reconciliation tests, 43 unified-intake tests, 16 venue-document-capture tests, and 35 Main Hub dashboard tests. These are 182 authored test methods across the listed suites (suite totals are not a claim of unique end-to-end scenarios). They have not been executed in this environment. The AccountChanges adapter and both cross-audit layers remain offline and research-only.
