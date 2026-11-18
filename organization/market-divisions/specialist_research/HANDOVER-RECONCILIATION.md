@@ -16,7 +16,11 @@ The event's `details` object must include:
 - `handover_id`, `outgoing_shift_id`, `incoming_shift_id`
 - `snapshot_id` and `portfolio_version`
 - `outgoing_acknowledged=true`, `incoming_acknowledged=true`
-- `positions_reconciled=true`
+- `positions_reconciled=true` as the overall reconciliation assertion
+- `desk_coverage`: positive instrument counts for each of `crypto`, `forex`,
+  `indices` and `gold`; every desk must be represented
+- `positions_reconciled_by_desk`: explicit `true` for each of the four desks;
+  one aggregate boolean cannot substitute for desk-by-desk reconciliation
 - `dependency_health` (must be `healthy` for acceptance)
 - `active_veto_ids` (explicit list; active vetoes are carried forward and
   reported, never cleared by handover)
