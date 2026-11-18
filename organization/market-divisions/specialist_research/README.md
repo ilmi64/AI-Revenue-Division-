@@ -866,3 +866,50 @@ Initial official-source research references:
 These references are starting points only. Product terms and margins change;
 the exact current contract, exchange notices, broker/FCM terms and account
 jurisdiction must be checked before a profile can be prepared or approved.
+
+
+## Venue document revision tracking and profile freshness
+
+`venue_document_revisions.py` adds an offline revision comparison layer for
+official venue and contract documents. A researcher supplies a captured
+document's text, canonical HTTPS URI, publisher/source class, capture time,
+extraction method and structured facts. `capture_document_revision`
+computes a SHA-256 fingerprint over the supplied text and creates a revision
+record. The record retains the captured text so the digest can be rechecked
+before comparisons; this is an explicit caller-supplied capture, not an
+automated fetch or a claim that a provider's complete document was obtained.
+
+`compare_document_revisions` compares consecutive revisions for the same
+document and reports added, removed, changed, unchanged and internally
+conflicted extracted facts. Critical terms include contract multiplier,
+quote/settlement currency, initial/maintenance margin, mark-price rules,
+funding/financing, expiry, settlement, liquidation, closeout, tick and roll
+terms. A changed document requires human review even if the extracted facts
+appear unchanged. Missing facts are not interpreted as zero or as proof that
+a term was removed unless the prior/current extraction explicitly establishes
+that comparison.
+
+`assess_profile_revision_impact` checks the explicit
+`source_revision_ids` mapping on a profile against the latest captured
+revision per document. A mismatch, missing latest capture or newly untracked
+source produces `STALE_REVIEW_REQUIRED`. A reviewer must compare the
+revisions and separately decide whether the profile requires a new draft or
+approval. No profile values are updated, no registry revision is appended,
+and no previously approved profile is silently kept current.
+
+The record contract is `venue-document-revisions.schema.json`; synthetic
+coverage is in `test_venue_document_revisions.py`. These are deterministic
+offline functions only: no polling, browser automation, network fetch,
+background monitoring or venue API calls are implemented. Captured text,
+extracted facts, publication dates and reviewer metadata remain
+unauthenticated. SHA-256 detects a mismatch against the supplied bytes but
+does not establish publisher identity, source authenticity or trusted time.
+This distinction follows NIST guidance that a bare hash does not provide
+source authentication; digital signatures or authenticated mechanisms are
+needed for that stronger property:
+https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-175Br1.pdf
+
+All outputs remain research-only with `trade_authority=false` and
+`live_readiness=false`. Gold futures (GC/MGC) and Gold CFDs/XAUUSD remain
+separate instrument-specific document/profile tracks; a revision in one must
+not be copied into the other.
