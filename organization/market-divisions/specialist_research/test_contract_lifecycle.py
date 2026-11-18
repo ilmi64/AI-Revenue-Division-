@@ -120,6 +120,26 @@ class ContractLifecycleTests(unittest.TestCase):
         self.assertEqual(result["status"], "LIFECYCLE_REPLAYED")
         self.assertEqual(result["cashflow_total"], -2.5)
 
+    def test_signed_rate_cashflow_is_not_inverted_for_short_positions(self):
+        for side in ("long", "short"):
+            result = replay_contract_lifecycle(
+                {
+                    "schema_version": "1.0.0", "profile_id": "p", "venue_id": "v",
+                    "instrument_id": "EUR_USD", "instrument_type": "forex_cfd",
+                    "quote_currency": "USD", "settlement_currency": "USD",
+                    "settlement_method": "broker_cash_adjustment",
+                    "roll_method": "venue_defined", "financing_convention": "daily_rate",
+                },
+                position(instrument_id="EUR_USD", contract_id="EUR_USD", side=side),
+                [{
+                    "event_type": "financing", "timestamp_utc": "2026-11-20T15:00:00Z",
+                    "rate": -0.01, "notional": 100.0, "basis_units": 1.0,
+                    "currency": "USD",
+                }],
+            )
+            self.assertEqual(result["status"], "LIFECYCLE_REPLAYED")
+            self.assertEqual(result["cashflow_total"], -1.0)
+
     def test_event_time_must_increase(self):
         events = [{
             "event_type": "roll", "timestamp_utc": "2026-11-20T15:00:00Z",
