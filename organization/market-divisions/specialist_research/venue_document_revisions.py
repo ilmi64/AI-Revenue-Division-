@@ -276,3 +276,85 @@ def assess_profile_revision_impact(profile: Any, latest_revisions: Any) -> dict[
         "trade_authority": False, "live_readiness": False, "authority": AUTHORITY,
         "note": "Any new source revision requires fact comparison and human review; profile values are never auto-updated.",
     }
+
+
+def build_revision_review_queue(comparison_reports: Any, profile_impact_reports: Any = None) -> dict[str, Any]:
+    """Build a deterministic, read-only queue for human review of document changes.
+
+    Critical extracted contract-term changes are ranked before other document
+    changes. This is workflow prioritization only; it does not approve evidence,
+    update profiles, or grant eligibility.
+    """
+    errors: list[str] = []
+    if not isinstance(comparison_reports, list):
+        errors.append("comparison_reports must be an array")
+        comparison_reports = []
+    if profile_impact_reports is None:
+        profile_impact_reports = []
+    if not isinstance(profile_impact_reports, list):
+        errors.append("profile_impact_reports must be an array when supplied")
+        profile_impact_reports = []
+    for index, report in enumerate(comparison_reports):
+        if not isinstance(report, dict) or report.get("status") == "INVALID_REVISION_COMPARISON":
+            errors.append(f"comparison_reports[{index}] is invalid")
+    for index, report in enumerate(profile_impact_reports):
+        if not isinstance(report, dict) or report.get("status") == "INVALID_PROFILE_REVISION_INPUT":
+            errors.append(f"profile_impact_reports[{index}] is invalid")
+    if errors:
+        return {
+            "status": "INVALID_REVIEW_QUEUE_INPUT", "errors": errors,
+            "items": [], "human_review_required": True,
+            "profile_update_performed": False, "profile_approval_performed": False,
+            "trade_authority": False, "live_readiness": False, "authority": AUTHORITY,
+        }
+
+    items: list[dict[str, Any]] = []
+    for report in comparison_reports:
+        if report.get("human_review_required") is not True:
+            continue
+        critical_keys = sorted(set(report.get("critical_changed_fact_keys", [])))
+        changed = report.get("changes", [])
+        items.append({
+            "review_type": "DOCUMENT_REVISION",
+            "document_id": report.get("document_id"),
+            "previous_revision_id": report.get("previous_revision_id"),
+            "current_revision_id": report.get("current_revision_id"),
+            "priority": "CRITICAL" if critical_keys else "STANDARD",
+            "critical_fact_keys": critical_keys,
+            "change_count": len(changed),
+            "content_changed": report.get("content_changed") is True,
+            "reason": "CRITICAL_CONTRACT_TERM_CHANGE" if critical_keys else "DOCUMENT_CONTENT_OR_FACT_CHANGE",
+        })
+    for report in profile_impact_reports:
+        if report.get("human_review_required") is not True:
+            continue
+        for document_id in report.get("stale_document_ids", []):
+            items.append({
+                "review_type": "PROFILE_SOURCE_FRESHNESS",
+                "document_id": document_id,
+                "priority": "CRITICAL" if document_id in {
+                    source.get("document_id") for source in report.get("stale_sources", [])
+                    if source.get("impact") == "FACT_DIFF_REQUIRED_BEFORE_PROFILE_REUSE"
+                } else "STANDARD",
+                "reason": "PROFILE_SOURCE_REVISION_STALE_OR_UNTRACKED",
+            })
+    items.sort(key=lambda item: (
+        0 if item["priority"] == "CRITICAL" else 1,
+        item.get("document_id") or "",
+        item["review_type"],
+        item.get("current_revision_id") or "",
+    ))
+    return {
+        "status": "REVIEW_REQUIRED" if items else "NO_REVIEW_ITEMS",
+        "errors": [], "items": items,
+        "item_count": len(items),
+        "critical_item_count": sum(item["priority"] == "CRITICAL" for item in items),
+        "human_review_required": bool(items),
+        "profile_update_performed": False, "profile_approval_performed": False,
+        "trade_authority": False, "live_readiness": False, "authority": AUTHORITY,
+        "limitations": [
+            "Priority is a deterministic review-queue ordering, not a risk score or approval.",
+            "The queue depends on caller-supplied comparisons and profile-impact reports.",
+            "No profile is changed, approved, or made eligible by queue generation.",
+        ],
+    }
