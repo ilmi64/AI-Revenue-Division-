@@ -57,6 +57,9 @@ def assess_oanda_margin_state(nav_mid: Any, margin_used: Any) -> dict[str, Any]:
         closeout_pct = None
     else:
         closeout_pct = (EARLY_CLOSEOUT_RATIO * used / nav) * 100.0
+    percentage_unbounded = closeout_pct is None or (closeout_pct is not None and not isfinite(closeout_pct))
+    if percentage_unbounded:
+        closeout_pct = None
     return {
         "status": "EARLY_CLOSEOUT_THRESHOLD_REACHED" if early_closeout
                   else "MARGIN_CALL_THRESHOLD_REACHED" if margin_call
@@ -64,7 +67,7 @@ def assess_oanda_margin_state(nav_mid: Any, margin_used: Any) -> dict[str, Any]:
         "nav_mid": nav, "margin_used": used,
         "margin_call": margin_call,
         "margin_closeout_percentage": closeout_pct,
-        "margin_closeout_percentage_unbounded": used > 0 and nav == 0,
+        "margin_closeout_percentage_unbounded": percentage_unbounded,
         "early_closeout_threshold": "NAV_mid <= 50% of Margin Used",
         "early_closeout_triggered": early_closeout,
         "trade_authority": False, "live_readiness": False,
@@ -88,7 +91,7 @@ def replay_oanda_account_margin_closeout(
     errors: list[str] = []
     warnings: list[str] = []
     if (not isinstance(account_currency, str) or len(account_currency) != 3
-            or not account_currency.isalpha() or account_currency.upper() != account_currency):
+            or any(character < "A" or character > "Z" for character in account_currency)):
         errors.append("account_currency must be a three-letter uppercase currency code")
     if not isinstance(initial_positions, list) or not initial_positions:
         errors.append("initial_positions must be a non-empty array")
@@ -106,6 +109,9 @@ def replay_oanda_account_margin_closeout(
         if not isinstance(pid, str) or not pid.strip() or pid in positions:
             errors.append(f"initial_positions[{index}] has missing or duplicate position_id")
             continue
+        for optional_text in ("desk_id", "instrument_id"):
+            if optional_text in position and (not isinstance(position[optional_text], str) or not position[optional_text].strip()):
+                errors.append(f"{pid}: {optional_text} must be a non-empty string when supplied")
         market_status = position.get("market_status", "open")
         if not isinstance(market_status, str) or market_status not in {"open", "closed", "halted"}:
             errors.append(f"{pid}: market_status must be open, closed or halted")
