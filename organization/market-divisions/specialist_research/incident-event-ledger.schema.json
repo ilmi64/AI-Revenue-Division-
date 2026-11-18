@@ -115,6 +115,8 @@
         "outgoing_acknowledged",
         "incoming_acknowledged",
         "positions_reconciled",
+        "desk_coverage",
+        "positions_reconciled_by_desk",
         "dependency_health",
         "active_veto_ids",
         "unresolved_critical_items"
@@ -155,6 +157,28 @@
         },
         "positions_reconciled": {
           "const": true
+        },
+        "desk_coverage": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["crypto", "forex", "indices", "gold"],
+          "properties": {
+            "crypto": {"type": "integer", "minimum": 1},
+            "forex": {"type": "integer", "minimum": 1},
+            "indices": {"type": "integer", "minimum": 1},
+            "gold": {"type": "integer", "minimum": 1}
+          }
+        },
+        "positions_reconciled_by_desk": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["crypto", "forex", "indices", "gold"],
+          "properties": {
+            "crypto": {"const": true},
+            "forex": {"const": true},
+            "indices": {"const": true},
+            "gold": {"const": true}
+          }
         },
         "dependency_health": {
           "type": "string",
