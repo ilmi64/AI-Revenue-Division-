@@ -212,7 +212,8 @@
           "source_class": "official_margin_schedule",
           "reviewed_at_utc": "2026-11-17T00:00:00Z",
           "observed_scope": [
-            "Canada-specific metals and commodities margin schedule"
+            "Canada-specific metals and commodities margin schedule",
+            "Canada Gold margin schedule lists 4.5:1; rate is instrument-specific and subject to change"
           ],
           "source_content_hash": null,
           "full_document_capture": false
@@ -235,9 +236,10 @@
         "spot reference and mark methodology",
         "long/short financing values",
         "trading hours and gap policy",
-        "Shariah review of CFD structure and financing"
+        "Shariah review of CFD structure and financing",
+        "capture timestamp and account-specific confirmation of current Gold margin requirement"
       ],
-      "next_action": "Capture the exact XAUUSD contract and account terms; separate conventional financing mechanics from any Shariah assessment."
+      "next_action": "Capture exact XAUUSD contract unit, live margin and closeout rules, long/short financing and account terms; treat the published 4.5:1 Gold margin as dated reference only and obtain independent Shariah review of the CFD and financing structure."
     },
     {
       "candidate_id": "cme_comex_gold_futures",
