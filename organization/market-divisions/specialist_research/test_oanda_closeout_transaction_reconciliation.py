@@ -41,6 +41,7 @@ def assess(pre=None, post=None, tx=None, **overrides):
         "transactions": [closeout_fill(), cancel()] if tx is None else tx,
         "transaction_id_start_exclusive": "100",
         "transaction_id_end_inclusive": "102",
+        "reported_last_transaction_id": "102",
         "transaction_range_complete": True,
         "transaction_range_unfiltered": True,
         "pre_closeout_orders_complete": True,
@@ -96,7 +97,7 @@ class OandaCloseoutTransactionReconciliationTests(unittest.TestCase):
                 "id": "103", "accountID": "acct-1", "time": "2026-11-18T05:00:05Z",
                 "type": "MARGIN_CALL_EXIT",
             }],
-            transaction_id_end_inclusive="103",
+            transaction_id_end_inclusive="103", reported_last_transaction_id="103",
             evaluated_at_utc="2026-11-18T05:00:06Z",
         )
         self.assertEqual(result["status"], "PASS")
@@ -197,6 +198,11 @@ class OandaCloseoutTransactionReconciliationTests(unittest.TestCase):
         bad["accountID"] = "other-account"
         result = assess(tx=[closeout_fill(), bad])
         self.assertEqual(result["status"], "HALT")
+
+    def test_reported_last_transaction_id_must_match_range_end(self):
+        result = assess(reported_last_transaction_id="103")
+        self.assertEqual(result["status"], "HALT")
+        self.assertTrue(any("reported_last_transaction_id" in error for error in result["errors"]))
 
     def test_transaction_range_must_be_complete(self):
         self.assertEqual(assess(transaction_range_complete=False)["status"], "HALT")
