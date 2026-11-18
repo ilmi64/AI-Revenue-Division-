@@ -1155,3 +1155,39 @@ orders endpoint are captured in `venue_document_capture_manifest.json`.
 They document `tradeID` linkage, `positionFill` semantics, and the account
 pending-order count/endpoint. The manifest stores excerpt fingerprints, not
 authenticated full documents or a connected broker feed.
+
+
+## OANDA closeout transaction reconciliation
+
+`oanda_closeout_transaction_reconciliation.py` compares complete pre- and
+post-closeout pending-order snapshots against a caller-supplied complete,
+unfiltered OANDA v20 transaction-ID range.
+
+It requires an `ORDER_FILL` transaction with reason
+`MARKET_ORDER_MARGIN_CLOSEOUT`, derives the closed trade IDs from its
+`tradesClosed` entries, and then checks every pre-closeout dependent
+TakeProfit/StopLoss/GuaranteedStopLoss/TrailingStopLoss order attached to
+those trades. Each expected dependent-order cancellation must have a matching
+`ORDER_CANCEL` transaction with reason `LINKED_TRADE_CLOSED`, after the
+relevant closeout fill, and the order must be absent from the post-closeout
+pending snapshot. A rejected cancellation, wrong reason, missing event,
+unexplained disappearance, or order both pending and terminal fails closed.
+
+The transaction range must be numeric, contiguous, unfiltered and explicitly
+declared complete. The module cross-checks account IDs and pre/post snapshot
+times. This is still caller-asserted evidence: it does not authenticate the
+export, connect to OANDA, poll the transaction stream, or prove the caller
+retrieved every page. Filled unrelated orders are reported but require a
+separate account-change/trade-position reconciliation before their resulting
+exposure can be considered resolved.
+
+Unified intake exposes `oanda_closeout_transaction_audit`. When an account
+margin replay records a closeout, missing transaction reconciliation creates
+a global OCC stop. If both pending-order and transaction replays are supplied,
+their post-closeout pending-order arrays, liquidated trade IDs and snapshot
+timestamps must agree. A successful historical cancellation audit never
+clears the original margin-call stop.
+
+Input/output contracts:
+`oanda-closeout-transaction-replay.schema.json` and
+`oanda-closeout-transaction-audit.schema.json`.
