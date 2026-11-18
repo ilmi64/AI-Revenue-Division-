@@ -30,7 +30,8 @@ def _blocked(errors: list[str], warnings: list[str] | None = None) -> dict[str, 
         "status": "HALT", "errors": errors, "warnings": warnings or [],
         "closeout_occurred": None, "pending_orders_complete": False,
         "pending_order_count": 0,
-        "orders_expected_cancelled": [], "orders_still_linked_to_open_trades": [],
+        "orders_still_pending_for_liquidated_trades": [], "orders_still_linked_to_open_trades": [],
+        "dependent_order_cancellation_transaction_verified": False,
         "orders_surviving_and_potentially_opening": [],
         "orders_surviving_but_reduce_only": [], "unclassified_orders": [],
         "possible_exposure_reopening": True,
@@ -120,7 +121,7 @@ def assess_oanda_post_closeout_pending_orders(
     remaining = set(remaining_open_trade_ids)
     if liquidated & remaining:
         return _blocked(["liquidated_trade_ids and remaining_open_trade_ids must be disjoint"], warnings)
-    expected_cancelled: list[str] = []
+    dependent_orders_still_pending: list[dict[str, str]] = []
     linked_survivors: list[dict[str, Any]] = []
     exposure_survivors: list[dict[str, Any]] = []
     reduce_only_survivors: list[dict[str, Any]] = []
@@ -162,6 +163,7 @@ def assess_oanda_post_closeout_pending_orders(
                 errors.append(f"{order_id}: dependent close order is missing its required tradeID")
                 continue
             if trade_id in liquidated:
+                dependent_orders_still_pending.append({"order_id": order_id, "trade_id": trade_id, "type": order_type})
                 errors.append(f"{order_id}: order linked to a liquidated trade is still pending; expected cancellation is not reflected")
                 continue
             if trade_id not in remaining:
@@ -210,7 +212,9 @@ def assess_oanda_post_closeout_pending_orders(
             })
 
     if errors:
-        return _blocked(errors, warnings)
+        blocked = _blocked(errors, warnings)
+        blocked["orders_still_pending_for_liquidated_trades"] = dependent_orders_still_pending
+        return blocked
 
     possible_reopening = bool(exposure_survivors)
     if possible_reopening:
@@ -232,7 +236,8 @@ def assess_oanda_post_closeout_pending_orders(
         "remaining_open_trade_ids_complete": True,
         "liquidated_trade_count": len(liquidated),
         "remaining_open_trade_count": len(remaining),
-        "orders_expected_cancelled": expected_cancelled,
+        "orders_still_pending_for_liquidated_trades": dependent_orders_still_pending,
+        "dependent_order_cancellation_transaction_verified": False,
         "orders_still_linked_to_open_trades": linked_survivors,
         "orders_surviving_and_potentially_opening": exposure_survivors,
         "orders_surviving_but_reduce_only": reduce_only_survivors,
@@ -246,6 +251,7 @@ def assess_oanda_post_closeout_pending_orders(
             "This is a read-only classification of a caller-supplied complete OANDA v20 pending-order snapshot, not a live broker query.",
             "It does not cancel, modify or place orders.",
             "It does not calculate whether a surviving order will trigger, fill, or create a specific post-fill margin requirement.",
+            "Absence of a dependent order from the post-closeout pending list is not proof of the cancellation transaction or its terminal reason; transaction-history reconciliation is not yet implemented.",
             "Order relationship and account hedging mode must be copied from the same authenticated account snapshot; this module does not authenticate the caller or source.",
             "A PASS means no supplied unrelated pending order can open new exposure under the supplied positionFill semantics; it does not mean the account is safe or live-ready.",
         ],
