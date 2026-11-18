@@ -138,7 +138,7 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
                          oanda_pending_order_snapshot: dict[str, Any] | None = None,
                          oanda_closeout_transaction_replay: dict[str, Any] | None = None) -> dict[str, Any]:
     """Build one immutable-style research snapshot from local source snapshots."""
-    _utc(now_utc, "now_utc")
+    evaluation_time = _utc(now_utc, "now_utc")
     audit_paths = (control_health_snapshot_history, control_health_event_ledger)
     if any(value is not None for value in audit_paths) and not all(value is not None for value in audit_paths):
         raise ValueError("control-health snapshot history and event ledger paths must be supplied together")
@@ -370,6 +370,18 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
                     "research_only": True,
                     "authority": "research_only_no_execution_authority",
                 }
+        if isinstance(oanda_account_margin_replay, dict) and isinstance(oanda_account_margin_replay.get("observations"), list):
+            future_observations = []
+            for index, observation in enumerate(oanda_account_margin_replay["observations"]):
+                if isinstance(observation, dict):
+                    try:
+                        if _utc(observation.get("timestamp_utc"), f"oanda_account_margin_replay.observations[{index}].timestamp_utc") > evaluation_time:
+                            future_observations.append(index)
+                    except ValueError:
+                        pass
+            if future_observations:
+                margin_report["status"] = "BLOCKED_INVALID_OR_INCOMPLETE_INPUT"
+                margin_report.setdefault("errors", []).append("OANDA account-margin observations cannot be later than the unified snapshot evaluation time")
         margin_status = margin_report.get("status")
         oanda_account_margin_audit = {
             "status": "PASS" if margin_status == "WITHIN_MARGIN_REQUIREMENTS" else "HALT",
@@ -428,6 +440,13 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
                     "warnings": [], "trade_authority": False, "live_readiness": False,
                     "research_only": True, "authority": "research_only_no_execution_authority",
                 }
+        if isinstance(oanda_pending_order_snapshot, dict):
+            try:
+                if _utc(oanda_pending_order_snapshot.get("evaluated_at_utc"), "oanda_pending_order_snapshot.evaluated_at_utc") > evaluation_time:
+                    pending_report["status"] = "HALT"
+                    pending_report.setdefault("errors", []).append("OANDA pending-order audit evaluation cannot be later than the unified snapshot time")
+            except ValueError:
+                pass
         pending_status = pending_report.get("status")
         oanda_pending_order_audit = {
             "status": "PASS" if pending_status == "PASS" else "HALT",
@@ -486,6 +505,13 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
                     "trade_authority": False, "live_readiness": False,
                     "research_only": True, "authority": "research_only_no_execution_authority",
                 }
+        if isinstance(oanda_closeout_transaction_replay, dict):
+            try:
+                if _utc(oanda_closeout_transaction_replay.get("evaluated_at_utc"), "oanda_closeout_transaction_replay.evaluated_at_utc") > evaluation_time:
+                    transaction_report["status"] = "HALT"
+                    transaction_report.setdefault("errors", []).append("OANDA transaction audit evaluation cannot be later than the unified snapshot time")
+            except ValueError:
+                pass
         consistency_errors = []
         if (isinstance(oanda_pending_order_snapshot, dict)
                 and isinstance(oanda_closeout_transaction_replay, dict)
