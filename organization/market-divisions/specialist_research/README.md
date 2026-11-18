@@ -738,3 +738,40 @@ readiness. No broker or exchange connection, order routing, stop clearance or
 trade authority is present. Regression coverage is in
 `test_simulation_orchestrator.py`; tests are authored and have not yet been
 executed.
+
+
+## Versioned venue and instrument profile registry
+
+`venue_profile_registry.py` provides a pure, offline registry validator and
+effective-date resolver for separately versioned venue/instrument profiles.
+It supports Crypto perpetuals, Forex CFDs, index futures/CFDs and Gold
+futures/CFDs. Each record binds a venue simulation specification to a matching
+contract lifecycle profile, with an explicit revision, validity interval,
+profile state, verification state, review state and evidence provenance.
+
+The registry contract is `venue-profile-registry.schema.json`; the empty
+fail-closed starting point is `venue-profile-registry.template.json`.
+Evidence provenance requires a source identifier, source reference, source
+type, capture timestamp and SHA-256 digest. The digest is only a consistency
+fingerprint for supplied evidence; the registry does not retrieve, authenticate
+or independently verify the underlying source.
+
+Only an effective profile with state `approved`, accepted review metadata and
+at least `source_checked` verification can be resolved for research replay.
+Unverified, pending, rejected, suspended, expired and not-yet-effective
+profiles are blocked. The `append_profile_revision` helper returns a new
+in-memory registry value, closes the previous revision's effective interval,
+and checks revision sequencing. It does not write files or persist registry
+changes.
+
+`simulate_registered_derivative` in `simulation_orchestrator.py` resolves
+the registry before calling the two simulation engines. This is a research
+eligibility gate only: reviewer identity and profile metadata are caller
+supplied and unauthenticated. No profile, including an approved one, can grant
+operational readiness, trade authority or live readiness. Actual venue terms,
+contract multipliers, margin tiers, financing conventions, settlement rules
+and Shariah considerations require independent instrument-specific review.
+
+Regression coverage is in `test_venue_profile_registry.py`; orchestrator
+integration coverage also checks that unverified profiles are blocked. Tests
+are authored and have not yet been executed.
