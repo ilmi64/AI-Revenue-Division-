@@ -98,6 +98,38 @@ class VenueIntelligenceTests(unittest.TestCase):
         result = assess_evidence_bundle(item, "2026-01-03T00:00:00Z")
         self.assertEqual(result["status"], "INVALID_EVIDENCE_BUNDLE")
 
+    def test_explicit_ttl_blocks_when_all_evidence_is_stale(self):
+        item = bundle()
+        item["facts"][0]["max_age_days"] = 1
+        result = assess_evidence_bundle(item, "2026-01-10T00:00:00Z")
+        self.assertEqual(result["status"], "BLOCKED_STALE_EVIDENCE")
+        self.assertIn(item["facts"][0]["fact_key"], result["stale_fact_keys"])
+
+    def test_fresh_source_prevents_stale_classification_for_same_fact(self):
+        item = bundle()
+        item["facts"][0]["max_age_days"] = 1
+        newer_source = dict(item["sources"][0])
+        newer_source.update({
+            "source_id": "official-2",
+            "source_uri": "https://example.invalid/updated",
+            "captured_at_utc": "2026-01-09T00:00:00Z",
+            "content_sha256": "b" * 64,
+        })
+        item["sources"].append(newer_source)
+        newer_fact = dict(item["facts"][0])
+        newer_fact.update({
+            "source_id": "official-2",
+            "observed_at_utc": "2026-01-09T00:00:00Z",
+        })
+        item["facts"].append(newer_fact)
+        result = assess_evidence_bundle(item, "2026-01-10T00:00:00Z")
+        self.assertNotIn(item["facts"][0]["fact_key"], result["stale_fact_keys"])
+
+    def test_no_ttl_does_not_invent_freshness_threshold(self):
+        result = assess_evidence_bundle(bundle(), "2027-01-10T00:00:00Z")
+        factor = result["fact_assessments"][0]
+        self.assertEqual(factor["freshness"], "NOT_ASSESSED_NO_TTL")
+
     def test_intake_report_keeps_venue_records_separate(self):
         result = build_research_intake_report(
             [bundle(), bundle(instrument_id="ETH-PERP")], "2026-01-03T00:00:00Z"
