@@ -52,7 +52,7 @@
         "lastTransactionID": {"type": "string", "pattern": "^[0-9]+$"},
         "account": {
           "type": "object",
-          "required": ["id", "orders", "trades", "positions"],
+          "required": ["id", "lastTransactionID", "orders", "trades", "positions"],
           "properties": {
             "id": {"type": "string", "minLength": 1},
             "lastTransactionID": {"type": "string", "pattern": "^[0-9]+$"},
