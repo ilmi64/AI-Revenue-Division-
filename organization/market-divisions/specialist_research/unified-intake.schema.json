@@ -443,7 +443,64 @@
               ]
             },
             "positions": {
-              "type": "array"
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "position_id",
+                  "instrument_type",
+                  "valuation_basis",
+                  "units",
+                  "normalization_status"
+                ],
+                "properties": {
+                  "position_id": {
+                    "type": "string"
+                  },
+                  "instrument_type": {
+                    "type": "string"
+                  },
+                  "valuation_basis": {
+                    "type": "string"
+                  },
+                  "units": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "contract_multiplier": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "leverage": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "margin_amount": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "delta": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "normalization_status": {
+                    "const": "INPUTS_VALIDATED_NOT_REPRICED"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              }
             },
             "unclassified_position_ids": {
               "type": "array",
@@ -468,7 +525,40 @@
               ]
             },
             "scenarios": {
-              "type": "array"
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "scenario_id",
+                  "status",
+                  "by_valuation_currency",
+                  "uncovered_position_ids",
+                  "assumptions"
+                ],
+                "properties": {
+                  "scenario_id": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "enum": [
+                      "ASSESSED",
+                      "INCOMPLETE"
+                    ]
+                  },
+                  "by_valuation_currency": {
+                    "type": "object"
+                  },
+                  "uncovered_position_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "assumptions": {
+                    "type": "string"
+                  }
+                }
+              }
             },
             "errors": {
               "type": "array",
