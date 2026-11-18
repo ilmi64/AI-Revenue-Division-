@@ -271,7 +271,8 @@
           "enum": [
             "PASS_AUDIT",
             "WARN_AUDIT",
-            "HALT_AUDIT"
+            "HALT_AUDIT",
+            "NOT_PROVIDED"
           ]
         },
         "snapshot_history_integrity": {
