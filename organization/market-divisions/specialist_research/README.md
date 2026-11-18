@@ -531,18 +531,16 @@ and evidence references. Missing desk or position context is UNKNOWN, never
 assumed to be zero exposure.
 
 The intake accepts an optional versioned OCC risk configuration
-(`--portfolio-risk-config`) and optional timestamped correlation evidence
-(`--correlation-evidence`, JSONL). Limits are evaluated only against exposure
-already expressed in the configured valuation currency. The module does not
+(`--portfolio-risk-config`; contract: `portfolio-risk-config.schema.json`) and optional timestamped correlation evidence
+(`--correlation-evidence`, JSONL). Limits support portfolio, individual desk and named exposure-group scopes, and are evaluated only against exposure
+already expressed in the configured valuation currency. Desk/group totals are partitioned by currency. The module does not
 invent FX conversions, leverage, contract multipliers, prices, margin, or
 positions. Currency buckets are kept separate. Invalid inputs and configured
 limit breaches halt the portfolio; any specialist HALT or stop challenge
 escalates to the portfolio-wide HALT. Missing correlation evidence remains
 UNKNOWN and is never treated as independence.
 
-Correlation pairs are preserved as caller-supplied, unauthenticated evidence;
-they are not a validated covariance model, portfolio VaR, forecast or
-execution signal. Risk limits must be explicitly supplied and owned by OCC;
+Correlation pairs are preserved as caller-supplied, unauthenticated evidence. Where both instruments have signed exposure in one shared valuation currency, a pairwise covariance-style exposure proxy is reported. Pairwise proxies are not additive and are not portfolio VaR, a validated covariance model, forecast or execution signal. Risk limits must be explicitly supplied and owned by OCC;
 there are no fabricated default thresholds. The Main Hub surfaces UNKNOWN as
 a warning and HALT as a stop-level audit result. The complete report always
 retains the research-only authority boundary.
