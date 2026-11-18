@@ -419,3 +419,17 @@ canonical source IDs, timestamps and independence groups are supplied claims;
 the adapter does not authenticate the referenced content, verify ownership,
 or establish that two publishers are operationally independent. The unified
 OCC audit carries this provenance assessment beside event classification.
+
+
+## Capital Flow research queue priority
+
+`capital_flow_priority.py` ranks only the order in which a human/research
+workflow should inspect events. High priority requires high materiality,
+minimum source reliability, attribution and event-confidence thresholds, plus
+complete provenance metadata. Missing provenance prevents elevated priority;
+known self-transfers, exchange hot-wallet reshuffles, bridge hops, wrapped-token
+mint/burns and internal treasury movements are excluded from the priority queue.
+
+Priority labels are not directional signals, market observations, risk limits,
+position sizing or execution instructions. Metadata completeness is not
+evidence authenticity, and declared source independence remains unverified.
