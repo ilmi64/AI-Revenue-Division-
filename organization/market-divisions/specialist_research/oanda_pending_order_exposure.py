@@ -215,6 +215,8 @@ def assess_oanda_post_closeout_pending_orders(
     possible_reopening = bool(exposure_survivors)
     if possible_reopening:
         warnings.append("Unrelated pending orders remain capable of opening or extending exposure after the margin closeout.")
+    if linked_survivors:
+        warnings.append("Dependent close orders remain attached to explicitly identified non-liquidated open trades; they are not entry orders.")
     if reduce_only_survivors:
         warnings.append("Reduce-only pending orders remain; they cannot open new positions but may be ineffective if no eligible position exists.")
     return {
