@@ -101,5 +101,112 @@
         }
       }
     }
-  }
+  },
+  "$defs": {
+    "handoverDetails": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "handover_id",
+        "outgoing_shift_id",
+        "incoming_shift_id",
+        "snapshot_id",
+        "portfolio_version",
+        "outgoing_acknowledged",
+        "incoming_acknowledged",
+        "positions_reconciled",
+        "dependency_health",
+        "active_veto_ids",
+        "unresolved_critical_items"
+      ],
+      "properties": {
+        "handover_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "outgoing_shift_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "incoming_shift_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "snapshot_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "portfolio_version": {
+          "oneOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "integer"
+            }
+          ]
+        },
+        "outgoing_acknowledged": {
+          "const": true
+        },
+        "incoming_acknowledged": {
+          "const": true
+        },
+        "positions_reconciled": {
+          "const": true
+        },
+        "dependency_health": {
+          "type": "string",
+          "enum": [
+            "healthy",
+            "degraded",
+            "failed",
+            "unknown"
+          ]
+        },
+        "active_veto_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "unresolved_critical_items": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "event": {
+            "properties": {
+              "event_type": {
+                "const": "handover_recorded"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "event": {
+            "properties": {
+              "details": {
+                "$ref": "#/$defs/handoverDetails"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
 }
