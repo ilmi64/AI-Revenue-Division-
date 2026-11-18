@@ -32,6 +32,8 @@ def handover_event():
             "incoming_shift_id": "night", "snapshot_id": "fixture-snapshot",
             "portfolio_version": 1, "outgoing_acknowledged": True,
             "incoming_acknowledged": True, "positions_reconciled": True,
+            "desk_coverage": {"crypto": 1, "forex": 1, "indices": 1, "gold": 1},
+            "positions_reconciled_by_desk": {"crypto": True, "forex": True, "indices": True, "gold": True},
             "dependency_health": "healthy", "active_veto_ids": [],
             "unresolved_critical_items": [],
         },
