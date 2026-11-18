@@ -169,10 +169,19 @@ class OandaCloseoutTransactionReconciliationTests(unittest.TestCase):
         result = assess(post=[dependent(), entry()])
         self.assertEqual(result["status"], "HALT")
 
-    def test_transaction_ids_must_be_contiguous(self):
-        result = assess(tx=[closeout_fill(), cancel(transaction_id="103")])
+    def test_numeric_transaction_id_gaps_are_not_assumed_to_be_missing_records(self):
+        result = assess(
+            tx=[closeout_fill(), cancel(transaction_id="103")],
+            transaction_id_end_inclusive="103", reported_last_transaction_id="103",
+        )
+        self.assertEqual(result["status"], "PASS")
+
+    def test_transaction_records_must_reach_reported_last_transaction_id(self):
+        result = assess(tx=[closeout_fill(), cancel(transaction_id="102")],
+                        transaction_id_end_inclusive="103",
+                        reported_last_transaction_id="103")
         self.assertEqual(result["status"], "HALT")
-        self.assertTrue(any("contiguous range" in e for e in result["errors"]))
+        self.assertTrue(any("boundary" in e for e in result["errors"]))
 
     def test_transaction_timestamps_must_not_move_backwards(self):
         result = assess(tx=[
