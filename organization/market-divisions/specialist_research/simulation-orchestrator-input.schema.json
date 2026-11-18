@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "simulation-orchestrator-input.schema.json",
+  "title": "OCC Unified Derivative Simulation Input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "venue_spec", "contract_profile", "position", "price_path", "lifecycle_events"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "venue_spec": {"type": "object"},
+    "contract_profile": {"$ref": "contract-lifecycle-profile.schema.json"},
+    "position": {
+      "type": "object",
+      "required": ["position_id", "instrument_id", "contract_id", "side", "quantity", "entry_price", "initial_margin", "available_margin"],
+      "properties": {
+        "position_id": {"type": "string", "minLength": 1},
+        "instrument_id": {"type": "string", "minLength": 1},
+        "contract_id": {"type": "string", "minLength": 1},
+        "side": {"enum": ["long", "short"]},
+        "quantity": {"type": "number", "exclusiveMinimum": 0},
+        "entry_price": {"type": "number", "exclusiveMinimum": 0},
+        "initial_margin": {"type": "number", "exclusiveMinimum": 0},
+        "available_margin": {"type": "number", "minimum": 0}
+      }
+    },
+    "price_path": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["timestamp_utc", "mark_price", "mark_price_basis", "executable_depth_notional", "funding_rate", "funding_interval_hours"],
+        "properties": {
+          "timestamp_utc": {"type": "string", "format": "date-time"},
+          "mark_price": {"type": "number", "exclusiveMinimum": 0},
+          "mark_price_basis": {"type": "string"},
+          "executable_depth_notional": {"type": "number", "exclusiveMinimum": 0},
+          "funding_rate": {"const": 0},
+          "funding_interval_hours": {"type": "number", "exclusiveMinimum": 0},
+          "gap_flag": {"type": "boolean"}
+        }
+      }
+    },
+    "lifecycle_events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["event_type", "timestamp_utc"],
+        "properties": {
+          "event_type": {"enum": ["funding", "financing", "roll", "expiry_settlement"]},
+          "timestamp_utc": {"type": "string", "format": "date-time"}
+        }
+      }
+    }
+  }
+}
