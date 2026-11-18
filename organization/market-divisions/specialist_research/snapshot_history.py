@@ -92,8 +92,11 @@ def verify_history(records: list[dict[str, Any]]) -> dict[str, Any]:
         if not isinstance(record, dict):
             errors.append(f"row {expected_sequence}: record must be an object")
             continue
-        if record.get("sequence") != expected_sequence:
+        sequence = record.get("sequence")
+        if isinstance(sequence, bool) or not isinstance(sequence, int) or sequence != expected_sequence:
             errors.append(f"row {expected_sequence}: invalid sequence")
+        if record.get("ledger_version") != "1.0.0":
+            errors.append(f"row {expected_sequence}: unsupported ledger_version")
         if record.get("previous_hash") != previous:
             errors.append(f"row {expected_sequence}: previous_hash chain mismatch")
         if record.get("authority") != AUTHORITY:
@@ -118,6 +121,13 @@ def verify_history(records: list[dict[str, Any]]) -> dict[str, Any]:
             errors.append(f"row {expected_sequence}: duplicate snapshot_id")
         else:
             seen_snapshot_ids.add(snapshot_id)
+        if isinstance(snapshot, dict) and isinstance(snapshot_id, str):
+            try:
+                expected_snapshot_id = "occ_" + sha256_json(snapshot)[:24]
+                if snapshot_id != expected_snapshot_id:
+                    errors.append(f"row {expected_sequence}: snapshot_id does not match snapshot")
+            except HistoryError as exc:
+                errors.append(f"row {expected_sequence}: {exc}")
 
         try:
             parse_utc(record.get("appended_at_utc"), "appended_at_utc")
