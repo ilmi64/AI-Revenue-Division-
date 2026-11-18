@@ -4,7 +4,7 @@
   "capture_date": "2026-11-17",
   "capture_time_precision": "date_only_normalized_to_utc_midnight",
   "captured_at_utc": "2026-11-17T00:00:00Z",
-  "method": "Official-page search excerpts transcribed into a research manifest; no complete page/PDF byte capture.",
+  "method": "Official-page excerpts retrieved through public web search and opened-page text, then transcribed into a research manifest; no complete page/PDF byte capture.",
   "global_controls": {
     "full_document_capture": false,
     "source_authentication": "NOT_PERFORMED",
@@ -89,7 +89,7 @@
       "full_document_capture": false,
       "capture_time_precision": "date_only_normalized_to_utc_midnight",
       "captured_at_utc": "2026-11-17T00:00:00Z",
-      "retrieval_method": "official_web_search_excerpt",
+      "retrieval_method": "official_web_open_excerpt",
       "revision_id": "kraken_mtf_linear_contract_specs:excerpt-20261117"
     },
     {
@@ -153,7 +153,7 @@
       "full_document_capture": false,
       "capture_time_precision": "date_only_normalized_to_utc_midnight",
       "captured_at_utc": "2026-11-17T00:00:00Z",
-      "retrieval_method": "official_web_search_excerpt",
+      "retrieval_method": "official_web_open_excerpt",
       "revision_id": "coinbase_intx_perpetual_product_specs:excerpt-20261117"
     },
     {
@@ -408,7 +408,7 @@
       "full_document_capture": false,
       "capture_time_precision": "date_only_normalized_to_utc_midnight",
       "captured_at_utc": "2026-11-17T00:00:00Z",
-      "retrieval_method": "official_web_search_excerpt",
+      "retrieval_method": "official_web_open_excerpt",
       "revision_id": "cme_comex_gold_futures_specs:excerpt-20261117"
     },
     {
