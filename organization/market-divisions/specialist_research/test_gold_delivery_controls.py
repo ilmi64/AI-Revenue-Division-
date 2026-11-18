@@ -44,7 +44,7 @@ class GoldDeliveryControlTests(unittest.TestCase):
         self.assertIn("NEW_POSITION_PROHIBITED_BY_FCM_FREEZE", result["blocks"])
 
     def test_first_notice_and_delivery_period_are_warned(self):
-        result = assess_gold_delivery_controls(contract(), {"side": "long", "is_open": True}, "2026-12-02T12:00:00Z")
+        result = assess_gold_delivery_controls(contract(), {"side": "long", "is_open": True, "contracts": 1}, "2026-12-02T12:00:00Z")
         self.assertIn("FIRST_NOTICE_DATE_REACHED", result["warnings"])
         self.assertIn("PHYSICAL_DELIVERY_POSITION_PERIOD_REACHED", result["warnings"])
 
@@ -85,6 +85,14 @@ class GoldDeliveryControlTests(unittest.TestCase):
         item["product_code"] = "MGC"
         item["rulebook_chapter"] = "120"
         result = assess_gold_delivery_controls(item, {"side": "long", "is_open": True, "contracts": 10}, "2026-11-20T12:00:00Z")
+        self.assertNotIn("MGC_DELIVERY_QUANTITY_MUST_BE_MULTIPLE_OF_TEN_EXCEPT_LAST_INTENT_DAY", result["blocks"])
+
+    def test_mgc_last_intent_date_uses_fcm_local_calendar_date(self):
+        item = contract()
+        item["product_code"] = "MGC"
+        item["rulebook_chapter"] = "120"
+        # 02:00 UTC on Dec 31 is Dec 30 in New York (the supplied last intent day).
+        result = assess_gold_delivery_controls(item, {"side": "long", "is_open": True, "contracts": 1}, "2026-12-31T02:00:00Z")
         self.assertNotIn("MGC_DELIVERY_QUANTITY_MUST_BE_MULTIPLE_OF_TEN_EXCEPT_LAST_INTENT_DAY", result["blocks"])
 
     def test_no_delivery_action_or_authority(self):
