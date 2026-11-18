@@ -199,3 +199,17 @@ a stop. Incident closure is tracked separately from global-stop state.
 Regression tests are in `test_incident_event_ledger.py`; they are authored,
 not executed. Like snapshot history, this is a local single-writer prototype,
 not a continuously running OCC service.
+
+
+## OCC audit and reconciliation
+
+The read-only cross-ledger audit is implemented in
+[`audit_reconciliation.py`](audit_reconciliation.py) and documented in
+[`AUDIT-RECONCILIATION.md`](AUDIT-RECONCILIATION.md). It independently
+verifies snapshot and incident-event histories, compares their global-stop
+state, and correlates stop IDs where available. It fails closed if no snapshot
+exists or either history fails integrity validation. It cannot clear a stop
+or grant execution authority.
+
+Regression cases are in `test_audit_reconciliation.py`; they are authored,
+not executed. This remains an offline audit utility, not a running monitor.
