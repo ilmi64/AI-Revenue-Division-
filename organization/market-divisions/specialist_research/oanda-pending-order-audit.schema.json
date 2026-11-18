@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OANDA Post-Closeout Pending-Order Exposure Audit",
+  "description": "Read-only account pending-order classification. Does not authenticate broker data or change orders.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "status",
+    "errors",
+    "warnings",
+    "closeout_occurred",
+    "pending_orders_complete",
+    "pending_order_count",
+    "orders_still_pending_for_liquidated_trades",
+    "orders_still_linked_to_open_trades",
+    "orders_surviving_and_potentially_opening",
+    "orders_surviving_but_reduce_only",
+    "possible_exposure_reopening",
+    "dependent_order_cancellation_transaction_verified",
+    "order_cancellation_performed",
+    "research_only",
+    "authority",
+    "trade_authority",
+    "live_readiness"
+  ],
+  "properties": {
+    "status": {
+      "enum": [
+        "PASS",
+        "HALT"
+      ]
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "closeout_occurred": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "pending_orders_complete": {
+      "type": "boolean"
+    },
+    "pending_order_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "orders_still_pending_for_liquidated_trades": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "order_id",
+          "trade_id",
+          "type"
+        ],
+        "properties": {
+          "order_id": {
+            "type": "string"
+          },
+          "trade_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "orders_still_linked_to_open_trades": {
+      "type": "array"
+    },
+    "orders_surviving_and_potentially_opening": {
+      "type": "array"
+    },
+    "orders_surviving_but_reduce_only": {
+      "type": "array"
+    },
+    "possible_exposure_reopening": {
+      "type": "boolean"
+    },
+    "dependent_order_cancellation_transaction_verified": {
+      "const": false
+    },
+    "order_cancellation_performed": {
+      "const": false
+    },
+    "research_only": {
+      "const": true
+    },
+    "authority": {
+      "const": "research_only_no_execution_authority"
+    },
+    "trade_authority": {
+      "const": false
+    },
+    "live_readiness": {
+      "const": false
+    }
+  }
+}
