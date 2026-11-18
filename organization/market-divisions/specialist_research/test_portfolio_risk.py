@@ -55,6 +55,7 @@ class PortfolioRiskTests(unittest.TestCase):
         self.assertEqual(result["exposure_by_valuation_currency"]["USD"]["gross"], 400.0)
         self.assertEqual(result["exposure_by_valuation_currency"]["USD"]["net"], 200.0)
         self.assertEqual(result["correlation_risk"]["pairs"][0]["correlation"], -0.35)
+        self.assertIsNotNone(result["correlation_risk"]["pairs"][0]["pairwise_correlation_adjusted_exposure_proxy"])
         self.assertFalse(result["correlation_risk"]["independence_assumed"])
         self.assertFalse(result["trade_authority"])
         self.assertFalse(result["live_readiness"])
