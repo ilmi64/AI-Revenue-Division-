@@ -197,10 +197,10 @@ def resolve_profile(registry: Any, venue_id: str, instrument_id: str,
     selected = matches[-1]
     if selected["profile_state"] in {"rejected", "suspended"}:
         state = "BLOCKED_PROFILE_STATE"
-    elif selected["profile_state"] != "approved" or selected["review_state"] != "accepted":
-        state = "BLOCKED_UNREVIEWED_PROFILE"
     elif selected["verification_state"] == "unverified":
         state = "BLOCKED_UNVERIFIED_PROFILE"
+    elif selected["profile_state"] != "approved" or selected["review_state"] != "accepted":
+        state = "BLOCKED_UNREVIEWED_PROFILE"
     else:
         state = "RESEARCH_ELIGIBLE_REVIEWED_PROFILE"
     eligible = state == "RESEARCH_ELIGIBLE_REVIEWED_PROFILE"
