@@ -972,7 +972,7 @@ The first-pass fact extraction records, among other items:
 
 The companion `venue_document_capture.py` validates the manifest and
 produces a research-only capture report. Its regression tests verify all
-nine excerpt digests, seven-candidate coverage, explicit partial-capture
+thirteen excerpt digests, seven-candidate coverage, explicit partial-capture
 status and fail-closed handling of tampered hashes or false full-document
 claims. The JSON contract is
 `venue-document-capture-manifest.schema.json`.
