@@ -158,6 +158,13 @@ class PortfolioRiskTests(unittest.TestCase):
         self.assertEqual(result["stress_testing"]["scenarios"][0]["status"], "INCOMPLETE")
         self.assertIn("position-gold", result["stress_testing"]["scenarios"][0]["uncovered_position_ids"])
 
+    def test_duplicate_stress_scenario_ids_are_rejected(self):
+        cfg = config()
+        cfg["stress_scenarios"].append(dict(cfg["stress_scenarios"][0]))
+        result = assess_portfolio_risk(packets(), NOW, cfg, correlations())
+        self.assertEqual(result["status"], "HALT")
+        self.assertTrue(any("scenario_id must be unique" in error for error in result["errors"]))
+
     def test_instrument_specific_basis_is_enforced(self):
         rows = packets()
         rows[2]["context"]["portfolio_risk"]["positions"][0]["valuation_basis"] = "spot_mark_to_market"
