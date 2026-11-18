@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://example.invalid/occ/portfolio-risk-config.schema.json",
   "title": "OCC Portfolio Risk Limits Configuration",
-  "description": "Explicit versioned OCC-owned risk thresholds. No default limits are supplied.",
+  "description": "Explicit versioned OCC-owned risk thresholds. No default limits are supplied. Derivative position overlays require margin, liquidation-distance, funding and executable-depth metadata; they do not reproduce broker liquidation engines.",
   "type": "object",
   "additionalProperties": false,
   "required": [
