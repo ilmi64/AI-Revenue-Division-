@@ -164,12 +164,16 @@ def build_gold_research_context(observation: dict[str, Any], now_utc: str) -> di
             errors.append("OANDA XAU/USD execution_risk_inputs are required for the selected risk profile")
             stress_audit = None
         else:
-            stress_audit = assess_gold_cfd_execution_stress(**execution_inputs)
-            if stress_audit["status"] == "INVALID_STRESS_INPUT":
+            try:
+                stress_audit = assess_gold_cfd_execution_stress(**execution_inputs)
+            except TypeError as exc:
+                stress_audit = None
+                errors.append(f"OANDA XAU/USD execution-risk input shape invalid: {exc}")
+            if stress_audit is not None and stress_audit["status"] == "INVALID_STRESS_INPUT":
                 errors.extend(stress_audit["errors"])
-            elif stress_audit["status"] == "HALT_SPREAD_STRESS":
+            elif stress_audit is not None and stress_audit["status"] == "HALT_SPREAD_STRESS":
                 errors.append("OANDA XAU/USD spread stress halt threshold breached")
-            elif stress_audit["status"] == "WARN_SPREAD_STRESS":
+            elif stress_audit is not None and stress_audit["status"] == "WARN_SPREAD_STRESS":
                 warnings.append("OANDA XAU/USD spread widening exceeds configured warning threshold")
         if session_audit["status"] == "INVALID_SESSION_INPUT":
             errors.extend(session_audit["errors"])
