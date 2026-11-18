@@ -221,7 +221,7 @@ class UnifiedIntakeTests(unittest.TestCase):
             capital_flow_source_registry=FLOW_REGISTRY,
         )
         audit = result["capital_flow_audit"]
-        self.assertEqual(audit["status"], "provided_no_eligible_match")
+        self.assertEqual(audit["status"], "blocked")
         self.assertEqual(audit["accepted_event_count"], 0)
         self.assertEqual(audit["instrument_count"], 1)
         self.assertIn("CAPITAL_FLOW_HANDOFF_REJECTED",
