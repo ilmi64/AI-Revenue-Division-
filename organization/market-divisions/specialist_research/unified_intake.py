@@ -502,6 +502,8 @@ def main() -> int:
     parser.add_argument("--control-health-event-ledger", type=Path)
     parser.add_argument("--portfolio-risk-config", type=Path)
     parser.add_argument("--correlation-evidence", type=Path)
+    parser.add_argument("--oanda-account-margin-replay", type=Path,
+                        help="JSON object with account_currency, initial_positions and observations")
     parser.add_argument("--max-market-age-seconds", type=float, default=120)
     parser.add_argument("--max-clock-skew-seconds", type=float, default=5)
     parser.add_argument("--output", type=Path, required=True)
@@ -524,11 +526,13 @@ def main() -> int:
                 pass
         risk_config = json.loads(args.portfolio_risk_config.read_text(encoding="utf-8")) if args.portfolio_risk_config else None
         correlations = _read_jsonl(args.correlation_evidence) if args.correlation_evidence else None
+        oanda_margin_replay = json.loads(args.oanda_account_margin_replay.read_text(encoding="utf-8")) if args.oanda_account_margin_replay else None
         result = build_unified_intake(
             observations, args.now_utc, market_registry, flow_events, flow_reviews,
             flow_registry, handover, version, args.previous_global_stop, args.occ_stop_state,
             args.max_market_age_seconds, args.max_clock_skew_seconds, args.require_full_coverage,
             args.control_health_snapshot_history, args.control_health_event_ledger, risk_config, correlations,
+            oanda_account_margin_replay=oanda_margin_replay,
         )
         args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         print(json.dumps({"status": result["status"], "desk_coverage": result["desk_coverage"],
@@ -536,6 +540,7 @@ def main() -> int:
                           "handover": result["handover"]["status"],
                           "control_health": result.get("control_health", {}).get("status", "not_requested"),
                           "portfolio_risk": result.get("portfolio_risk", {}).get("status", "not_provided"),
+                          "oanda_account_margin": result.get("oanda_account_margin_audit", {}).get("status", "not_provided"),
                           "output": str(args.output),
                           "authority": result["authority"]}, indent=2))
         return 0 if result["status"] in {"research", "unverified"} else 1
