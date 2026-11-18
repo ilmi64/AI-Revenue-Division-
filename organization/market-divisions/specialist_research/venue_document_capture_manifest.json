@@ -225,27 +225,39 @@
       "title": "Financing Costs FAQ",
       "publisher": "OANDA (Canada) Corporation",
       "source_class": "official_financing_policy",
-      "source_ref": "turn633863search5",
-      "content_sha256": "9e2469348d96f9e62fefff914561e76b973f0f5d5644914e55804b62ace144c2",
-      "document_text": "OANDA Canada says FX and metals financing is based on liquidity-provider tom-next swap rates adjusted by an instrument-specific admin fee and annualized. Long/buy and short/sell rates are separately determined; actual instrument rates may change.",
+      "source_ref": "turn917879view1",
+      "content_sha256": "deabc06fd45a102b2a55a5d72e44c78dbdec6d91153168b252f88fdcaef25b90",
+      "document_text": "OANDA Canada FAQ identifies the page as information relevant to OANDA (Canada) Corporation. FX and metals financing uses liquidity-provider tom-next swap rates adjusted by instrument-specific admin fee and annualized. Index financing uses an admin fee of 2.5% plus the relevant alternative reference rate for long positions; short positions use the difference from that 2.5% fee. FX and metals typically settle T+2, so Wednesday 5pm ET financing is typically tripled; index weekend financing is typically tripled Friday, subject to holidays. Sample rate examples are explicitly illustrative and not current rates.",
       "extracted_facts": [
         {
           "fact_key": "financing_convention",
-          "value": "tom-next swap blend plus instrument admin fee",
+          "value": "tom-next swap blend plus instrument-specific admin fee",
           "unit": "method",
-          "source_locator": "financing methodology"
+          "source_locator": "lines 30-38"
         },
         {
-          "fact_key": "financing_rate_basis",
-          "value": "annualized; separate long and short rates",
-          "unit": "basis",
-          "source_locator": "FX and metals table"
+          "fact_key": "index_financing_convention",
+          "value": "2.5% admin fee plus relevant alternative reference rate; side-dependent charge/credit",
+          "unit": "method",
+          "source_locator": "lines 39-41"
         },
         {
-          "fact_key": "financing_rate_freshness",
-          "value": "instrument rates may change",
-          "unit": "dynamic",
-          "source_locator": "FAQ rate description"
+          "fact_key": "fx_metals_triple_day",
+          "value": "typically Wednesday for T+2 settlement",
+          "unit": "schedule",
+          "source_locator": "lines 64-67"
+        },
+        {
+          "fact_key": "index_triple_day",
+          "value": "typically Friday; holiday-dependent",
+          "unit": "schedule",
+          "source_locator": "lines 64-67"
+        },
+        {
+          "fact_key": "sample_rates_status",
+          "value": "illustrative only; not current funding rates",
+          "unit": "caveat",
+          "source_locator": "lines 68-76"
         }
       ],
       "known_gaps": [
@@ -258,7 +270,7 @@
       "full_document_capture": false,
       "capture_time_precision": "date_only_normalized_to_utc_midnight",
       "captured_at_utc": "2026-11-17T00:00:00Z",
-      "retrieval_method": "official_web_search_excerpt",
+      "retrieval_method": "official_web_open_excerpt",
       "revision_id": "oanda_canada_financing_faq:excerpt-20261117"
     },
     {
@@ -270,33 +282,39 @@
       "title": "Index CFDs FAQ",
       "publisher": "OANDA (Canada) Corporation",
       "source_class": "official_help_centre",
-      "source_ref": "turn892521search3",
-      "content_sha256": "4f4cf0e2e32d64f2088c94bb4ede9beac1f6f2c570b6c48cbeb6c7c7efb0e385",
-      "document_text": "OANDA Canada states index exposure is provided as CFDs, not direct index purchases. Index CFD prices reference a combination of relevant futures and cash/spot prices, adjusted for dividends and anticipated corporate actions. Index CFDs have no expiry; clients may short and spreads are dynamic. Margin and trading hours are in separate documentation.",
+      "source_ref": "turn917879view2",
+      "content_sha256": "19c0b15556e423d38ee805f6a7a503b2a230c0ff5c6c70e2f63bf5b17799a771",
+      "document_text": "OANDA Canada states index exposure is offered as CFDs, not direct index purchases. Index CFD prices reference a combination of relevant futures and cash/spot prices, with adjustments for dividends and anticipated corporate actions. Index CFDs have no expiry; clients may short and spreads are dynamic. The FAQ states OANDA Canada Corporation ULC is regulated by CIRO and that accounts are available to anyone with a Canadian bank account. Product-specific margin and trading hours are in separate pages.",
       "extracted_facts": [
         {
           "fact_key": "mark_price_rule",
           "value": "relevant futures plus cash/spot reference, adjusted for dividends/corporate actions",
           "unit": "method",
-          "source_locator": "pricing FAQ"
+          "source_locator": "lines 46-50"
         },
         {
           "fact_key": "expiry",
           "value": "no expiry",
           "unit": "term",
-          "source_locator": "expiry FAQ"
+          "source_locator": "lines 51-53"
         },
         {
           "fact_key": "short_selling",
           "value": true,
           "unit": "boolean",
-          "source_locator": "shorting FAQ"
+          "source_locator": "lines 66-68"
         },
         {
           "fact_key": "spread_type",
           "value": "dynamic",
           "unit": "type",
-          "source_locator": "spread FAQ"
+          "source_locator": "lines 70-72"
+        },
+        {
+          "fact_key": "canadian_regulatory_context",
+          "value": "OANDA Canada Corporation ULC regulated by CIRO; accounts available to anyone with a Canadian bank account",
+          "unit": "jurisdiction",
+          "source_locator": "lines 147-148"
         }
       ],
       "known_gaps": [
@@ -309,7 +327,7 @@
       "full_document_capture": false,
       "capture_time_precision": "date_only_normalized_to_utc_midnight",
       "captured_at_utc": "2026-11-17T00:00:00Z",
-      "retrieval_method": "official_web_search_excerpt",
+      "retrieval_method": "official_web_open_excerpt",
       "revision_id": "oanda_canada_index_cfd_faq:excerpt-20261117"
     },
     {
@@ -323,45 +341,64 @@
       "title": "Financing Costs",
       "publisher": "OANDA (Canada) Corporation",
       "source_class": "official_financing_policy",
-      "source_ref": "turn633863search3",
-      "content_sha256": "84f2f8f15f6c0c956d88fe07735b64ee9b8dbefba8c9663ad71da31ffb3ed1c3",
-      "document_text": "OANDA Canada treats positions open at 5pm ET as overnight. FX, gold and silver daily financing is size times applicable annualized rate divided by 365; index financing is position value times rate divided by 365. Rates differ by instrument and long/short side and may change daily. Gold/FX rates reference tom-next swaps plus instrument admin fee.",
+      "source_ref": "turn917879view0",
+      "content_sha256": "b83b182bdfd65b5db4985009c13d3ff9949e2a445f1a0fe5498f0aa735baca61",
+      "document_text": "OANDA Canada's official financing page says positions open at 5pm ET are treated as overnight and may incur a charge or credit. FX, gold and silver daily financing is position size multiplied by applicable annualized rate divided by 365; index financing is position value multiplied by rate divided by 365. Long and short rates differ and may change daily. FX, gold and silver rates use liquidity-provider tom-next swaps plus instrument-specific admin fee. Index long rates include a 2.5% admin fee plus the relevant alternative reference rate; short rates use the difference between the reference rate and 2.5%, producing a charge or credit depending on the relationship. FX, gold and silver typically settle T+2, so Wednesday financing is usually tripled; index weekend financing is typically tripled Friday, subject to holidays. Indicative current-day rates are not finalized until 5pm ET.",
       "extracted_facts": [
         {
           "fact_key": "financing_cutoff",
           "value": "5pm ET",
           "unit": "time",
-          "source_locator": "Financing Costs"
+          "source_locator": "lines 122-125"
         },
         {
           "fact_key": "fx_gold_financing_formula",
           "value": "position size x annualized rate / 365",
           "unit": "formula",
-          "source_locator": "Financing Costs"
+          "source_locator": "lines 127-128"
         },
         {
           "fact_key": "index_financing_formula",
           "value": "position value x annualized rate / 365",
           "unit": "formula",
-          "source_locator": "Financing Costs"
+          "source_locator": "lines 129-130"
+        },
+        {
+          "fact_key": "index_financing_admin_fee",
+          "value": "2.5%",
+          "unit": "annualized admin fee",
+          "source_locator": "lines 148-155"
+        },
+        {
+          "fact_key": "fx_gold_weekend_financing",
+          "value": "typically tripled Wednesday for T+2 settlement; holiday-dependent",
+          "unit": "schedule",
+          "source_locator": "lines 185-192"
+        },
+        {
+          "fact_key": "index_weekend_financing",
+          "value": "typically tripled Friday; holiday-dependent",
+          "unit": "schedule",
+          "source_locator": "lines 185-192"
         },
         {
           "fact_key": "financing_rate_freshness",
-          "value": "instrument-specific and may change daily",
+          "value": "instrument-specific; may change daily; current-day rate final after 5pm ET",
           "unit": "dynamic",
-          "source_locator": "Funding rates"
+          "source_locator": "lines 131-143 and 228-231"
         }
       ],
       "known_gaps": [
-        "live instrument rates",
-        "holiday/triple-day handling",
-        "contract unit and closeout"
+        "live rates per instrument",
+        "instrument-specific account treatment",
+        "full client agreement",
+        "current exact settlement calendars and holiday exceptions"
       ],
       "capture_scope": "official_page_search_excerpt",
       "full_document_capture": false,
       "capture_time_precision": "date_only_normalized_to_utc_midnight",
       "captured_at_utc": "2026-11-17T00:00:00Z",
-      "retrieval_method": "official_web_search_excerpt",
+      "retrieval_method": "official_web_open_excerpt",
       "revision_id": "oanda_canada_financing_costs_page:excerpt-20261117"
     },
     {
