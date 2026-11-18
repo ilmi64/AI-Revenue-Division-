@@ -463,3 +463,33 @@ covered in `test_engines.py`. These tests are authored, not yet executed.
 
 The output contract is specified in
 [`gold-specialist-research.schema.json`](gold-specialist-research.schema.json).
+
+
+## Cross-desk OCC propagation and Main Hub integration
+
+The unified intake treats a specialist HALT or stop challenge from Crypto, Forex,
+indices or Gold as a global OCC stop. Explicit OCC stops, prior global-stop
+state and active handover veto IDs are accumulated; a CLEAR/INACTIVE/NONE
+observation cannot remove a prior stop. The intake does not perform stop
+clearance. Handover records must explicitly acknowledge both shifts, reconcile
+positions, report healthy dependencies, carry active veto IDs and contain no
+unresolved critical items. Missing handover evidence is never interpreted as
+acceptance.
+
+Structured Gold specialist results are summarized under
+`gold_specialist_audit` in the unified snapshot, including per-instrument
+macro-factor coverage, status, warnings/errors and the research-only authority
+boundary. The Main Hub dashboard exposes that audit alongside OCC control
+health, without promoting it into live readiness or execution permission.
+
+Replay evidence digests now include a named SHA-256 map for the replay,
+canonical evidence gate, specialist engine, Gold specialist and Capital Flow
+handoff/taxonomy/provenance/priority implementations. These hashes identify
+the code used for reproducibility; they do not authenticate external source
+content, establish trusted time, or make local records tamper-proof.
+
+Regression coverage has been extended for HALT propagation from Forex, indices
+and Gold, Gold context survival through unified intake, Gold audit visibility
+in the Main Hub, and specialist implementation fingerprints. Tests remain
+authored until the local regression runner is executed in an approved
+environment.
