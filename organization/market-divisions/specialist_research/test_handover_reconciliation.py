@@ -43,9 +43,10 @@ class HandoverReconciliationTests(unittest.TestCase):
     def audit(self):
         return audit_handovers(read_events(self.path))
 
-    def test_empty_ledger_has_no_accepted_handover(self):
+    def test_empty_ledger_cannot_imply_handover_acceptance(self):
         result = self.audit()
-        self.assertTrue(result["valid"])
+        self.assertFalse(result["valid"])
+        self.assertEqual(result["status"], "blocked")
         self.assertEqual(result["handover_count"], 0)
         self.assertFalse(result["trade_authority"])
 
