@@ -16,7 +16,7 @@ def contract():
         "last_trade_date": "2026-12-29", "delivery_start_date": "2026-12-01",
         "delivery_end_date": "2026-12-31",
         "fcm_long_position_cutoff_date": "2026-11-25",
-        "fcm_short_position_cutoff_date": "2026-12-28",
+        "fcm_short_position_cutoff_date": "2026-12-28", "last_intent_date": "2026-12-30",
         "new_position_freeze_date": "2026-11-24",
         "fcm_long_cutoff_utc": "2026-11-25T17:00:00Z",
         "fcm_short_cutoff_utc": "2026-12-28T17:00:00Z",
@@ -31,12 +31,12 @@ class GoldDeliveryControlTests(unittest.TestCase):
         self.assertFalse(result["trade_authority"])
 
     def test_long_position_after_fcm_receive_cutoff_blocks(self):
-        result = assess_gold_delivery_controls(contract(), {"side": "long", "is_open": True}, "2026-11-26T12:00:00Z")
+        result = assess_gold_delivery_controls(contract(), {"side": "long", "is_open": True, "contracts": 1}, "2026-11-26T12:00:00Z")
         self.assertEqual(result["status"], "HALT_DELIVERY_CONTROLS")
         self.assertIn("LONG_POSITION_AT_OR_AFTER_FCM_RECEIVE_CUTOFF", result["blocks"])
 
     def test_short_position_after_fcm_delivery_cutoff_blocks(self):
-        result = assess_gold_delivery_controls(contract(), {"side": "short", "is_open": True}, "2026-12-29T12:00:00Z")
+        result = assess_gold_delivery_controls(contract(), {"side": "short", "is_open": True, "contracts": 1}, "2026-12-29T12:00:00Z")
         self.assertIn("SHORT_POSITION_AT_OR_AFTER_FCM_DELIVERY_CUTOFF", result["blocks"])
 
     def test_new_position_after_freeze_blocks(self):
@@ -72,6 +72,20 @@ class GoldDeliveryControlTests(unittest.TestCase):
         item["rulebook_chapter"] = "120"
         result = assess_gold_delivery_controls(item, {"side": "flat", "is_open": False}, "2026-11-20T12:00:00Z")
         self.assertEqual(result["status"], "DELIVERY_CONTROLS_CLEAR")
+
+    def test_mgc_delivery_lot_multiple_of_ten_is_enforced(self):
+        item = contract()
+        item["product_code"] = "MGC"
+        item["rulebook_chapter"] = "120"
+        result = assess_gold_delivery_controls(item, {"side": "long", "is_open": True, "contracts": 1}, "2026-11-20T12:00:00Z")
+        self.assertIn("MGC_DELIVERY_QUANTITY_MUST_BE_MULTIPLE_OF_TEN_EXCEPT_LAST_INTENT_DAY", result["blocks"])
+
+    def test_mgc_ten_contract_delivery_quantity_passes_lot_rule(self):
+        item = contract()
+        item["product_code"] = "MGC"
+        item["rulebook_chapter"] = "120"
+        result = assess_gold_delivery_controls(item, {"side": "long", "is_open": True, "contracts": 10}, "2026-11-20T12:00:00Z")
+        self.assertNotIn("MGC_DELIVERY_QUANTITY_MUST_BE_MULTIPLE_OF_TEN_EXCEPT_LAST_INTENT_DAY", result["blocks"])
 
     def test_no_delivery_action_or_authority(self):
         result = assess_gold_delivery_controls(contract(), {"side": "flat", "is_open": False}, "2026-11-20T12:00:00Z")
