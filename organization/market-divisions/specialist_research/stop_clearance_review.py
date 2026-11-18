@@ -38,8 +38,11 @@ def assess_stop_clearance(event_records: list[dict[str, Any]]) -> dict[str, Any]
         if not isinstance(stop_id, str) or not stop_id.strip():
             errors.append(f"stop_raised event {event['event_id']} has no stop_id; clearance cannot be correlated")
             continue
-        stops.setdefault(stop_id, {"stop_id": stop_id, "raise_event_id": event["event_id"],
-                                   "incident_id": event["subject_id"], "requests": []})
+        if stop_id in stops:
+            errors.append(f"duplicate stop_id {stop_id!r} appears in multiple stop_raised events")
+            continue
+        stops[stop_id] = {"stop_id": stop_id, "raise_event_id": event["event_id"],
+                          "incident_id": event["subject_id"], "requests": []}
 
     for event in events:
         if event["event_type"] != "stop_clearance_requested":
@@ -48,6 +51,8 @@ def assess_stop_clearance(event_records: list[dict[str, Any]]) -> dict[str, Any]
         stop_id = details.get("stop_id")
         stop = stops.get(stop_id) if isinstance(stop_id, str) else None
         request_errors: list[str] = []
+        if details.get("approval_status") == "rejected":
+            request_errors.append("clearance request is marked rejected and cannot be eligible")
         if stop is None:
             request_errors.append("request references no known latched stop")
             errors.append(f"clearance request {event['event_id']} references unknown stop_id {stop_id!r}")
