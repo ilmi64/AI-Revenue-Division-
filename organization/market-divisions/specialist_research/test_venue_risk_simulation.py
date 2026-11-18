@@ -34,7 +34,7 @@ def position(**overrides):
 
 def step(timestamp, price, **overrides):
     value = {
-        "timestamp_utc": timestamp, "mark_price": price,
+        "timestamp_utc": timestamp, "mark_price": price, "mark_price_basis": "mark",
         "executable_depth_notional": 10000.0,
         "funding_rate": 0.001, "funding_interval_hours": 8.0,
         "gap_flag": False,
