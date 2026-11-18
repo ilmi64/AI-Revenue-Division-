@@ -16,8 +16,10 @@ from typing import Any
 
 try:
     from .capital_flow_taxonomy import classify_event
+    from .capital_flow_provenance import assess_event_provenance
 except ImportError:
     from capital_flow_taxonomy import classify_event
+    from capital_flow_provenance import assess_event_provenance
 
 GENESIS = "0" * 64
 ALLOWED_HANDOFF_STATES = {"watch", "research", "unverified", "corroborated"}
@@ -306,6 +308,7 @@ def build_handoff(events: list[dict[str, Any]], reviews: list[dict[str, Any]],
                 "event_id": event_id,
                 "event_type": event.get("event_type"),
                 "event_classification": classify_event(event),
+                "evidence_provenance": assess_event_provenance(event, now_utc),
                 "review_status": status,
                 "observed_at_utc": observed_at,
                 "asset_id": event.get("asset_id"),
