@@ -124,7 +124,9 @@ class HandoverReconciliationTests(unittest.TestCase):
 
     def test_stop_remains_latched_after_handover(self):
         self.append(event("evt-stop", "stop_raised", {"stop_id": "gold-stop"}, "gold-stop"))
-        self.append(event("evt-h1", details=handover()))
+        data = handover()
+        data["active_veto_ids"] = ["gold-stop"]
+        self.append(event("evt-h1", details=data))
         result = self.audit()
         self.assertTrue(result["global_stop_active"])
 
@@ -141,3 +143,10 @@ class HandoverReconciliationTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+    def test_handover_cannot_drop_previously_raised_stop_id(self):
+        self.append(event("evt-stop", "stop_raised", {"stop_id": "gold-stop"}, "gold-stop"))
+        self.append(event("evt-h1", details=handover()))
+        result = self.audit()
+        self.assertFalse(result["valid"])
+        self.assertTrue(any("not carried forward" in x for x in result["errors"]))
