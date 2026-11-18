@@ -11,7 +11,8 @@
     "source_timestamp_utc",
     "evaluated_at_utc",
     "max_snapshot_age_seconds",
-    "closeout_occurred"
+    "closeout_occurred",
+    "pending_orders_complete"
   ],
   "properties": {
     "pending_orders": {
@@ -46,6 +47,9 @@
       "exclusiveMinimum": 0
     },
     "closeout_occurred": {
+      "const": true
+    },
+    "pending_orders_complete": {
       "const": true
     }
   },
