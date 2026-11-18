@@ -68,7 +68,7 @@ class VenueProfileRegistryTests(unittest.TestCase):
         result = resolve_profile(
             registry(item), "synthetic-venue", "BTC-PERP", "2026-02-01T00:00:00Z"
         )
-        self.assertEqual(result["status"], "BLOCKED_UNREVIEWED_PROFILE")
+        self.assertEqual(result["status"], "BLOCKED_UNVERIFIED_PROFILE")
         self.assertIsNone(result["profile"])
 
     def test_approved_unverified_profile_fails_validation(self):
