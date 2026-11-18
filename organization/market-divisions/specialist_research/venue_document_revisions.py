@@ -368,7 +368,7 @@ def assess_document_freshness(revisions: Any, as_of_utc: Any, freshness_policy: 
         ],
     }
 
-def build_revision_review_queue(comparison_reports: Any, profile_impact_reports: Any = None) -> dict[str, Any]:
+def build_revision_review_queue(comparison_reports: Any, profile_impact_reports: Any = None, freshness_reports: Any = None) -> dict[str, Any]:
     """Build a deterministic, read-only queue for human review of document changes.
 
     Critical extracted contract-term changes are ranked before other document
@@ -384,12 +384,20 @@ def build_revision_review_queue(comparison_reports: Any, profile_impact_reports:
     if not isinstance(profile_impact_reports, list):
         errors.append("profile_impact_reports must be an array when supplied")
         profile_impact_reports = []
+    if freshness_reports is None:
+        freshness_reports = []
+    if not isinstance(freshness_reports, list):
+        errors.append("freshness_reports must be an array when supplied")
+        freshness_reports = []
     for index, report in enumerate(comparison_reports):
         if not isinstance(report, dict) or report.get("status") == "INVALID_REVISION_COMPARISON":
             errors.append(f"comparison_reports[{index}] is invalid")
     for index, report in enumerate(profile_impact_reports):
         if not isinstance(report, dict) or report.get("status") == "INVALID_PROFILE_REVISION_INPUT":
             errors.append(f"profile_impact_reports[{index}] is invalid")
+    for index, report in enumerate(freshness_reports):
+        if not isinstance(report, dict) or report.get("status") == "INVALID_FRESHNESS_INPUT":
+            errors.append(f"freshness_reports[{index}] is invalid")
     if errors:
         return {
             "status": "INVALID_REVIEW_QUEUE_INPUT", "errors": errors,
@@ -427,6 +435,16 @@ def build_revision_review_queue(comparison_reports: Any, profile_impact_reports:
                     if source.get("impact") == "FACT_DIFF_REQUIRED_BEFORE_PROFILE_REUSE"
                 } else "STANDARD",
                 "reason": "PROFILE_SOURCE_REVISION_STALE_OR_UNTRACKED",
+            })
+    for report in freshness_reports:
+        if report.get("status") != "STALE_EVIDENCE_REVIEW_REQUIRED":
+            continue
+        for document_id in report.get("stale_document_ids", []):
+            items.append({
+                "review_type": "DOCUMENT_CAPTURE_FRESHNESS",
+                "document_id": document_id,
+                "priority": "CRITICAL",
+                "reason": "EXPLICIT_CAPTURE_AGE_TTL_EXCEEDED",
             })
     items.sort(key=lambda item: (
         0 if item["priority"] == "CRITICAL" else 1,
