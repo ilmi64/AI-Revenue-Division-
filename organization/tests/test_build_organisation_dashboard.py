@@ -17,12 +17,13 @@ class OrganisationDashboardTests(unittest.TestCase):
         cls.operating = json.loads((root / "operating-framework.json").read_text(encoding="utf-8"))
         cls.work_queue = json.loads((root / "work-queue.json").read_text(encoding="utf-8"))
 
-    def build(self, work_queue=None, execution_log=None, risk_register=None, decision_register=None, incident_register=None, recovery_plan=None):
+    def build(self, work_queue=None, execution_log=None, risk_register=None, decision_register=None, incident_register=None, recovery_plan=None, occ_control_health=None):
         return build_dashboard(
             self.registry, self.readiness, self.dependencies, self.operating, [], [],
             work_queue if work_queue is not None else self.work_queue, execution_log,
             risk_register, decision_register, incident_register,
-            recovery_plan if recovery_plan is not None else json.loads((Path(__file__).resolve().parents[1] / "recovery-plan.json").read_text(encoding="utf-8"))
+            recovery_plan if recovery_plan is not None else json.loads((Path(__file__).resolve().parents[1] / "recovery-plan.json").read_text(encoding="utf-8")),
+            occ_control_health=occ_control_health
         )
 
     def test_dashboard_exposes_not_provided_occ_control_health(self):
@@ -30,6 +31,27 @@ class OrganisationDashboardTests(unittest.TestCase):
         self.assertEqual(report["occ_control_health"]["status"], "NOT_PROVIDED")
         self.assertFalse(report["occ_control_health"]["trade_authority"])
         self.assertFalse(report["occ_control_health"]["live_readiness"])
+
+    def test_dashboard_accepts_integrated_occ_snapshot(self):
+        snapshot = {
+            "snapshot_type": "unified_occ_research_intelligence",
+            "status": "unverified",
+            "global_stop_active": False,
+            "active_stops": [],
+            "control_health": {
+                "status": "PASS_AUDIT",
+                "latest_verified_snapshot_id": "occ-fixture",
+                "errors": [],
+                "warnings": [],
+                "authority": "research_only_no_execution_authority",
+                "trade_authority": False,
+                "live_readiness": False,
+            },
+        }
+        report = self.build(occ_control_health=snapshot)
+        self.assertEqual(report["occ_control_health"]["status"], "PASS_AUDIT")
+        self.assertEqual(report["occ_control_health"]["snapshot_id"], "occ-fixture")
+        self.assertFalse(report["occ_control_health"]["global_stop_active"])
 
     def test_dashboard_propagates_occ_audit_halt_and_stop_state(self):
         snapshot = {
