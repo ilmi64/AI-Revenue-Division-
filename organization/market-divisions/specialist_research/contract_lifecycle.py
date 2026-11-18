@@ -124,6 +124,7 @@ def replay_contract_lifecycle(profile: dict[str, Any], position: dict[str, Any],
 
     quantity = float(position["quantity"])
     contract_id = position["contract_id"]
+    active_profile = dict(profile)
     cashflow_total = 0.0
     previous_time: datetime | None = None
     rows: list[dict[str, Any]] = []
@@ -142,7 +143,7 @@ def replay_contract_lifecycle(profile: dict[str, Any], position: dict[str, Any],
             errors.append(f"{prefix}.timestamp_utc must increase strictly")
             break
         event_type = event.get("event_type")
-        expiry_time = _utc(profile.get("expiry_utc"))
+        expiry_time = _utc(active_profile.get("expiry_utc"))
         if expiry_time is not None and timestamp >= expiry_time and event_type != "expiry_settlement":
             errors.append(f"{prefix} is at/after expiry and must be an expiry_settlement event")
             break
@@ -152,10 +153,10 @@ def replay_contract_lifecycle(profile: dict[str, Any], position: dict[str, Any],
         if settled:
             errors.append(f"{prefix} cannot follow expiry settlement")
             break
-        if event_type == "funding" and profile["financing_convention"] != "funding_rate":
+        if event_type == "funding" and active_profile["financing_convention"] != "funding_rate":
             errors.append(f"{prefix} funding event conflicts with profile convention")
             break
-        if event_type == "financing" and profile["financing_convention"] not in {
+        if event_type == "financing" and active_profile["financing_convention"] not in {
             "annualized_rate", "daily_rate"
         }:
             errors.append(f"{prefix} financing event conflicts with profile convention")
@@ -173,7 +174,7 @@ def replay_contract_lifecycle(profile: dict[str, Any], position: dict[str, Any],
                 # cashflows a second time. Venue-specific payer/receiver rules
                 # must be normalized by the caller before this replay.
                 cashflow = float(rate) * float(notional) * float(basis)
-            if event.get("currency") != profile["settlement_currency"]:
+            if event.get("currency") != active_profile["settlement_currency"]:
                 errors.append(f"{prefix}.currency must match settlement_currency")
                 break
             cashflow_total += cashflow
@@ -181,7 +182,7 @@ def replay_contract_lifecycle(profile: dict[str, Any], position: dict[str, Any],
                          "timestamp_utc": event["timestamp_utc"], "cashflow": cashflow,
                          "currency": event["currency"], "contract_id": contract_id})
         elif event_type == "roll":
-            if profile["roll_method"] == "not_applicable":
+            if active_profile["roll_method"] == "not_applicable":
                 errors.append(f"{prefix} roll conflicts with profile")
                 break
             old_id, new_id = event.get("old_contract_id"), event.get("new_contract_id")
@@ -196,8 +197,36 @@ def replay_contract_lifecycle(profile: dict[str, Any], position: dict[str, Any],
             if not _number(adjustment):
                 errors.append(f"{prefix}.cash_adjustment must be finite and explicit")
                 break
-            if event.get("currency") != profile["settlement_currency"]:
+            if event.get("currency") != active_profile["settlement_currency"]:
                 errors.append(f"{prefix}.currency must match settlement_currency")
+                break
+            next_profile = event.get("new_contract_profile")
+            next_profile_errors = validate_contract_profile(next_profile)
+            if next_profile_errors:
+                errors.append(f"{prefix}.new_contract_profile is missing or invalid: " + "; ".join(next_profile_errors))
+                break
+            identity_fields = (
+                "venue_id", "instrument_id", "instrument_type", "quote_currency",
+                "settlement_currency", "settlement_method", "roll_method",
+                "financing_convention",
+            )
+            if any(next_profile.get(key) != active_profile.get(key) for key in identity_fields):
+                errors.append(f"{prefix}.new_contract_profile changes the instrument or venue identity")
+                break
+            if next_profile.get("profile_id") == active_profile.get("profile_id"):
+                errors.append(f"{prefix}.new_contract_profile must have a distinct profile_id")
+                break
+            if next_profile.get("instrument_type") in {"index_future", "gold_future"}:
+                if next_profile.get("contract_code") != new_id:
+                    errors.append(f"{prefix}.new_contract_profile.contract_code must match new_contract_id")
+                    break
+                old_expiry = _utc(active_profile.get("expiry_utc"))
+                new_expiry = _utc(next_profile.get("expiry_utc"))
+                if old_expiry is None or new_expiry is None or new_expiry <= old_expiry:
+                    errors.append(f"{prefix}.new_contract_profile expiry must be later than the current contract expiry")
+                    break
+            elif next_profile.get("contract_code") and next_profile.get("contract_code") != new_id:
+                errors.append(f"{prefix}.new_contract_profile.contract_code must match new_contract_id")
                 break
             cashflow_total += float(adjustment)
             rows.append({"event_id": event.get("event_id"), "event_type": "roll",
@@ -205,10 +234,11 @@ def replay_contract_lifecycle(profile: dict[str, Any], position: dict[str, Any],
                          "new_contract_id": new_id, "old_reference_price": float(old_price),
                          "new_reference_price": float(new_price),
                          "cash_adjustment": float(adjustment), "currency": event["currency"],
-                         "roll_method": profile["roll_method"]})
+                         "roll_method": active_profile["roll_method"]})
             contract_id = new_id
+            active_profile = dict(next_profile)
         elif event_type == "expiry_settlement":
-            expiry = _utc(profile.get("expiry_utc"))
+            expiry = _utc(active_profile.get("expiry_utc"))
             if expiry is None or timestamp < expiry:
                 errors.append(f"{prefix} settlement cannot occur before a valid contract expiry")
                 break
@@ -219,13 +249,13 @@ def replay_contract_lifecycle(profile: dict[str, Any], position: dict[str, Any],
             if event.get("contract_id") != contract_id:
                 errors.append(f"{prefix}.contract_id must match current contract")
                 break
-            if event.get("settlement_method") != profile["settlement_method"]:
+            if event.get("settlement_method") != active_profile["settlement_method"]:
                 errors.append(f"{prefix}.settlement_method must match profile")
                 break
             if not _number(event.get("realized_cashflow")):
                 errors.append(f"{prefix}.realized_cashflow must be explicit and finite")
                 break
-            if event.get("currency") != profile["settlement_currency"]:
+            if event.get("currency") != active_profile["settlement_currency"]:
                 errors.append(f"{prefix}.currency must match settlement_currency")
                 break
             realized = float(event["realized_cashflow"])
@@ -233,7 +263,7 @@ def replay_contract_lifecycle(profile: dict[str, Any], position: dict[str, Any],
             rows.append({"event_id": event.get("event_id"), "event_type": "expiry_settlement",
                          "timestamp_utc": event["timestamp_utc"], "contract_id": contract_id,
                          "settlement_price": float(settlement_price),
-                         "settlement_method": profile["settlement_method"],
+                         "settlement_method": active_profile["settlement_method"],
                          "realized_cashflow": realized, "currency": event["currency"]})
             quantity = 0.0
             settled = True
@@ -251,7 +281,7 @@ def replay_contract_lifecycle(profile: dict[str, Any], position: dict[str, Any],
         "errors": [], "events": rows, "ending_quantity": quantity,
         "ending_contract_id": contract_id, "settled": settled,
         "cashflow_total": cashflow_total,
-        "settlement_currency": profile["settlement_currency"],
+        "settlement_currency": active_profile["settlement_currency"],
         "authority": AUTHORITY, "trade_authority": False,
         "live_readiness": False, "simulation_only": True,
         "limitations": [
