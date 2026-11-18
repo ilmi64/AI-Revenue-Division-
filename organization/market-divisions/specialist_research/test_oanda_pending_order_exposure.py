@@ -168,6 +168,11 @@ class OandaPendingOrderExposureTests(unittest.TestCase):
     def test_boolean_freshness_limit_blocks(self):
         self.assertEqual(assess(max_snapshot_age_seconds=True)["status"], "HALT")
 
+    def test_blocked_input_does_not_claim_closeout_or_complete_snapshot(self):
+        result = assess(pending_orders_complete=False)
+        self.assertIsNone(result["closeout_occurred"])
+        self.assertFalse(result["pending_orders_complete"])
+
     def test_order_cancellation_is_never_performed(self):
         result = assess([entry()])
         self.assertFalse(result["order_cancellation_performed"])
