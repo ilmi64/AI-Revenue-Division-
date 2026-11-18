@@ -81,6 +81,12 @@ class SimulationOrchestratorTests(unittest.TestCase):
         result = simulate_unified_derivative(venue(), other, position(), path(), [])
         self.assertEqual(result["status"], "BLOCKED_INPUT_RECONCILIATION")
 
+    def test_venue_identity_mismatch_blocks(self):
+        other = profile()
+        other["venue_id"] = "different-venue"
+        result = simulate_unified_derivative(venue(), other, position(), path(), [])
+        self.assertEqual(result["status"], "BLOCKED_INPUT_RECONCILIATION")
+
     def test_component_failure_blocks_reconciliation(self):
         bad = path()
         bad[0]["mark_price_basis"] = "last"
@@ -119,6 +125,21 @@ class SimulationOrchestratorTests(unittest.TestCase):
         )
         self.assertEqual(result["status"], "SIMULATED_SETTLEMENT")
         self.assertTrue(result["reconciliation"]["checks"][-2]["passed"])
+
+    def test_path_reaching_expiry_without_settlement_blocks(self):
+        dated = profile()
+        dated.update({
+            "instrument_type": "gold_future", "instrument_id": "GCZ6",
+            "settlement_method": "cash", "roll_method": "manual_close_open",
+            "financing_convention": "none", "contract_code": "GCZ6",
+            "expiry_utc": "2026-12-28T18:30:00Z",
+        })
+        v = venue()
+        v["instrument_type"] = "gold_future"
+        p = position(instrument_id="GCZ6", contract_id="GCZ6")
+        at_expiry = path(timestamp_utc="2026-12-28T18:30:00Z")
+        result = simulate_unified_derivative(v, dated, p, at_expiry, [])
+        self.assertEqual(result["status"], "BLOCKED_RECONCILIATION")
 
     def test_path_after_settlement_blocks(self):
         dated = profile()
