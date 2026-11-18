@@ -140,7 +140,8 @@
           },
           "then": {
             "required": [
-              "units"
+              "units",
+              "instrument"
             ]
           }
         },
