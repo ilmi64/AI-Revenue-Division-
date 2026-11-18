@@ -46,7 +46,7 @@ def review(action="review", status="corroborated", event_id="evt-sol-1"):
 REGISTRY = {"sources": [{
     "source_id": "source-a", "access_mode": "public",
     "access_status": "verified", "cost_status": "free",
-    "terms_review_status": "approved", "operational_status": "active",
+    "terms_review_status": "approved", "canada_review_status": "approved", "operational_status": "active",
 }]}
 
 
@@ -126,6 +126,14 @@ class CapitalFlowHandoffTests(unittest.TestCase):
 
     def test_unknown_or_unreviewed_source_terms_rejected(self):
         registry = {"sources": [{**REGISTRY["sources"][0], "terms_review_status": "not_reviewed"}]}
+        self.assertEqual(self.build(registry=registry)["event_records"], [])
+
+    def test_unreviewed_canada_access_rejected(self):
+        registry = {"sources": [{**REGISTRY["sources"][0], "canada_review_status": "not_reviewed"}]}
+        self.assertEqual(self.build(registry=registry)["event_records"], [])
+
+    def test_unknown_access_mode_rejected(self):
+        registry = {"sources": [{**REGISTRY["sources"][0], "access_mode": "unrecognized_mode"}]}
         self.assertEqual(self.build(registry=registry)["event_records"], [])
 
     def test_wrong_chain_does_not_match(self):
