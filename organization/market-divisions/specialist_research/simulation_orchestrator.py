@@ -123,6 +123,16 @@ def simulate_unified_derivative(
 
     settlement_rows = [row for row in lifecycle_result.get("events", [])
                        if row.get("event_type") == "expiry_settlement"]
+    expiry_value = contract_profile.get("expiry_utc")
+    expiry_time = _timestamp(expiry_value) if expiry_value else None
+    if expiry_time is not None and not settlement_rows:
+        path_times_for_expiry = [_timestamp(step.get("timestamp_utc")) for step in price_path]
+        if any(ts is None or ts >= expiry_time for ts in path_times_for_expiry):
+            check("dated_contract_expiry", False,
+                  "Dated contract path reaches expiry without an explicit settlement event.")
+        else:
+            check("dated_contract_expiry", True,
+                  "Dated contract path remains before expiry.");
     if settlement_rows:
         settlement_time = _timestamp(settlement_rows[-1].get("timestamp_utc"))
         path_times = [_timestamp(step.get("timestamp_utc")) for step in price_path]
@@ -152,11 +162,9 @@ def simulate_unified_derivative(
     # Keep unlike currencies separate; no implicit FX conversion or equity merge.
     settlement_cashflow = lifecycle_result.get("cashflow_total")
     same_currency = contract_profile.get("settlement_currency") == venue_spec.get("quote_currency")
+    # Settlement cashflow may already include realized price P&L. Never add it
+    # to path equity without a separately specified accounting bridge.
     combined_equity = None
-    if same_currency and isinstance(settlement_cashflow, (int, float)):
-        combined_equity = venue_result.get("ending_equity_estimate")
-        if isinstance(combined_equity, (int, float)):
-            combined_equity += settlement_cashflow
 
     return {
         "status": status, "errors": errors,
@@ -168,9 +176,13 @@ def simulate_unified_derivative(
             "status": reconciliation_status, "checks": checks, "errors": errors,
             "carry_source": "contract_lifecycle_only",
             "cashflow_currency": contract_profile.get("settlement_currency"),
-            "combined_equity_estimate": combined_equity,
-            "combined_equity_currency": contract_profile.get("settlement_currency") if combined_equity is not None else None,
-            "currency_merge_performed": combined_equity is not None,
+            "lifecycle_cashflow_total": settlement_cashflow,
+            "lifecycle_cashflow_currency": contract_profile.get("settlement_currency"),
+            "venue_equity_estimate": venue_result.get("ending_equity_estimate"),
+            "venue_equity_currency": venue_spec.get("quote_currency"),
+            "combined_equity_estimate": None,
+            "currency_merge_performed": False,
+            "currency_merge_reason": "No accounting bridge is supplied; lifecycle settlement cashflow may include realized price P&L."
         },
         "limitations": [
             "The venue and contract profiles and all market/event inputs are caller-supplied and unauthenticated.",
