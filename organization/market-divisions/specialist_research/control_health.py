@@ -59,6 +59,19 @@ def build_control_health(snapshot: dict[str, Any],
 
     cross_errors = list(cross_ledger.get("errors", []))
     handover_errors = list(handover.get("errors", []))
+    known_snapshot_ids = {
+        row.get("snapshot_id") for row in snapshot_records
+        if isinstance(row, dict) and isinstance(row.get("snapshot_id"), str)
+    }
+    for row in event_records:
+        event = row.get("event", {}) if isinstance(row, dict) else {}
+        if isinstance(event, dict) and event.get("event_type") == "handover_recorded":
+            details = event.get("details", {})
+            referenced_id = details.get("snapshot_id") if isinstance(details, dict) else None
+            if isinstance(referenced_id, str) and referenced_id not in known_snapshot_ids:
+                handover_errors.append(
+                    f"handover {event.get('event_id')}: snapshot_id does not reference a verified snapshot-history entry"
+                )
     warnings = list(cross_ledger.get("warnings", [])) + list(handover.get("warnings", []))
     integrity_ok = bool(cross_ledger.get("snapshot_history", {}).get("valid")) and bool(
         cross_ledger.get("event_history", {}).get("valid"))
