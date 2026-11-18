@@ -984,3 +984,14 @@ documentation does not establish that a Canadian/Ontario resident can use
 those products. Gold futures GC/MGC and XAUUSD Gold CFDs remain separate;
 the OANDA financing description is a conventional financing mechanism and
 is not a Shariah approval.
+
+
+The source review was subsequently deepened by opening the official Kraken,
+Coinbase and CME Gold pages. The Kraken excerpt now records the page's
+explicit mark-price formula, hourly funding range and multiplier, its
+statement that maintenance margin is half initial margin, and its USD
+settlement timing. Coinbase BTC/ETH examples were checked against the opened
+product specification. CME GC/MGC contract sizes and the stated date of the
+page's indicative margin estimates were checked against the opened Gold
+product page. The manifest distinguishes `official_web_open_excerpt` from
+`official_web_search_excerpt` so the retrieval method is not overstated.
