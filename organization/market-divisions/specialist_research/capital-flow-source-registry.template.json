@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0.0",
+  "sources": [],
+  "policy": {
+    "default_decision": "blocked_until_all_source_gates_verified",
+    "trade_authority": false,
+    "live_readiness": false,
+    "notes": [
+      "No provider is pre-approved by this template.",
+      "Record evidence for access, cost, terms, Canada review and operational status before changing any source gate.",
+      "A passing source record only permits research-context consideration; it does not authenticate source data or grant execution authority."
+    ]
+  }
+}
