@@ -61,7 +61,7 @@ def _records(value: Any, field: str, errors: list[str]) -> list[dict[str, Any]]:
     return result
 
 
-def _position_units(position: dict[str, Any], side: str) -> float | None:
+def _position_units(position: dict[str, Any], side: str) -> Decimal | None:
     value = position.get(side)
     if not isinstance(value, dict):
         return None
@@ -302,6 +302,7 @@ def assess_oanda_post_closeout_account_changes(
         "closed_trade_ids_confirmed": sorted(closed),
         "reduced_trade_ids": sorted(reduced),
         "cancelled_order_ids_confirmed": sorted(cancelled_order_ids),
+        "expected_cancelled_order_ids_confirmed": sorted(expected_cancelled & cancelled_order_ids),
         "position_instruments_reconciled": sorted(position_map),
         "position_reconciliation": "PASS",
         "account_change_reconciliation_complete": True,
