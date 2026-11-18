@@ -148,6 +148,20 @@ class HandoverReconciliationTests(unittest.TestCase):
         self.assertFalse(result["valid"])
         self.assertTrue(any("not carried forward" in x for x in result["errors"]))
 
+    def test_future_stop_does_not_retroactively_block_earlier_handover(self):
+        self.append(event("evt-h1", details=handover()))
+        future_stop = event(
+            "evt-future-stop", "stop_raised",
+            {"stop_id": "future-gold-stop"}, "future-gold-stop"
+        )
+        future_stop["occurred_at_utc"] = "2026-11-18T21:00:00Z"
+        future_stop["recorded_at_utc"] = "2026-11-18T21:00:00Z"
+        self.append(future_stop)
+        result = self.audit()
+        self.assertTrue(result["valid"], result["errors"])
+        self.assertEqual(result["status"], "accepted")
+        self.assertTrue(result["global_stop_active"])
+
 
 if __name__ == "__main__":
     unittest.main()
