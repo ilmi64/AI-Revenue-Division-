@@ -143,6 +143,21 @@ class OandaCloseoutTransactionReconciliationTests(unittest.TestCase):
         self.assertEqual(result["status"], "HALT")
         self.assertTrue(any("contiguous range" in e for e in result["errors"]))
 
+    def test_transaction_timestamps_must_not_move_backwards(self):
+        result = assess(tx=[
+            closeout_fill(transaction_id="101", time="2026-11-18T05:00:02Z"),
+            cancel(transaction_id="102", time="2026-11-18T05:00:01Z"),
+        ])
+        self.assertEqual(result["status"], "HALT")
+        self.assertTrue(any("timestamps move backwards" in error for error in result["errors"]))
+
+    def test_multiple_linked_trade_cancellation_transactions_halt(self):
+        result = assess(tx=[
+            closeout_fill(), cancel(),
+            cancel(transaction_id="103", time="2026-11-18T05:00:02Z"),
+        ], transaction_id_end_inclusive="103")
+        self.assertEqual(result["status"], "HALT")
+
     def test_duplicate_transaction_id_halts(self):
         result = assess(tx=[closeout_fill(), cancel(), cancel()])
         self.assertEqual(result["status"], "HALT")
