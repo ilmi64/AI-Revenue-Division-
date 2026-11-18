@@ -386,6 +386,27 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
         "errors": ["OANDA post-closeout pending-order snapshot was not supplied"],
         "trade_authority": False, "live_readiness": False,
     }
+    margin_replay_report = oanda_account_margin_audit.get("report")
+    closeout_batches = margin_replay_report.get("closeout_batches") if isinstance(margin_replay_report, dict) else None
+    if oanda_pending_order_snapshot is None and isinstance(closeout_batches, list) and closeout_batches:
+        missing_pending_report = {
+            "status": "HALT",
+            "errors": ["A margin closeout was recorded but no post-closeout pending-order snapshot was supplied."],
+            "warnings": [], "closeout_occurred": True,
+            "pending_orders_complete": False, "possible_exposure_reopening": True,
+            "order_cancellation_performed": False,
+            "trade_authority": False, "live_readiness": False,
+            "research_only": True, "authority": "research_only_no_execution_authority",
+        }
+        oanda_pending_order_audit = {
+            "status": "HALT", "report": missing_pending_report,
+            "errors": missing_pending_report["errors"],
+            "trade_authority": False, "live_readiness": False,
+        }
+        active_stops.append({
+            "source": "oanda_pending_orders", "instrument_id": "account",
+            "reason": "POST_CLOSEOUT_PENDING_ORDER_RECONCILIATION_MISSING",
+        })
     if oanda_pending_order_snapshot is not None:
         try:
             from .oanda_pending_order_exposure import assess_oanda_post_closeout_pending_orders
