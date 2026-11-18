@@ -605,13 +605,18 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
                     or sorted(tx_closed) != sorted(change_closed)):
                 consistency_errors.append("closed trade IDs differ between transaction and AccountChanges reconciliations")
             tx_cancelled = transaction_report.get("orders_expected_cancelled")
-            change_cancelled = changes_report.get("cancelled_order_ids_confirmed")
+            change_cancelled = changes_report.get("expected_cancelled_order_ids_confirmed")
             if (not isinstance(tx_cancelled, list) or not isinstance(change_cancelled, list)
                     or any(not isinstance(item, str) for item in tx_cancelled + change_cancelled)
                     or sorted(tx_cancelled) != sorted(change_cancelled)):
                 consistency_errors.append("expected linked-order cancellations differ between transaction and AccountChanges reconciliations")
             if oanda_closeout_transaction_replay.get("account_id") != oanda_post_closeout_account_changes_replay.get("account_id"):
                 consistency_errors.append("account IDs differ between transaction and AccountChanges reconciliations")
+            tx_last_id = transaction_report.get("reported_last_transaction_id")
+            changes_last_id = changes_report.get("last_transaction_id")
+            if (not isinstance(tx_last_id, str) or not isinstance(changes_last_id, str)
+                    or tx_last_id != changes_last_id):
+                consistency_errors.append("transaction history lastTransactionID differs from AccountChanges cursor")
             tx_pre_orders = oanda_closeout_transaction_replay.get("pre_closeout_pending_orders")
             changes_pre_ids = oanda_post_closeout_account_changes_replay.get("pre_closeout_pending_order_ids")
             tx_pre_ids = ([item.get("id") for item in tx_pre_orders if isinstance(item, dict)]
