@@ -289,6 +289,7 @@ def assess_oanda_closeout_transaction_reconciliation(
         "account_id": account_id,
         "transaction_id_start_exclusive": str(start_id),
         "transaction_id_end_inclusive": str(end_id),
+        "reported_last_transaction_id": str(reported_last_id),
         "transaction_count": len(parsed_transactions),
         "transaction_range_complete": True,
         "closeout_transaction_ids": closeout_ids,
