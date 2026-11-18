@@ -169,8 +169,11 @@ def replay_contract_lifecycle(profile: dict[str, Any], position: dict[str, Any],
                 if not all(_number(x) for x in (rate, notional, basis)) or float(notional) <= 0 or float(basis) <= 0:
                     errors.append(f"{prefix} requires cashflow or finite rate/notional/positive basis_units")
                     break
-                # Rate sign is interpreted literally as signed cashflow to this position.
-                cashflow = float(rate) * float(notional) * float(basis) * side_sign
+                # Rate sign is already the signed cashflow convention for this
+                # position; applying side_sign here would invert short-position
+                # cashflows a second time. Venue-specific payer/receiver rules
+                # must be normalized by the caller before this replay.
+                cashflow = float(rate) * float(notional) * float(basis)
             if event.get("currency") != profile["settlement_currency"]:
                 errors.append(f"{prefix}.currency must match settlement_currency")
                 break
