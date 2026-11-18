@@ -20,8 +20,8 @@ class VenueDocumentCaptureTests(unittest.TestCase):
     def test_manifest_validates(self):
         self.assertEqual(validate_capture_manifest(self.manifest), [])
 
-    def test_all_twenty_excerpt_digests_match_captured_text(self):
-        self.assertEqual(len(self.manifest["captures"]), 20)
+    def test_all_twenty_one_excerpt_digests_match_captured_text(self):
+        self.assertEqual(len(self.manifest["captures"]), 21)
         for capture in self.manifest["captures"]:
             self.assertEqual(validate_revision(capture), [])
 
@@ -44,7 +44,7 @@ class VenueDocumentCaptureTests(unittest.TestCase):
     def test_report_discloses_partial_capture_and_no_profile_eligibility(self):
         report = build_capture_report(self.manifest)
         self.assertEqual(report["status"], "PARTIAL_EVIDENCE_CAPTURE_VALID")
-        self.assertEqual(report["document_count"], 20)
+        self.assertEqual(report["document_count"], 21)
         self.assertEqual(report["candidate_count"], 7)
         self.assertFalse(report["full_document_capture"])
         self.assertTrue(all(not item["profile_eligible"] for item in report["documents"]))
@@ -95,6 +95,10 @@ class VenueDocumentCaptureTests(unittest.TestCase):
         self.assertEqual(endpoint_facts["transaction_last_id"], "lastTransactionID")
         changes = captures["oanda_v20_account_changes_endpoint"]
         self.assertTrue(any(item["fact_key"] == "account_changes_cancelled_orders" for item in changes["extracted_facts"]))
+        account = captures["oanda_v20_account_definitions"]
+        account_facts = {item["fact_key"]: item["value"] for item in account["extracted_facts"]}
+        self.assertEqual(account_facts["full_account_transaction_cursor"], "lastTransactionID")
+        self.assertEqual(account_facts["account_changes_price_dependent_state"], "NAV, unrealizedPL, marginUsed and marginAvailable")
 
     def test_capture_manifest_preserves_per_document_capture_dates(self):
         dates = {item["captured_at_utc"] for item in self.manifest["captures"]}
