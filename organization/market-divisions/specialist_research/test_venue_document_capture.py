@@ -90,9 +90,17 @@ class VenueDocumentCaptureTests(unittest.TestCase):
         self.assertEqual(facts["linked_trade_closed_reason"], "LINKED_TRADE_CLOSED")
         self.assertEqual(facts["margin_closeout_fill_reason"], "MARKET_ORDER_MARGIN_CLOSEOUT")
         endpoint = captures["oanda_v20_transaction_endpoints"]
-        self.assertTrue(any(item["fact_key"] == "transaction_since_id_endpoint" for item in endpoint["extracted_facts"]))
+        endpoint_facts = {item["fact_key"]: item["value"] for item in endpoint["extracted_facts"]}
+        self.assertTrue(endpoint_facts["transaction_since_id_endpoint"].endswith("/transactions/sinceid"))
+        self.assertEqual(endpoint_facts["transaction_last_id"], "lastTransactionID")
         changes = captures["oanda_v20_account_changes_endpoint"]
         self.assertTrue(any(item["fact_key"] == "account_changes_cancelled_orders" for item in changes["extracted_facts"]))
+
+    def test_capture_manifest_preserves_per_document_capture_dates(self):
+        dates = {item["captured_at_utc"] for item in self.manifest["captures"]}
+        self.assertEqual(dates, {"2026-11-17T00:00:00Z", "2026-11-18T00:00:00Z"})
+        self.assertEqual(self.manifest["captured_at_utc"], "2026-11-18T00:00:00Z")
+        self.assertEqual(validate_capture_manifest(self.manifest), [])
 
     def test_gold_cfd_capture_does_not_claim_physical_ownership(self):
         item = next(x for x in self.manifest["captures"] if x["document_id"] == "oanda_xauusd_instrument_page")
