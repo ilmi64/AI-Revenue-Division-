@@ -1210,11 +1210,14 @@ caller-supplied OANDA v20 `GET /v3/accounts/{accountID}/changes` response and
 a subsequent full account snapshot. It reconciles the returned transaction
 cursor, closed margin-closeout trades, linked dependent-order cancellations,
 filled pre-existing orders, newly opened/reduced/closed trades, and changed
-long/short position units against the full snapshot. A newly opened trade, any non-closeout order fill, any order created or triggered
-after the supplied closeout boundary, or a newly remaining pending order keeps
-the audit at HALT for independent OCC exposure review. Only an ORDER_FILL
-explicitly identified by a matching transaction reason of
-`MARKET_ORDER_MARGIN_CLOSEOUT` is exempt from the unexpected-fill check. It never connects to OANDA or changes an order or position.
+long/short position units against the full snapshot. A newly opened trade, any non-closeout order fill, any non-closeout order created or any order triggered after the supplied
+closeout boundary, or a newly remaining pending order keeps the audit at HALT
+for independent OCC exposure review. OANDA may include an immediately filled
+margin-closeout market order in both `ordersCreated` and `ordersFilled`; that
+creation is exempt only when a matching `MARKET_ORDER` transaction has reason
+`MARGIN_CLOSEOUT` and its matching `ORDER_FILL` transaction has reason
+`MARKET_ORDER_MARGIN_CLOSEOUT`. The transaction and AccountChanges fill arrays
+must agree in both directions. It never connects to OANDA or changes an order or position.
 
 The input contract is defined in
 `oanda-post-closeout-account-changes.schema.json`; synthetic regression
