@@ -175,6 +175,58 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
         if packet.get("status") == "halt" or "STOP_CHALLENGE" in packet.get("risk_flags", []):
             active_stops.append({"source": str(desk_id), "instrument_id": str(instrument_id),
                                  "reason": "specialist_halt_or_stop_challenge"})
+    capital_flow_packets = []
+    capital_flow_boundary_errors = []
+    for packet in packets:
+        if not isinstance(packet, dict) or packet.get("desk_id") != "crypto":
+            continue
+        handoff = packet.get("capital_flow_handoff")
+        if handoff is None:
+            continue
+        if (not isinstance(handoff, dict)
+                or handoff.get("mode") != "research_only"
+                or handoff.get("destination_desk") != "crypto"
+                or handoff.get("trade_authority") is not False
+                or handoff.get("live_readiness") is not False
+                or not isinstance(handoff.get("event_records"), list)
+                or not isinstance(handoff.get("rejected_matching_events"), list)):
+            capital_flow_boundary_errors.append(
+                f"{packet.get('instrument_id')}: malformed or authority-violating Capital Flow handoff"
+            )
+            continue
+        capital_flow_packets.append({
+            "instrument_id": packet.get("instrument_id"),
+            "status": handoff.get("status", "provided"),
+            "accepted_event_ids": sorted(
+                item["event_id"] for item in handoff["event_records"]
+                if isinstance(item, dict) and isinstance(item.get("event_id"), str)
+            ),
+            "rejected_events": [
+                {"event_id": item.get("event_id"), "reason": item.get("reason")}
+                for item in handoff["rejected_matching_events"] if isinstance(item, dict)
+            ],
+            "review_ledger": handoff.get("review_ledger"),
+            "trade_authority": False,
+            "live_readiness": False,
+        })
+    if capital_flow_boundary_errors:
+        packet_errors.append({"instrument_id": "capital_flow_boundary",
+                              "errors": capital_flow_boundary_errors})
+
+    capital_flow_audit = {
+        "status": ("blocked" if capital_flow_boundary_errors else
+                   "consumed_research_context" if any(x["accepted_event_ids"] for x in capital_flow_packets) else
+                   "provided_no_eligible_match" if capital_flow_packets else "not_consumed"),
+        "instrument_count": len(capital_flow_packets),
+        "accepted_event_count": sum(len(x["accepted_event_ids"]) for x in capital_flow_packets),
+        "rejected_event_count": sum(len(x["rejected_events"]) for x in capital_flow_packets),
+        "instruments": capital_flow_packets,
+        "boundary_errors": capital_flow_boundary_errors,
+        "mode": "research_only",
+        "trade_authority": False,
+        "live_readiness": False,
+    }
+
     missing_desks = [desk for desk, count in desk_coverage.items() if count == 0]
     if require_full_coverage and missing_desks:
         packet_errors.append({"instrument_id": "coverage", "errors": [
@@ -217,6 +269,7 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
         "missing_desks": missing_desks,
         "coverage_complete": coverage_complete,
         "specialist_packets": packets,
+        "capital_flow_audit": capital_flow_audit,
         "capital_flow_context": replay_result.get("capital_flow_handoff", {
             "status": "not_consumed", "accepted_event_count": 0, "trade_authority": False,
         }),
