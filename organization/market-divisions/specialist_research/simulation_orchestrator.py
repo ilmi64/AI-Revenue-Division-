@@ -229,6 +229,9 @@ def simulate_registered_derivative(
     )
     if not resolution.get("research_eligible"):
         errors = list(resolution.get("errors", []))
+        freshness = resolution.get("document_freshness")
+        if isinstance(freshness, dict):
+            errors.extend(freshness.get("errors", []))
         if not errors:
             errors.append(f"registry resolution blocked: {resolution.get('status')}")
         result = _blocked("BLOCKED_REGISTRY_PROFILE", errors)
