@@ -24,6 +24,8 @@ def handover(hid="h-1", outgoing="day-1", incoming="night-1"):
         "incoming_shift_id": incoming, "snapshot_id": "occ-snapshot-1",
         "portfolio_version": 7, "outgoing_acknowledged": True,
         "incoming_acknowledged": True, "positions_reconciled": True,
+        "desk_coverage": {"crypto": 1, "forex": 1, "indices": 1, "gold": 1},
+        "positions_reconciled_by_desk": {"crypto": True, "forex": True, "indices": True, "gold": True},
         "dependency_health": "healthy", "active_veto_ids": [],
         "unresolved_critical_items": [],
     }
