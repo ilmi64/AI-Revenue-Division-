@@ -114,7 +114,12 @@
       ],
       "properties": {
         "status": {
-          "enum": ["PASS", "WARN", "HALT", "NOT_PROVIDED"]
+          "enum": [
+            "PASS",
+            "WARN",
+            "HALT",
+            "NOT_PROVIDED"
+          ]
         },
         "instrument_count": {
           "type": "integer",
@@ -135,21 +140,64 @@
               "live_readiness"
             ],
             "properties": {
-              "instrument_id": {"type": ["string", "null"]},
-              "status": {"enum": ["research", "unverified", "halt", "NOT_PROVIDED"]},
-              "price_basis": {"type": ["string", "null"]},
-              "macro_factor_count": {"type": "integer", "minimum": 0, "maximum": 8},
-              "macro_factor_coverage": {"type": "object"},
-              "source_independence_verified": {"const": false},
-              "errors": {"type": "array", "items": {"type": "string"}},
-              "warnings": {"type": "array", "items": {"type": "string"}},
-              "trade_authority": {"const": false},
-              "live_readiness": {"const": false}
+              "instrument_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "status": {
+                "enum": [
+                  "research",
+                  "unverified",
+                  "halt",
+                  "NOT_PROVIDED"
+                ]
+              },
+              "price_basis": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "macro_factor_count": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 8
+              },
+              "macro_factor_coverage": {
+                "type": "object"
+              },
+              "source_independence_verified": {
+                "const": false
+              },
+              "errors": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "warnings": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "trade_authority": {
+                "const": false
+              },
+              "live_readiness": {
+                "const": false
+              }
             }
           }
         },
-        "trade_authority": {"const": false},
-        "live_readiness": {"const": false}
+        "trade_authority": {
+          "const": false
+        },
+        "live_readiness": {
+          "const": false
+        }
       }
     },
     "capital_flow_context": {
@@ -295,25 +343,141 @@
     },
     "portfolio_risk": {
       "type": "object",
-      "required": ["schema_version", "status", "coverage", "position_count", "positions", "desk_exposure", "exposure_by_valuation_currency", "exposure_by_group", "risk_limits", "correlation_risk", "simultaneous_stop_count", "stop_sources", "errors", "warnings", "authority", "trade_authority", "live_readiness"],
+      "required": [
+        "schema_version",
+        "status",
+        "coverage",
+        "position_count",
+        "positions",
+        "desk_exposure",
+        "exposure_by_valuation_currency",
+        "exposure_by_group",
+        "risk_limits",
+        "correlation_risk",
+        "simultaneous_stop_count",
+        "stop_sources",
+        "errors",
+        "warnings",
+        "authority",
+        "trade_authority",
+        "live_readiness",
+        "instrument_normalization",
+        "stress_testing"
+      ],
       "properties": {
-        "schema_version": {"const": "1.0.0"},
-        "status": {"enum": ["HALT", "UNKNOWN", "ASSESSED_WITHIN_CONFIGURED_LIMITS"]},
-        "position_count": {"type": "integer", "minimum": 0},
-        "positions": {"type": "array"},
-        "coverage": {"type": "object"},
-        "desk_exposure": {"type": "object"},
-        "exposure_by_valuation_currency": {"type": "object"},
-        "exposure_by_group": {"type": "object"},
-        "risk_limits": {"type": "object"},
-        "correlation_risk": {"type": "object"},
-        "simultaneous_stop_count": {"type": "integer", "minimum": 0},
-        "stop_sources": {"type": "array"},
-        "errors": {"type": "array", "items": {"type": "string"}},
-        "warnings": {"type": "array", "items": {"type": "string"}},
-        "authority": {"const": "research_only_no_execution_authority"},
-        "trade_authority": {"const": false},
-        "live_readiness": {"const": false}
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "status": {
+          "enum": [
+            "HALT",
+            "UNKNOWN",
+            "ASSESSED_WITHIN_CONFIGURED_LIMITS"
+          ]
+        },
+        "position_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "positions": {
+          "type": "array"
+        },
+        "coverage": {
+          "type": "object"
+        },
+        "desk_exposure": {
+          "type": "object"
+        },
+        "exposure_by_valuation_currency": {
+          "type": "object"
+        },
+        "exposure_by_group": {
+          "type": "object"
+        },
+        "risk_limits": {
+          "type": "object"
+        },
+        "correlation_risk": {
+          "type": "object"
+        },
+        "simultaneous_stop_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "stop_sources": {
+          "type": "array"
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "authority": {
+          "const": "research_only_no_execution_authority"
+        },
+        "trade_authority": {
+          "const": false
+        },
+        "live_readiness": {
+          "const": false
+        },
+        "instrument_normalization": {
+          "type": "object",
+          "required": [
+            "status",
+            "positions",
+            "unclassified_position_ids"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "INPUTS_VALIDATED_NOT_REPRICED",
+                "UNKNOWN"
+              ]
+            },
+            "positions": {
+              "type": "array"
+            },
+            "unclassified_position_ids": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "stress_testing": {
+          "type": "object",
+          "required": [
+            "status",
+            "scenarios",
+            "errors"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "ASSESSED",
+                "UNKNOWN"
+              ]
+            },
+            "scenarios": {
+              "type": "array"
+            },
+            "errors": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
       }
     },
     "control_health": {
