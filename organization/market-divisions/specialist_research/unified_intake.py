@@ -133,7 +133,8 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
                          control_health_snapshot_history: Path | None = None,
                          control_health_event_ledger: Path | None = None,
                          portfolio_risk_config: dict[str, Any] | None = None,
-                         correlation_evidence: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+                         correlation_evidence: list[dict[str, Any]] | None = None,
+                         oanda_account_margin_replay: dict[str, Any] | None = None) -> dict[str, Any]:
     """Build one immutable-style research snapshot from local source snapshots."""
     _utc(now_utc, "now_utc")
     audit_paths = (control_health_snapshot_history, control_health_event_ledger)
@@ -338,6 +339,47 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
         elif normalized_stop not in {"CLEAR", "INACTIVE", "NONE"}:
             packet_errors.append({"instrument_id": "occ_control", "errors": ["unknown OCC stop state"]})
     portfolio_risk_audit = assess_portfolio_risk(packets, now_utc, portfolio_risk_config, correlation_evidence)
+    oanda_account_margin_audit = {
+        "status": "NOT_PROVIDED", "report": None,
+        "errors": ["OANDA account-level margin replay was not supplied"],
+        "trade_authority": False, "live_readiness": False,
+    }
+    if oanda_account_margin_replay is not None:
+        try:
+            from .oanda_account_margin_closeout import replay_oanda_account_margin_closeout
+        except ImportError:
+            from oanda_account_margin_closeout import replay_oanda_account_margin_closeout
+        if not isinstance(oanda_account_margin_replay, dict):
+            margin_report = {
+                "status": "BLOCKED_INVALID_OR_INCOMPLETE_INPUT",
+                "errors": ["oanda_account_margin_replay must be an object"],
+                "trade_authority": False, "live_readiness": False,
+                "research_only": True,
+                "authority": "research_only_no_execution_authority",
+            }
+        else:
+            try:
+                margin_report = replay_oanda_account_margin_closeout(**oanda_account_margin_replay)
+            except TypeError as exc:
+                margin_report = {
+                    "status": "BLOCKED_INVALID_OR_INCOMPLETE_INPUT",
+                    "errors": [f"invalid OANDA account margin replay input shape: {exc}"],
+                    "trade_authority": False, "live_readiness": False,
+                    "research_only": True,
+                    "authority": "research_only_no_execution_authority",
+                }
+        margin_status = margin_report.get("status")
+        oanda_account_margin_audit = {
+            "status": "PASS" if margin_status == "WITHIN_MARGIN_REQUIREMENTS" else "HALT",
+            "report": margin_report,
+            "errors": margin_report.get("errors", []),
+            "trade_authority": False, "live_readiness": False,
+        }
+        if oanda_account_margin_audit["status"] == "HALT":
+            active_stops.append({
+                "source": "oanda_account_margin", "instrument_id": "account",
+                "reason": "OANDA_ACCOUNT_MARGIN_CALL_CLOSEOUT_OR_INVALID_REPLAY",
+            })
     if portfolio_risk_audit["status"] == "HALT":
         active_stops.append({"source": "portfolio_risk", "instrument_id": "portfolio",
                              "reason": "portfolio_risk_halt_or_limit_breach"})
@@ -374,6 +416,7 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
         "capital_flow_audit": capital_flow_audit,
         "gold_specialist_audit": gold_specialist_audit,
         "portfolio_risk": portfolio_risk_audit,
+        "oanda_account_margin_audit": oanda_account_margin_audit,
         "capital_flow_context": replay_result.get("capital_flow_handoff", {
             "status": "not_consumed", "accepted_event_count": 0, "trade_authority": False,
         }),
@@ -404,6 +447,7 @@ def build_unified_intake(observations: list[dict[str, Any]], now_utc: str,
             "Gold macro and instrument context is descriptive research only and is not independently authenticated",
             "Missing desk coverage is visible and prevents a fully covered research status",
             "Portfolio exposure, risk limits and correlation are unknown unless explicit comparable evidence and OCC limits are supplied",
+            "OANDA account-level margin rules are audited only when an explicit same-account position set and verified trading-day observations are supplied",
         ],
     }
 
