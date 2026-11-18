@@ -20,8 +20,8 @@ class VenueDocumentCaptureTests(unittest.TestCase):
     def test_manifest_validates(self):
         self.assertEqual(validate_capture_manifest(self.manifest), [])
 
-    def test_all_seventeen_excerpt_digests_match_captured_text(self):
-        self.assertEqual(len(self.manifest["captures"]), 17)
+    def test_all_twenty_excerpt_digests_match_captured_text(self):
+        self.assertEqual(len(self.manifest["captures"]), 20)
         for capture in self.manifest["captures"]:
             self.assertEqual(validate_revision(capture), [])
 
@@ -44,7 +44,7 @@ class VenueDocumentCaptureTests(unittest.TestCase):
     def test_report_discloses_partial_capture_and_no_profile_eligibility(self):
         report = build_capture_report(self.manifest)
         self.assertEqual(report["status"], "PARTIAL_EVIDENCE_CAPTURE_VALID")
-        self.assertEqual(report["document_count"], 17)
+        self.assertEqual(report["document_count"], 20)
         self.assertEqual(report["candidate_count"], 7)
         self.assertFalse(report["full_document_capture"])
         self.assertTrue(all(not item["profile_eligible"] for item in report["documents"]))
@@ -82,6 +82,17 @@ class VenueDocumentCaptureTests(unittest.TestCase):
         self.assertIn("REDUCE_ONLY", facts["reduce_only_semantics"])
         endpoint = captures["oanda_v20_account_pending_orders_endpoint"]
         self.assertTrue(any(item["fact_key"] == "pending_orders_endpoint" for item in endpoint["extracted_facts"]))
+
+    def test_oanda_v20_transaction_evidence_captures_closeout_and_cancellation_fields(self):
+        captures = {item["document_id"]: item for item in self.manifest["captures"]}
+        transactions = captures["oanda_v20_transaction_definitions"]
+        facts = {item["fact_key"]: item["value"] for item in transactions["extracted_facts"]}
+        self.assertEqual(facts["linked_trade_closed_reason"], "LINKED_TRADE_CLOSED")
+        self.assertEqual(facts["margin_closeout_fill_reason"], "MARKET_ORDER_MARGIN_CLOSEOUT")
+        endpoint = captures["oanda_v20_transaction_endpoints"]
+        self.assertTrue(any(item["fact_key"] == "transaction_since_id_endpoint" for item in endpoint["extracted_facts"]))
+        changes = captures["oanda_v20_account_changes_endpoint"]
+        self.assertTrue(any(item["fact_key"] == "account_changes_cancelled_orders" for item in changes["extracted_facts"]))
 
     def test_gold_cfd_capture_does_not_claim_physical_ownership(self):
         item = next(x for x in self.manifest["captures"] if x["document_id"] == "oanda_xauusd_instrument_page")
