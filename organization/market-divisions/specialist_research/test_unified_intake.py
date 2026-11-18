@@ -31,19 +31,19 @@ class UnifiedIntakeTests(unittest.TestCase):
             }],
             "post_closeout_pending_orders": [] if post_orders is None else post_orders,
             "transactions": [
-                {"id": "101", "accountID": "acct-1", "time": "2026-11-17T20:45:01Z",
+                {"id": "101", "accountID": "acct-1", "time": "2026-11-17T11:59:57Z",
                  "type": "ORDER_FILL", "reason": "MARKET_ORDER_MARGIN_CLOSEOUT",
                  "orderID": "100", "tradesClosed": [{"tradeID": "trade-gold", "units": "1"}]},
-                {"id": "102", "accountID": "acct-1", "time": "2026-11-17T20:45:01Z",
+                {"id": "102", "accountID": "acct-1", "time": "2026-11-17T11:59:57Z",
                  "type": "ORDER_CANCEL", "orderID": "sl-gold", "reason": "LINKED_TRADE_CLOSED"},
             ],
             "transaction_id_start_exclusive": "100", "transaction_id_end_inclusive": "102",
             "reported_last_transaction_id": "102",
             "transaction_range_complete": True, "transaction_range_unfiltered": True,
             "pre_closeout_orders_complete": True, "post_closeout_orders_complete": True,
-            "pre_closeout_snapshot_timestamp_utc": "2026-11-17T20:45:00Z",
-            "post_closeout_snapshot_timestamp_utc": "2026-11-17T20:45:02Z",
-            "evaluated_at_utc": "2026-11-17T20:45:03Z", "max_snapshot_age_seconds": 60,
+            "pre_closeout_snapshot_timestamp_utc": "2026-11-17T11:59:56Z",
+            "post_closeout_snapshot_timestamp_utc": "2026-11-17T11:59:58Z",
+            "evaluated_at_utc": "2026-11-17T12:00:00Z", "max_snapshot_age_seconds": 60,
         }
 
     def oanda_pending_snapshot(self, orders=None):
@@ -52,8 +52,8 @@ class UnifiedIntakeTests(unittest.TestCase):
             "liquidated_trade_ids": ["trade-gold"], "remaining_open_trade_ids": [],
             "remaining_open_trade_ids_complete": True, "reported_pending_order_count": len(orders or []),
             "account_hedging_enabled": False,
-            "source_timestamp_utc": "2026-11-17T20:45:02Z",
-            "evaluated_at_utc": "2026-11-17T20:45:03Z", "max_snapshot_age_seconds": 60,
+            "source_timestamp_utc": "2026-11-17T11:59:58Z",
+            "evaluated_at_utc": "2026-11-17T12:00:00Z", "max_snapshot_age_seconds": 60,
             "pending_orders_complete": True, "closeout_occurred": True,
         }
 
@@ -131,7 +131,7 @@ class UnifiedIntakeTests(unittest.TestCase):
                 {"position_id": "fx", "desk_id": "forex", "instrument_id": "EURUSD"},
             ],
             "observations": [{
-                "timestamp_utc": "2026-11-17T20:45:00Z",
+                "timestamp_utc": "2026-11-17T11:59:56Z",
                 "nav_mid": 900, "margin_used": 1000,
                 "position_market_status": {"gold": "open", "fx": "open"},
                 "trading_day_check": False,
@@ -149,7 +149,7 @@ class UnifiedIntakeTests(unittest.TestCase):
             "account_currency": "CAD",
             "initial_positions": [{"position_id": "gold", "desk_id": "gold", "instrument_id": "XAUUSD"}],
             "observations": [{
-                "timestamp_utc": "2026-11-17T20:45:00Z", "nav_mid": 400, "margin_used": 1000,
+                "timestamp_utc": "2026-11-17T11:59:56Z", "nav_mid": 400, "margin_used": 1000,
                 "position_market_status": {"gold": "open"}, "trading_day_check": False,
             }],
         }
@@ -187,7 +187,7 @@ class UnifiedIntakeTests(unittest.TestCase):
             "account_currency": "CAD",
             "initial_positions": [{"position_id": "gold", "desk_id": "gold", "instrument_id": "XAUUSD"}],
             "observations": [{
-                "timestamp_utc": "2026-11-17T20:45:00Z", "nav_mid": 400, "margin_used": 1000,
+                "timestamp_utc": "2026-11-17T11:59:56Z", "nav_mid": 400, "margin_used": 1000,
                 "position_market_status": {"gold": "open"}, "trading_day_check": False,
             }],
         }
@@ -204,7 +204,7 @@ class UnifiedIntakeTests(unittest.TestCase):
             "account_currency": "CAD",
             "initial_positions": [{"position_id": "gold", "desk_id": "gold", "instrument_id": "XAUUSD"}],
             "observations": [{
-                "timestamp_utc": "2026-11-17T20:45:00Z", "nav_mid": 400, "margin_used": 1000,
+                "timestamp_utc": "2026-11-17T11:59:56Z", "nav_mid": 400, "margin_used": 1000,
                 "position_market_status": {"gold": "open"}, "trading_day_check": False,
             }],
         }
@@ -222,9 +222,9 @@ class UnifiedIntakeTests(unittest.TestCase):
             "account_currency": "CAD",
             "initial_positions": [{"position_id": "gold", "desk_id": "gold", "instrument_id": "XAUUSD"}],
             "observations": [
-                {"timestamp_utc": "2026-11-17T20:45:00Z", "nav_mid": 900, "margin_used": 1000,
+                {"timestamp_utc": "2026-11-17T11:59:56Z", "nav_mid": 900, "margin_used": 1000,
                  "position_market_status": {"gold": "open"}, "trading_day_check": False},
-                {"timestamp_utc": "2026-11-18T14:00:00Z", "nav_mid": 1200, "margin_used": 1000,
+                {"timestamp_utc": "2026-11-17T11:59:58Z", "nav_mid": 1200, "margin_used": 1000,
                  "position_market_status": {"gold": "open"}, "trading_day_check": False},
             ],
         }
@@ -238,7 +238,7 @@ class UnifiedIntakeTests(unittest.TestCase):
             "account_currency": "CAD",
             "initial_positions": [{"position_id": "gold", "desk_id": "gold", "instrument_id": "XAUUSD"}],
             "observations": [{
-                "timestamp_utc": "2026-11-17T20:45:00Z",
+                "timestamp_utc": "2026-11-17T11:59:56Z",
                 "nav_mid": 1200, "margin_used": 1000,
                 "position_market_status": {"gold": "open"},
                 "trading_day_check": False,
