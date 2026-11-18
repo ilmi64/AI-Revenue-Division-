@@ -254,6 +254,9 @@ def build_occ_control_health_report(snapshot=None):
                 "oanda_closeout_transaction_audit": {"status": "NOT_PROVIDED", "report": None,
                                                       "errors": [], "trade_authority": False,
                                                       "live_readiness": False},
+                "oanda_post_closeout_account_changes_audit": {"status": "NOT_PROVIDED", "report": None,
+                                                               "errors": [], "trade_authority": False,
+                                                               "live_readiness": False},
                 "errors": [],
                 "warnings": ["No unified OCC snapshot supplied to the Main Hub dashboard."],
                 "trade_authority": False, "live_readiness": False}
@@ -272,6 +275,9 @@ def build_occ_control_health_report(snapshot=None):
                 "oanda_closeout_transaction_audit": {"status": "HALT", "report": None,
                                                       "errors": ["Supplied OCC snapshot is invalid."],
                                                       "trade_authority": False, "live_readiness": False},
+                "oanda_post_closeout_account_changes_audit": {"status": "HALT", "report": None,
+                                                               "errors": ["Supplied OCC snapshot is invalid."],
+                                                               "trade_authority": False, "live_readiness": False},
                 "errors": ["Supplied OCC snapshot is missing or has an unsupported snapshot_type."],
                 "warnings": [], "trade_authority": False, "live_readiness": False}
     audit = snapshot.get("control_health")
@@ -387,6 +393,34 @@ def build_occ_control_health_report(snapshot=None):
     elif oanda_transaction_audit.get("status") == "NOT_PROVIDED" and status == "PASS_AUDIT":
         status = "WARN_AUDIT"
         warnings.append("OANDA closeout transaction reconciliation was not supplied.")
+    oanda_changes_audit = snapshot.get("oanda_post_closeout_account_changes_audit")
+    if oanda_changes_audit is None:
+        oanda_changes_audit = {"status": "NOT_PROVIDED", "report": None, "errors": [],
+                               "trade_authority": False, "live_readiness": False}
+    elif (not isinstance(oanda_changes_audit, dict)
+          or oanda_changes_audit.get("status") not in {"NOT_PROVIDED", "PASS", "HALT"}
+          or oanda_changes_audit.get("trade_authority") is not False
+          or oanda_changes_audit.get("live_readiness") is not False
+          or not isinstance(oanda_changes_audit.get("errors"), list)
+          or any(not isinstance(item, str) for item in oanda_changes_audit.get("errors", []))
+          or (oanda_changes_audit.get("status") == "NOT_PROVIDED" and oanda_changes_audit.get("report") is not None)
+          or (oanda_changes_audit.get("status") in {"PASS", "HALT"} and not isinstance(oanda_changes_audit.get("report"), dict))
+          or (oanda_changes_audit.get("status") == "PASS" and oanda_changes_audit.get("report", {}).get("status") != "PASS")
+          or (oanda_changes_audit.get("status") == "HALT" and oanda_changes_audit.get("report", {}).get("status") == "PASS")
+          or (oanda_changes_audit.get("status") in {"PASS", "HALT"} and
+              (oanda_changes_audit.get("report", {}).get("trade_authority") is not False
+               or oanda_changes_audit.get("report", {}).get("live_readiness") is not False
+               or oanda_changes_audit.get("report", {}).get("authority") != "research_only_no_execution_authority"))):
+        oanda_changes_audit = dict(oanda_changes_audit) if isinstance(oanda_changes_audit, dict) else {}
+        oanda_changes_audit["status"] = "HALT"
+        errors.append("OANDA post-closeout account-change audit is malformed or violates its research-only authority boundary.")
+        status = "HALT_AUDIT"
+    elif oanda_changes_audit.get("status") == "HALT":
+        errors.append("OANDA post-closeout account-change reconciliation reports inconsistent trades, orders or positions.")
+        status = "HALT_AUDIT"
+    elif oanda_changes_audit.get("status") == "NOT_PROVIDED" and status == "PASS_AUDIT":
+        status = "WARN_AUDIT"
+        warnings.append("OANDA post-closeout AccountChanges reconciliation was not supplied.")
     gold_audit = snapshot.get("gold_specialist_audit")
     if not isinstance(gold_audit, dict):
         gold_audit = {"status": "NOT_PROVIDED", "instrument_count": 0,
@@ -416,6 +450,7 @@ def build_occ_control_health_report(snapshot=None):
         "oanda_account_margin_audit": oanda_margin_audit,
         "oanda_pending_order_audit": oanda_pending_audit,
         "oanda_closeout_transaction_audit": oanda_transaction_audit,
+        "oanda_post_closeout_account_changes_audit": oanda_changes_audit,
         "audit": audit,
         "errors": errors,
         "warnings": warnings,
