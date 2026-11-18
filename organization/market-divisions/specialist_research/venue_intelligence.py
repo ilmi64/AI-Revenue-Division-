@@ -186,11 +186,13 @@ def assess_evidence_bundle(bundle: Any, as_of_utc: str) -> dict[str, Any]:
                     or isinstance(max_age_days, bool) or max_age_days < 0):
                 errors.append(f"fact {key} max_age_days must be non-negative")
             elif as_of is not None:
-                for entry in entries:
-                    observed_at = _utc(entry["observed_at_utc"])
-                    if observed_at is not None and (as_of - observed_at).total_seconds() > max_age_days * 86400:
-                        if key not in stale_facts:
-                            stale_facts.append(key)
+                observation_times = [_utc(entry["observed_at_utc"]) for entry in entries]
+                valid_times = [value for value in observation_times if value is not None]
+                if valid_times and all(
+                    (as_of - observed_at).total_seconds() > max_age_days * 86400
+                    for observed_at in valid_times
+                ) and key not in stale_facts:
+                    stale_facts.append(key)
         fact_assessments.append({
             "fact_key": key, "source_count": len(entries),
             "official_class_source_count": official_count,
