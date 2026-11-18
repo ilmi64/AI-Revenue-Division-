@@ -31,13 +31,15 @@ class UnifiedIntakeTests(unittest.TestCase):
             }],
             "post_closeout_pending_orders": [] if post_orders is None else post_orders,
             "transactions": [
+                {"id": "100", "accountID": "acct-1", "time": "2026-11-17T11:59:57Z",
+                 "type": "MARKET_ORDER", "reason": "MARGIN_CLOSEOUT"},
                 {"id": "101", "accountID": "acct-1", "time": "2026-11-17T11:59:57Z",
                  "type": "ORDER_FILL", "reason": "MARKET_ORDER_MARGIN_CLOSEOUT",
                  "orderID": "100", "tradesClosed": [{"tradeID": "trade-gold", "units": "1"}]},
                 {"id": "102", "accountID": "acct-1", "time": "2026-11-17T11:59:57Z",
                  "type": "ORDER_CANCEL", "orderID": "sl-gold", "reason": "LINKED_TRADE_CLOSED"},
             ],
-            "transaction_id_start_exclusive": "100", "transaction_id_end_inclusive": "102",
+            "transaction_id_start_exclusive": "99", "transaction_id_end_inclusive": "102",
             "reported_last_transaction_id": "102",
             "transaction_range_complete": True, "transaction_range_unfiltered": True,
             "pre_closeout_orders_complete": True, "post_closeout_orders_complete": True,
@@ -609,18 +611,19 @@ class UnifiedIntakeTests(unittest.TestCase):
 
     def oanda_account_changes_replay(self, new_trade=False):
         changes = {
-            "ordersCreated": [], "ordersCancelled": [{"id": "sl-gold"}],
+            "ordersCreated": [{"id": "closeout"}], "ordersCancelled": [{"id": "sl-gold"}],
             "ordersFilled": [{"id": "closeout"}], "ordersTriggered": [],
             "tradesOpened": [{"id": "trade-new"}] if new_trade else [],
             "tradesReduced": [], "tradesClosed": [{"id": "trade-gold"}],
             "positions": [],
             "transactions": [
+                {"id": "100", "accountID": "acct-1", "type": "MARKET_ORDER", "reason": "MARGIN_CLOSEOUT"},
                 {"id": "101", "accountID": "acct-1", "type": "ORDER_FILL", "orderID": "closeout", "reason": "MARKET_ORDER_MARGIN_CLOSEOUT"},
                 {"id": "102", "accountID": "acct-1", "type": "ORDER_CANCEL", "orderID": "sl-gold"},
             ],
         }
         return {
-            "account_id": "acct-1", "since_transaction_id": "100",
+            "account_id": "acct-1", "since_transaction_id": "99",
             "changes_response": {"lastTransactionID": "102", "changes": changes},
             "post_closeout_account_snapshot": {
                 "lastTransactionID": "102",
