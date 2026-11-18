@@ -89,6 +89,47 @@ class UnifiedIntakeTests(unittest.TestCase):
         self.assertEqual(result["status"], "halt")
         self.assertTrue(any(stop["source"] == "portfolio_risk" for stop in result["active_stops"]))
 
+    def test_oanda_margin_call_escalates_to_global_occ_stop(self):
+        account_replay = {
+            "account_currency": "CAD",
+            "initial_positions": [
+                {"position_id": "gold", "desk_id": "gold", "instrument_id": "XAUUSD"},
+                {"position_id": "fx", "desk_id": "forex", "instrument_id": "EURUSD"},
+            ],
+            "observations": [{
+                "timestamp_utc": "2026-11-17T20:45:00Z",
+                "nav_mid": 900, "margin_used": 1000,
+                "position_market_status": {"gold": "open", "fx": "open"},
+                "trading_day_check": False,
+            }],
+        }
+        result = self.build(oanda_account_margin_replay=account_replay)
+        self.assertEqual(result["oanda_account_margin_audit"]["status"], "HALT")
+        self.assertTrue(result["global_stop_active"])
+        self.assertEqual(result["status"], "halt")
+        self.assertTrue(any(stop["source"] == "oanda_account_margin" for stop in result["active_stops"]))
+        self.assertFalse(result["oanda_account_margin_audit"]["trade_authority"])
+
+    def test_oanda_account_margin_within_requirements_is_pass(self):
+        account_replay = {
+            "account_currency": "CAD",
+            "initial_positions": [{"position_id": "gold", "desk_id": "gold", "instrument_id": "XAUUSD"}],
+            "observations": [{
+                "timestamp_utc": "2026-11-17T20:45:00Z",
+                "nav_mid": 1200, "margin_used": 1000,
+                "position_market_status": {"gold": "open"},
+                "trading_day_check": False,
+            }],
+        }
+        result = self.build(oanda_account_margin_replay=account_replay)
+        self.assertEqual(result["oanda_account_margin_audit"]["status"], "PASS")
+        self.assertFalse(any(stop["source"] == "oanda_account_margin" for stop in result["active_stops"]))
+
+    def test_oanda_account_margin_not_provided_is_explicit(self):
+        result = self.build()
+        self.assertEqual(result["oanda_account_margin_audit"]["status"], "NOT_PROVIDED")
+        self.assertIsNone(result["oanda_account_margin_audit"]["report"])
+
     def test_multiple_instruments_per_desk_are_supported(self):
         rows = self.four_desk_rows() + [obs("crypto_spot", "BTC-USDC")]
         rows[-1].update(base_asset="BTC", market_pair="BTC/USDC",
