@@ -58,6 +58,19 @@ class OandaMarginStateTests(unittest.TestCase):
         self.assertTrue(result["margin_closeout_percentage_unbounded"])
         self.assertTrue(result["early_closeout_triggered"])
 
+    def test_margin_call_recovery_remains_historically_latched(self):
+        result = replay_oanda_account_margin_closeout("CAD", positions(), [
+            observation(17, nav=900, used=1000, daily=False),
+            {
+                "timestamp_utc": "2026-11-18T14:00:00Z", "nav_mid": 1200, "margin_used": 1000,
+                "position_market_status": {"gold-xau": "open", "fx-eurusd": "open", "index-spx": "open"},
+                "trading_day_check": False,
+            },
+        ])
+        self.assertEqual(result["status"], "MARGIN_CALL_OBSERVED_RECOVERED")
+        self.assertTrue(result["margin_call_observed"])
+        self.assertFalse(result["current_margin_call_active"])
+
     def test_zero_margin_used_has_no_margin_trigger(self):
         result = assess_oanda_margin_state(0, 0)
         self.assertFalse(result["margin_call"])
