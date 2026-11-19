@@ -13,8 +13,8 @@ Required fields:
 | `source_system` | Stable identifier for the originating system |
 | `source_incident_id` | Stable ID within that source system |
 | `division` | Owning division, e.g. Crypto, Forex, Indices, Gold |
-| `severity` | Source-assigned `INFO`, `WARNING`, or `CRITICAL` |
-| `status` | Source status: `OPEN`, `ACKNOWLEDGED`, or `RESOLVED` |
+| `severity` | Source severity or explicitly documented adapter policy |
+| `status` | `OPEN`, `ACKNOWLEDGED`, or `RESOLVED` |
 | `reason_code` | Machine-readable cause |
 | `summary` | Short, non-sensitive explanation |
 | `observed_at_epoch` | First observation time |
@@ -24,21 +24,31 @@ Optional `instrument` identifies the exact instrument/contract. Do not collapse 
 
 ## Reporting semantics
 
-- Source severity is preserved; the aggregator does not silently upgrade or downgrade it.
 - OPEN and ACKNOWLEDGED are active. RESOLVED is retained for audit context but excluded from active counts.
 - Staleness is a reporting flag based on the incident's observed age and a configurable threshold. It is not proof that a source is still failing and does not resolve anything.
 - Duplicate `(source_system, source_incident_id)` pairs in one snapshot are rejected.
 - Timestamps in the future or internally inconsistent timestamps are rejected.
 - Reports are deterministic for the same input and reporting time.
 
-## Current implementation
+## Solana paper-exit adapter
 
-`occ/incident_intake.py` is a pure in-memory validator and report builder. It accepts snapshots supplied by a caller. It has no network client, database, scheduler, notification transport, credentials, account integration, or execution capability.
+`occ/solana_exit_adapter.py` implements a callable, read-only adapter against the two query methods exposed by the Solana CoordinationStore contract:
 
-The Solana paper-exit escalation bridge in the separate `Solana-memecoins` repository is a candidate source adapter, not a connected runtime. It must be reviewed and mapped explicitly before use. Other divisions require their own adapters and source-of-truth checks.
+- `unresolved_exit_market_data_incidents()`
+- `unresolved_position_exits()`
+
+It does not import the Solana repository, open its database, instantiate a store, poll a runtime, or mutate source state. A caller must explicitly supply a compatible source object and a reporting timestamp.
+
+Stable source identities are namespaced separately for market-data incidents and position-exit operations. Market-data records preserve their reason code and first/last-seen timestamps. Position-exit records preserve operation identity, creation time and source workflow status. OCC status remains OPEN because the source query contract does not provide authenticated OCC acknowledgement. No source record is acknowledged or resolved.
+
+**Severity policy:** both unresolved market-data incidents and unresolved position exits are mapped to CRITICAL because either means paper-exit safety or reconciliation is uncertain. This is an explicit conservative adapter policy, not a severity field supplied by the source. Review this policy before broadening the adapter to other incident classes.
+
+## Current implementation limits
+
+The adapter is a pure callable transformation and report builder. It is not connected to an OCC runtime, scheduler, dashboard, database, notification transport, credentials, account integration, or execution capability. Other divisions require their own reviewed adapters and source-of-truth checks.
 
 ## Approval and safety boundary
 
 This contract does not authorize source-system writes, operator acknowledgement, incident resolution, account lockout, trading, order routing, wallet access, or live operations. Those actions remain outside OCC's read-only reporting role and require separate reviewed controls and owner approval.
 
-No tests are claimed as executed in this change; GitHub Actions remain on hold.
+Tests are authored, not executed; GitHub Actions remain on quota hold.
