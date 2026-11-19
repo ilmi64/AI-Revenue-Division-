@@ -30,7 +30,10 @@ def _required_epoch(record: dict[str, Any], key: str) -> float:
     value = record.get(key)
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         raise SolanaExitAdapterError(f"source {key} is missing or invalid")
-    return float(value)
+    try:
+        return float(value)
+    except (OverflowError, TypeError, ValueError) as exc:
+        raise SolanaExitAdapterError(f"source {key} is outside the supported numeric range") from exc
 
 
 def collect_solana_exit_incidents(
