@@ -6,6 +6,7 @@ records, send notifications, or invoke trading/execution capabilities.
 from __future__ import annotations
 
 from collections import Counter
+import math
 from typing import Any, Iterable, Mapping
 
 
@@ -34,7 +35,7 @@ def validate_incident(record: Mapping[str, Any], *, now_epoch: float) -> dict[st
         raise IncidentIntakeError("severity must be INFO, WARNING, or CRITICAL")
     if status not in STATUSES:
         raise IncidentIntakeError("status must be OPEN, ACKNOWLEDGED, or RESOLVED")
-    if isinstance(now_epoch, bool) or not isinstance(now_epoch, (int, float)):
+    if (isinstance(now_epoch, bool) or not isinstance(now_epoch, (int, float))\n            or not math.isfinite(float(now_epoch))):
         raise IncidentIntakeError("now_epoch must be numeric")
     if now_epoch < 0:
         raise IncidentIntakeError("now_epoch cannot be negative")
@@ -42,7 +43,7 @@ def validate_incident(record: Mapping[str, Any], *, now_epoch: float) -> dict[st
     result = dict(record)
     for key in ("observed_at_epoch", "updated_at_epoch"):
         value = record.get(key)
-        if isinstance(value, bool) or not isinstance(value, (int, float)) or value < 0:
+        if (isinstance(value, bool) or not isinstance(value, (int, float))\n                or not math.isfinite(float(value)) or value < 0):
             raise IncidentIntakeError(f"{key} must be a non-negative epoch")
         if value > now_epoch:
             raise IncidentIntakeError(f"{key} cannot be in the future")
