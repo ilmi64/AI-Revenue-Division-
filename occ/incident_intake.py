@@ -20,11 +20,12 @@ class IncidentIntakeError(ValueError):
 
 
 def _finite_number(value: Any) -> bool:
-    return (
-        not isinstance(value, bool)
-        and isinstance(value, (int, float))
-        and math.isfinite(float(value))
-    )
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return False
+    try:
+        return math.isfinite(float(value))
+    except (OverflowError, TypeError, ValueError):
+        return False
 
 
 def validate_incident(record: Mapping[str, Any], *, now_epoch: float) -> dict[str, Any]:
@@ -74,7 +75,12 @@ def build_incident_report(
     """Build a deterministic read-only summary from supplied snapshots."""
     if not _finite_number(stale_after_seconds) or stale_after_seconds <= 0:
         raise IncidentIntakeError("stale_after_seconds must be finite and positive")
-    validated = [validate_incident(item, now_epoch=now_epoch) for item in records]
+    if not _finite_number(now_epoch) or now_epoch < 0:
+        raise IncidentIntakeError("now_epoch must be a finite non-negative epoch")
+    try:
+        validated = [validate_incident(item, now_epoch=now_epoch) for item in records]
+    except TypeError as exc:
+        raise IncidentIntakeError("records must be an iterable of incident mappings") from exc
     seen: set[tuple[str, str]] = set()
     for item in validated:
         key = (item["source_system"], item["source_incident_id"])
