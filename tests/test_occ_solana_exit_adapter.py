@@ -73,6 +73,19 @@ class SolanaExitAdapterTests(unittest.TestCase):
         with self.assertRaises(SolanaExitAdapterError):
             collect_solana_exit_incidents(source, now_epoch=120.0)
 
+    def test_rejects_unrepresentable_source_timestamp(self):
+        source = FakeSource()
+        source.market[0]["first_seen_epoch"] = 10 ** 10000
+        with self.assertRaisesRegex(SolanaExitAdapterError, "numeric range"):
+            collect_solana_exit_incidents(source, now_epoch=120.0)
+
+    def test_rejects_non_finite_source_timestamp(self):
+        source = FakeSource()
+        source.market[0]["first_seen_epoch"] = float("inf")
+        from occ.incident_intake import IncidentIntakeError
+        with self.assertRaises(IncidentIntakeError):
+            collect_solana_exit_incidents(source, now_epoch=120.0)
+
     def test_requires_read_only_source_methods(self):
         with self.assertRaises(SolanaExitAdapterError):
             collect_solana_exit_incidents(object(), now_epoch=120.0)
