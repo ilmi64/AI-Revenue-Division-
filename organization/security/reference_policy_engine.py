@@ -28,6 +28,14 @@ def _valid_timestamp(value: Any) -> bool:
     return isinstance(value, int) and not isinstance(value, bool) and value >= 0
 
 
+def _valid_amount(value: Any) -> bool:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return False
+    if isinstance(value, int):
+        return value >= 0
+    return math.isfinite(value) and value >= 0
+
+
 def authorize(
     request: dict[str, Any],
     identity: dict[str, Any],
@@ -108,11 +116,9 @@ def authorize(
 
     cost = request.get("cost_cad", 0)
     cap = policy.get("cost_cap_cad", 0)
-    if (isinstance(cost, bool) or not isinstance(cost, (int, float)) or
-            not math.isfinite(cost) or cost < 0):
+    if not _valid_amount(cost):
         return deny("invalid_cost")
-    if (isinstance(cap, bool) or not isinstance(cap, (int, float)) or
-            not math.isfinite(cap) or cap < 0):
+    if not _valid_amount(cap):
         return deny("invalid_cost_cap")
     if cost > cap:
         return deny("cost_cap_exceeded")
