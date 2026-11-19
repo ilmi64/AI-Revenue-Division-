@@ -10,43 +10,45 @@ REQUIRED = ("company_id", "agent_id", "task_id", "operation", "resource",
 
 def dispatch_authorized_one(*, store, worker, now, gateway, context_resolver,
                             sender, dispatch_fn, audit_fn=lambda *a, **k: None):
-    """Claim one action; bind its immutable payload to trusted identity/task context;
-    authorize once at final dispatch; then invoke sender with remote idempotency key.
+    """Claim one action and authorize once immediately before sender invocation.
 
-    context_resolver(claim, payload, now) must load identity/task from trusted
-    control-plane stores and return (principal, task, request). Never build
-    principal/task from payload or model-supplied claims.
+    context_resolver must load principal/task from trusted control-plane stores;
+    never construct them from model-supplied payload claims.
     """
+    def emit(event, data):
+        try:
+            audit_fn(event, data)
+            return True
+        except Exception:
+            return False
+
     def final_policy_check(claim):
         try:
             payload = json.loads(claim.payload_json)
             if not isinstance(payload, dict) or any(k not in payload for k in REQUIRED):
-                audit_fn("dispatch_denied", {"action_id": claim.action_id, "reason": "malformed_action_payload"})
+                emit("dispatch_denied", {"action_id": claim.action_id, "reason": "malformed_action_payload"})
                 return False
             principal, task, request = context_resolver(claim, payload, now)
             bound = {
-                "company_id": principal.company_id,
-                "agent_id": principal.agent_id,
-                "task_id": task.task_id,
-                "operation": request.operation,
-                "resource": request.resource,
-                "policy_version": request.policy_version,
+                "company_id": principal.company_id, "agent_id": principal.agent_id,
+                "task_id": task.task_id, "operation": request.operation,
+                "resource": request.resource, "policy_version": request.policy_version,
                 "requires_owner_approval": request.requires_owner_approval,
                 "approval_id": request.approval_id,
             }
             if any(payload.get(k) != v for k, v in bound.items()):
-                audit_fn("dispatch_denied", {"action_id": claim.action_id, "reason": "payload_context_mismatch"})
+                emit("dispatch_denied", {"action_id": claim.action_id, "reason": "payload_context_mismatch"})
                 return False
             decision = gateway.authorize(principal, task, request)
-            audit_fn("dispatch_authorization", {
+            audit_ok = emit("dispatch_authorization", {
                 "action_id": claim.action_id, "company_id": principal.company_id,
                 "agent_id": principal.agent_id, "task_id": task.task_id,
                 "operation": request.operation, "resource": request.resource,
                 "outcome": decision.outcome, "reason": decision.reason,
                 "policy_version": request.policy_version
             })
-            return decision.outcome == "allow"
+            return audit_ok and decision.outcome == "allow"
         except Exception:
-            audit_fn("dispatch_denied", {"action_id": claim.action_id, "reason": "context_or_audit_dependency_error"})
+            # Do not attempt a second audit write when the audit dependency itself failed.
             return False
     return dispatch_fn(store, worker, now, final_policy_check, sender)
