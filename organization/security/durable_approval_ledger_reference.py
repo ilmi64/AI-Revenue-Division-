@@ -142,8 +142,14 @@ class DurableApprovalLedger:
             return ConsumeResult(True,"consumed_once",event_id)
         except sqlite3.IntegrityError:
             self.db.execute("ROLLBACK")
-            # A uniqueness collision is a replay/duplicate, never a second success.
-            return ConsumeResult(False,"approval_replay_or_action_duplicate")
+            # Only classify as replay if the unique row exists after rollback.
+            # Other integrity failures (including audit insertion failure) propagate.
+            existing=self.db.execute("""SELECT 1 FROM approval_consumptions
+              WHERE approval_id=? OR action_id=? LIMIT 1""",
+              (approval_id,action_id)).fetchone()
+            if existing:
+                return ConsumeResult(False,"approval_replay_or_action_duplicate")
+            raise
         except Exception:
             self.db.execute("ROLLBACK")
             raise
