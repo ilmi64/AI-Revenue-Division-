@@ -53,6 +53,7 @@ class PolicyEngineTests(unittest.TestCase):
     def test_malformed_allowlist_denied(self): self.assertEqual(self.decide(policy=dict(self.policy, allowed_operations=None)).reason, "malformed_operation_allowlist")
     def test_boolean_cost_is_not_numeric(self): self.assertEqual(self.decide(request=dict(self.request, cost_cad=True)).reason, "invalid_cost")
     def test_nan_cost_denied(self): self.assertEqual(self.decide(request=dict(self.request, cost_cad=float("nan"))).reason, "invalid_cost")
+    def test_extremely_large_integer_cost_denied_without_exception(self): self.assertEqual(self.decide(request=dict(self.request, cost_cad=10**1000)).reason, "cost_cap_exceeded")
     def test_boolean_expiry_denied(self): self.assertEqual(self.decide(identity=dict(self.identity, expires_at=True)).reason, "invalid_identity_expiry")
     def test_missing_emergency_stop_state_fails_closed(self): self.assertEqual(self.decide(policy={k:v for k,v in self.policy.items() if k != "emergency_stop"}).reason, "emergency_stop_active_or_unverified")
     def test_approval_must_identify_owner_issuer(self):
