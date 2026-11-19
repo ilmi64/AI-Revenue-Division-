@@ -105,6 +105,8 @@ def validate_instrument_identity(record: Mapping[str, Any]) -> dict[str, Any]:
     if multiplier is not None:
         multiplier = _positive_number(multiplier, "contract_multiplier")
 
+    if product_type == "FX_SPOT" and base_currency is None:
+        raise InstrumentIdentityError("FX spot identity requires an explicit base_currency")
     if product_type == "FUTURE" and expiry is None:
         raise InstrumentIdentityError("futures identity requires an explicit expiry")
     if product_type in {"SPOT", "FX_SPOT", "INDEX_CASH"} and expiry is not None:
