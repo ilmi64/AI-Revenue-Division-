@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0.0",
+  "status": "proposed_two_company_target_state",
+  "owner_authority": "reserved_owner_approvals_remain_in_force",
+  "shared_platform": {
+    "workforce_control_plane": {
+      "name": "Paperclip",
+      "status": "leading_candidate_not_deployed"
+    },
+    "agent_orchestration": {
+      "name": "Ruflo",
+      "status": "leading_candidate_not_deployed"
+    },
+    "engineering_runtimes": [
+      {"name": "Claude Code", "status": "candidate_not_deployed"},
+      {"name": "OpenAI Codex", "status": "candidate_not_deployed"},
+      {"name": "OpenHands", "status": "sandbox_candidate_not_deployed"}
+    ],
+    "model_families": [
+      {"name": "Claude", "integration": "adapter_or_runtime_verification_required"},
+      {"name": "GPT_Codex", "integration": "adapter_or_runtime_verification_required"},
+      {"name": "Qwen", "integration": "local_or_compatible_endpoint_verification_required"},
+      {"name": "Llama", "integration": "local_or_compatible_endpoint_verification_required"},
+      {"name": "Gemini", "integration": "adapter_or_runtime_verification_required"},
+      {"name": "Other_compatible_models", "integration": "case_by_case_verification_required"}
+    ],
+    "supporting_candidates": [
+      {"name": "AgentMemory", "purpose": "scoped_persistent_memory", "status": "not_adopted"},
+      {"name": "Langfuse", "purpose": "tracing_and_evaluation", "status": "not_adopted"},
+      {"name": "OpenLIT", "purpose": "observability", "status": "not_adopted"}
+    ],
+    "shared_code_and_generic_adapters_allowed": true,
+    "shared_company_authority_allowed": false,
+    "shared_private_memory_by_default": false,
+    "shared_credentials_by_default": false
+  },
+  "companies": [
+    {
+      "id": "trading_technology",
+      "legal_and_operational_identity": "independent_company",
+      "name": "Trading & Technology Company",
+      "executive_roles": ["CEO", "COO", "CFO", "CTO", "CRO", "CISO", "Research_Director", "Risk_Director"],
+      "specialist_departments": [
+        "Crypto_and_PolyBot",
+        "Forex",
+        "Equity_Indices",
+        "Gold_XAUUSD",
+        "Market_Data_and_Provenance",
+        "Capital_Flow_Intelligence",
+        "Quantitative_Research_and_Backtesting",
+        "Independent_Risk",
+        "Security_Incident_Response_and_Recovery",
+        "Finance_and_Reporting"
+      ],
+      "own_agent_registry": true,
+      "own_task_queue": true,
+      "own_memory_namespace": true,
+      "own_budget_and_financial_ledger": true,
+      "own_audit_log": true,
+      "own_risk_authority": true,
+      "default_operating_mode": "research_and_paper_only",
+      "live_trading_authorized": false
+    },
+    {
+      "id": "ai_revenue",
+      "legal_and_operational_identity": "independent_company",
+      "name": "AI Revenue Company",
+      "executive_roles": ["CEO", "COO", "CFO", "CTO", "CMO", "CRO", "CHRO", "CISO", "Legal_Compliance_Review"],
+      "specialist_departments": [
+        "Product_and_Service_Development",
+        "AI_Creative_Studio",
+        "Engineering_and_Automation",
+        "Research_and_Business_Intelligence",
+        "Sales_and_Business_Development",
+        "Marketing_and_Distribution",
+        "Customer_Support_and_Account_Operations",
+        "Delivery_and_Quality_Assurance",
+        "Finance_and_Accounting",
+        "Agent_Workforce_Management",
+        "Security_and_Recovery",
+        "Administration"
+      ],
+      "own_agent_registry": true,
+      "own_task_queue": true,
+      "own_memory_namespace": true,
+      "own_budget_and_financial_ledger": true,
+      "own_audit_log": true,
+      "own_operating_authority": true,
+      "autonomous_permitted_workflows_target": true,
+      "external_and_financial_actions_require_owner_approval": true,
+      "ai_creative_studio_required_for_company_launch": false,
+      "verified_customer_delivery_and_cash_receipt_required_for_launch": true
+    }
+  ],
+  "main_hub_occ": {
+    "role": "shared_governance_coordination_security_and_reporting_layer",
+    "may_coordinate_cross_company_work": true,
+    "may_override_company_executives": false,
+    "may_move_or_control_company_funds": false,
+    "may_bypass_company_risk_controls": false,
+    "cross_company_data_sharing": "explicit_scoped_logged_approval_required"
+  },
+  "global_guardrails": {
+    "incremental_spend_cad": 0,
+    "paid_apis_and_trials_enabled": false,
+    "github_actions_runs_enabled": false,
+    "installations_and_deployments_authorized": false,
+    "repository_merges_authorized": false,
+    "external_publication_and_outreach_authorized": false,
+    "financial_transactions_authorized": false,
+    "wallet_signing_and_live_trading_authorized": false,
+    "agents_may_change_own_permissions_or_policies": false,
+    "missing_or_conflicting_evidence_policy": "fail_closed_and_escalate",
+    "model_output_is_authority": false
+  },
+  "migration_notes": [
+    "Legacy division-based records are historical source material and must not be treated as the target company structure.",
+    "Finance, risk, research and technology capabilities may provide shared services only through explicit company-scoped contracts; company ledgers and authority remain separate.",
+    "Ecommerce and Animora remain deferred unless the owner explicitly resumes them; AI Creative Studio is a distinct AI Revenue department and does not reactivate Animora.",
+    "No role, registry entry or architecture proposal proves an agent is deployed or a company is operational."
+  ]
+}
