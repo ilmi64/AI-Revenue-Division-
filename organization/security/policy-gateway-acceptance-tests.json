@@ -1,0 +1,26 @@
+{
+  "status": "acceptance_vectors_proposed_not_executed_in_production",
+  "scenarios": [
+    "valid scoped read request allows",
+    "unverified identity denies",
+    "expired/revoked identity denies",
+    "expired task denies",
+    "cross-company principal/task mismatch denies",
+    "wrong agent assignment denies",
+    "stale policy version denies",
+    "emergency-stop active or unavailable denies",
+    "operation outside task scope denies",
+    "resource outside task scope denies",
+    "Trading live order denied even if task allowlists it",
+    "wallet signing and funds transfer denied",
+    "risk HALT/STOP mutation denied",
+    "protected policy/identity/approval administration denied",
+    "missing owner approval denies",
+    "approval wrong company/task/resource denies",
+    "replayed approval denied by atomic consumer",
+    "policy callback exception denies",
+    "approval service unavailable denies",
+    "policy update between enqueue and dispatch denies at final gateway",
+    "direct model-to-tool bypass is blocked by network and gateway enforcement"
+  ]
+}
