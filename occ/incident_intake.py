@@ -19,12 +19,22 @@ class IncidentIntakeError(ValueError):
     """An incoming division incident snapshot is invalid."""
 
 
+def _finite_number(value: Any) -> bool:
+    return (
+        not isinstance(value, bool)
+        and isinstance(value, (int, float))
+        and math.isfinite(float(value))
+    )
+
+
 def validate_incident(record: Mapping[str, Any], *, now_epoch: float) -> dict[str, Any]:
     """Validate and copy one normalized incident snapshot."""
     if not isinstance(record, Mapping):
         raise IncidentIntakeError("incident must be a mapping")
-    required = ("source_system", "source_incident_id", "division",
-                "severity", "status", "reason_code", "summary")
+    required = (
+        "source_system", "source_incident_id", "division",
+        "severity", "status", "reason_code", "summary",
+    )
     for key in required:
         value = record.get(key)
         if not isinstance(value, str) or not value.strip():
@@ -35,16 +45,14 @@ def validate_incident(record: Mapping[str, Any], *, now_epoch: float) -> dict[st
         raise IncidentIntakeError("severity must be INFO, WARNING, or CRITICAL")
     if status not in STATUSES:
         raise IncidentIntakeError("status must be OPEN, ACKNOWLEDGED, or RESOLVED")
-    if (isinstance(now_epoch, bool) or not isinstance(now_epoch, (int, float))\n            or not math.isfinite(float(now_epoch))):
-        raise IncidentIntakeError("now_epoch must be numeric")
-    if now_epoch < 0:
-        raise IncidentIntakeError("now_epoch cannot be negative")
+    if not _finite_number(now_epoch) or now_epoch < 0:
+        raise IncidentIntakeError("now_epoch must be a finite non-negative epoch")
 
     result = dict(record)
     for key in ("observed_at_epoch", "updated_at_epoch"):
         value = record.get(key)
-        if (isinstance(value, bool) or not isinstance(value, (int, float))\n                or not math.isfinite(float(value)) or value < 0):
-            raise IncidentIntakeError(f"{key} must be a non-negative epoch")
+        if not _finite_number(value) or value < 0:
+            raise IncidentIntakeError(f"{key} must be a finite non-negative epoch")
         if value > now_epoch:
             raise IncidentIntakeError(f"{key} cannot be in the future")
         result[key] = float(value)
@@ -64,10 +72,8 @@ def build_incident_report(
     stale_after_seconds: float = 300.0,
 ) -> dict[str, Any]:
     """Build a deterministic read-only summary from supplied snapshots."""
-    if (isinstance(stale_after_seconds, bool)
-            or not isinstance(stale_after_seconds, (int, float))
-            or stale_after_seconds <= 0):
-        raise IncidentIntakeError("stale_after_seconds must be positive")
+    if not _finite_number(stale_after_seconds) or stale_after_seconds <= 0:
+        raise IncidentIntakeError("stale_after_seconds must be finite and positive")
     validated = [validate_incident(item, now_epoch=now_epoch) for item in records]
     seen: set[tuple[str, str]] = set()
     for item in validated:
