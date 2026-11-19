@@ -1,0 +1,25 @@
+{
+  "status": "proposed_not_executed_in_repository",
+  "cases": [
+    "approval revocation commits before dispatch authorization and blocks it",
+    "dispatch authorization commits before revocation and records the race order",
+    "approval consumption, dispatch_started and audit append commit atomically",
+    "audit insertion failure rolls back approval consumption and action state",
+    "crash after dispatch_started commit is recovered as outcome_unknown, never auto-sent",
+    "sender timeout and exception produce outcome_unknown",
+    "receiver accepted result is terminal sent",
+    "receiver rejection is terminal failed and requires investigation",
+    "same action and idempotency key with identical intent is idempotent",
+    "same key with different intent is rejected",
+    "company, agent, task, operation, resource and policy mismatches deny",
+    "expired and revoked approvals deny",
+    "duplicate authorization cannot consume approval twice",
+    "authenticated applied evidence closes as reconciled_applied",
+    "authenticated not-applied evidence closes old intent without reusing approval",
+    "inconclusive evidence quarantines",
+    "unauthenticated, stale, mismatched or duplicate evidence is rejected",
+    "online backup restores with SQLite integrity and valid audit chain",
+    "tampered audit payload or chain fails verification",
+    "restore keeps dispatch disabled pending revocation, emergency-stop and receiver reconciliation"
+  ]
+}
