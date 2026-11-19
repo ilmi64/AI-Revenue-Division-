@@ -115,6 +115,44 @@ class RecoveryTests(unittest.TestCase):
         finally:
             second.close()
 
+    def test_revocation_and_dispatch_race_has_one_serialized_winner(self):
+        second=DispatchStore(self.path)
+        barrier=threading.Barrier(2)
+        outcomes=[]
+        errors=[]
+        def authorize():
+            try:
+                barrier.wait()
+                outcomes.append(("authorize",self.s.authorize_and_start("ac1",company="coA",
+                  agent="ag1",task="t1",operation="publish",resource="listing/1",
+                  policy="v1",now=3)))
+            except Exception as exc: errors.append(exc)
+        def revoke():
+            try:
+                barrier.wait()
+                outcomes.append(("revoke",second.revoke("ap1",company="coA",now=3)))
+            except Exception as exc: errors.append(exc)
+        threads=[threading.Thread(target=authorize),threading.Thread(target=revoke)]
+        try:
+            for thread in threads: thread.start()
+            for thread in threads: thread.join(timeout=5)
+            self.assertTrue(all(not thread.is_alive() for thread in threads))
+            self.assertEqual(errors,[])
+            auth=dict(outcomes)["authorize"]
+            revoked=dict(outcomes)["revoke"]
+            if auth["allowed"]:
+                self.assertEqual(self.s.action_state("ac1"),"dispatch_started")
+                self.assertTrue(revoked)
+                self.assertEqual(self.s.db.execute("select count(*) from consumed").fetchone()[0],1)
+            else:
+                self.assertEqual(auth["reason"],"approval_revoked")
+                self.assertTrue(revoked)
+                self.assertEqual(self.s.action_state("ac1"),"queued")
+                self.assertEqual(self.s.db.execute("select count(*) from consumed").fetchone()[0],0)
+            self.assertTrue(self.s.verify_audit("coA"))
+        finally:
+            second.close()
+
     def test_audit_tamper_detected(self):
         self.start()
         self.s.db.execute("update audit set payload='{}' where kind='dispatch_started'")
