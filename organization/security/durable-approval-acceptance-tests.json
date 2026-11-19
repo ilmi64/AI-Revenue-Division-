@@ -1,0 +1,24 @@
+{
+  "status": "proposed_acceptance_vectors",
+  "scenarios": [
+    "valid exact-scope approval consumes once",
+    "duplicate approval ID rejected",
+    "duplicate nonce rejected",
+    "same approval replay from a second action rejected",
+    "two concurrent independent connections yield exactly one winner",
+    "wrong company/owner/agent/session/task/operation/resource/policy version denied",
+    "expired approval denied",
+    "revoked approval denied",
+    "amount above integer minor-unit ceiling denied",
+    "consumption and audit event commit atomically",
+    "audit insert failure rolls back consumption",
+    "approval issue and audit event atomic",
+    "revocation and audit event atomic",
+    "consumption persists across process restart",
+    "per-company audit chains verify independently",
+    "tampered event payload/hash detected",
+    "database unavailable fails closed",
+    "backup restore and point-in-time recovery verified",
+    "multi-node concurrency and failover verified before production"
+  ]
+}
