@@ -79,6 +79,7 @@ def transition_market_data_quarantine(
     now_epoch: int | float,
     prior_state: Mapping[str, Any] | None = None,
     recovery_review_claim: Mapping[str, Any] | None = None,
+    max_recovery_observation_age_seconds: int | float = 30,
 ) -> dict[str, Any]:
     """Compute one fail-closed state transition; no transition clears quarantine.
 
@@ -86,6 +87,7 @@ def transition_market_data_quarantine(
     authenticated host-controlled release mechanism is intentionally absent.
     """
     now = _epoch(now_epoch, "now_epoch")
+    max_recovery_age = _epoch(max_recovery_observation_age_seconds, "max_recovery_observation_age_seconds")
     identity, source_ids = _validate_report(agreement_report)
     status = agreement_report.get("status")
     if status not in {
@@ -140,8 +142,18 @@ def transition_market_data_quarantine(
         reason = "MARKET_DATA_SOURCE_CONFLICT"
     elif was_quarantined:
         if status == "AGREEMENT_WITHIN_THRESHOLD_UNVERIFIED" and len(source_ids) >= 2:
-            state = "RECOVERY_REVIEW_REQUIRED"
-            reason = "FRESH_AGREEMENT_IS_NOT_AUTHORIZED_RELEASE"
+            ages = []
+            for item in agreement_report["accepted_observations"]:
+                age = item.get("age_seconds")
+                if isinstance(age, bool) or not isinstance(age, (int, float)) or not math.isfinite(float(age)) or float(age) < 0:
+                    raise QuarantineStateError("recovery observations require finite non-negative age_seconds")
+                ages.append(float(age))
+            if any(age > max_recovery_age for age in ages):
+                state = "QUARANTINED"
+                reason = "RECOVERY_EVIDENCE_STALE"
+            else:
+                state = "RECOVERY_REVIEW_REQUIRED"
+                reason = "FRESH_AGREEMENT_IS_NOT_AUTHORIZED_RELEASE"
         else:
             state = "QUARANTINED"
             reason = "RECOVERY_EVIDENCE_INSUFFICIENT"
@@ -151,8 +163,8 @@ def transition_market_data_quarantine(
 
     review_record = None
     if recovery_review_claim is not None:
-        if not was_quarantined and state == "NOT_QUARANTINED":
-            raise QuarantineStateError("recovery review claim requires an existing quarantine")
+        if not was_quarantined or status != "AGREEMENT_WITHIN_THRESHOLD_UNVERIFIED" or state != "RECOVERY_REVIEW_REQUIRED":
+            raise QuarantineStateError("recovery review claim requires fresh agreement while quarantined")
         if not isinstance(recovery_review_claim, Mapping):
             raise QuarantineStateError("recovery_review_claim must be a mapping")
         decision = recovery_review_claim.get("decision")
