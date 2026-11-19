@@ -52,6 +52,27 @@ class IncidentIntakeTests(unittest.TestCase):
         self.assertEqual(report["active_count"], 1)
         self.assertEqual(report["status_counts"], {"ACKNOWLEDGED": 1})
 
+    def test_non_finite_now_is_rejected(self):
+        for value in (float("nan"), float("inf"), float("-inf")):
+            with self.subTest(value=value):
+                with self.assertRaises(IncidentIntakeError):
+                    build_incident_report([self.open], now_epoch=value)
+
+    def test_non_finite_staleness_threshold_is_rejected(self):
+        for value in (float("nan"), float("inf"), float("-inf")):
+            with self.subTest(value=value):
+                with self.assertRaises(IncidentIntakeError):
+                    build_incident_report([self.open], now_epoch=120.0,
+                                          stale_after_seconds=value)
+
+    def test_non_finite_incident_timestamp_is_rejected(self):
+        for value in (float("nan"), float("inf"), float("-inf")):
+            with self.subTest(value=value):
+                with self.assertRaises(IncidentIntakeError):
+                    validate_incident(
+                        {**self.open, "observed_at_epoch": value}, now_epoch=120.0,
+                    )
+
 
 if __name__ == "__main__":
     unittest.main()
