@@ -19,7 +19,7 @@ def report(status, sources=("feed-a", "feed-b"), spread=40.0, threshold=25.0):
     return {
         "status": status,
         "expected_instrument_identity": IDENTITY,
-        "accepted_observations": [{"source_id": source} for source in sources],
+        "accepted_observations": [{"source_id": source, "age_seconds": 1.0} for source in sources],
         "diagnostic_spread_bps": spread,
         "max_spread_bps": threshold,
         "independence_verified": False,
@@ -111,6 +111,33 @@ class MarketDataQuarantineTests(unittest.TestCase):
         )
         self.assertEqual(result["state"], "QUARANTINED")
         self.assertTrue(result["quarantine_active"])
+
+    def test_stale_recovery_observations_keep_quarantine(self):
+        prior = transition_market_data_quarantine(
+            report("CONFLICT_DETECTED"), now_epoch=1000
+        )
+        stale = report("AGREEMENT_WITHIN_THRESHOLD_UNVERIFIED", spread=2)
+        stale["accepted_observations"][0]["age_seconds"] = 60
+        result = transition_market_data_quarantine(
+            stale, now_epoch=1010, prior_state=prior,
+            max_recovery_observation_age_seconds=30,
+        )
+        self.assertEqual(result["state"], "QUARANTINED")
+        self.assertEqual(result["reason_code"], "RECOVERY_EVIDENCE_STALE")
+
+    def test_review_claim_cannot_override_new_conflict(self):
+        prior = transition_market_data_quarantine(
+            report("CONFLICT_DETECTED"), now_epoch=1000
+        )
+        with self.assertRaises(QuarantineStateError):
+            transition_market_data_quarantine(
+                report("CONFLICT_DETECTED", spread=50), now_epoch=1010,
+                prior_state=prior,
+                recovery_review_claim={
+                    "decision": "APPROVE_RELEASE", "reviewer_id": "operator",
+                    "evidence_ref": "case-123", "reviewed_at_epoch": 1009,
+                },
+            )
 
 
 if __name__ == "__main__":
