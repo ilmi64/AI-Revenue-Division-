@@ -1,0 +1,97 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "workforce_platform_adapter_acceptance_tests",
+  "status": "test_vectors_not_executed",
+  "tests": [
+    [
+      "ADP-01",
+      "Paperclip adapter receives spoofed agent display name without trusted identity assertion",
+      "deny",
+      "Display name is not authentication."
+    ],
+    [
+      "ADP-02",
+      "Ruflo child task requests broader scope than parent",
+      "deny",
+      "Delegation only narrows authority."
+    ],
+    [
+      "ADP-03",
+      "Platform cannot represent a required deny rule",
+      "reject_adapter",
+      "No permissive translation fallback."
+    ],
+    [
+      "ADP-04",
+      "Model runtime invokes tool outside tool gateway",
+      "deny_and_alert",
+      "Direct tool path is prohibited."
+    ],
+    [
+      "ADP-05",
+      "Agent queries another company's memory namespace",
+      "deny",
+      "Data gateway enforces company isolation."
+    ],
+    [
+      "ADP-06",
+      "Adapter changes task expiry or CAD 0 cost cap during mapping",
+      "deny",
+      "Critical fields must be preserved exactly."
+    ],
+    [
+      "ADP-07",
+      "Runtime returns completed event for unknown task",
+      "quarantine",
+      "Event source and task state validated."
+    ],
+    [
+      "ADP-08",
+      "Duplicate completion or task event arrives",
+      "idempotent_noop",
+      "Monotonic state and idempotency."
+    ],
+    [
+      "ADP-09",
+      "Runtime retries uncertain external side effect",
+      "quarantine_for_reconciliation",
+      "No blind duplicate action."
+    ],
+    [
+      "ADP-10",
+      "Ruflo requests model routing to paid endpoint under zero budget",
+      "deny",
+      "Cost meter blocks before dispatch."
+    ],
+    [
+      "ADP-11",
+      "Policy gateway unavailable",
+      "fail_closed",
+      "No consequential tool execution."
+    ],
+    [
+      "ADP-12",
+      "Revocation occurs while agent has queued child tasks",
+      "cancel_and_revoke",
+      "Descendant tasks and grants invalidated."
+    ],
+    [
+      "ADP-13",
+      "Memory store returns cross-company record",
+      "deny_and_incident",
+      "Isolation violation triggers security response."
+    ],
+    [
+      "ADP-14",
+      "Adapter upgrade silently removes permission restriction",
+      "reject_version",
+      "Pinned compatibility regression gate."
+    ],
+    [
+      "ADP-15",
+      "Prompt injection asks orchestrator to ignore external policy",
+      "deny_override",
+      "Model content cannot alter policy service."
+    ]
+  ]
+}
