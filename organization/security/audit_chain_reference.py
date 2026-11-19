@@ -13,9 +13,11 @@ def _clean(value: Any, path: str = "$") -> Any:
     if isinstance(value, dict):
         out = {}
         for k, v in value.items():
-            if SECRET_KEY.search(str(k)):
+            if not isinstance(k, str):
+                raise AuditError(f"object keys must be strings at {path}")
+            if SECRET_KEY.search(k):
                 raise AuditError(f"secret-like field forbidden at {path}.{k}")
-            out[str(k)] = _clean(v, f"{path}.{k}")
+            out[k] = _clean(v, f"{path}.{k}")
         return out
     if isinstance(value, (list, tuple)):
         return [_clean(v, f"{path}[{i}]") for i, v in enumerate(value)]
@@ -79,14 +81,23 @@ def verify_chain(events: list[dict]) -> tuple[bool, str]:
     seen_ids, seen_sequences = set(), set()
     for index, event in enumerate(events, 1):
         try:
-            if event.get("sequence") != index: return False, f"sequence_gap_or_reorder:{index}"
-            if event.get("event_id") in seen_ids: return False, "duplicate_event_id"
-            if event.get("sequence") in seen_sequences: return False, "duplicate_sequence"
-            if event.get("previous_hash") != previous: return False, f"previous_hash_mismatch:{index}"
+            if not isinstance(event, dict):
+                return False, f"invalid_event:{index}"
+            if event.get("sequence") != index:
+                return False, f"sequence_gap_or_reorder:{index}"
+            if event.get("event_id") in seen_ids:
+                return False, "duplicate_event_id"
+            if event.get("sequence") in seen_sequences:
+                return False, "duplicate_sequence"
+            if event.get("previous_hash") != previous:
+                return False, f"previous_hash_mismatch:{index}"
             body = {k:event[k] for k in ("event_id","sequence","occurred_at","company_id","actor_id","event_type","payload","previous_hash")}
             expected = event_hash({**body, "hash_algorithm":"sha256"})
-            if event.get("hash") != expected: return False, f"event_hash_mismatch:{index}"
-            seen_ids.add(event["event_id"]); seen_sequences.add(event["sequence"]); previous = expected
-        except (KeyError, TypeError, AuditError, ValueError):
+            if event.get("hash") != expected:
+                return False, f"event_hash_mismatch:{index}"
+            seen_ids.add(event["event_id"])
+            seen_sequences.add(event["sequence"])
+            previous = expected
+        except (KeyError, TypeError, AuditError, ValueError, AttributeError):
             return False, f"invalid_event:{index}"
     return True, "ok"
