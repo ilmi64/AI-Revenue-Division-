@@ -117,14 +117,6 @@ def analyze_independent_feed_agreement(
             issues.append(f"observation {index}: missing adapter_id")
             continue
         source_id, adapter_id = source_id.strip(), adapter_id.strip()
-        if source_id in seen_sources:
-            issues.append(f"observation {index}: repeated source_id")
-            continue
-        if adapter_id in seen_adapters:
-            issues.append(f"observation {index}: repeated adapter_id")
-            continue
-        seen_sources.add(source_id)
-        seen_adapters.add(adapter_id)
         event_id = raw.get("event_id")
         if not isinstance(event_id, str) or not event_id.strip():
             issues.append(f"observation {index}: missing event_id")
@@ -134,6 +126,14 @@ def analyze_independent_feed_agreement(
             issues.append(f"observation {index}: duplicate event_id for source")
             continue
         seen_source_events.add(event_key)
+        if source_id in seen_sources:
+            issues.append(f"observation {index}: repeated source_id")
+            continue
+        if adapter_id in seen_adapters:
+            issues.append(f"observation {index}: repeated adapter_id")
+            continue
+        seen_sources.add(source_id)
+        seen_adapters.add(adapter_id)
         registry_entry = registry_by_pair.get((source_id, adapter_id))
         if registry_entry is None:
             issues.append(f"observation {index}: no exact instrument-scoped registry record")
