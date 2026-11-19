@@ -18,7 +18,7 @@ class AuditChainTests(unittest.TestCase):
         x=sample(); x[1]["hash"]="f"*64
         self.assertFalse(verify_chain(x)[0])
     def test_deletion(self): self.assertFalse(verify_chain(sample()[1:])[0])
-    def test_reorder(self): self.assertFalse(verify_chain(list(reversed(sample())))[0])
+    def test_reorder(self): self.assertFalse(verify_chain(list(reversed(sample()))[0:])[0])
     def test_duplicate_id(self):
         x=sample(); x[1]["event_id"]=x[0]["event_id"]
         self.assertFalse(verify_chain(x)[0])
@@ -40,4 +40,12 @@ class AuditChainTests(unittest.TestCase):
         with self.assertRaises(AuditError):
             c.append(event_id="x", occurred_at="now", company_id="c", actor_id="a",
                      event_type="test", payload=["bad"])
+    def test_non_string_payload_key_rejected(self):
+        c=InMemoryAuditChain()
+        with self.assertRaises(AuditError):
+            c.append(event_id="x", occurred_at="now", company_id="c", actor_id="a",
+                     event_type="test", payload={1:"bad"})
+    def test_non_mapping_event_fails_closed(self):
+        self.assertFalse(verify_chain(["not-an-event"])[0])
+
 if __name__ == "__main__": unittest.main()
