@@ -1,4 +1,4 @@
-import os, tempfile, unittest
+import os, sqlite3, tempfile, unittest
 from transactional_dispatch_recovery_reference import DispatchStore
 
 class RecoveryTests(unittest.TestCase):
@@ -81,6 +81,15 @@ class RecoveryTests(unittest.TestCase):
             self.assertTrue(restored.verify_audit("coA"))
             self.assertEqual(restored.action_state("ac1"),"sent")
         finally: restored.close()
+    def test_audit_failure_rolls_back_approval_and_dispatch_state(self):
+        self.s.db.execute("""CREATE TRIGGER reject_dispatch_audit
+          BEFORE INSERT ON audit WHEN NEW.kind='dispatch_started'
+          BEGIN SELECT RAISE(ABORT, 'audit unavailable'); END;""")
+        with self.assertRaises(sqlite3.IntegrityError):
+            self.start()
+        self.assertEqual(self.s.action_state("ac1"),"queued")
+        self.assertEqual(self.s.db.execute("select count(*) from consumed").fetchone()[0],0)
+
     def test_audit_tamper_detected(self):
         self.start()
         self.s.db.execute("update audit set payload='{}' where kind='dispatch_started'")
