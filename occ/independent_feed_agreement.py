@@ -92,7 +92,8 @@ def analyze_independent_feed_agreement(
     registry_issues: list[str] = []
     for entry in registry["entries"]:
         if _identity_key(entry["instrument_identity"]) != expected_key:
-            registry_issues.append("registry entry is scoped to a different instrument")
+            # A registry may cover many instruments; unrelated valid records
+            # are out of scope, not evidence of a malformed observation.
             continue
         pair = (entry["source_id"], entry["adapter_id"])
         registry_by_pair[pair] = entry
@@ -182,10 +183,10 @@ def analyze_independent_feed_agreement(
         status = "INPUTS_REJECTED"
     elif len(accepted) < min_sources:
         status = "INSUFFICIENT_SOURCES"
-    elif len(groups) < min_declared_groups:
-        status = "DECLARED_GROUPS_NOT_INDEPENDENTLY_VERIFIED"
     elif spread_bps is not None and spread_bps > threshold:
         status = "CONFLICT_DETECTED"
+    elif len(groups) < min_declared_groups:
+        status = "DECLARED_GROUPS_NOT_INDEPENDENTLY_VERIFIED"
     else:
         status = "AGREEMENT_WITHIN_THRESHOLD_UNVERIFIED"
 
