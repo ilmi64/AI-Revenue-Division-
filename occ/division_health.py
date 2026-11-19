@@ -131,6 +131,8 @@ def build_division_health_report(
         seen.add(identity)
 
     expected: list[str] = []
+    if isinstance(expected_divisions, str):
+        raise DivisionHealthError("expected_divisions must be an iterable of names, not a string")
     if expected_divisions is not None:
         try:
             for division in expected_divisions:
@@ -159,6 +161,10 @@ def build_division_health_report(
             item["observed_at_epoch"],
         ),
     )
+    health_counts = Counter(item["effective_health_status"] for item in ordered)
+    if missing:
+        health_counts["UNKNOWN"] += len(missing)
+
     return {
         "generated_at_epoch": float(now_epoch),
         "read_only": True,
@@ -167,11 +173,10 @@ def build_division_health_report(
         "operational_ready": False,
         "source_snapshot_count": len(ordered),
         "division_count": len(observed_divisions),
+        "expected_division_count": len(expected),
         "missing_expected_divisions": missing,
         "stale_snapshot_count": sum(1 for item in ordered if item["stale"]),
-        "health_counts": dict(Counter(
-            item["effective_health_status"] for item in ordered
-        )),
+        "health_counts": dict(health_counts),
         "snapshots": ordered,
         "limitations": [
             "Health is not operational readiness or live-trading approval.",
