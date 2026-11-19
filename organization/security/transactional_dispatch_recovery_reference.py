@@ -116,7 +116,13 @@ class DispatchStore:
             return {"allowed":True,"idempotency_key":a["idem"],"intent":json.loads(a["intent_json"])}
         except sqlite3.IntegrityError:
             self.db.execute("ROLLBACK")
-            return {"allowed":False,"reason":"approval_or_action_replay"}
+            # Distinguish a genuine unique-consumption replay from an audit
+            # constraint failure. Audit failure must propagate and fail closed.
+            used=self.db.execute("SELECT 1 FROM consumed WHERE approval_id=? OR action_id=? LIMIT 1",
+                                 (a["approval_id"] if a else "",action_id)).fetchone()
+            if used:
+                return {"allowed":False,"reason":"approval_or_action_replay"}
+            raise
         except Exception:
             self.db.execute("ROLLBACK"); raise
     def record_sender_result(self, action_id, *, result, now):
