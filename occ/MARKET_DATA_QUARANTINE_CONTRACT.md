@@ -17,8 +17,10 @@ runtime.
   AGREEMENT_WITHIN_THRESHOLD_UNVERIFIED with at least two unique source IDs,
   or an operator release claim is recorded.
 
-A later agreement never clears quarantine. Insufficient sources, rejected
-inputs or unverified group labels preserve quarantine. Repeated conflicts
+A later agreement never clears quarantine. Recovery review requires at least two
+unique sources and finite observation ages within the configured recovery
+freshness limit. Stale observations, insufficient sources, rejected inputs or
+unverified group labels preserve quarantine. Repeated conflicts
 preserve the original quarantine timestamp and increment a conflict counter.
 
 ## Manual review boundary
