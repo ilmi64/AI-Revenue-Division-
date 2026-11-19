@@ -145,9 +145,15 @@ def transition_market_data_quarantine(
             ages = []
             for item in agreement_report["accepted_observations"]:
                 age = item.get("age_seconds")
-                if isinstance(age, bool) or not isinstance(age, (int, float)) or not math.isfinite(float(age)) or float(age) < 0:
+                if isinstance(age, bool) or not isinstance(age, (int, float)):
                     raise QuarantineStateError("recovery observations require finite non-negative age_seconds")
-                ages.append(float(age))
+                try:
+                    age_number = float(age)
+                except (TypeError, ValueError, OverflowError) as exc:
+                    raise QuarantineStateError("recovery observations require finite non-negative age_seconds") from exc
+                if not math.isfinite(age_number) or age_number < 0:
+                    raise QuarantineStateError("recovery observations require finite non-negative age_seconds")
+                ages.append(age_number)
             if any(age > max_recovery_age for age in ages):
                 state = "QUARANTINED"
                 reason = "RECOVERY_EVIDENCE_STALE"
