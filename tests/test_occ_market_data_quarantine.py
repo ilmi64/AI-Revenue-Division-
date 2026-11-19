@@ -125,6 +125,17 @@ class MarketDataQuarantineTests(unittest.TestCase):
         self.assertEqual(result["state"], "QUARANTINED")
         self.assertEqual(result["reason_code"], "RECOVERY_EVIDENCE_STALE")
 
+    def test_overflowing_recovery_age_is_rejected_cleanly(self):
+        prior = transition_market_data_quarantine(
+            report("CONFLICT_DETECTED"), now_epoch=1000
+        )
+        oversized = report("AGREEMENT_WITHIN_THRESHOLD_UNVERIFIED", spread=2)
+        oversized["accepted_observations"][0]["age_seconds"] = 10 ** 10000
+        with self.assertRaises(QuarantineStateError):
+            transition_market_data_quarantine(
+                oversized, now_epoch=1010, prior_state=prior,
+            )
+
     def test_review_claim_cannot_override_new_conflict(self):
         prior = transition_market_data_quarantine(
             report("CONFLICT_DETECTED"), now_epoch=1000
