@@ -1,4 +1,4 @@
-import os, sqlite3, tempfile, unittest
+import os, sqlite3, tempfile, threading, unittest
 from transactional_dispatch_recovery_reference import DispatchStore
 
 class RecoveryTests(unittest.TestCase):
@@ -89,6 +89,31 @@ class RecoveryTests(unittest.TestCase):
             self.start()
         self.assertEqual(self.s.action_state("ac1"),"queued")
         self.assertEqual(self.s.db.execute("select count(*) from consumed").fetchone()[0],0)
+
+    def test_two_workers_race_one_approval_exactly_one_wins(self):
+        second=DispatchStore(self.path)
+        barrier=threading.Barrier(2)
+        results=[]
+        errors=[]
+        def worker(store):
+            try:
+                barrier.wait()
+                results.append(store.authorize_and_start("ac1",company="coA",agent="ag1",
+                  task="t1",operation="publish",resource="listing/1",policy="v1",now=3))
+            except Exception as exc:
+                errors.append(exc)
+        threads=[threading.Thread(target=worker,args=(store,)) for store in (self.s,second)]
+        try:
+            for thread in threads: thread.start()
+            for thread in threads: thread.join(timeout=5)
+            self.assertTrue(all(not thread.is_alive() for thread in threads))
+            self.assertEqual(errors,[])
+            self.assertEqual(sum(1 for result in results if result["allowed"]),1)
+            self.assertEqual(self.s.db.execute("select count(*) from consumed").fetchone()[0],1)
+            self.assertEqual(self.s.action_state("ac1"),"dispatch_started")
+            self.assertTrue(self.s.verify_audit("coA"))
+        finally:
+            second.close()
 
     def test_audit_tamper_detected(self):
         self.start()
