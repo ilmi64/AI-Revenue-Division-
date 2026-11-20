@@ -116,6 +116,8 @@ class SQLiteCheckpointRegistry:
 
     def accept(self,checkpoint, *, trusted_key_ids, signature_verifier, now,
                max_age_seconds=86400,future_skew_seconds=30):
+        if not isinstance(checkpoint,dict):
+            raise CheckpointError("checkpoint_object_required")
         verified=verify_checkpoint(checkpoint,trusted_key_ids=trusted_key_ids,
           signature_verifier=signature_verifier,expected_company=checkpoint.get("company_id"),
           expected_stream=checkpoint.get("stream_id"),now=now,
