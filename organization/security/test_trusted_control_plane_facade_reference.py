@@ -20,6 +20,11 @@ class IdentityVerifier:
 
 class Scheduler:
     def __init__(self, result=None, error=None): self.result=result; self.error=error
+    def resolve_approval_scope(self, *, task_id, company_id, now):
+        if self.error: raise self.error
+        if task_id != "task-1" or company_id != "revenue" or now != 100:
+            raise AssertionError("unexpected approval task lookup")
+        return task_claims()
     def resolve(self, *, task_reference, principal, now):
         if self.error: raise self.error
         if task_reference != "task-ref" or principal.agent_id != "agent-1" or now != 100:
@@ -140,6 +145,28 @@ class TrustedFacadeTests(unittest.TestCase):
         with self.assertRaisesRegex(TrustedControlPlaneError,"amount_requires_nonnegative_minor_units_and_currency"):
             make_facade(owner=approval_claims(amount_minor=500)).issue_owner_approval(
                 owner_signed_envelope={})
+
+    def test_approval_must_match_trusted_task_assignment(self):
+        facade=TrustedControlPlaneFacade(
+            company_id="revenue", identity_audience="runtime", approval_audience="owner-approval",
+            trusted_owner_ids={"owner-1"}, clock=Clock(),
+            identity_verifier=IdentityVerifier(principal_claims()),
+            task_scheduler=Scheduler(task_claims(assigned_agent_id="agent-2")),
+            owner_approval_verifier=OwnerVerifier(approval_claims()),
+            approval_repository=ApprovalRepository({}))
+        with self.assertRaisesRegex(TrustedControlPlaneError,"approval_task_scope_mismatch"):
+            facade.issue_owner_approval(owner_signed_envelope={})
+
+    def test_approval_operation_must_be_in_task_scope(self):
+        facade=TrustedControlPlaneFacade(
+            company_id="revenue", identity_audience="runtime", approval_audience="owner-approval",
+            trusted_owner_ids={"owner-1"}, clock=Clock(),
+            identity_verifier=IdentityVerifier(principal_claims()),
+            task_scheduler=Scheduler(task_claims(allowed_operations={"research.read"})),
+            owner_approval_verifier=OwnerVerifier(approval_claims()),
+            approval_repository=ApprovalRepository({}))
+        with self.assertRaisesRegex(TrustedControlPlaneError,"approval_outside_task_scope"):
+            facade.issue_owner_approval(owner_signed_envelope={})
 
     def test_valid_owner_approval_persisted(self):
         repo=ApprovalRepository({"approval_id":"approval-1","company_id":"revenue",
