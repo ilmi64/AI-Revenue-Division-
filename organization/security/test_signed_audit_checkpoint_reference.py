@@ -76,5 +76,19 @@ class SignedCheckpointTests(unittest.TestCase):
         c=self.make()
         with self.assertRaisesRegex(CheckpointError,"signer_untrusted"):
             self.registry.accept(c,trusted_key_ids={"other"},signature_verifier=verify,now=101)
+    def test_first_checkpoint_requires_genesis_link(self):
+        c=self.make(prev="f"*64)
+        with self.assertRaisesRegex(CheckpointError,"genesis_link"):
+            self.accept(c)
+    def test_registry_insert_failure_does_not_advance_head(self):
+        c=self.make()
+        self.registry.db.execute("""CREATE TRIGGER reject_checkpoint
+          BEFORE INSERT ON checkpoints BEGIN SELECT RAISE(ABORT,'storage unavailable'); END;""")
+        with self.assertRaisesRegex(CheckpointError,"integrity_conflict"):
+            self.accept(c)
+        self.assertIsNone(self.registry.db.execute(
+          "SELECT 1 FROM checkpoint_heads WHERE company_id='coA' AND stream_id='audit-main'").fetchone())
+        self.registry.db.execute("DROP TRIGGER reject_checkpoint")
+        self.assertEqual(self.accept(c),"accepted")
 
 if __name__=="__main__": unittest.main()
