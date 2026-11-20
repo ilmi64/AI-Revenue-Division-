@@ -29,9 +29,13 @@ The verifier must authenticate the receiver signature and bind the evidence to
 the exact company, action ID, idempotency key, receiver account and recovery
 audience.
 The action's receiver account must be persisted in immutable action intent;
-missing or mutable destination identity fails closed. The reconciliation adapter
-accepts a verifier object exposing a trusted `verify` method, not an arbitrary
-agent-provided callback. It must enforce issuer allowlists, freshness, nonce/evidence replay
+missing or mutable destination identity fails closed. Action intent is write-once:
+production database privileges/constraints must prevent later edits, and the
+committed intent digest must be covered by the append-only audit record. The
+reference's under-lock comparison detects a change during verification; it does
+not prove that a privileged actor did not alter intent earlier. The reconciliation
+adapter accepts a verifier object exposing a trusted `verify` method, not an
+arbitrary agent-provided callback. It must enforce issuer allowlists, freshness, nonce/evidence replay
 protection and a stable evidence ID. Verification occurs outside the SQLite
 write transaction; after verification, the reference reloads the action under
 BEGIN IMMEDIATE and rechecks its company, ID and idempotency key before changing
