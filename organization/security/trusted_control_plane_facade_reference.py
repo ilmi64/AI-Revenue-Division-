@@ -77,7 +77,7 @@ class TrustedControlPlaneFacade:
             raise TrustedControlPlaneError("invalid_trusted_owner_registry")
         required = (
             (clock, "now"), (identity_verifier, "verify"),
-            (task_scheduler, "resolve"),
+            (task_scheduler, "resolve"), (task_scheduler, "resolve_approval_scope"),
             (owner_approval_verifier, "verify"),
             (approval_repository, "issue"),
         )
@@ -211,6 +211,24 @@ class TrustedControlPlaneFacade:
                 raise TrustedControlPlaneError("amount_requires_nonnegative_minor_units_and_currency")
         elif currency is not None and not _nonempty(currency):
             raise TrustedControlPlaneError("invalid_currency")
+        try:
+            task = self.__task_scheduler.resolve_approval_scope(
+                task_id=claims["task_id"], company_id=self.__company_id, now=now)
+        except Exception as exc:
+            raise TrustedControlPlaneError("approval_task_resolution_unavailable") from exc
+        if not isinstance(task, dict):
+            raise TrustedControlPlaneError("approval_task_not_found")
+        if (task.get("task_id") != claims["task_id"] or
+                task.get("company_id") != self.__company_id or
+                task.get("assigned_agent_id") != claims["agent_id"] or
+                task.get("stream_id") != claims["stream_id"] or
+                task.get("policy_version") != claims["policy_version"]):
+            raise TrustedControlPlaneError("approval_task_scope_mismatch")
+        if (claims["operation"] not in task.get("allowed_operations", ()) or
+                claims["resource"] not in task.get("allowed_resources", ())):
+            raise TrustedControlPlaneError("approval_outside_task_scope")
+        if task.get("expires_at", 0) <= now:
+            raise TrustedControlPlaneError("approval_task_expired")
         try:
             receipt = self.__approval_repository.issue(claims=dict(claims), now=now)
         except Exception as exc:
