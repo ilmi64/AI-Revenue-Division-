@@ -1,0 +1,22 @@
+{
+  "status": "specified_not_executed",
+  "test_file": "test_trusted_control_plane_facade_reference.py",
+  "scenarios": [
+    "Trusted dependencies are fixed at service construction and cannot be replaced per request.",
+    "Identity verification is bound to the configured company and audience.",
+    "Identity issuer failure, malformed claims, expiry or invalid epoch fails closed.",
+    "Trusted scheduler resolves task; caller cannot choose company, agent or role.",
+    "Task company, assigned agent, expiry and nonempty operation/resource scopes are checked.",
+    "Trusted clock failure or invalid value fails closed.",
+    "Owner approval signature verification is performed by the bound verifier.",
+    "Owner ID must be in the trusted owner registry.",
+    "Approval is bound to company, stream, agent, session, task, operation, resource, policy, audience and nonce.",
+    "Approval must be single-use and within its validity interval.",
+    "Amount must use integer minor units and include a currency.",
+    "Durable repository receipt must match approval ID, company, scope digest and expiry.",
+    "Repository errors or malformed receipts fail closed.",
+    "Facade returns no database connection or direct SQL capability.",
+    "Agent-facing APIs cannot invoke owner-only approval endpoint without service-layer authentication.",
+    "Prototype does not claim production cryptographic or distributed guarantees."
+  ]
+}
