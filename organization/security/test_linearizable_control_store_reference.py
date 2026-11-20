@@ -140,6 +140,11 @@ class ControlStoreTests(unittest.TestCase):
             self.assertEqual(result["reason"],"operation_hard_denied")
             self.assertEqual(self.db.action_state(action),"queued")
 
+    def test_hard_deny_with_unknown_action_is_safe(self):
+        result=self.db.authorize_and_start("missing-action",company="co-a",stream="primary",
+            agent="agent-a",task="task-1",operation="wallet.sign",resource="wallet/main",
+            policy_version="v1",now=20)
+        self.assertEqual(result,{"allowed":False,"reason":"operation_hard_denied"})
     def test_company_mismatch_denied(self):
         self.assertEqual(self._authorize(company="co-b")["reason"],"company_or_stream_mismatch")
 
