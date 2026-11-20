@@ -113,9 +113,25 @@ class RepositoryTests(unittest.TestCase):
         with self.assertRaises(ApprovalRepositoryError):
             self.repo.consume_in_transaction(
                 self.conn, approval_id=valid_claims()["approval_id"], action_id="a",
-                expected={"company_id": "revenue-co"}, now=120,
+                expected={"company_id": "revenue-co", "stream_id": "wrong-stream"}, now=120,
             )
         self.assertEqual(self.conn.commits, 0)
+
+    def test_revoke_updates_record_and_audits_in_one_commit(self):
+        self.conn.cursor_obj.fetchone.side_effect = [
+            {"stream_id": "sales", "revoked_at": None},
+            {"last_sequence": 0, "head_hash": "0" * 64},
+        ]
+        result = self.repo.revoke(
+            approval_id=valid_claims()["approval_id"],
+            company_id="revenue-co", actor_id="owner-1", now=130,
+        )
+        self.assertTrue(result)
+        self.assertEqual(self.conn.commits, 1)
+        self.assertEqual(self.conn.rollbacks, 0)
+        sql = " ".join(str(c.args[0]) for c in self.conn.cursor_obj.execute.call_args_list)
+        self.assertIn("UPDATE owner_approval_records", sql)
+        self.assertIn("INSERT INTO owner_approval_audit_events", sql)
 
     def test_amount_currency_pair_is_enforced(self):
         claims = valid_claims()
