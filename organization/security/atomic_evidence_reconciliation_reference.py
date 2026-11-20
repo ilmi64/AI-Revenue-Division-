@@ -22,7 +22,10 @@ class EvidenceReplayError(ReconciliationError):
 
 class SQLiteAtomicReconciliationStore:
     """Single-host reference; replay receipt, state transition and audit are atomic."""
-    def __init__(self, path):
+    def __init__(self, path, *, trusted_verifier):
+        if not callable(getattr(trusted_verifier, "verify_for_atomic_reconciliation", None)):
+            raise ReconciliationError("trusted_receiver_verifier_required")
+        self._trusted_verifier = trusted_verifier
         self.db = sqlite3.connect(str(path), timeout=10, isolation_level=None)
         self.db.row_factory = sqlite3.Row
         self.db.execute("PRAGMA foreign_keys=ON")
@@ -67,44 +70,41 @@ class SQLiteAtomicReconciliationStore:
         self.db.execute("INSERT INTO audit(company,kind,at,payload,prev,hash) VALUES(?,?,?,?,?,?)",
                         (company,kind,now,self.canon(payload),prev,digest))
 
-    def reconcile(self, *, action_id, evidence, verified, now):
-        """Commit replay receipt, terminal state and audit event as one transaction.
+    def reconcile(self, *, action_id, evidence, now):
+        """Verify with the store-bound trusted verifier, then atomically consume replay.
 
-        Call only after a trusted verifier has authenticated the exact raw evidence
-        and checked company/action/destination/audience bindings. Do not inject a
-        separate replay store into that verifier for this integrated path.
+        Signature verification occurs before the write transaction. Durable replay
+        consumption is exclusively the unique receipt insert inside the transaction.
+        The action's immutable identity is reloaded and compared after BEGIN IMMEDIATE.
         """
-        if not isinstance(evidence,dict) or not isinstance(verified,dict) or verified.get("verified") is not True:
-            raise ReconciliationError("trusted_verified_evidence_required")
-        required=("issuer","nonce","evidence_id","outcome","observed_at","signature")
-        if any(k not in evidence for k in required):
-            raise ReconciliationError("evidence_fields_missing")
-        for key in ("issuer","nonce","evidence_id","signature"):
-            if not isinstance(evidence[key],str) or not evidence[key].strip():
-                raise ReconciliationError("invalid_evidence_field:"+key)
-        if evidence["outcome"] not in ("applied","not_applied","inconclusive"):
-            raise ReconciliationError("invalid_outcome")
-        observed=evidence["observed_at"]
-        if isinstance(observed,bool) or not isinstance(observed,int):
-            raise ReconciliationError("invalid_observed_at")
+        if not isinstance(evidence,dict):
+            raise ReconciliationError("evidence_object_required")
         if isinstance(now,bool) or not isinstance(now,int):
             raise ReconciliationError("invalid_now")
-        # Import the canonicalizer used by the verifier; signature itself is excluded.
-        from receiver_evidence_verifier_reference import ReceiverEvidenceVerifier
+        action_before=self.db.execute("SELECT * FROM actions WHERE action_id=?",
+                                      (action_id,)).fetchone()
+        if action_before is None:
+            raise ReconciliationError("action_not_found")
+        expected={"company":action_before["company"],"action_id":action_id,
+                  "receiver_account":action_before["receiver_account"],
+                  "idempotency_key":action_before["idempotency_key"],
+                  "audience":"recovery-gateway"}
         try:
+            verified=self._trusted_verifier.verify_for_atomic_reconciliation(
+                evidence,expected=expected,now=now)
+            from receiver_evidence_verifier_reference import ReceiverEvidenceVerifier
             payload=ReceiverEvidenceVerifier.canonical_signed_payload(evidence)
         except Exception as exc:
-            raise ReconciliationError("evidence_canonicalization_failed") from exc
+            raise ReconciliationError("trusted_evidence_verification_failed") from exc
         digest=hashlib.sha256(payload).hexdigest()
-        if not HEX64.fullmatch(str(verified.get("payload_sha256",""))) or digest != verified.get("payload_sha256"):
-            raise ReconciliationError("verified_payload_digest_mismatch")
-        if (verified.get("issuer") != evidence["issuer"] or
-            verified.get("evidence_id") != evidence["evidence_id"] or
-            verified.get("outcome") != evidence["outcome"] or
-            verified.get("observed_at") != observed):
-            raise ReconciliationError("verified_claim_binding_mismatch")
-        if verified.get("nonce") not in (None, evidence["nonce"]):
-            raise ReconciliationError("verified_nonce_mismatch")
+        if (not isinstance(verified,dict) or verified.get("verified") is not True or
+            verified.get("payload_sha256") != digest or
+            verified.get("issuer") != evidence.get("issuer") or
+            verified.get("nonce") != evidence.get("nonce") or
+            verified.get("evidence_id") != evidence.get("evidence_id") or
+            verified.get("outcome") != evidence.get("outcome") or
+            verified.get("observed_at") != evidence.get("observed_at")):
+            raise ReconciliationError("trusted_verifier_claim_mismatch")
 
         state={"applied":"reconciled_applied","not_applied":"reconciled_not_applied",
                "inconclusive":"quarantined"}[evidence["outcome"]]
@@ -114,12 +114,11 @@ class SQLiteAtomicReconciliationStore:
             action=self.db.execute("SELECT * FROM actions WHERE action_id=?",(action_id,)).fetchone()
             if action is None:
                 raise ReconciliationError("action_not_found")
-            expected={"company":action["company"],"action_id":action_id,
-                      "receiver_account":action["receiver_account"],
-                      "idempotency_key":action["idempotency_key"],"audience":"recovery-gateway"}
-            if any(evidence.get(k) != v for k,v in expected.items()):
-                raise ReconciliationError("evidence_action_binding_mismatch")
-
+            identity_before=(action_before["company"],action_before["receiver_account"],
+                             action_before["idempotency_key"])
+            identity_now=(action["company"],action["receiver_account"],action["idempotency_key"])
+            if identity_before != identity_now:
+                raise ReconciliationError("action_identity_changed_during_verification")
             by_nonce=self.db.execute(
               "SELECT * FROM evidence_receipts WHERE issuer=? AND nonce=?",
               (issuer,nonce)).fetchone()
@@ -132,10 +131,12 @@ class SQLiteAtomicReconciliationStore:
             if prior:
                 same=(prior["issuer"],prior["nonce"],prior["evidence_id"],prior["payload_sha256"],
                       prior["action_id"],prior["company"],prior["outcome"],prior["observed_at"]) == (
-                      issuer,nonce,eid,digest,action_id,action["company"],evidence["outcome"],observed)
+                      issuer,nonce,eid,digest,action_id,action["company"],evidence["outcome"],
+                      evidence["observed_at"])
                 if not same:
                     raise EvidenceReplayError("evidence_replay_or_identity_conflict")
-                if action["state"] == state and action["evidence_id"] == eid and action["payload_sha256"] == digest:
+                if (action["state"] == state and action["evidence_id"] == eid and
+                    action["payload_sha256"] == digest):
                     self.db.execute("COMMIT")
                     return "duplicate_same_result"
                 raise ReconciliationError("receipt_state_invariant_violation")
@@ -145,7 +146,8 @@ class SQLiteAtomicReconciliationStore:
             self.db.execute("""INSERT INTO evidence_receipts
               (issuer,nonce,evidence_id,payload_sha256,action_id,company,outcome,observed_at,accepted_at)
               VALUES(?,?,?,?,?,?,?,?,?)""",
-              (issuer,nonce,eid,digest,action_id,action["company"],evidence["outcome"],observed,now))
+              (issuer,nonce,eid,digest,action_id,action["company"],evidence["outcome"],
+               evidence["observed_at"],now))
             self.db.execute("""UPDATE actions SET state=?,evidence_id=?,payload_sha256=?
               WHERE action_id=? AND state='outcome_unknown'""",(state,eid,digest,action_id))
             if self.db.execute("SELECT changes()").fetchone()[0] != 1:
@@ -156,9 +158,6 @@ class SQLiteAtomicReconciliationStore:
             return state
         except sqlite3.IntegrityError as exc:
             if self.db.in_transaction: self.db.execute("ROLLBACK")
-            # A uniqueness collision is replay only when a conflicting receipt
-            # actually exists. Audit/foreign-key/other integrity failures must
-            # remain operational errors and must not be mislabeled as replay.
             collision=self.db.execute("""SELECT 1 FROM evidence_receipts
               WHERE (issuer=? AND nonce=?) OR (issuer=? AND evidence_id=?) LIMIT 1""",
               (issuer,nonce,issuer,eid)).fetchone()
