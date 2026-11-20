@@ -1,5 +1,5 @@
 import os, tempfile, threading, unittest
-from durable_replay_store_reference import SQLiteReplayStore, ReplayError
+from durable_replay_store_reference import SQLiteReplayStore, ReplayError, ReplayConflict, ReplayStoreUnavailable
 
 class DurableReplayStoreTests(unittest.TestCase):
     def setUp(self):
@@ -16,11 +16,11 @@ class DurableReplayStoreTests(unittest.TestCase):
         self.assertTrue(self.claim())
     def test_nonce_replay_rejected(self):
         self.claim()
-        with self.assertRaisesRegex(ReplayError,"replayed"):
+        with self.assertRaisesRegex(ReplayConflict,"replayed"):
             self.claim(evidence_id="e2")
     def test_evidence_id_replay_rejected(self):
         self.claim()
-        with self.assertRaisesRegex(ReplayError,"replayed"):
+        with self.assertRaisesRegex(ReplayConflict,"replayed"):
             self.claim(nonce="n2")
     def test_restart_persistence(self):
         self.claim()
@@ -55,6 +55,18 @@ class DurableReplayStoreTests(unittest.TestCase):
         with self.assertRaises(ReplayError):
             self.store.claim(issuer="",nonce="n",evidence_id="e",
               payload_sha256="x",observed_at=1,accepted_at=2)
+    def test_non_duplicate_integrity_failure_is_store_unavailable(self):
+        self.store.db.execute("""CREATE TRIGGER reject_insert BEFORE INSERT ON receiver_evidence_replay
+          BEGIN SELECT RAISE(ABORT,'storage write unavailable'); END;""")
+        with self.assertRaises(ReplayStoreUnavailable):
+            self.claim()
+        self.assertEqual(self.store.db.execute(
+          "SELECT count(*) FROM receiver_evidence_replay").fetchone()[0],0)
+    def test_conflicting_nonce_and_id_are_replay_conflict(self):
+        self.claim()
+        with self.assertRaises(ReplayConflict):
+            self.store.claim(issuer="receiver-A",nonce="n1",evidence_id="e2",
+              payload_sha256="b"*64,observed_at=100,accepted_at=101)
 
 if __name__=="__main__":
     unittest.main()
