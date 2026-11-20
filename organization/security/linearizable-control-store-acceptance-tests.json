@@ -37,6 +37,7 @@
     "immutable_intent_digest_and_independent_signed_WORM_checkpoints",
     "receiver_idempotency_and_recovery_epoch_fencing",
     "monitoring_restore_drills_and_independent_security_review",
-    "trusted_asymmetric_signature_verification_and_approval_issuer"
+    "trusted_asymmetric_signature_verification_and_approval_issuer",
+    "explicit_currency_and_minor_unit_precision_binding"
   ]
 }
