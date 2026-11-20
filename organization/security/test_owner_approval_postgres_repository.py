@@ -9,6 +9,8 @@ from owner_approval_postgres_repository import (
 class FakeConnection:
     def __init__(self):
         self.cursor_obj = MagicMock()
+        self.cursor_obj.__enter__.return_value = self.cursor_obj
+        self.cursor_obj.__exit__.return_value = False
         self.commits = 0
         self.rollbacks = 0
         self.closed = 0
@@ -82,7 +84,7 @@ class RepositoryTests(unittest.TestCase):
         self.assertEqual(self.conn.rollbacks, 1)
 
     def test_consume_uses_caller_transaction_without_commit(self):
-        self.conn.cursor_obj.fetchone.return_value = {
+        self.conn.cursor_obj.fetchone.side_effect = [{
             "company_id": "revenue-co", "stream_id": "sales", "owner_id": "owner-1",
             "principal_agent_id": "agent-1", "session_id": "session-1", "task_id": "task-1",
             "operation": "crm.create_draft", "resource": "customer/123",
@@ -90,7 +92,7 @@ class RepositoryTests(unittest.TestCase):
             "policy_version": "p1", "audience": "approval-service",
             "revoked_at": None, "expires_at": __import__("datetime").datetime.fromtimestamp(200, __import__("datetime").timezone.utc),
             "amount_minor": None, "currency": None, "nonce": "nonce-1",
-        }
+        }, {"last_sequence": 0, "head_hash": "0" * 64}]
         result = self.repo.consume_in_transaction(
             self.conn, approval_id=valid_claims()["approval_id"], action_id="action-1",
             expected={
