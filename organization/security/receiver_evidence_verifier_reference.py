@@ -5,6 +5,7 @@ This module deliberately does not accept a caller-supplied authenticated=True fl
 """
 from __future__ import annotations
 import hashlib, json
+from durable_replay_store_reference import ReplayConflict, ReplayStoreUnavailable
 
 class EvidenceError(ValueError):
     pass
@@ -75,8 +76,12 @@ class ReceiverEvidenceVerifier:
                     self._replay_store.claim(issuer=evidence["issuer"],nonce=evidence["nonce"],
                         evidence_id=evidence["evidence_id"],payload_sha256=digest,
                         observed_at=observed,accepted_at=now)
+                except ReplayConflict as exc:
+                    raise EvidenceError("evidence_replay") from exc
+                except ReplayStoreUnavailable as exc:
+                    raise EvidenceError("replay_store_unavailable") from exc
                 except Exception as exc:
-                    raise EvidenceError("evidence_replay_store_rejected") from exc
+                    raise EvidenceError("replay_store_unexpected_failure") from exc
         return {"verified":True,"evidence_id":evidence["evidence_id"],
                 "outcome":evidence["outcome"],"payload_sha256":digest,
                 "issuer":evidence["issuer"],"nonce":evidence["nonce"],"observed_at":observed}
