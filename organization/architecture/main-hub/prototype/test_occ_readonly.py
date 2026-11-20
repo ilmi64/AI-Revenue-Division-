@@ -62,6 +62,21 @@ class OccReadOnlyTests(unittest.TestCase):
         with self.assertRaises(SnapshotError):
             assess_snapshot(snapshot, "ai_revenue", now=naive_now)
 
+    def test_invalid_reference_clock_type_rejected(self):
+        snapshot = load("ai-revenue.snapshot.example.json")
+        with self.assertRaises(SnapshotError):
+            assess_snapshot(snapshot, "ai_revenue", now="2026-11-20T12:39:00Z")
+
+    def test_negative_max_age_rejected(self):
+        snapshot = load("ai-revenue.snapshot.example.json")
+        with self.assertRaises(SnapshotError):
+            assess_snapshot(snapshot, "ai_revenue", now=NOW, max_age_hours=-1)
+
+    def test_non_integer_max_age_rejected(self):
+        snapshot = load("ai-revenue.snapshot.example.json")
+        with self.assertRaises(SnapshotError):
+            assess_snapshot(snapshot, "ai_revenue", now=NOW, max_age_hours=24.5)
+
     def test_malformed_nested_incident_record_rejected(self):
         snapshot = load("ai-revenue.snapshot.example.json")
         snapshot["incident_summary"] = []
