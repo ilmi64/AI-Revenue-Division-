@@ -34,7 +34,8 @@ class LinearizableControlStore:
         CREATE TABLE IF NOT EXISTS approvals(
           approval_id TEXT PRIMARY KEY, company TEXT NOT NULL, stream TEXT NOT NULL,
           agent TEXT NOT NULL, task TEXT NOT NULL, operation TEXT NOT NULL,
-          resource TEXT NOT NULL, policy_version TEXT NOT NULL, expires_at INTEGER NOT NULL,
+          resource TEXT NOT NULL, policy_version TEXT NOT NULL, amount_limit_minor INTEGER,
+          expires_at INTEGER NOT NULL,
           revoked INTEGER NOT NULL DEFAULT 0, consumed_action_id TEXT UNIQUE, consumed_at INTEGER);
         CREATE TABLE IF NOT EXISTS actions(
           action_id TEXT PRIMARY KEY, company TEXT NOT NULL, stream TEXT NOT NULL,
@@ -93,12 +94,16 @@ class LinearizableControlStore:
             (company,stream,DISABLED,now))
 
     def issue_approval(self, *, approval_id, company, stream, agent, task,
-                       operation, resource, policy_version, expires_at, now):
+                       operation, resource, policy_version, expires_at, now, amount_limit_minor=None):
         if not self.required(approval_id,company,stream,agent,task,operation,resource,policy_version):
             raise ControlStoreError("approval_fields_required")
         if (isinstance(now,bool) or not isinstance(now,int) or isinstance(expires_at,bool)
             or not isinstance(expires_at,int) or expires_at<=now):
             raise ControlStoreError("invalid_approval_expiry")
+        if amount_limit_minor is not None and (
+            isinstance(amount_limit_minor,bool) or not isinstance(amount_limit_minor,int)
+            or amount_limit_minor<0):
+            raise ControlStoreError("invalid_amount_limit_minor")
         self.db.execute("BEGIN IMMEDIATE")
         try:
             if self.db.execute("SELECT 1 FROM streams WHERE company=? AND stream=?",
@@ -106,8 +111,9 @@ class LinearizableControlStore:
                 raise ControlStoreError("stream_not_registered")
             self.db.execute(
                 "INSERT INTO approvals(approval_id,company,stream,agent,task,operation,resource,"
-                "policy_version,expires_at) VALUES(?,?,?,?,?,?,?,?,?)",
-                (approval_id,company,stream,agent,task,operation,resource,policy_version,expires_at))
+                "policy_version,amount_limit_minor,expires_at) VALUES(?,?,?,?,?,?,?,?,?,?)",
+                (approval_id,company,stream,agent,task,operation,resource,policy_version,
+                 amount_limit_minor,expires_at))
             self._audit(company,stream,"approval_issued",now,
                         {"approval_id":approval_id,"task":task,"operation":operation})
             self.db.execute("COMMIT")
@@ -297,6 +303,13 @@ class LinearizableControlStore:
             if reason is None and (p["company"],p["stream"],p["agent"],p["task"],p["operation"],
                 p["resource"],p["policy_version"])!=(company,stream,agent,task,operation,resource,policy_version):
                 reason="approval_scope_mismatch"
+            if reason is None:
+                amount=json.loads(a["intent_json"]).get("amount_minor")
+                if amount is not None and (isinstance(amount,bool) or not isinstance(amount,int) or amount<0):
+                    reason="invalid_action_amount"
+                elif p["amount_limit_minor"] is not None and (
+                    amount is None or amount>p["amount_limit_minor"]):
+                    reason="amount_limit_exceeded"
             if reason:
                 if a and a["company"]==company and a["stream"]==stream:
                     self._audit(company,stream,"dispatch_denied",now,{"action_id":action_id,"reason":reason})
