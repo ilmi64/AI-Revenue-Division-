@@ -1,0 +1,84 @@
+{
+  "status": "proposed_not_executed",
+  "companies": [
+    "AI Revenue",
+    "Trading & Technology"
+  ],
+  "shared_control_plane_role": "transport_and_scoped_coordination_only",
+  "default_cross_company_access": "deny",
+  "test_groups": [
+    {
+      "id": "ISO-01",
+      "name": "Identity and tenant spoofing",
+      "cases": [
+        "payload company spoof",
+        "header/metadata mismatch",
+        "missing tenant context"
+      ]
+    },
+    {
+      "id": "ISO-02",
+      "name": "Private data boundaries",
+      "cases": [
+        "memory read/write",
+        "ledger access",
+        "customer records",
+        "secrets",
+        "audit stream"
+      ]
+    },
+    {
+      "id": "ISO-03",
+      "name": "Task and delegation",
+      "cases": [
+        "child scope widening",
+        "expired delegation",
+        "revoked delegation",
+        "replay",
+        "resource mismatch"
+      ]
+    },
+    {
+      "id": "ISO-04",
+      "name": "Shared infrastructure leakage",
+      "cases": [
+        "cache/vector/object store",
+        "queue retry/dead-letter",
+        "logs/traces/crash dumps",
+        "backup restore"
+      ]
+    },
+    {
+      "id": "ISO-05",
+      "name": "Authority separation",
+      "cases": [
+        "OCC approval attempt",
+        "cross-company approval consumption",
+        "risk halt modification",
+        "funds/order action"
+      ]
+    },
+    {
+      "id": "ISO-06",
+      "name": "Failure and recovery",
+      "cases": [
+        "policy outage",
+        "issuer outage",
+        "audit outage",
+        "key rotation",
+        "offboarding",
+        "concurrent tenant interleaving"
+      ]
+    }
+  ],
+  "evidence_required": [
+    "build and policy version",
+    "sanitized request",
+    "expected and actual decision",
+    "side-effect counter",
+    "audit event ID",
+    "reviewer and timestamp"
+  ],
+  "pass_rule": "deny before protected data disclosure or side effect; audit denial in correct company stream",
+  "certification": "none"
+}
