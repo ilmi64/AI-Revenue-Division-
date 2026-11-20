@@ -85,6 +85,18 @@ class RecoveryTests(unittest.TestCase):
             self.s.reconcile("ac1",evidence=wrong,
                 evidence_verifier=self.fake_verifier("applied"),now=6)
 
+    def test_action_identity_rechecked_after_verification(self):
+        self.start(); self.s.record_sender_result("ac1",result="timeout",now=4)
+        valid=self.fake_verifier("applied")
+        def mutate_then_verify(evidence, *, expected, now):
+            # Simulate an identity change between pre-verification read and commit.
+            self.s.db.execute("UPDATE actions SET idem='tampered-idem' WHERE id='ac1'")
+            return valid(evidence,expected=expected,now=now)
+        with self.assertRaisesRegex(ValueError,"action_identity_changed_during_verification"):
+            self.s.reconcile("ac1",evidence=self.receiver_evidence("ev-race"),
+                evidence_verifier=mutate_then_verify,now=6)
+        self.assertEqual(self.s.action_state("ac1"),"outcome_unknown")
+
     def test_unauthenticated_evidence_rejected(self):
         self.start(); self.s.record_sender_result("ac1",result="timeout",now=4)
         with self.assertRaises(ValueError):
