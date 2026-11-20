@@ -98,6 +98,8 @@ class SQLiteRecoveryAuthority:
         """Require independently verified assessment AND exact one-time owner approval."""
         if isinstance(now,bool) or not isinstance(now,int):
             raise RecoveryAuthorityError("invalid_time")
+        if not isinstance(owner_approval,dict) or not isinstance(recovery_assessment,dict):
+            raise RecoveryAuthorityError("signed_release_documents_required")
         row=self.db.execute("SELECT * FROM recovery_streams WHERE company=? AND stream=?",
                             (company,stream)).fetchone()
         if row is None: raise RecoveryAuthorityError("stream_not_registered")
