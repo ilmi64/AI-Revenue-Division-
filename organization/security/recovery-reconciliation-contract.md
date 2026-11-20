@@ -26,3 +26,15 @@ Status: offline reference only. No production backup, remote receiver query, or 
 
 ## Production gate
 Independent receiver reconciliation, protected evidence, durable event/outbox transactions, recovery runbooks, restore drills, least-privilege access and owner approval are required before any external action. Trading execution remains separately prohibited until its own risk and live-readiness gates pass.
+
+
+## Superseding security boundary
+The earlier `recovery_reconciliation_reference.py` is a legacy synthetic fixture.
+Its `authenticated` boolean is not cryptographic proof and must never be used
+for production authorization. The current reference path is
+`atomic_evidence_reconciliation_reference.py`, which binds a trusted
+`ReceiverEvidenceVerifier` and atomically records replay receipt, action state
+and audit. Quarantine release is separately governed by
+`recovery_authority_reference.py`, requiring a signed recovery assessment and
+one-time exact-scope owner approval. Both remain offline prototypes and neither
+is deployed or production validated.
