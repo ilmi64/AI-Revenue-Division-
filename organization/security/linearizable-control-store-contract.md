@@ -54,6 +54,9 @@ authorized before quarantine may arrive remotely after quarantine.
 - Synthetic tests do not establish production consistency or security.
 
 ## Safety
-Trading live orders, wallet signing, transfers, withdrawals and risk-control
-changes remain denied by the separate policy gateway. This reference does not
-authorize or execute them. No GitHub Actions/CI is authorized by this contract.
+Trading live orders, wallet signing, funds transfers, broker/exchange orders,
+withdrawals, and HALT/STOP/risk-limit modifications are hard-denied both by the
+separate deterministic policy gateway and by this reference control-store
+authorization boundary. An owner approval cannot override these hard denies.
+The reference does not authorize or execute external effects. No GitHub Actions/CI
+is authorized by this contract.
