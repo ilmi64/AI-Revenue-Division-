@@ -17,6 +17,10 @@
     "Repository errors or malformed receipts fail closed.",
     "Facade returns no database connection or direct SQL capability.",
     "Agent-facing APIs cannot invoke owner-only approval endpoint without service-layer authentication.",
-    "Prototype does not claim production cryptographic or distributed guarantees."
+    "Prototype does not claim production cryptographic or distributed guarantees.",
+    "Owner approval task is resolved independently from the trusted scheduler.",
+    "Owner approval agent, stream, task and policy version must match the authoritative task.",
+    "Owner approval operation and resource must be within the task's allowed scopes.",
+    "Malformed, empty or expired task scope fails closed before approval persistence."
   ]
 }
