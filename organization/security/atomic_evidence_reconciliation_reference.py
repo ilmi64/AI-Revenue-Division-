@@ -120,9 +120,15 @@ class SQLiteAtomicReconciliationStore:
             if any(evidence.get(k) != v for k,v in expected.items()):
                 raise ReconciliationError("evidence_action_binding_mismatch")
 
-            prior=self.db.execute("""SELECT * FROM evidence_receipts
-              WHERE (issuer=? AND nonce=?) OR (issuer=? AND evidence_id=?)""",
-              (issuer,nonce,issuer,eid)).fetchone()
+            by_nonce=self.db.execute(
+              "SELECT * FROM evidence_receipts WHERE issuer=? AND nonce=?",
+              (issuer,nonce)).fetchone()
+            by_id=self.db.execute(
+              "SELECT * FROM evidence_receipts WHERE issuer=? AND evidence_id=?",
+              (issuer,eid)).fetchone()
+            if by_nonce and by_id and by_nonce["nonce"] != by_id["nonce"]:
+                raise EvidenceReplayError("evidence_nonce_and_id_conflict")
+            prior=by_nonce or by_id
             if prior:
                 same=(prior["issuer"],prior["nonce"],prior["evidence_id"],prior["payload_sha256"],
                       prior["action_id"],prior["company"],prior["outcome"],prior["observed_at"]) == (
@@ -150,7 +156,15 @@ class SQLiteAtomicReconciliationStore:
             return state
         except sqlite3.IntegrityError as exc:
             if self.db.in_transaction: self.db.execute("ROLLBACK")
-            raise EvidenceReplayError("evidence_unique_constraint_conflict") from exc
+            # A uniqueness collision is replay only when a conflicting receipt
+            # actually exists. Audit/foreign-key/other integrity failures must
+            # remain operational errors and must not be mislabeled as replay.
+            collision=self.db.execute("""SELECT 1 FROM evidence_receipts
+              WHERE (issuer=? AND nonce=?) OR (issuer=? AND evidence_id=?) LIMIT 1""",
+              (issuer,nonce,issuer,eid)).fetchone()
+            if collision:
+                raise EvidenceReplayError("evidence_unique_constraint_conflict") from exc
+            raise
         except Exception:
             if self.db.in_transaction: self.db.execute("ROLLBACK")
             raise
