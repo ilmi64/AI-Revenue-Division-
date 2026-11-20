@@ -224,11 +224,20 @@ class TrustedControlPlaneFacade:
                 task.get("stream_id") != claims["stream_id"] or
                 task.get("policy_version") != claims["policy_version"]):
             raise TrustedControlPlaneError("approval_task_scope_mismatch")
-        if (claims["operation"] not in task.get("allowed_operations", ()) or
-                claims["resource"] not in task.get("allowed_resources", ())):
-            raise TrustedControlPlaneError("approval_outside_task_scope")
-        if task.get("expires_at", 0) <= now:
+        task_expiry = task.get("expires_at")
+        if not _timestamp(task_expiry) or task_expiry <= now:
             raise TrustedControlPlaneError("approval_task_expired")
+        task_operations = task.get("allowed_operations")
+        task_resources = task.get("allowed_resources")
+        if (not isinstance(task_operations, (set, frozenset, list, tuple)) or
+                not isinstance(task_resources, (set, frozenset, list, tuple)) or
+                not task_operations or not task_resources or
+                any(not _nonempty(x) for x in task_operations) or
+                any(not _nonempty(x) for x in task_resources)):
+            raise TrustedControlPlaneError("approval_task_scope_invalid")
+        if (claims["operation"] not in task_operations or
+                claims["resource"] not in task_resources):
+            raise TrustedControlPlaneError("approval_outside_task_scope")
         try:
             receipt = self.__approval_repository.issue(claims=dict(claims), now=now)
         except Exception as exc:
