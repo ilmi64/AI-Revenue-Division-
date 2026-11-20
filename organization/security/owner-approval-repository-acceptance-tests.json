@@ -24,6 +24,7 @@
     "Database outage or ambiguous commit fails closed and requires reconciliation.",
     "Company A role cannot read or write Company B approval or audit records.",
     "Audit chain is verified against independently signed checkpoints on restore.",
-    "Approval consumption eventually shares the dispatch/recovery transaction boundary."
+    "Approval consumption eventually shares the dispatch/recovery transaction boundary.",
+    "The original verified signed approval envelope is retained for audit and independent re-verification."
   ]
 }
