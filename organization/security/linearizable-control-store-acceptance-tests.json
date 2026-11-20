@@ -32,7 +32,9 @@
     "amount_limit_minor_enforced_before_dispatch",
     "approval_replay_rejected_by_atomic_consumption",
     "dispatch_authorized_before_quarantine_remains_in_flight",
-    "release_rechecks_epoch_after_verifier_execution"
+    "release_rechecks_epoch_after_verifier_execution",
+    "trading_live_orders_wallet_signing_transfers_broker_orders_withdrawals_and_risk_control_changes_hard_denied",
+    "hard_denies_cannot_be_overridden_by_owner_approval"
   ],
   "production_gaps": [
     "strongly_consistent_shared_database_and_transaction_isolation",
@@ -41,6 +43,7 @@
     "receiver_idempotency_and_recovery_epoch_fencing",
     "monitoring_restore_drills_and_independent_security_review",
     "trusted_asymmetric_signature_verification_and_approval_issuer",
-    "explicit_currency_and_minor_unit_precision_binding"
+    "explicit_currency_and_minor_unit_precision_binding",
+    "hard_deny_policy_registry_consistency_and_independent_gateway_conformance"
   ]
 }
