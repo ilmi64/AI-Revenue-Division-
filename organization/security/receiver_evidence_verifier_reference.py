@@ -16,7 +16,7 @@ class ReceiverEvidenceVerifier:
     OUTCOMES = {"applied","not_applied","inconclusive"}
 
     def __init__(self, signature_verifier, trusted_issuers, *, max_age_seconds=300,
-                 future_skew_seconds=30):
+                 future_skew_seconds=30, replay_store=None):
         if not callable(signature_verifier):
             raise ValueError("trusted_signature_verifier_required")
         if not trusted_issuers:
@@ -25,7 +25,10 @@ class ReceiverEvidenceVerifier:
         self._issuers = frozenset(trusted_issuers)
         self.max_age = max_age_seconds
         self.future_skew = future_skew_seconds
-        self._seen = set()  # prototype only; production requires durable shared replay store
+        self._seen = set()  # fallback prototype only; inject durable store where available
+        if replay_store is not None and not callable(getattr(replay_store, 'claim', None)):
+            raise ValueError('durable_replay_store_invalid')
+        self._replay_store = replay_store
 
     @staticmethod
     def canonical_signed_payload(evidence):
@@ -53,14 +56,22 @@ class ReceiverEvidenceVerifier:
         for key,value in expected.items():
             if evidence.get(key) != value:
                 raise EvidenceError("evidence_scope_mismatch:"+key)
-        replay=(evidence["issuer"],evidence["nonce"])
-        if replay in self._seen:
-            raise EvidenceError("evidence_replay")
         signed=self.canonical_signed_payload(evidence)
         if not self._verify_signature(evidence["issuer"],signed,evidence["signature"]):
             raise EvidenceError("invalid_signature")
-        self._seen.add(replay)
         digest=hashlib.sha256(signed).hexdigest()
+        if self._replay_store is None:
+            replay=(evidence["issuer"],evidence["nonce"])
+            if replay in self._seen:
+                raise EvidenceError("evidence_replay")
+            self._seen.add(replay)
+        else:
+            try:
+                self._replay_store.claim(issuer=evidence["issuer"],nonce=evidence["nonce"],
+                    evidence_id=evidence["evidence_id"],payload_sha256=digest,
+                    observed_at=observed,accepted_at=now)
+            except Exception as exc:
+                raise EvidenceError("evidence_replay_store_rejected") from exc
         return {"verified":True,"evidence_id":evidence["evidence_id"],
                 "outcome":evidence["outcome"],"payload_sha256":digest,
                 "issuer":evidence["issuer"],"observed_at":observed}
