@@ -74,7 +74,7 @@ class RecoveryTests(unittest.TestCase):
         self.assertEqual(r["reason"],"approval_expired")
     def test_duplicate_enqueue_is_idempotent(self):
         self.assertEqual(self.s.enqueue(action_id="ac1",company="coA",approval_id="ap1",
-          idempotency_key="idem1",intent={"listing":"1","price_minor":1200},now=4),
+          idempotency_key="idem1",intent={"listing":"1","price_minor":1200,"receiver_account":"acct1"},now=4),
           "duplicate_same_intent")
     def test_conflicting_idempotency_rejected(self):
         with self.assertRaises(ValueError):
@@ -129,6 +129,18 @@ class RecoveryTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,"action_identity_changed_during_verification"):
             self.s.reconcile("ac1",evidence=self.receiver_evidence("ev-race"),
                 evidence_verifier=mutate_then_verify,now=6)
+        self.assertEqual(self.s.action_state("ac1"),"outcome_unknown")
+
+    def test_receiver_account_identity_rechecked_after_verification(self):
+        self.start(); self.s.record_sender_result("ac1",result="timeout",now=4)
+        valid=self.fake_verifier("applied")
+        def mutate_destination_then_verify(evidence, *, expected, now):
+            self.s.db.execute("UPDATE actions SET intent_json=? WHERE id='ac1'",
+              ('{"listing":"1","price_minor":1200,"receiver_account":"acct-other"}',))
+            return valid(evidence,expected=expected,now=now)
+        with self.assertRaisesRegex(ValueError,"action_identity_changed_during_verification"):
+            self.s.reconcile("ac1",evidence=self.receiver_evidence("ev-destination-race"),
+              evidence_verifier=mutate_destination_then_verify,now=6)
         self.assertEqual(self.s.action_state("ac1"),"outcome_unknown")
 
     def test_unauthenticated_evidence_rejected(self):
