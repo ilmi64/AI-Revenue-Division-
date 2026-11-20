@@ -290,7 +290,14 @@ class LinearizableControlStore:
         try:
             a=self.db.execute("SELECT * FROM actions WHERE action_id=?",(action_id,)).fetchone()
             reason=None
-            if a is None: reason="action_not_found"
+            hard_denied = {
+                "trade.live_order", "wallet.sign", "funds.transfer",
+                "broker.order", "exchange.withdraw", "wallet.withdraw",
+                "risk.halt.modify", "risk.stop.modify", "risk.limits.modify",
+            }
+            if operation in hard_denied:
+                reason="operation_hard_denied"
+            if reason is None and a is None: reason="action_not_found"
             elif (a["company"],a["stream"])!=(company,stream): reason="company_or_stream_mismatch"
             elif a["state"]!="queued": reason="action_not_queued"
             s=self.db.execute("SELECT * FROM streams WHERE company=? AND stream=?",(company,stream)).fetchone()
