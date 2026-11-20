@@ -6,7 +6,8 @@ def setup(**kw):
  t=Task("task-1","revenue","agent-1",frozenset({"research.read","draft.create"}),
         frozenset({"market/public","draft/1"}),400,"v1")
  cfg=dict(identity_verifier=lambda p:True,approval_consumer=lambda *a:True,
-          emergency_stop=lambda c:False,current_policy_version=lambda:"v1")
+          emergency_stop=lambda c:False,current_policy_version=lambda:"v1",
+          trading_company_ids=frozenset({"trading"}))
  cfg.update(kw)
  return PolicyGateway(**cfg),p,t
 def req(**kw):
@@ -46,6 +47,27 @@ class GatewayTests(unittest.TestCase):
   t=Task("task-1","trading","agent-1",frozenset({"trade.live_order"}),frozenset({"account/1"}),400,"v1")
   self.assertEqual(g.authorize(p,t,req(operation="trade.live_order",resource="account/1")).reason,
                    "trading_live_or_risk_control_action_prohibited")
+ def test_all_trading_hard_denies_even_if_allowlisted(self):
+  denied=sorted(TRADING_ALWAYS_DENY)
+  for operation in denied:
+   with self.subTest(operation=operation):
+    g,p,t=setup(trading_company_ids={"tt-production"})
+    p=Principal("agent-1","tt-production","operator","s-1",True,500)
+    t=Task("task-1","tt-production","agent-1",frozenset({operation}),
+           frozenset({"account/1"}),400,"v1")
+    decision=g.authorize(p,t,req(operation=operation,resource="account/1"))
+    self.assertEqual(decision.reason,"trading_live_or_risk_control_action_prohibited")
+ def test_trading_company_identifier_is_explicitly_configured(self):
+  g,p,t=setup(trading_company_ids={"tt-production"})
+  p=Principal("agent-1","tt-production","operator","s-1",True,500)
+  t=Task("task-1","tt-production","agent-1",frozenset({"wallet.withdraw"}),
+         frozenset({"account/1"}),400,"v1")
+  self.assertEqual(g.authorize(p,t,req(operation="wallet.withdraw",resource="account/1")).reason,
+                   "trading_live_or_risk_control_action_prohibited")
+ def test_missing_trading_company_configuration_rejected(self):
+  with self.assertRaisesRegex(ValueError,"explicit_trading_company_ids_required"):
+   PolicyGateway(identity_verifier=lambda p:True,approval_consumer=lambda *a:True,
+    emergency_stop=lambda c:False,current_policy_version=lambda:"v1",trading_company_ids=set())
  def test_protected_policy_change_denied(self):
   g,p,t=setup(); self.assertEqual(g.authorize(p,t,req(operation="policy.modify")).reason,
                                   "protected_control_plane_operation")
