@@ -239,7 +239,8 @@ class TrustedControlPlaneFacade:
                 claims["resource"] not in task_resources):
             raise TrustedControlPlaneError("approval_outside_task_scope")
         try:
-            receipt = self.__approval_repository.issue(claims=dict(claims), now=now)
+            receipt = self.__approval_repository.issue(
+                claims=dict(claims), signed_envelope=owner_signed_envelope, now=now)
         except Exception as exc:
             raise TrustedControlPlaneError("durable_approval_persistence_failed") from exc
         if not isinstance(receipt, dict) or any(
