@@ -114,12 +114,12 @@ class ControlStoreTests(unittest.TestCase):
         self.db.db.execute("""CREATE TRIGGER fail_quarantine BEFORE INSERT ON audit
           WHEN NEW.event_type='stream_quarantined' BEGIN SELECT RAISE(ABORT,'audit unavailable'); END""")
         before=self.db.stream_state("co-a","primary")
+        before_outbox=self.db.db.execute("SELECT COUNT(*) FROM control_outbox").fetchone()[0]
         with self.assertRaises(Exception):
             self.db.quarantine(company="co-a",stream="primary",incident_id="x",reason="test",
                 checkpoint_digest="c"*64,now=30)
         after=self.db.stream_state("co-a","primary")
         self.assertEqual((after["status"],after["epoch"]),(before["status"],before["epoch"]))
-        before_outbox=self.db.db.execute("SELECT COUNT(*) FROM control_outbox").fetchone()[0]
         self.assertEqual(before_outbox,
                          self.db.db.execute("SELECT COUNT(*) FROM control_outbox").fetchone()[0])
 
@@ -153,6 +153,29 @@ class ControlStoreTests(unittest.TestCase):
                 checkpoint_digest="d"*64,owner_approval="synthetic-signed-document",
                 recovery_assessment="synthetic-signed-document",owner_verifier=owner,
                 assessment_verifier=assessor,now=22)
+        self.assertEqual(self.db.stream_state("co-a","primary")["status"],QUARANTINED)
+
+    def test_release_approval_nonce_cannot_be_reused(self):
+        self.db.quarantine(company="co-a",stream="primary",incident_id="inc-1",reason="test",
+            checkpoint_digest="d"*64,now=21)
+        owner=Verifier({"approval_id":"single-use-owner-approval","nonce":"single-use-nonce","expires_at":900})
+        assessor=Verifier({"assessment_digest":"assessment-1","expires_at":900,"db_integrity":True,
+            "audit_chain_valid":True,"checkpoint_match":True,"revocations_current":True,
+            "emergency_stop_clear":True,"unknown_actions_reconciled":True})
+        self.db.release_stream(company="co-a",stream="primary",incident_id="inc-1",
+            checkpoint_digest="d"*64,owner_approval="synthetic-signed-document",
+            recovery_assessment="synthetic-signed-document",owner_verifier=owner,
+            assessment_verifier=assessor,now=22)
+        self.db.quarantine(company="co-a",stream="primary",incident_id="inc-2",reason="test",
+            checkpoint_digest="e"*64,now=23)
+        assessor2=Verifier({"assessment_digest":"assessment-2","expires_at":900,"db_integrity":True,
+            "audit_chain_valid":True,"checkpoint_match":True,"revocations_current":True,
+            "emergency_stop_clear":True,"unknown_actions_reconciled":True})
+        with self.assertRaises(ControlStoreError):
+            self.db.release_stream(company="co-a",stream="primary",incident_id="inc-2",
+                checkpoint_digest="e"*64,owner_approval="synthetic-signed-document",
+                recovery_assessment="synthetic-signed-document",owner_verifier=owner,
+                assessment_verifier=assessor2,now=24)
         self.assertEqual(self.db.stream_state("co-a","primary")["status"],QUARANTINED)
 
     def test_dispatch_quarantine_race_serializes(self):
