@@ -56,6 +56,32 @@ class OccReadOnlyTests(unittest.TestCase):
         with self.assertRaises(SnapshotError):
             assess_snapshot(snapshot, "ai_revenue", now=NOW)
 
+    def test_malformed_nested_incident_record_rejected(self):
+        snapshot = load("ai-revenue.snapshot.example.json")
+        snapshot["incident_summary"] = []
+        with self.assertRaises(SnapshotError):
+            assess_snapshot(snapshot, "ai_revenue", now=NOW)
+
+    def test_unexpected_nested_evidence_field_rejected(self):
+        snapshot = load("trading-technology.snapshot.example.json")
+        snapshot["evidence"][0]["private_key"] = "not-accepted"
+        with self.assertRaises(SnapshotError):
+            assess_snapshot(snapshot, "trading_technology", now=NOW)
+
+    def test_non_string_enum_value_rejected_cleanly(self):
+        snapshot = load("ai-revenue.snapshot.example.json")
+        snapshot["gates"][0]["status"] = []
+        with self.assertRaises(SnapshotError):
+            assess_snapshot(snapshot, "ai_revenue", now=NOW)
+
+    def test_old_synthetic_snapshot_is_also_marked_stale(self):
+        snapshot = load("ai-revenue.snapshot.example.json")
+        snapshot["published_at"] = "2026-11-18T00:00:00Z"
+        result = assess_snapshot(snapshot, "ai_revenue", now=NOW)
+        self.assertTrue(result["stale"])
+        self.assertEqual(result["display_status"], "STALE")
+        self.assertEqual(result["trust"], "SYNTHETIC_UNTRUSTED")
+
 
 if __name__ == "__main__":
     unittest.main()
