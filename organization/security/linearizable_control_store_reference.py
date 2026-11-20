@@ -54,6 +54,10 @@ class LinearizableControlStore:
           event_id TEXT PRIMARY KEY, company TEXT NOT NULL, stream TEXT NOT NULL,
           epoch INTEGER NOT NULL, event_type TEXT NOT NULL, payload_json TEXT NOT NULL,
           created_at INTEGER NOT NULL, delivered_at INTEGER);
+        CREATE TABLE IF NOT EXISTS release_consumptions(
+          approval_id TEXT PRIMARY KEY, nonce TEXT NOT NULL UNIQUE,
+          company TEXT NOT NULL, stream TEXT NOT NULL, incident_id TEXT NOT NULL,
+          checkpoint_digest TEXT NOT NULL, consumed_at INTEGER NOT NULL);
         """)
 
     @staticmethod
@@ -233,6 +237,9 @@ class LinearizableControlStore:
             if (cur is None or cur["status"]!=QUARANTINED or cur["incident_id"]!=incident_id
                 or cur["checkpoint_digest"]!=checkpoint_digest or cur["epoch"]!=row["epoch"]):
                 raise ControlStoreError("quarantine_changed_during_verification")
+            self.db.execute(
+                "INSERT INTO release_consumptions VALUES(?,?,?,?,?,?,?)",
+                (aid,nonce,company,stream,incident_id,checkpoint_digest,now))
             epoch=cur["epoch"]+1
             self.db.execute("UPDATE streams SET status=?,epoch=?,updated_at=? WHERE company=? AND stream=?",
                             (ACTIVE,epoch,now,company,stream))
