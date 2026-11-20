@@ -115,7 +115,7 @@ class LinearizableControlStore:
                 (approval_id,company,stream,agent,task,operation,resource,policy_version,
                  amount_limit_minor,expires_at))
             self._audit(company,stream,"approval_issued",now,
-                        {"approval_id":approval_id,"task":task,"operation":operation})
+                        {"approval_id":approval_id,"task":task,"operation":operation,\n                          "amount_limit_minor":amount_limit_minor})
             self.db.execute("COMMIT")
         except Exception:
             if self.db.in_transaction: self.db.execute("ROLLBACK")
