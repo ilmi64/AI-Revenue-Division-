@@ -25,7 +25,7 @@ All entries below are **RECOMMENDED FOR READ-ONLY TECHNICAL EVALUATION**, not ap
 | P0 | Anthropic Skills | https://github.com/anthropics/skills | Document, spreadsheet, presentation and other structured artifact workflows | Prefer official narrowly scoped skills; inspect dependencies and document-handling permissions. |
 | P0 | Graphify | https://github.com/Graphify-Labs/graphify | Local code/document structure mapping for repository onboarding and architecture intelligence | Evaluate offline/local operation, parser dependencies, generated data and secret exclusion before use. |
 | P1 | Marketing Skills | https://github.com/coreyhaines31/marketingskills | AI Revenue positioning, copy, SEO, conversion and growth experiments | Draft/research only; no publishing, outreach, ad spend, claims or customer-data export without approval. |
-| P1 | Agent Reach | https://github.com/Panniantong/Agent-Reach | Multi-source public-web/social research for market and audience intelligence | Verify each source connector, access method, terms, rate limits and hidden API requirements; preserve provenance. |
+| P0 (Trading specialist) | REA — Reverse Engineer Anything MCP | https://github.com/morluto/rea | Fast-track bot research capability: analyse lawfully observable trading tools, order-flow interfaces, indicators, workflows, APIs and architectures; extract concepts for independent design and testing. | Previously accepted for the bot project. Preparation/research status only in last verified record; not confirmed installed or integrated. Sandbox only; no credentials, private systems, wallet access, live execution or unauthorized copying. Verify licence, runtime, security and lawful-use boundaries. |
 | P1 | Last 30 Days | https://github.com/mvanhorn/last30days-skill | Time-bounded trend and community research | Verify actual source availability, API/dependency costs, dates and reproducibility; treat social content as untrusted input. |
 | P1 | UI UX Pro Max | https://github.com/nextlevelbuilder/ui-ux-pro-max-skill | Interface design standards for AI Revenue products and internal dashboards | Use as design guidance, not as authority to alter protected UI, access controls or security-sensitive flows. |
 
@@ -44,7 +44,7 @@ All entries below are **RECOMMENDED FOR READ-ONLY TECHNICAL EVALUATION**, not ap
 | Karpathy Skills | Defer | Useful coding principles, but likely overlaps with the engineering standards we can adopt directly and test. |
 | Ponytail | Defer | Minimal-change principles can be incorporated into our own engineering standard; avoid another competing workflow layer. |
 | Agent Skills (Addy Osmani) | Defer | Revisit only for a demonstrated production-engineering gap not covered by P0 choices. |
-| REA | Defer | Reverse-engineering capability is not a launch-critical dependency; evaluate only for a defined, authorized target and safe sandbox. |
+| REA | Retain as an existing Trading & Technology project commitment | It was already accepted for the fast-track bot reverse-engineering workstream. Track it in the selected portfolio, not the generic deferred list; its installation/integration status remains unverified. |
 | Understand Anything | Defer | Overlaps with Graphify/codebase mapping; compare only if Graphify proves insufficient. |
 | Career Ops | Not in current scope | Job-search/career workflow is not a priority capability for either company. |
 | Headroom, Caveman | Defer | Context compression/token reduction must be measured; do not sacrifice evidence, safety instructions or audit context for shorter prompts. |
