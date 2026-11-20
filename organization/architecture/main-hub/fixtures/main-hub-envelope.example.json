@@ -69,46 +69,91 @@
       "notes": "Requires customer delivery and actual payment evidence before launch."
     }
   ],
-  "status_snapshot": {
-    "snapshot_id": "SYN-main-hub-2026-11-20",
-    "company_id": "ai_revenue",
-    "schema_version": "0.1",
-    "source_revision": "0000000-synthetic-fixture",
-    "published_at": "2026-11-20T12:00:00Z",
-    "overall_status": "UNKNOWN",
-    "subsystems": {
-      "main_hub": "NOT_IMPLEMENTED",
-      "ai_revenue_snapshot": "UNKNOWN",
-      "trading_technology_snapshot": "UNKNOWN"
+  "status_snapshots": [
+    {
+      "snapshot_id": "SYN-ai_revenue-2026-11-20",
+      "company_id": "ai_revenue",
+      "schema_version": "0.1",
+      "source_revision": "0000000-synthetic-fixture",
+      "published_at": "2026-11-20T12:00:00Z",
+      "overall_status": "UNKNOWN",
+      "subsystems": {
+        "main_hub": "NOT_IMPLEMENTED",
+        "commercial_operations": "UNKNOWN",
+        "ai_workforce": "NOT_IMPLEMENTED"
+      },
+      "gates": [
+        {
+          "gate_id": "operational_readiness",
+          "status": "NOT_RUN",
+          "critical": true,
+          "evidence_refs": [],
+          "notes": "Synthetic fixture; no operational readiness claim."
+        }
+      ],
+      "blockers": [
+        {
+          "blocker_id": "synthetic_only",
+          "severity": "medium",
+          "summary": "Synthetic example data; replace only with authenticated company-published evidence."
+        }
+      ],
+      "incident_summary": {
+        "open_count": 0,
+        "highest_severity": "none",
+        "quarantined": false
+      },
+      "evidence": [
+        {
+          "evidence_id": "EV-ai_revenue-SYN",
+          "reference": "synthetic://fixture",
+          "evidence_type": "other",
+          "verified_at": null
+        }
+      ]
     },
-    "gates": [
-      {
-        "gate_id": "main_hub_operational_readiness",
-        "status": "NOT_RUN",
-        "critical": true,
-        "evidence_refs": [],
-        "notes": "Synthetic root-envelope fixture only."
-      }
-    ],
-    "blockers": [
-      {
-        "blocker_id": "synthetic_only",
-        "severity": "medium",
-        "summary": "Synthetic root envelope; no live company status."
-      }
-    ],
-    "incident_summary": {
-      "open_count": 0,
-      "highest_severity": "none",
-      "quarantined": false
-    },
-    "evidence": [
-      {
-        "evidence_id": "EV-main-hub-SYN",
-        "reference": "synthetic://main-hub-envelope",
-        "evidence_type": "other",
-        "verified_at": null
-      }
-    ]
-  }
+    {
+      "snapshot_id": "SYN-trading_technology-2026-11-20",
+      "company_id": "trading_technology",
+      "schema_version": "0.1",
+      "source_revision": "0000000-synthetic-fixture",
+      "published_at": "2026-11-20T12:00:00Z",
+      "overall_status": "UNKNOWN",
+      "subsystems": {
+        "main_hub": "NOT_IMPLEMENTED",
+        "polybot": "UNKNOWN",
+        "paper_trading": "UNKNOWN",
+        "risk_controls": "UNKNOWN"
+      },
+      "gates": [
+        {
+          "gate_id": "operational_readiness",
+          "status": "NOT_RUN",
+          "critical": true,
+          "evidence_refs": [],
+          "notes": "Synthetic fixture; no operational readiness claim."
+        }
+      ],
+      "blockers": [
+        {
+          "blocker_id": "synthetic_only",
+          "severity": "medium",
+          "summary": "Synthetic example data; replace only with authenticated company-published evidence."
+        }
+      ],
+      "incident_summary": {
+        "open_count": 0,
+        "highest_severity": "none",
+        "quarantined": false
+      },
+      "evidence": [
+        {
+          "evidence_id": "EV-trading_technology-SYN",
+          "reference": "synthetic://fixture",
+          "evidence_type": "other",
+          "verified_at": null
+        }
+      ]
+    }
+  ]
 }
