@@ -64,13 +64,12 @@ class AtomicEvidenceReconciliationTests(unittest.TestCase):
         self.reconcile(self.evidence())
         self.store.register_unknown_action(action_id="a2",company="coA",
             receiver_account="acct1",idempotency_key="idem2")
-        e=self.evidence(eid="ev2",nonce="n2",action_id="a2",idempotency_key="idem2")
+        e=self.evidence(eid="ev1",nonce="n2",action_id="a2",idempotency_key="idem2")
         v=self.verifier.verify(e,expected={"company":"coA","action_id":"a2",
             "receiver_account":"acct1","idempotency_key":"idem2",
             "audience":"recovery-gateway"},now=101)
-        with self.assertRaises(EvidenceReplayError): self.store.reconcile(
-            action_id="a2",evidence=self.evidence(eid="ev1",nonce="n1",action_id="a2",
-              idempotency_key="idem2"),verified=v,now=102)
+        with self.assertRaises(EvidenceReplayError):
+            self.store.reconcile(action_id="a2",evidence=e,verified=v,now=102)
     def test_digest_mutation_between_verify_and_commit_rejected(self):
         e=self.evidence()
         v=self.verify(e)
