@@ -1,5 +1,6 @@
-import os, sqlite3, tempfile, threading, unittest
+import hashlib, os, sqlite3, tempfile, threading, unittest
 from transactional_dispatch_recovery_reference import DispatchStore
+from receiver_evidence_verifier_reference import ReceiverEvidenceVerifier, EvidenceError
 
 class RecoveryTests(unittest.TestCase):
     def setUp(self):
@@ -9,13 +10,13 @@ class RecoveryTests(unittest.TestCase):
         self.s.issue_approval(approval_id="ap1",company="coA",agent="ag1",task="t1",
           operation="publish",resource="listing/1",policy="v1",expires=1000,now=1)
         self.s.enqueue(action_id="ac1",company="coA",approval_id="ap1",
-          idempotency_key="idem1",intent={"listing":"1","price_minor":1200},now=2)
+          idempotency_key="idem1",intent={"listing":"1","price_minor":1200,"receiver_account":"acct1"},now=2)
     def tearDown(self):
         self.s.close(); self.tmp.cleanup()
     @staticmethod
     def receiver_evidence(evidence_id, **overrides):
         evidence={"evidence_id":evidence_id,"company":"coA","action_id":"ac1",
-                  "idempotency_key":"idem1","audience":"recovery-gateway"}
+                  "idempotency_key":"idem1","receiver_account":"acct1","audience":"recovery-gateway"}
         evidence.update(overrides)
         return evidence
     @staticmethod
@@ -27,6 +28,23 @@ class RecoveryTests(unittest.TestCase):
             return {"verified":True,"outcome":outcome,"evidence_id":evidence["evidence_id"],
                     "issuer":"test-receiver","observed_at":now,"payload_sha256":"0"*64}
         return verify
+    def signed_receiver_evidence(self, evidence_id="ev-real", **overrides):
+        evidence={"evidence_id":evidence_id,"issuer":"receiver-A","audience":"recovery-gateway",
+          "company":"coA","action_id":"ac1","receiver_account":"acct1",
+          "idempotency_key":"idem1","outcome":"applied","observed_at":5,
+          "nonce":"nonce-"+evidence_id,"signature":""}
+        evidence.update(overrides)
+        evidence["signature"]=hashlib.sha256(
+          ReceiverEvidenceVerifier.canonical_signed_payload(evidence)).hexdigest()
+        return evidence
+    @staticmethod
+    def real_verifier():
+        # Deterministic digest callback is a test fixture, not production cryptography.
+        return ReceiverEvidenceVerifier(
+          lambda issuer,payload,signature: issuer=="receiver-A" and
+            signature==hashlib.sha256(payload).hexdigest(),
+          {"receiver-A"},max_age_seconds=300,future_skew_seconds=30)
+
     def start(self):
         return self.s.authorize_and_start("ac1",company="coA",agent="ag1",task="t1",
           operation="publish",resource="listing/1",policy="v1",now=3)
@@ -78,6 +96,22 @@ class RecoveryTests(unittest.TestCase):
     def test_inconclusive_quarantines(self):
         self.start(); self.s.record_sender_result("ac1",result="exception",now=4)
         self.assertEqual(self.s.reconcile("ac1",evidence=self.receiver_evidence("ev3"),evidence_verifier=self.fake_verifier("inconclusive"),now=6),"quarantined")
+    def test_reconciliation_uses_real_verifier_object_and_receiver_binding(self):
+        self.start()
+        self.s.record_sender_result("ac1",result="timeout",now=4)
+        verifier=self.real_verifier()
+        self.assertEqual(self.s.reconcile("ac1",evidence=self.signed_receiver_evidence(),
+          evidence_verifier=verifier,now=6),"reconciled_applied")
+
+    def test_real_verifier_rejects_wrong_receiver_account(self):
+        self.start()
+        self.s.record_sender_result("ac1",result="timeout",now=4)
+        verifier=self.real_verifier()
+        wrong=self.signed_receiver_evidence("ev-wrong-account",receiver_account="acct-other")
+        with self.assertRaises(EvidenceError):
+            self.s.reconcile("ac1",evidence=wrong,evidence_verifier=verifier,now=6)
+        self.assertEqual(self.s.action_state("ac1"),"outcome_unknown")
+
     def test_wrong_action_binding_is_rejected(self):
         self.start(); self.s.record_sender_result("ac1",result="timeout",now=4)
         wrong=self.receiver_evidence("ev-wrong",action_id="different-action")
