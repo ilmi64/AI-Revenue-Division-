@@ -1,15 +1,15 @@
-"""Atomic evidence receipt + reconciliation prototype.
+"""Atomic trusted-evidence receipt + reconciliation prototype.
 
-Offline SQLite reference only. Signature verification is performed by the
-trusted ReceiverEvidenceVerifier before this method is called. The verified
-claim's digest is recomputed here so the raw nonce/evidence identity cannot be
-swapped between verification and durable recording.
+Offline SQLite reference only. The store is bound to a ReceiverEvidenceVerifier.
+It verifies signature and scope without consuming replay state, then commits
+the durable nonce/evidence receipt, action transition and audit event together.
 """
 from __future__ import annotations
 import hashlib
 import json
 import re
 import sqlite3
+from receiver_evidence_verifier_reference import ReceiverEvidenceVerifier
 
 GENESIS = "0" * 64
 HEX64 = re.compile(r"^[0-9a-f]{64}$")
@@ -23,7 +23,7 @@ class EvidenceReplayError(ReconciliationError):
 class SQLiteAtomicReconciliationStore:
     """Single-host reference; replay receipt, state transition and audit are atomic."""
     def __init__(self, path, *, trusted_verifier):
-        if not callable(getattr(trusted_verifier, "verify_for_atomic_reconciliation", None)):
+        if not isinstance(trusted_verifier, ReceiverEvidenceVerifier):
             raise ReconciliationError("trusted_receiver_verifier_required")
         self._trusted_verifier = trusted_verifier
         self.db = sqlite3.connect(str(path), timeout=10, isolation_level=None)
@@ -92,7 +92,6 @@ class SQLiteAtomicReconciliationStore:
         try:
             verified=self._trusted_verifier.verify_for_atomic_reconciliation(
                 evidence,expected=expected,now=now)
-            from receiver_evidence_verifier_reference import ReceiverEvidenceVerifier
             payload=ReceiverEvidenceVerifier.canonical_signed_payload(evidence)
         except Exception as exc:
             raise ReconciliationError("trusted_evidence_verification_failed") from exc
