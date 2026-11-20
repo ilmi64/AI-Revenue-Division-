@@ -24,14 +24,15 @@
     "release_rechecks_incident_checkpoint_and_epoch",
     "dispatch_quarantine_race_serializes",
     "company_epochs_are_isolated",
-    "audit_tampering_detected"
+    "audit_tampering_detected",
+    "release_approval_nonce_cannot_be_reused"
   ],
   "production_gaps": [
     "strongly_consistent_shared_database_and_transaction_isolation",
-    "durable_atomic_release_approval_and_nonce_consumption",
     "asymmetric_signature_verification_and_protected_key_custody",
     "immutable_intent_digest_and_independent_signed_WORM_checkpoints",
     "receiver_idempotency_and_recovery_epoch_fencing",
-    "monitoring_restore_drills_and_independent_security_review"
+    "monitoring_restore_drills_and_independent_security_review",
+    "trusted_asymmetric_signature_verification_and_approval_issuer"
   ]
 }
