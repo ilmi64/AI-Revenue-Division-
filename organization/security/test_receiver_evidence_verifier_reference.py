@@ -47,4 +47,15 @@ class EvidenceTests(unittest.TestCase):
         with self.assertRaises(EvidenceError): self.v.verify(e,expected=self.expected,now=1000)
     def test_no_verifier_no_instance(self):
         with self.assertRaises(ValueError): ReceiverEvidenceVerifier(None,{"receiver-A"})
+    def test_atomic_verification_does_not_consume_replay_before_commit(self):
+        first=self.v.verify_for_atomic_reconciliation(self.e,expected=self.expected,now=1000)
+        second=self.v.verify_for_atomic_reconciliation(self.e,expected=self.expected,now=1000)
+        self.assertEqual(first["payload_sha256"],second["payload_sha256"])
+    def test_atomic_verification_rejects_separate_replay_store(self):
+        class ReplayStore:
+            def claim(self,**kwargs): pass
+        v=ReceiverEvidenceVerifier(lambda issuer,payload,signature: True,
+          {"receiver-A"},replay_store=ReplayStore())
+        with self.assertRaises(EvidenceError):
+            v.verify_for_atomic_reconciliation(self.e,expected=self.expected,now=1000)
 if __name__=="__main__": unittest.main()
