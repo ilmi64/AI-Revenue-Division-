@@ -74,6 +74,12 @@ class AtomicEvidenceReconciliationTests(unittest.TestCase):
     def test_store_requires_trusted_verifier(self):
         with self.assertRaisesRegex(ReconciliationError,"trusted_receiver_verifier_required"):
             SQLiteAtomicReconciliationStore(self.path)
+    def test_store_rejects_untrusted_duck_typed_verifier(self):
+        class FakeVerifier:
+            def verify_for_atomic_reconciliation(self,*args,**kwargs):
+                return {"verified":True}
+        with self.assertRaisesRegex(ReconciliationError,"trusted_receiver_verifier_required"):
+            SQLiteAtomicReconciliationStore(self.path,trusted_verifier=FakeVerifier())
 
     def test_scope_mismatch_rejected(self):
         e=self.evidence(receiver_account="other")
