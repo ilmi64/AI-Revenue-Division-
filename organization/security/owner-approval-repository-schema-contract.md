@@ -2,7 +2,7 @@
 
 Status: proposed PostgreSQL DDL; not applied, migrated, executed or security-reviewed.
 
-The schema provides a full-scope durable record for the trusted façade's approval repository adapter. It covers company/stream, owner, principal, session, task, operation, resource, recipient, optional immutable intent digest, amount in integer minor units, currency, policy version, audience, nonce, single-use semantics, signer key reference, signed-payload/signature digests, expiry, revocation, one-time consumption and a per-company/stream audit chain.
+The schema provides a full-scope durable record for the trusted façade's approval repository adapter. It covers company/stream, owner, principal, session, task, operation, resource, recipient, optional immutable intent digest, amount in integer minor units, currency, policy version, audience, nonce, single-use semantics, signer key reference, signed-payload/signature digests, the original signed envelope, expiry, revocation, one-time consumption and a per-company/stream audit chain.
 
 ## Required repository behaviour
 - Accept only claims already verified by the trusted owner-approval authority. The repository is not a signature verifier.
