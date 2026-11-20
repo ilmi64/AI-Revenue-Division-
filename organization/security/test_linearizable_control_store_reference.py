@@ -119,7 +119,8 @@ class ControlStoreTests(unittest.TestCase):
                 checkpoint_digest="c"*64,now=30)
         after=self.db.stream_state("co-a","primary")
         self.assertEqual((after["status"],after["epoch"]),(before["status"],before["epoch"]))
-        self.assertEqual(self.db.db.execute("SELECT COUNT(*) FROM control_outbox").fetchone()[0],
+        before_outbox=self.db.db.execute("SELECT COUNT(*) FROM control_outbox").fetchone()[0]
+        self.assertEqual(before_outbox,
                          self.db.db.execute("SELECT COUNT(*) FROM control_outbox").fetchone()[0])
 
     def test_crash_after_commit_never_auto_resends(self):
