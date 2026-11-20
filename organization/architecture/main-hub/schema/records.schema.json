@@ -9,7 +9,7 @@
     "company_registry",
     "decisions",
     "workstreams",
-    "status_snapshot"
+    "status_snapshots"
   ],
   "properties": {
     "schema_version": {
@@ -48,8 +48,26 @@
         "$ref": "#/$defs/workstream"
       }
     },
-    "status_snapshot": {
-      "$ref": "#/$defs/snapshot"
+    "status_snapshots": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "$ref": "#/$defs/snapshot"
+      },
+      "contains": {
+        "type": "object",
+        "properties": {
+          "company_id": {
+            "const": "ai_revenue"
+          }
+        },
+        "required": [
+          "company_id"
+        ]
+      },
+      "minContains": 1,
+      "maxContains": 1
     }
   },
   "$defs": {
@@ -457,6 +475,25 @@
     {
       "properties": {
         "company_registry": {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "company_id": {
+                "const": "trading_technology"
+              }
+            },
+            "required": [
+              "company_id"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      }
+    },
+    {
+      "properties": {
+        "status_snapshots": {
           "contains": {
             "type": "object",
             "properties": {
