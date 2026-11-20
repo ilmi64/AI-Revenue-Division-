@@ -16,8 +16,12 @@ Status: proposed security boundary; not production-enforced.
 - Signature covers canonical payload excluding the signature field.
 - The verifier returns a normalized verified claim and payload digest. Only
   that output may be passed to the reconciliation transaction.
-- The in-memory nonce cache in the reference is demonstration-only. Production
-  needs durable, atomic, multi-node replay prevention and evidence-ID uniqueness.
+- The verifier's current in-memory nonce cache is demonstration-only. A separate
+  SQLite replay-store prototype now demonstrates durable nonce and evidence-ID
+  uniqueness across restarts and independent connections. It is not wired into
+  the verifier by default. Production needs a shared transactional multi-node
+  store, retention policy, backup/restore, failover testing and atomic claim after
+  signature and scope verification.
 - Receiver evidence must be independently retrieved or authenticated; an AI
   worker must not control the verifier callback, trusted issuer registry,
   receiver account binding, clock or replay store.
