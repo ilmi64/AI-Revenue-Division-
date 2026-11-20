@@ -12,17 +12,38 @@ EXPECTED = {
     "trading_technology": "trading-technology.snapshot.example.json",
 }
 VALID_OVERALL = {"HEALTHY", "DEGRADED", "BLOCKED", "UNKNOWN", "STALE"}
+VALID_SUBSYSTEM = VALID_OVERALL | {"NOT_IMPLEMENTED"}
 VALID_GATE = {"PASS", "FAIL", "BLOCKED", "NOT_RUN", "WAIVED"}
+VALID_SEVERITY = {"low", "medium", "high", "critical"}
+VALID_INCIDENT_SEVERITY = VALID_SEVERITY | {"none"}
 
 
 class SnapshotError(ValueError):
-    pass
+    """Raised when a company snapshot is malformed or outside the allowlist."""
 
 
-def _parse_time(value: str) -> datetime:
+def _keys(record: Any, required: set[str], optional: set[str], label: str) -> None:
+    if not isinstance(record, dict):
+        raise SnapshotError(f"{label} must be an object")
+    missing = required - set(record)
+    extra = set(record) - required - optional
+    if missing or extra:
+        raise SnapshotError(
+            f"{label} field mismatch; missing={sorted(missing)}; extra={sorted(extra)}"
+        )
+
+
+def _nonempty_string(value: Any, label: str) -> None:
+    if not isinstance(value, str) or not value.strip():
+        raise SnapshotError(f"{label} must be a non-empty string")
+
+
+def _parse_time(value: Any) -> datetime:
+    if not isinstance(value, str):
+        raise SnapshotError("published_at must be an ISO-8601 timestamp")
     try:
         parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
-    except (TypeError, ValueError) as exc:
+    except ValueError as exc:
         raise SnapshotError("published_at must be an ISO-8601 timestamp") from exc
     if parsed.tzinfo is None:
         raise SnapshotError("published_at must include a timezone")
@@ -31,55 +52,96 @@ def _parse_time(value: str) -> datetime:
 
 def assess_snapshot(snapshot: dict[str, Any], expected_company: str,
                     now: datetime | None = None, max_age_hours: int = 24) -> dict[str, Any]:
-    """Validate a narrow allowlist and return a conservative display record."""
-    if not isinstance(snapshot, dict):
-        raise SnapshotError("snapshot must be an object")
+    """Validate a strict snapshot shape and return a conservative display record."""
     required = {
         "snapshot_id", "company_id", "schema_version", "source_revision",
         "published_at", "overall_status", "subsystems", "gates", "blockers",
         "incident_summary", "evidence",
     }
-    if set(snapshot) != required:
-        missing = sorted(required - set(snapshot))
-        extra = sorted(set(snapshot) - required)
-        raise SnapshotError(f"snapshot field mismatch; missing={missing}; extra={extra}")
-    if snapshot["company_id"] != expected_company:
+    _keys(snapshot, required, set(), "snapshot")
+    if expected_company not in EXPECTED or snapshot["company_id"] != expected_company:
         raise SnapshotError("company identity mismatch")
     if snapshot["schema_version"] != "0.1":
         raise SnapshotError("unsupported schema version")
+    _nonempty_string(snapshot["snapshot_id"], "snapshot_id")
+    _nonempty_string(snapshot["source_revision"], "source_revision")
+    if len(snapshot["source_revision"]) < 7:
+        raise SnapshotError("source_revision must contain at least 7 characters")
     if snapshot["overall_status"] not in VALID_OVERALL:
         raise SnapshotError("invalid overall status")
-    if not isinstance(snapshot["subsystems"], dict) or not snapshot["subsystems"]:
+
+    subsystems = snapshot["subsystems"]
+    if not isinstance(subsystems, dict) or not subsystems:
         raise SnapshotError("subsystems must be a non-empty object")
+    for name, status in subsystems.items():
+        _nonempty_string(name, "subsystem name")
+        if status not in VALID_SUBSYSTEM:
+            raise SnapshotError(f"invalid subsystem status for {name}")
+
     if not isinstance(snapshot["gates"], list) or not isinstance(snapshot["blockers"], list):
         raise SnapshotError("gates and blockers must be arrays")
     for gate in snapshot["gates"]:
-        if not isinstance(gate, dict) or gate.get("status") not in VALID_GATE:
-            raise SnapshotError("invalid gate record")
-        if not isinstance(gate.get("critical"), bool):
-            raise SnapshotError("gate critical flag must be boolean")
+        _keys(gate, {"gate_id", "status", "critical", "evidence_refs"}, {"notes"}, "gate")
+        _nonempty_string(gate["gate_id"], "gate_id")
+        if gate["status"] not in VALID_GATE or not isinstance(gate["critical"], bool):
+            raise SnapshotError("invalid gate status or critical flag")
+        if not isinstance(gate["evidence_refs"], list) or not all(
+            isinstance(ref, str) for ref in gate["evidence_refs"]
+        ):
+            raise SnapshotError("gate evidence_refs must be an array of strings")
+        if "notes" in gate and not isinstance(gate["notes"], str):
+            raise SnapshotError("gate notes must be a string")
+
+    for blocker in snapshot["blockers"]:
+        _keys(blocker, {"blocker_id", "severity", "summary"}, set(), "blocker")
+        _nonempty_string(blocker["blocker_id"], "blocker_id")
+        _nonempty_string(blocker["summary"], "blocker summary")
+        if blocker["severity"] not in VALID_SEVERITY:
+            raise SnapshotError("invalid blocker severity")
+
+    incident = snapshot["incident_summary"]
+    _keys(incident, {"open_count", "highest_severity", "quarantined"}, set(), "incident_summary")
+    if not isinstance(incident["open_count"], int) or isinstance(incident["open_count"], bool) or incident["open_count"] < 0:
+        raise SnapshotError("incident open_count must be a non-negative integer")
+    if incident["highest_severity"] not in VALID_INCIDENT_SEVERITY:
+        raise SnapshotError("invalid incident severity")
+    if not isinstance(incident["quarantined"], bool):
+        raise SnapshotError("incident quarantined must be boolean")
+
+    if not isinstance(snapshot["evidence"], list):
+        raise SnapshotError("evidence must be an array")
+    evidence_refs = []
+    for evidence in snapshot["evidence"]:
+        _keys(evidence, {"evidence_id", "reference", "evidence_type"}, {"verified_at"}, "evidence")
+        _nonempty_string(evidence["evidence_id"], "evidence_id")
+        _nonempty_string(evidence["reference"], "evidence reference")
+        if evidence["evidence_type"] not in {
+            "commit", "test_run", "report", "approval_record",
+            "deployment_record", "external_source", "other"
+        }:
+            raise SnapshotError("invalid evidence type")
+        if evidence.get("verified_at") is not None:
+            _parse_time(evidence["verified_at"])
+        evidence_refs.append(evidence["reference"])
 
     published = _parse_time(snapshot["published_at"])
     current = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
+    if max_age_hours < 0:
+        raise SnapshotError("max_age_hours cannot be negative")
     age_hours = (current - published).total_seconds() / 3600
     is_stale = age_hours > max_age_hours or age_hours < -5 / 60
-    synthetic = str(snapshot["source_revision"]).startswith("0000000-synthetic")
+    synthetic = snapshot["source_revision"].startswith("0000000-synthetic")
     critical_not_pass = [
         gate["gate_id"] for gate in snapshot["gates"]
         if gate["critical"] and gate["status"] != "PASS"
     ]
 
-    # No authentication adapter exists in v0.1. Therefore no input is trusted
-    # and the effective status cannot be promoted to HEALTHY.
-    if synthetic:
-        display_status = "UNKNOWN"
-        trust = "SYNTHETIC_UNTRUSTED"
-    elif is_stale:
+    # No publisher authentication exists yet. Never promote any input to HEALTHY.
+    if is_stale:
         display_status = "STALE"
-        trust = "UNAUTHENTICATED"
     else:
         display_status = "UNKNOWN"
-        trust = "UNAUTHENTICATED"
+    trust = "SYNTHETIC_UNTRUSTED" if synthetic else "UNAUTHENTICATED"
 
     return {
         "company_id": expected_company,
@@ -91,11 +153,8 @@ def assess_snapshot(snapshot: dict[str, Any], expected_company: str,
         "stale": is_stale,
         "critical_gates_not_passed": critical_not_pass,
         "blocker_count": len(snapshot["blockers"]),
-        "incident_summary": snapshot["incident_summary"],
-        "evidence_refs": [
-            item.get("reference") for item in snapshot["evidence"]
-            if isinstance(item, dict) and isinstance(item.get("reference"), str)
-        ],
+        "incident_summary": incident,
+        "evidence_refs": evidence_refs,
     }
 
 
