@@ -27,7 +27,11 @@ bytes, but cannot supply the verifier or its trust configuration.
 
 The verifier must authenticate the receiver signature and bind the evidence to
 the exact company, action ID, idempotency key, receiver account and recovery
-audience. It must enforce issuer allowlists, freshness, nonce/evidence replay
+audience.
+The action's receiver account must be persisted in immutable action intent;
+missing or mutable destination identity fails closed. The reconciliation adapter
+accepts a verifier object exposing a trusted `verify` method, not an arbitrary
+agent-provided callback. It must enforce issuer allowlists, freshness, nonce/evidence replay
 protection and a stable evidence ID. Verification occurs outside the SQLite
 write transaction; after verification, the reference reloads the action under
 BEGIN IMMEDIATE and rechecks its company, ID and idempotency key before changing
