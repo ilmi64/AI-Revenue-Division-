@@ -146,7 +146,8 @@ class DispatchStore:
             raise ValueError("trusted_evidence_verifier_required")
         if not isinstance(evidence,dict):
             raise ValueError("evidence_required")
-        # Load action identity first; verifier must bind evidence to this exact action.
+        # Read immutable action identity before external verification. The trusted
+        # verifier must bind the signed evidence to this exact action and audience.
         action=self.db.execute("SELECT company,id,idem FROM actions WHERE id=?",(action_id,)).fetchone()
         if not action:
             raise ValueError("action_not_found")
@@ -168,7 +169,14 @@ class DispatchStore:
         self.db.execute("BEGIN IMMEDIATE")
         try:
             a=self.db.execute("SELECT * FROM actions WHERE id=?",(action_id,)).fetchone()
-            if not a or a["state"]!="outcome_unknown":
+            if not a:
+                raise ValueError("action_not_found")
+            # Recheck identity under the write lock: verification happened outside
+            # the transaction to avoid holding a DB lock across external code.
+            if (a["company"],a["id"],a["idem"]) != (
+                expected["company"],expected["action_id"],expected["idempotency_key"]):
+                raise ValueError("action_identity_changed_during_verification")
+            if a["state"]!="outcome_unknown":
                 raise ValueError("action_not_unknown")
             evidence_record={"outcome":outcome,"evidence_id":evidence_id,"source":source,
                       "observed_at":observed_at,"payload_sha256":verified.get("payload_sha256")}
