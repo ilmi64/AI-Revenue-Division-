@@ -1,0 +1,128 @@
+{
+  "status": "proposed_acceptance_vectors_not_executed",
+  "contract": "recovery-authority-to-dispatch-boundary-enforcement-contract.md",
+  "test_count": 20,
+  "required_enforcement_points": [
+    "scheduler",
+    "agent_runtime",
+    "tool_data_gateway",
+    "cost_gateway",
+    "outbox_dispatcher",
+    "external_action_gateway",
+    "queue_retry_dead_letter_workers",
+    "startup_restore"
+  ],
+  "global_invariants": [
+    "default_deny",
+    "authoritative_company_stream_binding",
+    "monotonic_recovery_epoch",
+    "no_stale_authorization_after_quarantine",
+    "release_requires_independent_assessment_and_owner_approval",
+    "no_auto_resume_of_old_actions",
+    "trading_live_execution_hard_deny"
+  ],
+  "tests": [
+    [
+      "RDE-01",
+      "queued task during quarantine",
+      "scheduler refuses lease; no runtime start"
+    ],
+    [
+      "RDE-02",
+      "running task during quarantine",
+      "halt permitted work; no new consequential calls"
+    ],
+    [
+      "RDE-03",
+      "old lease after epoch increment",
+      "deny stale epoch"
+    ],
+    [
+      "RDE-04",
+      "authority outage with cached active state",
+      "fail closed"
+    ],
+    [
+      "RDE-05",
+      "tool/data gateway on quarantined stream",
+      "deny before protected access"
+    ],
+    [
+      "RDE-06",
+      "outbox authorization after quarantine",
+      "no sender invocation"
+    ],
+    [
+      "RDE-07",
+      "dispatch authorization before quarantine",
+      "mark potentially in flight; reconcile"
+    ],
+    [
+      "RDE-08",
+      "duplicate/out-of-order quarantine events",
+      "idempotent monotonic epoch"
+    ],
+    [
+      "RDE-09",
+      "consumer misses quarantine event",
+      "authoritative preflight denies; incident raised"
+    ],
+    [
+      "RDE-10",
+      "queue redrive during quarantine",
+      "deny retry"
+    ],
+    [
+      "RDE-11",
+      "paid inference during quarantine",
+      "cost gateway denies before provider call"
+    ],
+    [
+      "RDE-12",
+      "OCC/model/runtime attempts release",
+      "deny with no state mutation"
+    ],
+    [
+      "RDE-13",
+      "invalid/stale/revoked/wrong-scope owner approval",
+      "deny release without consuming approval"
+    ],
+    [
+      "RDE-14",
+      "checkpoint/audit/revocation/emergency-stop unavailable",
+      "remain disabled"
+    ],
+    [
+      "RDE-15",
+      "valid recovery release",
+      "increment epoch; fresh leases only"
+    ],
+    [
+      "RDE-16",
+      "restart/restore after quarantine",
+      "start disabled pending verification"
+    ],
+    [
+      "RDE-17",
+      "cross-company stream/epoch substitution",
+      "deny and raise incident"
+    ],
+    [
+      "RDE-18",
+      "concurrent quarantine and dispatch authorization",
+      "linearizable ordering"
+    ],
+    [
+      "RDE-19",
+      "direct worker-to-tool bypass",
+      "gateway denies and alerts"
+    ],
+    [
+      "RDE-20",
+      "Trading live execution after recovery release",
+      "absolute hard-deny remains"
+    ]
+  ],
+  "pass_rule": "Every protected execution path denies before disclosure or side effect when recovery state is disabled, stale, missing, contradictory or unavailable; quarantine epoch fencing is enforced at the final boundary.",
+  "certification": "none"
+}
