@@ -99,7 +99,11 @@ class RecoveryAuthorityTests(unittest.TestCase):
               checkpoint_digest=self.digest,owner_approval=self.approval(company="coB"),
               recovery_assessment=self.assessment(company="coB"),now=10)
     def test_audit_tampering_detected(self):
-        self.authority.db.execute("UPDATE recovery_audit SET reason='tampered' WHERE seq=1")
+        self.authority.db.execute("UPDATE recovery_audit SET payload='{}' WHERE seq=1")
         self.assertFalse(self.authority.verify_audit("coA","main"))
+    def test_non_object_release_documents_rejected(self):
+        with self.assertRaisesRegex(RecoveryAuthorityError,"signed_release_documents_required"):
+            self.authority.release(company="coA",stream="main",incident_id="inc1",
+              checkpoint_digest=self.digest,owner_approval=None,recovery_assessment=None,now=10)
 
 if __name__=="__main__": unittest.main()
