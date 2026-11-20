@@ -125,6 +125,8 @@ def assess_snapshot(snapshot: dict[str, Any], expected_company: str,
         evidence_refs.append(evidence["reference"])
 
     published = _parse_time(snapshot["published_at"])
+    if now is not None and (now.tzinfo is None or now.utcoffset() is None):
+        raise SnapshotError("now must include a timezone")
     current = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
     if max_age_hours < 0:
         raise SnapshotError("max_age_hours cannot be negative")
