@@ -6,7 +6,7 @@ Status: offline prototype source and tests added; not executed, deployed or prod
 - A company-scoped façade binds identity verifier, scheduler, owner-approval verifier, trusted clock, trusted owner registry and approval repository at construction.
 - Request methods cannot supply verifier callbacks, trusted owner IDs, clock values, company identity or repository adapters.
 - Identity resolution checks verified issuer output, expected company/audience, expiry, identity epoch, and trusted scheduler assignment/company/task scope.
-- Owner approval issuance checks verifier output, trusted owner registry, exact company/audience, single-use semantics, expiry, nonce, task/principal/resource/policy scope, and amount/currency pairing.
+- Owner approval issuance checks verifier output, trusted owner registry, exact company/audience, single-use semantics, expiry, nonce, task/principal/resource/policy scope, and amount/currency pairing. It resolves the task independently from the trusted scheduler and rejects approvals for unassigned agents, mismatched stream/policy versions, expired tasks or operations/resources outside the task scope.
 - Durable approval persistence is delegated to a trusted repository adapter. The façade validates the repository receipt and scope digest before returning it.
 - The API returns immutable dataclasses, not database handles.
 
