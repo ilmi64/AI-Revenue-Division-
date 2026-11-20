@@ -1,0 +1,18 @@
+{
+  "status": "proposed_not_executed",
+  "tests": [
+    "valid signed checkpoint is accepted only from a trusted signer",
+    "invalid signature is rejected",
+    "wrong company or stream binding is rejected",
+    "stale checkpoint is rejected",
+    "future-dated checkpoint is rejected",
+    "exact duplicate checkpoint is idempotent",
+    "lower-sequence checkpoint rollback is rejected",
+    "same-sequence different digest is rejected",
+    "incorrect previous-checkpoint link is rejected",
+    "first checkpoint must link to genesis",
+    "restore must match exact latest sequence and event hash",
+    "unknown signer key is rejected",
+    "database/registry integrity failure leaves prior checkpoint head unchanged"
+  ]
+}
