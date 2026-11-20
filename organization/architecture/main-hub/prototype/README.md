@@ -17,7 +17,7 @@ The default fixture directory is the sibling `../fixtures` directory. The progra
 
 - Python standard library only; no package installation required.
 - No network calls, web server, database, credentials, external actions, or company adapter.
-- Strict field allowlist; rejects identity mismatch and unexpected fields.
+- Strict field allowlist; rejects identity mismatch, unexpected fields, invalid reference clocks, and invalid freshness limits.
 - Synthetic source revisions are explicitly untrusted.
 - All unauthenticated sources remain `UNKNOWN`; stale sources display `STALE`.
 - A critical gate is considered unresolved unless its state is exactly `PASS`; `WAIVED` is not a pass.
@@ -25,7 +25,7 @@ The default fixture directory is the sibling `../fixtures` directory. The progra
 
 ## Next required work
 
-1. Execute these standard-library tests in an authorized local environment and record the exact revision.
+1. Execute the 14 authored standard-library tests in an authorized local environment and record the exact revision.
 2. Add full draft 2020-12 schema validation using an already available validator (do not install packages under the current no-spend/no-install rule).
 3. Design authenticated, company-owned publishers and freshness/replay protections before accepting any non-synthetic data.
 4. Keep company data stores and decision authority separate.
