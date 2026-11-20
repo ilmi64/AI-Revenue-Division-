@@ -179,8 +179,9 @@ class DispatchStore:
                 raise ValueError("action_not_found")
             # Recheck identity under the write lock: verification happened outside
             # the transaction to avoid holding a DB lock across external code.
-            if (a["company"],a["id"],a["idem"]) != (
-                expected["company"],expected["action_id"],expected["idempotency_key"]):
+            if (a["company"],a["id"],a["idem"],a["intent_json"]) != (
+                expected["company"],expected["action_id"],expected["idempotency_key"],
+                action["intent_json"]):
                 raise ValueError("action_identity_changed_during_verification")
             if a["state"]!="outcome_unknown":
                 raise ValueError("action_not_unknown")
