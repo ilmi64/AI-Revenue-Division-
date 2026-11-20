@@ -4,7 +4,8 @@ from typing import Callable, FrozenSet
 
 TRADING_ALWAYS_DENY = frozenset({
     "trade.live_order", "wallet.sign", "funds.transfer", "broker.order",
-    "exchange.withdraw", "risk.halt.modify", "risk.stop.modify"
+    "exchange.withdraw", "wallet.withdraw", "risk.halt.modify",
+    "risk.stop.modify", "risk.limits.modify"
 })
 PROTECTED = frozenset({"policy.modify", "identity.grant", "approval.issue", "secret.read"})
 
@@ -44,7 +45,12 @@ class Decision:
 class PolicyGateway:
     """All callbacks are trusted infrastructure interfaces, never model-supplied."""
     def __init__(self, *, identity_verifier: Callable, approval_consumer: Callable,
-                 emergency_stop: Callable, current_policy_version: Callable):
+                 emergency_stop: Callable, current_policy_version: Callable,
+                 trading_company_ids):
+        ids=frozenset(trading_company_ids)
+        if not ids or any(not isinstance(x,str) or not x.strip() for x in ids):
+            raise ValueError("explicit_trading_company_ids_required")
+        self.trading_company_ids=ids
         self.identity_verifier=identity_verifier
         self.approval_consumer=approval_consumer
         self.emergency_stop=emergency_stop
@@ -68,7 +74,7 @@ class PolicyGateway:
                 return Decision("deny","company_emergency_stop_active")
             if request.operation in PROTECTED:
                 return Decision("deny","protected_control_plane_operation")
-            if principal.company_id == "trading" and request.operation in TRADING_ALWAYS_DENY:
+            if principal.company_id in self.trading_company_ids and request.operation in TRADING_ALWAYS_DENY:
                 return Decision("deny","trading_live_or_risk_control_action_prohibited")
             if request.operation not in task.allowed_operations:
                 return Decision("deny","operation_outside_task_scope")
