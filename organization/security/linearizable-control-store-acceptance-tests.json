@@ -34,7 +34,8 @@
     "dispatch_authorized_before_quarantine_remains_in_flight",
     "release_rechecks_epoch_after_verifier_execution",
     "trading_live_orders_wallet_signing_transfers_broker_orders_withdrawals_and_risk_control_changes_hard_denied",
-    "hard_denies_cannot_be_overridden_by_owner_approval"
+    "hard_denies_cannot_be_overridden_by_owner_approval",
+    "hard_deny_with_unknown_action_identifier_remains_denied_without_exception"
   ],
   "production_gaps": [
     "strongly_consistent_shared_database_and_transaction_isolation",
