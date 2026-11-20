@@ -142,18 +142,24 @@ class DispatchStore:
             self.db.execute("ROLLBACK"); raise
     def reconcile(self, action_id, *, evidence, evidence_verifier, now):
         """Verify raw receiver evidence through trusted infrastructure before recording it."""
-        if not callable(evidence_verifier):
-            raise ValueError("trusted_evidence_verifier_required")
+        verify=getattr(evidence_verifier,"verify",None)
+        if not callable(verify):
+            raise ValueError("trusted_evidence_verifier_object_required")
         if not isinstance(evidence,dict):
             raise ValueError("evidence_required")
-        # Read immutable action identity before external verification. The trusted
-        # verifier must bind the signed evidence to this exact action and audience.
-        action=self.db.execute("SELECT company,id,idem FROM actions WHERE id=?",(action_id,)).fetchone()
+        # Read immutable action identity and destination before external verification.
+        # The receiver account is part of the immutable action intent; absence fails closed.
+        action=self.db.execute("SELECT company,id,idem,intent_json FROM actions WHERE id=?",(action_id,)).fetchone()
         if not action:
             raise ValueError("action_not_found")
+        intent=json.loads(action["intent_json"])
+        receiver_account=intent.get("receiver_account")
+        if not isinstance(receiver_account,str) or not receiver_account.strip():
+            raise ValueError("receiver_account_missing_from_action_intent")
         expected={"company":action["company"],"action_id":action["id"],
-                  "idempotency_key":action["idem"],"audience":"recovery-gateway"}
-        verified=evidence_verifier(evidence, expected=expected, now=now)
+                  "idempotency_key":action["idem"],"receiver_account":receiver_account,
+                  "audience":"recovery-gateway"}
+        verified=verify(evidence, expected=expected, now=now)
         if not isinstance(verified,dict) or verified.get("verified") is not True:
             raise ValueError("receiver_evidence_not_verified")
         outcome=verified.get("outcome")
