@@ -1,4 +1,5 @@
 """Synthetic local tests for the unified recovery/dispatch transaction boundary."""
+import sqlite3
 import tempfile
 import threading
 import unittest
@@ -154,6 +155,29 @@ class ControlStoreTests(unittest.TestCase):
                 recovery_assessment="synthetic-signed-document",owner_verifier=owner,
                 assessment_verifier=assessor,now=22)
         self.assertEqual(self.db.stream_state("co-a","primary")["status"],QUARANTINED)
+
+    def test_action_intent_is_immutable(self):
+        with self.assertRaises(sqlite3.IntegrityError):
+            self.db.db.execute("UPDATE actions SET intent_json='{}' WHERE action_id='action-1'")
+        self.assertEqual(self.db.action_state("action-1"),"queued")
+
+    def test_release_audit_failure_is_not_misclassified_as_replay(self):
+        self.db.quarantine(company="co-a",stream="primary",incident_id="audit-inc",reason="test",
+            checkpoint_digest="d"*64,now=21)
+        owner=Verifier({"approval_id":"audit-owner","nonce":"audit-nonce","expires_at":900})
+        assessor=Verifier({"assessment_digest":"audit-assessment","expires_at":900,"db_integrity":True,
+            "audit_chain_valid":True,"checkpoint_match":True,"revocations_current":True,
+            "emergency_stop_clear":True,"unknown_actions_reconciled":True})
+        self.db.db.execute("""CREATE TRIGGER fail_release_audit BEFORE INSERT ON audit
+          WHEN NEW.event_type='stream_released_by_owner' BEGIN SELECT RAISE(ABORT,'audit unavailable'); END""")
+        with self.assertRaises(sqlite3.IntegrityError):
+            self.db.release_stream(company="co-a",stream="primary",incident_id="audit-inc",
+                checkpoint_digest="d"*64,owner_approval="synthetic-signed-document",
+                recovery_assessment="synthetic-signed-document",owner_verifier=owner,
+                assessment_verifier=assessor,now=22)
+        self.assertEqual(self.db.stream_state("co-a","primary")["status"],QUARANTINED)
+        self.assertEqual(self.db.db.execute(
+            "SELECT COUNT(*) FROM release_consumptions WHERE approval_id='audit-owner'").fetchone()[0],0)
 
     def test_release_approval_nonce_cannot_be_reused(self):
         self.db.quarantine(company="co-a",stream="primary",incident_id="inc-1",reason="test",
