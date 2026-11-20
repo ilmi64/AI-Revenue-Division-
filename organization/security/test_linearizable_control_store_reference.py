@@ -119,6 +119,27 @@ class ControlStoreTests(unittest.TestCase):
         self.assertEqual(result["reason"],"amount_limit_exceeded")
         self.assertEqual(self.db.action_state("over-cap"),"queued")
 
+    def test_trading_and_financial_hard_denies(self):
+        denied = (
+            "trade.live_order", "wallet.sign", "funds.transfer", "broker.order",
+            "exchange.withdraw", "wallet.withdraw", "risk.halt.modify",
+            "risk.stop.modify", "risk.limits.modify",
+        )
+        for index, operation in enumerate(denied):
+            approval = "hard-deny-approval-" + str(index)
+            action = "hard-deny-action-" + str(index)
+            self.db.issue_approval(approval_id=approval,company="co-a",stream="primary",
+                agent="agent-a",task="task-hard-deny",operation=operation,resource="protected",
+                policy_version="v1",expires_at=1000,now=4)
+            self.db.enqueue(action_id=action,company="co-a",stream="primary",approval_id=approval,
+                idempotency_key="hard-deny-idem-" + str(index),
+                intent={"receiver_account":"synthetic-sink"},now=4)
+            result=self.db.authorize_and_start(action,company="co-a",stream="primary",
+                agent="agent-a",task="task-hard-deny",operation=operation,resource="protected",
+                policy_version="v1",now=20)
+            self.assertEqual(result["reason"],"operation_hard_denied")
+            self.assertEqual(self.db.action_state(action),"queued")
+
     def test_company_mismatch_denied(self):
         self.assertEqual(self._authorize(company="co-b")["reason"],"company_or_stream_mismatch")
 
