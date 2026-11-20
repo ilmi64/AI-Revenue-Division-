@@ -101,6 +101,9 @@ class LinearizableControlStore:
             raise ControlStoreError("invalid_approval_expiry")
         self.db.execute("BEGIN IMMEDIATE")
         try:
+            if self.db.execute("SELECT 1 FROM streams WHERE company=? AND stream=?",
+                               (company,stream)).fetchone() is None:
+                raise ControlStoreError("stream_not_registered")
             self.db.execute(
                 "INSERT INTO approvals(approval_id,company,stream,agent,task,operation,resource,"
                 "policy_version,expires_at) VALUES(?,?,?,?,?,?,?,?,?)",
@@ -115,6 +118,8 @@ class LinearizableControlStore:
     def enqueue(self, *, action_id, company, stream, approval_id, idempotency_key, intent, now):
         if not self.required(action_id,company,stream,approval_id,idempotency_key) or not isinstance(intent,dict):
             raise ControlStoreError("action_fields_required")
+        if isinstance(now,bool) or not isinstance(now,int):
+            raise ControlStoreError("invalid_time")
         encoded = self.canon(intent)
         self.db.execute("BEGIN IMMEDIATE")
         try:
@@ -168,6 +173,8 @@ class LinearizableControlStore:
     def quarantine(self, *, company, stream, incident_id, reason, checkpoint_digest, now):
         if not self.required(company,stream,incident_id,reason,checkpoint_digest):
             raise ControlStoreError("quarantine_fields_required")
+        if isinstance(now,bool) or not isinstance(now,int):
+            raise ControlStoreError("invalid_time")
         if len(checkpoint_digest)!=64 or any(c not in "0123456789abcdef" for c in checkpoint_digest):
             raise ControlStoreError("checkpoint_digest_invalid")
         self.db.execute("BEGIN IMMEDIATE")
@@ -198,6 +205,8 @@ class LinearizableControlStore:
     def release_stream(self, *, company, stream, incident_id, checkpoint_digest,
                        owner_approval, recovery_assessment, owner_verifier,
                        assessment_verifier, now):
+        if isinstance(now,bool) or not isinstance(now,int):
+            raise ControlStoreError("invalid_time")
         if not callable(getattr(owner_verifier,"verify",None)) or not callable(
             getattr(assessment_verifier,"verify",None)):
             raise ControlStoreError("trusted_release_verifiers_required")
@@ -268,6 +277,8 @@ class LinearizableControlStore:
     def authorize_and_start(self, action_id, *, company, stream, agent, task,
                             operation, resource, policy_version, now):
         """Authorization linearization point. The sender is deliberately absent."""
+        if isinstance(now,bool) or not isinstance(now,int):
+            raise ControlStoreError("invalid_time")
         self.db.execute("BEGIN IMMEDIATE")
         try:
             a=self.db.execute("SELECT * FROM actions WHERE action_id=?",(action_id,)).fetchone()
@@ -316,6 +327,8 @@ class LinearizableControlStore:
         states={"accepted":"sent","rejected":"failed","timeout":"outcome_unknown",
                 "exception":"outcome_unknown"}
         if result not in states: raise ControlStoreError("invalid_sender_result")
+        if isinstance(now,bool) or not isinstance(now,int):
+            raise ControlStoreError("invalid_time")
         self.db.execute("BEGIN IMMEDIATE")
         try:
             a=self.db.execute("SELECT * FROM actions WHERE action_id=?",(action_id,)).fetchone()
