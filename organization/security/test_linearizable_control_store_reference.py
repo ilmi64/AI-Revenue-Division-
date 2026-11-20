@@ -209,14 +209,16 @@ class ControlStoreTests(unittest.TestCase):
             checkpoint_digest="d"*64,owner_approval="synthetic-signed-document",
             recovery_assessment="synthetic-signed-document",owner_verifier=owner,
             assessment_verifier=assessor,now=22)
-        self.db.quarantine(company="co-a",stream="primary",incident_id="inc-2",reason="test",
-            checkpoint_digest="e"*64,now=23)
+        # Re-quarantine the exact same incident scope so the verifier succeeds;
+        # the database must reject the already-consumed approval/nonce itself.
+        self.db.quarantine(company="co-a",stream="primary",incident_id="inc-1",reason="test",
+            checkpoint_digest="d"*64,now=23)
         assessor2=Verifier({"assessment_digest":"assessment-2","expires_at":900,"db_integrity":True,
             "audit_chain_valid":True,"checkpoint_match":True,"revocations_current":True,
             "emergency_stop_clear":True,"unknown_actions_reconciled":True})
-        with self.assertRaises(ControlStoreError):
-            self.db.release_stream(company="co-a",stream="primary",incident_id="inc-2",
-                checkpoint_digest="e"*64,owner_approval="synthetic-signed-document",
+        with self.assertRaisesRegex(ControlStoreError,"release_replay_or_conflict"):
+            self.db.release_stream(company="co-a",stream="primary",incident_id="inc-1",
+                checkpoint_digest="d"*64,owner_approval="synthetic-signed-document",
                 recovery_assessment="synthetic-signed-document",owner_verifier=owner,
                 assessment_verifier=assessor2,now=24)
         self.assertEqual(self.db.stream_state("co-a","primary")["status"],QUARANTINED)
@@ -246,6 +248,55 @@ class ControlStoreTests(unittest.TestCase):
         else:
             self.assertEqual(results["dispatch"]["reason"],"stream_not_active")
             self.assertEqual(self.db.action_state("action-1"),"queued")
+
+    def test_approval_replay_is_rejected_by_consumption_record(self):
+        self.db.authorize_and_start("action-1",company="co-a",stream="primary",
+            agent="agent-a",task="task-1",operation="publish",resource="catalog/item",
+            policy_version="v1",now=40)
+        self.db.enqueue(action_id="action-replay",company="co-a",stream="primary",
+            approval_id="approval-1",idempotency_key="idem-replay",
+            intent={"receiver_account":"synthetic-sink"},now=41)
+        with self.assertRaisesRegex(ControlStoreError,"approval_already_consumed"):
+            self.db.authorize_and_start("action-replay",company="co-a",stream="primary",
+                agent="agent-a",task="task-1",operation="publish",resource="catalog/item",
+                policy_version="v1",now=42)
+        self.assertEqual(self.db.action_state("action-replay"),"queued")
+
+    def test_dispatch_authorized_before_quarantine_remains_in_flight(self):
+        result=self.db.authorize_and_start("action-1",company="co-a",stream="primary",
+            agent="agent-a",task="task-1",operation="publish",resource="catalog/item",
+            policy_version="v1",now=40)
+        self.assertTrue(result["allowed"])
+        old_epoch=self.db.stream_state("co-a","primary")["epoch"]
+        self.db.quarantine(company="co-a",stream="primary",incident_id="after-auth",
+            reason="post-authorization incident",checkpoint_digest="f"*64,now=41)
+        self.assertEqual(self.db.action_state("action-1"),"dispatch_started")
+        self.assertEqual(self.db.stream_state("co-a","primary")["epoch"],old_epoch+1)
+
+    def test_release_rechecks_epoch_after_verifier_runs(self):
+        self.db.quarantine(company="co-a",stream="primary",incident_id="verify-race",
+            reason="test",checkpoint_digest="b"*64,now=21)
+        class MutatingVerifier:
+            def __init__(self, claims, mutate):
+                self.claims,self.mutate=claims,mutate
+            def verify(self, document, *, expected, now):
+                self.mutate()
+                return {**expected,**self.claims,"verified":True}
+        owner=MutatingVerifier({"approval_id":"race-owner","nonce":"race-nonce","expires_at":900},
+            lambda: None)
+        assessor=Verifier({"assessment_digest":"race-assessment","expires_at":900,"db_integrity":True,
+            "audit_chain_valid":True,"checkpoint_match":True,"revocations_current":True,
+            "emergency_stop_clear":True,"unknown_actions_reconciled":True})
+        owner.mutate=lambda: self.db.quarantine(company="co-a",stream="primary",
+            incident_id="verify-race-2",reason="changed during verification",
+            checkpoint_digest="c"*64,now=22)
+        with self.assertRaisesRegex(ControlStoreError,"quarantine_changed_during_verification"):
+            self.db.release_stream(company="co-a",stream="primary",incident_id="verify-race",
+                checkpoint_digest="b"*64,owner_approval="synthetic-signed-document",
+                recovery_assessment="synthetic-signed-document",owner_verifier=owner,
+                assessment_verifier=assessor,now=23)
+        self.assertEqual(self.db.stream_state("co-a","primary")["status"],QUARANTINED)
+        self.assertEqual(self.db.stream_state("co-a","primary")["incident_id"],"verify-race-2")
 
     def test_company_epochs_are_isolated(self):
         self.db.register_stream(company="co-b",stream="primary",now=1)
