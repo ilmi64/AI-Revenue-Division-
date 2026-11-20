@@ -13,8 +13,17 @@ class RecoveryTests(unittest.TestCase):
     def tearDown(self):
         self.s.close(); self.tmp.cleanup()
     @staticmethod
+    def receiver_evidence(evidence_id, **overrides):
+        evidence={"evidence_id":evidence_id,"company":"coA","action_id":"ac1",
+                  "idempotency_key":"idem1","audience":"recovery-gateway"}
+        evidence.update(overrides)
+        return evidence
+    @staticmethod
     def fake_verifier(outcome):
+        # Test double only: model the trusted verifier's exact action binding.
         def verify(evidence, *, expected, now):
+            if any(evidence.get(key)!=value for key,value in expected.items()):
+                return {"verified":False}
             return {"verified":True,"outcome":outcome,"evidence_id":evidence["evidence_id"],
                     "issuer":"test-receiver","observed_at":now,"payload_sha256":"0"*64}
         return verify
@@ -61,18 +70,25 @@ class RecoveryTests(unittest.TestCase):
         self.assertEqual(self.start()["reason"],"action_not_queued")
     def test_applied_reconciliation_terminal(self):
         self.start(); self.s.record_sender_result("ac1",result="timeout",now=4)
-        self.assertEqual(self.s.reconcile("ac1",evidence={"evidence_id":"ev1"},evidence_verifier=self.fake_verifier("applied"),now=6),"reconciled_applied")
+        self.assertEqual(self.s.reconcile("ac1",evidence=self.receiver_evidence("ev1"),evidence_verifier=self.fake_verifier("applied"),now=6),"reconciled_applied")
     def test_not_applied_does_not_reuse_old_authorization(self):
         self.start(); self.s.record_sender_result("ac1",result="timeout",now=4)
-        self.s.reconcile("ac1",evidence={"evidence_id":"ev2"},evidence_verifier=self.fake_verifier("not_applied"),now=6)
+        self.s.reconcile("ac1",evidence=self.receiver_evidence("ev2"),evidence_verifier=self.fake_verifier("not_applied"),now=6)
         self.assertEqual(self.start()["reason"],"action_not_queued")
     def test_inconclusive_quarantines(self):
         self.start(); self.s.record_sender_result("ac1",result="exception",now=4)
-        self.assertEqual(self.s.reconcile("ac1",evidence={"evidence_id":"ev3"},evidence_verifier=self.fake_verifier("inconclusive"),now=6),"quarantined")
+        self.assertEqual(self.s.reconcile("ac1",evidence=self.receiver_evidence("ev3"),evidence_verifier=self.fake_verifier("inconclusive"),now=6),"quarantined")
+    def test_wrong_action_binding_is_rejected(self):
+        self.start(); self.s.record_sender_result("ac1",result="timeout",now=4)
+        wrong=self.receiver_evidence("ev-wrong",action_id="different-action")
+        with self.assertRaisesRegex(ValueError,"receiver_evidence_not_verified"):
+            self.s.reconcile("ac1",evidence=wrong,
+                evidence_verifier=self.fake_verifier("applied"),now=6)
+
     def test_unauthenticated_evidence_rejected(self):
         self.start(); self.s.record_sender_result("ac1",result="timeout",now=4)
         with self.assertRaises(ValueError):
-            self.s.reconcile("ac1",evidence={"evidence_id":"ev4"},evidence_verifier=lambda *a,**k: (_ for _ in ()).throw(ValueError("bad_signature")),now=6)
+            self.s.reconcile("ac1",evidence=self.receiver_evidence("ev4"),evidence_verifier=lambda *a,**k: (_ for _ in ()).throw(ValueError("bad_signature")),now=6)
     def test_audit_and_online_backup_restore(self):
         self.start(); self.s.record_sender_result("ac1",result="accepted",now=4)
         backup=os.path.join(self.tmp.name,"backup.db")
