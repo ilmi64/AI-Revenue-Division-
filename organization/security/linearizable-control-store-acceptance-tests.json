@@ -25,7 +25,10 @@
     "dispatch_quarantine_race_serializes",
     "company_epochs_are_isolated",
     "audit_tampering_detected",
-    "release_approval_nonce_cannot_be_reused"
+    "release_approval_nonce_cannot_be_reused",
+    "action_intent_is_immutable",
+    "release_audit_failure_rolls_back_without_false_replay",
+    "approval_requires_registered_company_stream"
   ],
   "production_gaps": [
     "strongly_consistent_shared_database_and_transaction_isolation",
