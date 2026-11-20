@@ -1,4 +1,4 @@
-import unittest
+import hashlib, unittest
 from receiver_evidence_verifier_reference import ReceiverEvidenceVerifier, EvidenceError
 
 class EvidenceTests(unittest.TestCase):
@@ -10,12 +10,12 @@ class EvidenceTests(unittest.TestCase):
         self.e={"evidence_id":"ev1","issuer":"receiver-A","audience":"recovery-gateway",
           "company":"coA","action_id":"act1","receiver_account":"acct1",
           "idempotency_key":"idem1","outcome":"applied","observed_at":950,
-          "nonce":"n1","signature":"valid"}
+          "nonce":"n1","signature":""}\n        self.e["signature"]=hashlib.sha256(self.v.canonical_signed_payload(self.e)).hexdigest()
         self.expected={"audience":"recovery-gateway","company":"coA","action_id":"act1",
           "receiver_account":"acct1","idempotency_key":"idem1"}
     def _signature(self,issuer,payload,signature):
         self.calls.append((issuer,payload,signature))
-        return signature=="valid" and issuer=="receiver-A"
+        return signature==hashlib.sha256(payload).hexdigest() and issuer=="receiver-A"
     def test_valid_bound_evidence(self):
         result=self.v.verify(self.e,expected=self.expected,now=1000)
         self.assertTrue(result["verified"])
