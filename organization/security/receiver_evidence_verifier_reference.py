@@ -35,12 +35,16 @@ class ReceiverEvidenceVerifier:
         payload={k:v for k,v in evidence.items() if k!="signature"}
         return json.dumps(payload,sort_keys=True,separators=(",",":"),allow_nan=False).encode("utf-8")
 
-    def verify(self, evidence, *, expected, now):
+    def verify(self, evidence, *, expected, now, consume_replay=True):
+        if not isinstance(now,int) or isinstance(now,bool):
+            raise EvidenceError("invalid_trusted_time")
+        if not isinstance(expected,dict):
+            raise EvidenceError("invalid_expected_scope")
         if not isinstance(evidence,dict) or any(k not in evidence for k in self.REQUIRED):
             raise EvidenceError("missing_evidence_fields")
         if evidence["issuer"] not in self._issuers:
             raise EvidenceError("untrusted_issuer")
-        if evidence["outcome"] not in self.OUTCOMES:
+        if not isinstance(evidence["outcome"],str) or evidence["outcome"] not in self.OUTCOMES:
             raise EvidenceError("invalid_outcome")
         for key in ("evidence_id","issuer","audience","company","action_id",
                     "receiver_account","idempotency_key","nonce","signature"):
@@ -60,19 +64,26 @@ class ReceiverEvidenceVerifier:
         if not self._verify_signature(evidence["issuer"],signed,evidence["signature"]):
             raise EvidenceError("invalid_signature")
         digest=hashlib.sha256(signed).hexdigest()
-        if self._replay_store is None:
-            replay=(evidence["issuer"],evidence["nonce"])
-            if replay in self._seen:
-                raise EvidenceError("evidence_replay")
-            self._seen.add(replay)
-        else:
-            try:
-                self._replay_store.claim(issuer=evidence["issuer"],nonce=evidence["nonce"],
-                    evidence_id=evidence["evidence_id"],payload_sha256=digest,
-                    observed_at=observed,accepted_at=now)
-            except Exception as exc:
-                raise EvidenceError("evidence_replay_store_rejected") from exc
+        if consume_replay:
+            if self._replay_store is None:
+                replay=(evidence["issuer"],evidence["nonce"])
+                if replay in self._seen:
+                    raise EvidenceError("evidence_replay")
+                self._seen.add(replay)
+            else:
+                try:
+                    self._replay_store.claim(issuer=evidence["issuer"],nonce=evidence["nonce"],
+                        evidence_id=evidence["evidence_id"],payload_sha256=digest,
+                        observed_at=observed,accepted_at=now)
+                except Exception as exc:
+                    raise EvidenceError("evidence_replay_store_rejected") from exc
         return {"verified":True,"evidence_id":evidence["evidence_id"],
                 "outcome":evidence["outcome"],"payload_sha256":digest,
-                "issuer":evidence["issuer"],"observed_at":observed}
+                "issuer":evidence["issuer"],"nonce":evidence["nonce"],"observed_at":observed}
+
+    def verify_for_atomic_reconciliation(self, evidence, *, expected, now):
+        """Verify signature/scope without consuming replay state outside the DB transaction."""
+        if self._replay_store is not None:
+            raise EvidenceError("separate_replay_store_forbidden_for_atomic_reconciliation")
+        return self.verify(evidence,expected=expected,now=now,consume_replay=False)
 
