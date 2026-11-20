@@ -91,7 +91,7 @@ Build a **read-only status and evidence control centre first**. Do not begin wit
 ### M1 — Canonical records and schemas
 - Define company registry, decision register, workstream register and status-snapshot schema.
 - Add synthetic examples for both companies.
-- Acceptance: schema validation rejects missing identity, invalid status, stale source revision and unapproved fields.
+- Acceptance: schema validation rejects missing identity, invalid status and unapproved fields. Freshness, replay protection and source-revision provenance require separate runtime checks; JSON Schema alone cannot establish them.
 
 ### M2 — Read-only OCC prototype
 - Ingest synthetic company snapshots.
@@ -141,7 +141,7 @@ Strategy discovery outputs must distinguish public claims, hypotheses, reproduce
 
 - **M0 baseline inventory:** initial repository-tree and architecture-document inventory completed. The inventory confirmed that the OCC application itself is not present as a demonstrated running service. Existing control-plane Python modules remain reference/prototype material until tested at an exact revision.
 - **M1 canonical records:** JSON Schema and synthetic company snapshots, registry/workstream examples, decision-log starter and a complete root-envelope fixture are committed under `main-hub/` in both architecture branches. The schema now constrains the company registry to exactly two entries and requires one record for each company. The mirrored schema and root-envelope fixture were synchronised.
-- **Validation limitation:** JSON syntax parsing passed for the schema and four fixture files. Full JSON Schema validation has **not** been run; no validator package was installed and no GitHub Actions workflow was triggered. Publisher authentication, replay protection, freshness enforcement and source-revision verification are not implemented.
+- **Validation limitation:** JSON syntax parsing passed for the schema and four fixture files. Full JSON Schema validation has **not** been run; no validator package was installed and no GitHub Actions workflow was triggered. JSON Schema can validate structure and declared constraints, but it cannot by itself prove publisher authenticity, replay resistance, real-time freshness or source-revision provenance. Those require separate runtime controls, which are not implemented.
 - **M2 read-only prototype:** an offline Python-standard-library report generator, strict nested-field allowlists, company-identity checks, conservative freshness handling and ten unit tests have been committed under `organization/architecture/main-hub/prototype/` in the AI Revenue architecture branch. This is a temporary implementation staging location only; it does not give AI Revenue authority over OCC or company records. The prototype reads synthetic fixtures only and has no network, database, server, credentials or external-action capability. Tests are authored but have **not** been executed; this is reference code, not a running service.
 - **M2 hardening:** validation now checks nested gate, blocker, incident and evidence structures, rejects unexpected nested fields and malformed enum types, and marks stale synthetic snapshots as stale while retaining their untrusted label.
 - **Next:** execute the committed standard-library tests in an authorized local environment, correct any failures, then perform full draft 2020-12 schema validation using an already-available offline validator. Only after those checks should the next iteration add a local operator presentation.
