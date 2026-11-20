@@ -28,7 +28,8 @@
     "release_approval_nonce_cannot_be_reused",
     "action_intent_is_immutable",
     "release_audit_failure_rolls_back_without_false_replay",
-    "approval_requires_registered_company_stream"
+    "approval_requires_registered_company_stream",
+    "amount_limit_minor_enforced_before_dispatch"
   ],
   "production_gaps": [
     "strongly_consistent_shared_database_and_transaction_isolation",
