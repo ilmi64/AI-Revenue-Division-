@@ -29,7 +29,10 @@
     "action_intent_is_immutable",
     "release_audit_failure_rolls_back_without_false_replay",
     "approval_requires_registered_company_stream",
-    "amount_limit_minor_enforced_before_dispatch"
+    "amount_limit_minor_enforced_before_dispatch",
+    "approval_replay_rejected_by_atomic_consumption",
+    "dispatch_authorized_before_quarantine_remains_in_flight",
+    "release_rechecks_epoch_after_verifier_execution"
   ],
   "production_gaps": [
     "strongly_consistent_shared_database_and_transaction_isolation",
