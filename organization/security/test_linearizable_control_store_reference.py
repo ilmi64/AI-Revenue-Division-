@@ -53,6 +53,12 @@ class ControlStoreTests(unittest.TestCase):
         return db.authorize_and_start(action,company=company,stream="primary",agent="agent-a",
             task=task,operation="publish",resource="catalog/item",policy_version="v1",now=20)
 
+    def test_approval_requires_registered_company_stream(self):
+        with self.assertRaises(ControlStoreError):
+            self.db.issue_approval(approval_id="orphan",company="co-missing",stream="missing",
+                agent="agent-a",task="task-x",operation="publish",resource="catalog/item",
+                policy_version="v1",expires_at=1000,now=3)
+
     def test_new_stream_defaults_disabled(self):
         self.db.register_stream(company="co-b",stream="new",now=1)
         self.assertEqual(self.db.stream_state("co-b","new")["status"],DISABLED)
