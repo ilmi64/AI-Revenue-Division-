@@ -137,6 +137,13 @@ Strategy discovery outputs must distinguish public claims, hypotheses, reproduce
 - No paid subscriptions, APIs, credits, hosting, trials with billing risk, purchases or other spending without explicit owner approval.
 - No Actions runs, merges, deployments, public releases, account/permission changes or consequential external actions without separate explicit approval.
 
+## 9. Implementation progress (2026-11-20)
+
+- **M0 baseline inventory:** initial repository-tree and architecture-document inventory completed. The inventory confirmed that the OCC application itself is not present as a demonstrated running service. Existing control-plane Python modules remain reference/prototype material until tested at an exact revision.
+- **M1 canonical records:** first draft of the JSON Schema and synthetic company snapshots, registry/workstream examples and decision-log starter added under `main-hub/` in both architecture branches. The mirrored schema and fixture files were fetched back and verified byte-identical.
+- **Validation limitation:** JSON syntax parsing passed for the schema and four fixture files. Full JSON Schema validation has **not** been run; no validator package was installed and no GitHub Actions workflow was triggered. Publisher authentication, replay protection, freshness enforcement and source-revision verification are not implemented.
+- **Next:** complete semantic schema validation in an already-available offline environment, then implement the read-only OCC prototype against synthetic fixtures only.
+
 ## 9. Definition of done for Main Hub v0.1
 
 Main Hub v0.1 is complete only when:
