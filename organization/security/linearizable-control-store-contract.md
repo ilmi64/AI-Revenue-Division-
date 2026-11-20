@@ -29,9 +29,11 @@ revocations, emergency-stop clear and reconciliation of unknown actions. Verify
 documents outside the write transaction, then recheck incident, checkpoint and
 epoch under the lock before commit.
 
-The reference's verifier objects are synthetic test doubles. Release approval
-nonce is not durably consumed here. Production must consume signed owner approval
-and nonce atomically with release in the same transaction.
+The reference persists release approval IDs and nonces in a unique-key
+consumption table in the same transaction as the release transition, preventing
+local replay. Verifier objects are synthetic test doubles; cryptographic signature
+verification is not implemented. Production must verify owner signatures through
+a trusted asymmetric authority before atomic approval/nonce consumption and release.
 
 ## External side effects
 No local database can atomically commit arbitrary remote HTTP, exchange, broker,
@@ -44,7 +46,6 @@ authorized before quarantine may arrive remotely after quarantine.
 ## Production blockers
 - SQLite is a single-host reference, not production multi-node storage.
 - No asymmetric signatures, KMS/HSM, trusted issuer or real cryptographic verifier.
-- No durable release nonce consumption in this reference.
 - No independently administered WORM audit store or signed checkpoint signer.
 - No receiver idempotency/epoch-fencing adapter or network sender.
 - No production monitoring, backup/restore drill or independent security review.
