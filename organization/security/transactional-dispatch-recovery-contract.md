@@ -17,10 +17,23 @@ send again. The remote receiver must enforce the stable idempotency key for the
 full reconciliation window. Exactly-once delivery is not claimed.
 
 ## Reconciliation
-Only a trusted verifier may set authenticated=true. Evidence must be bound to
-the exact action and receiver/account, include a stable evidence ID, source and
-observation time, and be fresh enough for the receiver's semantics. Applied
-becomes reconciled_applied; authoritative not-applied becomes
+The reference accepts raw evidence plus an injected verifier dependency; it does
+not accept a caller-supplied authenticated boolean. The verifier MUST be
+constructed, configured and injected only by trusted control-plane
+infrastructure. It MUST NOT be selected, replaced, configured or invoked with
+agent-controlled trust roots, issuer registries, receiver accounts, clocks,
+replay stores or verification keys. Agents and workers may submit evidence
+bytes, but cannot supply the verifier or its trust configuration.
+
+The verifier must authenticate the receiver signature and bind the evidence to
+the exact company, action ID, idempotency key, receiver account and recovery
+audience. It must enforce issuer allowlists, freshness, nonce/evidence replay
+protection and a stable evidence ID. Verification occurs outside the SQLite
+write transaction; after verification, the reference reloads the action under
+BEGIN IMMEDIATE and rechecks its company, ID and idempotency key before changing
+state. Production must preserve this binding and recheck atomically.
+
+Applied becomes reconciled_applied; authoritative not-applied becomes
 reconciled_not_applied; inconclusive becomes quarantined. None reuses the old
 approval. A new action requires a new intent and fresh owner approval.
 
