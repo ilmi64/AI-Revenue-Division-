@@ -1,5 +1,5 @@
 import hashlib, json, os, tempfile, unittest
-from durable_replay_store_reference import SQLiteReplayStore, ReplayError
+from durable_replay_store_reference import SQLiteReplayStore, ReplayError, ReplayConflict, ReplayStoreUnavailable
 from receiver_evidence_verifier_reference import ReceiverEvidenceVerifier, EvidenceError
 
 class VerifierDurableReplayIntegrationTests(unittest.TestCase):
@@ -52,6 +52,22 @@ class VerifierDurableReplayIntegrationTests(unittest.TestCase):
         self.assertTrue(self.verifier.verify(good,expected={"company":"coA",
           "action_id":"a1","receiver_account":"acct1","idempotency_key":"idem1",
           "audience":"recovery-gateway"},now=101)["verified"])
+
+    def test_replay_conflict_is_distinguished_from_store_outage(self):
+        e=self.evidence()
+        expected={"company":"coA","action_id":"a1","receiver_account":"acct1",
+          "idempotency_key":"idem1","audience":"recovery-gateway"}
+        self.verifier.verify(e,expected=expected,now=101)
+        with self.assertRaisesRegex(EvidenceError,"evidence_replay"):
+            self.verifier.verify(e,expected=expected,now=101)
+
+    def test_storage_integrity_failure_is_not_reported_as_replay(self):
+        self.store.db.execute("""CREATE TRIGGER reject_insert BEFORE INSERT ON receiver_evidence_replay
+          BEGIN SELECT RAISE(ABORT,'storage write unavailable'); END;""")
+        with self.assertRaisesRegex(EvidenceError,"replay_store_unavailable"):
+            self.verifier.verify(self.evidence(),expected={"company":"coA","action_id":"a1",
+              "receiver_account":"acct1","idempotency_key":"idem1",
+              "audience":"recovery-gateway"},now=101)
 
 if __name__=="__main__":
     unittest.main()
