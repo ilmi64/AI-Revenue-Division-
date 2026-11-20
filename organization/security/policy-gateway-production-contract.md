@@ -13,7 +13,7 @@ Status: reference implementation and test vectors only; not deployed, connected 
 2. Match principal company, agent and role to the assigned task.
 3. Check task expiry, allowed operation, exact resource, cost/amount bounds and policy version.
 4. Read current company emergency-stop state; unavailable or uncertain means deny.
-5. Deny protected control-plane changes and all Trading live-order, wallet-signing, funds-transfer, broker-order, withdrawal and risk HALT/STOP modification operations.
+5. Deny protected control-plane changes and all Trading hard-deny operations: live orders, wallet signing, funds transfers, broker orders, exchange/wallet withdrawals, and HALT/STOP/risk-limit modifications. The complete operation set is defined in `TRADING_ALWAYS_DENY` and must match the unified control-store hard-deny set. Trading company identifiers are explicit deployment configuration (`trading_company_ids`); never infer company identity from a magic string such as `trading`. Missing or empty configuration prevents gateway construction.
 6. For actions requiring owner approval, consume a signed, short-lived, single-use approval bound to exact company, principal/session, task, operation, resource, amount/limits, policy version and nonce.
 7. Recheck authorization immediately before dispatch at the enforcement gateway; do not rely on an earlier allow decision.
 
