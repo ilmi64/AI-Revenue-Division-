@@ -47,6 +47,8 @@ class PolicyGateway:
     def __init__(self, *, identity_verifier: Callable, approval_consumer: Callable,
                  emergency_stop: Callable, current_policy_version: Callable,
                  trading_company_ids):
+        if isinstance(trading_company_ids,str):
+            raise ValueError("explicit_trading_company_ids_required")
         ids=frozenset(trading_company_ids)
         if not ids or any(not isinstance(x,str) or not x.strip() for x in ids):
             raise ValueError("explicit_trading_company_ids_required")
