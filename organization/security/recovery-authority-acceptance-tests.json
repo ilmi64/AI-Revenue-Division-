@@ -1,0 +1,20 @@
+{
+  "status": "proposed_not_executed",
+  "scenarios": [
+    "new streams start dispatch-disabled",
+    "quarantine is idempotent for same incident and checkpoint",
+    "only trusted recovery assessment plus exact owner approval can release",
+    "invalid owner signature keeps stream quarantined",
+    "invalid recovery-assessor signature keeps stream quarantined",
+    "any failed recovery control keeps stream quarantined",
+    "incident or checkpoint mismatch denies release",
+    "expired owner approval denies release",
+    "expired recovery assessment denies release",
+    "approval ID and nonce are consumed once atomically with release",
+    "exact duplicate release retry is idempotent",
+    "consumed approval cannot release a later incident",
+    "company-scoped state cannot be read or released through another company",
+    "audit-chain tampering is detected",
+    "database failure or transaction conflict never activates stream"
+  ]
+}
