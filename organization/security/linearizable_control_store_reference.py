@@ -58,6 +58,9 @@ class LinearizableControlStore:
           approval_id TEXT PRIMARY KEY, nonce TEXT NOT NULL UNIQUE,
           company TEXT NOT NULL, stream TEXT NOT NULL, incident_id TEXT NOT NULL,
           checkpoint_digest TEXT NOT NULL, consumed_at INTEGER NOT NULL);
+        CREATE TRIGGER IF NOT EXISTS immutable_action_intent
+          BEFORE UPDATE OF action_id,company,stream,approval_id,idempotency_key,intent_json,enqueue_epoch
+          ON actions BEGIN SELECT RAISE(ABORT,'immutable_action_intent'); END;
         """)
 
     @staticmethod
@@ -252,7 +255,12 @@ class LinearizableControlStore:
             return epoch
         except sqlite3.IntegrityError as exc:
             if self.db.in_transaction: self.db.execute("ROLLBACK")
-            raise ControlStoreError("release_replay_or_conflict") from exc
+            used=self.db.execute(
+                "SELECT 1 FROM release_consumptions WHERE approval_id=? OR nonce=? LIMIT 1",
+                (aid,nonce)).fetchone()
+            if used:
+                raise ControlStoreError("release_replay_or_conflict") from exc
+            raise
         except Exception:
             if self.db.in_transaction: self.db.execute("ROLLBACK")
             raise
