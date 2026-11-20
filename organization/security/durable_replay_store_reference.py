@@ -5,9 +5,16 @@ durable backups, restricted roles and tested failover.
 """
 from __future__ import annotations
 import sqlite3
-from pathlib import Path
 
 class ReplayError(ValueError):
+    pass
+
+class ReplayConflict(ReplayError):
+    """A nonce or evidence ID is already durably claimed."""
+    pass
+
+class ReplayStoreUnavailable(RuntimeError):
+    """The replay store could not establish whether a claim was committed."""
     pass
 
 class SQLiteReplayStore:
@@ -15,6 +22,7 @@ class SQLiteReplayStore:
         self.path=str(path)
         self.db=sqlite3.connect(self.path,timeout=10,isolation_level=None)
         self.db.execute("PRAGMA foreign_keys=ON")
+        self.db.execute("PRAGMA busy_timeout=10000")
         self.db.execute("""
           CREATE TABLE IF NOT EXISTS receiver_evidence_replay (
             issuer TEXT NOT NULL,
@@ -46,8 +54,22 @@ class SQLiteReplayStore:
             self.db.execute("COMMIT")
             return True
         except sqlite3.IntegrityError as exc:
-            self.db.execute("ROLLBACK")
-            raise ReplayError("evidence_nonce_or_id_replayed") from exc
+            if self.db.in_transaction:
+                self.db.execute("ROLLBACK")
+            try:
+                collision=self.db.execute("""SELECT 1 FROM receiver_evidence_replay
+                  WHERE (issuer=? AND nonce=?) OR (issuer=? AND evidence_id=?) LIMIT 1""",
+                  (issuer,nonce,issuer,evidence_id)).fetchone()
+            except sqlite3.Error as lookup_error:
+                raise ReplayStoreUnavailable("replay_store_unavailable_after_integrity_error") from lookup_error
+            if collision:
+                raise ReplayConflict("evidence_nonce_or_id_replayed") from exc
+            raise ReplayStoreUnavailable("replay_store_integrity_failure") from exc
+        except sqlite3.Error as exc:
+            if self.db.in_transaction:
+                try: self.db.execute("ROLLBACK")
+                except sqlite3.Error: pass
+            raise ReplayStoreUnavailable("replay_store_unavailable") from exc
         except Exception:
             if self.db.in_transaction:
                 self.db.execute("ROLLBACK")
