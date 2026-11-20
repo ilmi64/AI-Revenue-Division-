@@ -21,6 +21,10 @@
     "policy callback exception denies",
     "approval service unavailable denies",
     "policy update between enqueue and dispatch denies at final gateway",
-    "direct model-to-tool bypass is blocked by network and gateway enforcement"
+    "direct model-to-tool bypass is blocked by network and gateway enforcement",
+    "all nine Trading hard-deny operations denied even when explicitly allowlisted",
+    "Trading hard-deny applies to configured non-default company identifiers",
+    "gateway refuses empty or missing Trading company identifier configuration",
+    "gateway hard-deny set exactly matches unified control-store hard-deny set"
   ]
 }
