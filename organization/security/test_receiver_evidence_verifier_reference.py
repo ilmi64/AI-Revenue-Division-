@@ -10,7 +10,8 @@ class EvidenceTests(unittest.TestCase):
         self.e={"evidence_id":"ev1","issuer":"receiver-A","audience":"recovery-gateway",
           "company":"coA","action_id":"act1","receiver_account":"acct1",
           "idempotency_key":"idem1","outcome":"applied","observed_at":950,
-          "nonce":"n1","signature":""}\n        self.e["signature"]=hashlib.sha256(self.v.canonical_signed_payload(self.e)).hexdigest()
+          "nonce":"n1","signature":""}
+        self.e["signature"]=hashlib.sha256(self.v.canonical_signed_payload(self.e)).hexdigest()
         self.expected={"audience":"recovery-gateway","company":"coA","action_id":"act1",
           "receiver_account":"acct1","idempotency_key":"idem1"}
     def _signature(self,issuer,payload,signature):
