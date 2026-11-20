@@ -67,7 +67,7 @@ def assess_snapshot(snapshot: dict[str, Any], expected_company: str,
     _nonempty_string(snapshot["source_revision"], "source_revision")
     if len(snapshot["source_revision"]) < 7:
         raise SnapshotError("source_revision must contain at least 7 characters")
-    if snapshot["overall_status"] not in VALID_OVERALL:
+    if not isinstance(snapshot["overall_status"], str) or snapshot["overall_status"] not in VALID_OVERALL:
         raise SnapshotError("invalid overall status")
 
     subsystems = snapshot["subsystems"]
@@ -75,7 +75,7 @@ def assess_snapshot(snapshot: dict[str, Any], expected_company: str,
         raise SnapshotError("subsystems must be a non-empty object")
     for name, status in subsystems.items():
         _nonempty_string(name, "subsystem name")
-        if status not in VALID_SUBSYSTEM:
+        if not isinstance(status, str) or status not in VALID_SUBSYSTEM:
             raise SnapshotError(f"invalid subsystem status for {name}")
 
     if not isinstance(snapshot["gates"], list) or not isinstance(snapshot["blockers"], list):
@@ -83,7 +83,7 @@ def assess_snapshot(snapshot: dict[str, Any], expected_company: str,
     for gate in snapshot["gates"]:
         _keys(gate, {"gate_id", "status", "critical", "evidence_refs"}, {"notes"}, "gate")
         _nonempty_string(gate["gate_id"], "gate_id")
-        if gate["status"] not in VALID_GATE or not isinstance(gate["critical"], bool):
+        if not isinstance(gate["status"], str) or gate["status"] not in VALID_GATE or not isinstance(gate["critical"], bool):
             raise SnapshotError("invalid gate status or critical flag")
         if not isinstance(gate["evidence_refs"], list) or not all(
             isinstance(ref, str) for ref in gate["evidence_refs"]
@@ -96,14 +96,14 @@ def assess_snapshot(snapshot: dict[str, Any], expected_company: str,
         _keys(blocker, {"blocker_id", "severity", "summary"}, set(), "blocker")
         _nonempty_string(blocker["blocker_id"], "blocker_id")
         _nonempty_string(blocker["summary"], "blocker summary")
-        if blocker["severity"] not in VALID_SEVERITY:
+        if not isinstance(blocker["severity"], str) or blocker["severity"] not in VALID_SEVERITY:
             raise SnapshotError("invalid blocker severity")
 
     incident = snapshot["incident_summary"]
     _keys(incident, {"open_count", "highest_severity", "quarantined"}, set(), "incident_summary")
     if not isinstance(incident["open_count"], int) or isinstance(incident["open_count"], bool) or incident["open_count"] < 0:
         raise SnapshotError("incident open_count must be a non-negative integer")
-    if incident["highest_severity"] not in VALID_INCIDENT_SEVERITY:
+    if not isinstance(incident["highest_severity"], str) or incident["highest_severity"] not in VALID_INCIDENT_SEVERITY:
         raise SnapshotError("invalid incident severity")
     if not isinstance(incident["quarantined"], bool):
         raise SnapshotError("incident quarantined must be boolean")
@@ -115,7 +115,7 @@ def assess_snapshot(snapshot: dict[str, Any], expected_company: str,
         _keys(evidence, {"evidence_id", "reference", "evidence_type"}, {"verified_at"}, "evidence")
         _nonempty_string(evidence["evidence_id"], "evidence_id")
         _nonempty_string(evidence["reference"], "evidence reference")
-        if evidence["evidence_type"] not in {
+        if not isinstance(evidence["evidence_type"], str) or evidence["evidence_type"] not in {
             "commit", "test_run", "report", "approval_record",
             "deployment_record", "external_source", "other"
         }:
