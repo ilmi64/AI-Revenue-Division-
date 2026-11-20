@@ -12,6 +12,12 @@ class RecoveryTests(unittest.TestCase):
           idempotency_key="idem1",intent={"listing":"1","price_minor":1200},now=2)
     def tearDown(self):
         self.s.close(); self.tmp.cleanup()
+    @staticmethod
+    def fake_verifier(outcome):
+        def verify(evidence, *, expected, now):
+            return {"verified":True,"outcome":outcome,"evidence_id":evidence["evidence_id"],
+                    "issuer":"test-receiver","observed_at":now,"payload_sha256":"0"*64}
+        return verify
     def start(self):
         return self.s.authorize_and_start("ac1",company="coA",agent="ag1",task="t1",
           operation="publish",resource="listing/1",policy="v1",now=3)
@@ -55,22 +61,18 @@ class RecoveryTests(unittest.TestCase):
         self.assertEqual(self.start()["reason"],"action_not_queued")
     def test_applied_reconciliation_terminal(self):
         self.start(); self.s.record_sender_result("ac1",result="timeout",now=4)
-        self.assertEqual(self.s.reconcile("ac1",outcome="applied",evidence_id="ev1",
-          source="receiver",observed_at=5,authenticated=True,now=6),"reconciled_applied")
+        self.assertEqual(self.s.reconcile("ac1",evidence={"evidence_id":"ev1"},evidence_verifier=self.fake_verifier("applied"),now=6),"reconciled_applied")
     def test_not_applied_does_not_reuse_old_authorization(self):
         self.start(); self.s.record_sender_result("ac1",result="timeout",now=4)
-        self.s.reconcile("ac1",outcome="not_applied",evidence_id="ev2",
-          source="receiver",observed_at=5,authenticated=True,now=6)
+        self.s.reconcile("ac1",evidence={"evidence_id":"ev2"},evidence_verifier=self.fake_verifier("not_applied"),now=6)
         self.assertEqual(self.start()["reason"],"action_not_queued")
     def test_inconclusive_quarantines(self):
         self.start(); self.s.record_sender_result("ac1",result="exception",now=4)
-        self.assertEqual(self.s.reconcile("ac1",outcome="inconclusive",evidence_id="ev3",
-          source="receiver",observed_at=5,authenticated=True,now=6),"quarantined")
+        self.assertEqual(self.s.reconcile("ac1",evidence={"evidence_id":"ev3"},evidence_verifier=self.fake_verifier("inconclusive"),now=6),"quarantined")
     def test_unauthenticated_evidence_rejected(self):
         self.start(); self.s.record_sender_result("ac1",result="timeout",now=4)
         with self.assertRaises(ValueError):
-            self.s.reconcile("ac1",outcome="applied",evidence_id="ev4",
-              source="unknown",observed_at=5,authenticated=False,now=6)
+            self.s.reconcile("ac1",evidence={"evidence_id":"ev4"},evidence_verifier=lambda *a,**k: (_ for _ in ()).throw(ValueError("bad_signature")),now=6)
     def test_audit_and_online_backup_restore(self):
         self.start(); self.s.record_sender_result("ac1",result="accepted",now=4)
         backup=os.path.join(self.tmp.name,"backup.db")
