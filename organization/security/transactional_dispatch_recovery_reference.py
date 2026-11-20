@@ -140,25 +140,43 @@ class DispatchStore:
             self.db.execute("COMMIT"); return state
         except Exception:
             self.db.execute("ROLLBACK"); raise
-    def reconcile(self, action_id, *, outcome, evidence_id, source, observed_at,
-                  authenticated, now):
-        """Evidence is verified by an external trusted verifier; no automatic resend."""
-        if outcome not in ("applied","not_applied","inconclusive") or not authenticated:
-            raise ValueError("untrusted_or_invalid_reconciliation")
-        if not all(isinstance(x,str) and x.strip() for x in (evidence_id,source)):
+    def reconcile(self, action_id, *, evidence, evidence_verifier, now):
+        """Verify raw receiver evidence through trusted infrastructure before recording it."""
+        if not callable(evidence_verifier):
+            raise ValueError("trusted_evidence_verifier_required")
+        if not isinstance(evidence,dict):
             raise ValueError("evidence_required")
+        # Load action identity first; verifier must bind evidence to this exact action.
+        action=self.db.execute("SELECT company,id,idem FROM actions WHERE id=?",(action_id,)).fetchone()
+        if not action:
+            raise ValueError("action_not_found")
+        expected={"company":action["company"],"action_id":action["id"],
+                  "idempotency_key":action["idem"],"audience":"recovery-gateway"}
+        verified=evidence_verifier(evidence, expected=expected, now=now)
+        if not isinstance(verified,dict) or verified.get("verified") is not True:
+            raise ValueError("receiver_evidence_not_verified")
+        outcome=verified.get("outcome")
+        if outcome not in ("applied","not_applied","inconclusive"):
+            raise ValueError("invalid_verified_outcome")
+        evidence_id=verified.get("evidence_id")
+        if not isinstance(evidence_id,str) or not evidence_id.strip():
+            raise ValueError("verified_evidence_id_required")
+        source=verified.get("issuer")
+        observed_at=verified.get("observed_at")
+        if not isinstance(source,str) or isinstance(observed_at,bool) or not isinstance(observed_at,int):
+            raise ValueError("verified_evidence_metadata_required")
         self.db.execute("BEGIN IMMEDIATE")
         try:
             a=self.db.execute("SELECT * FROM actions WHERE id=?",(action_id,)).fetchone()
             if not a or a["state"]!="outcome_unknown":
                 raise ValueError("action_not_unknown")
-            evidence={"outcome":outcome,"evidence_id":evidence_id,"source":source,
-                      "observed_at":observed_at}
+            evidence_record={"outcome":outcome,"evidence_id":evidence_id,"source":source,
+                      "observed_at":observed_at,"payload_sha256":verified.get("payload_sha256")}
             state={"applied":"reconciled_applied","not_applied":"reconciled_not_applied",
                    "inconclusive":"quarantined"}[outcome]
             self.db.execute("UPDATE actions SET state=?,updated=?,evidence_json=? WHERE id=?",
-                            (state,now,self.canon(evidence),action_id))
-            self._event(a["company"],"action_reconciled",now,{"action_id":action_id,**evidence,"state":state})
+                            (state,now,self.canon(evidence_record),action_id))
+            self._event(a["company"],"action_reconciled",now,{"action_id":action_id,**evidence_record,"state":state})
             self.db.execute("COMMIT"); return state
         except Exception:
             self.db.execute("ROLLBACK"); raise
