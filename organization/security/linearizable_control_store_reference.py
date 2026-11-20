@@ -298,8 +298,8 @@ class LinearizableControlStore:
             if operation in hard_denied:
                 reason="operation_hard_denied"
             if reason is None and a is None: reason="action_not_found"
-            elif (a["company"],a["stream"])!=(company,stream): reason="company_or_stream_mismatch"
-            elif a["state"]!="queued": reason="action_not_queued"
+            if reason is None and (a["company"],a["stream"])!=(company,stream): reason="company_or_stream_mismatch"
+            if reason is None and a["state"]!="queued": reason="action_not_queued"
             s=self.db.execute("SELECT * FROM streams WHERE company=? AND stream=?",(company,stream)).fetchone()
             if reason is None and s is None: reason="stream_not_registered"
             if reason is None and s["status"]!=ACTIVE: reason="stream_not_active"
