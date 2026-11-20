@@ -1,0 +1,37 @@
+{
+  "title": "Unified recovery/dispatch control-store acceptance tests",
+  "status": "specified_not_executed",
+  "environment": "isolated_local_scratch_only",
+  "tests": [
+    "new_stream_starts_disabled",
+    "exact_approval_consumed_once",
+    "quarantine_before_dispatch_denies",
+    "dispatch_before_quarantine_is_recorded_as_in_flight",
+    "quarantine_epoch_fences_preincident_actions",
+    "release_epoch_fences_actions_enqueued_during_quarantine",
+    "duplicate_enqueue_same_intent_is_idempotent",
+    "idempotency_key_changed_intent_rejected",
+    "approval_replay_rejected",
+    "revocation_blocks_dispatch",
+    "expiry_blocks_dispatch",
+    "company_scope_mismatch_denied",
+    "audit_failure_rolls_back_dispatch_and_consumption",
+    "quarantine_audit_failure_rolls_back_status_epoch_and_outbox",
+    "crash_after_commit_never_auto_resends",
+    "timeout_becomes_outcome_unknown",
+    "release_requires_both_trusted_verifiers",
+    "release_requires_all_assessment_checks",
+    "release_rechecks_incident_checkpoint_and_epoch",
+    "dispatch_quarantine_race_serializes",
+    "company_epochs_are_isolated",
+    "audit_tampering_detected"
+  ],
+  "production_gaps": [
+    "strongly_consistent_shared_database_and_transaction_isolation",
+    "durable_atomic_release_approval_and_nonce_consumption",
+    "asymmetric_signature_verification_and_protected_key_custody",
+    "immutable_intent_digest_and_independent_signed_WORM_checkpoints",
+    "receiver_idempotency_and_recovery_epoch_fencing",
+    "monitoring_restore_drills_and_independent_security_review"
+  ]
+}
