@@ -1,7 +1,10 @@
-"""Offline recovery and reconciliation reference for outbox + approval ledger.
+"""Legacy synthetic recovery fixture; NOT an authorization boundary.
 
-No network, broker, wallet, or external side effects. All evidence is supplied by
-a trusted operator/reconciler and must be independently authenticated in production.
+The authenticated boolean in ReconciliationEvidence is test-fixture data only.
+Do not use this helper to authorize production reconciliation. Use the
+store-bound ReceiverEvidenceVerifier + atomic evidence receipt implementation
+and the independent owner-gated recovery authority reference instead.
+No network or financial side effects are implemented.
 """
 from dataclasses import dataclass
 from typing import Optional
