@@ -43,8 +43,8 @@ class OwnerVerifier:
 
 class ApprovalRepository:
     def __init__(self, result=None, error=None): self.result=result; self.error=error; self.calls=[]
-    def issue(self, *, claims, now):
-        self.calls.append((claims,now))
+    def issue(self, *, claims, signed_envelope, now):
+        self.calls.append((claims,signed_envelope,now))
         if self.error: raise self.error
         return self.result
 
@@ -174,7 +174,8 @@ class TrustedFacadeTests(unittest.TestCase):
         receipt=make_facade(repository=repo).issue_owner_approval(owner_signed_envelope={"signed":"owner"})
         self.assertEqual(receipt.approval_id,"approval-1")
         self.assertEqual(len(repo.calls),1)
-        self.assertEqual(repo.calls[0][1],100)
+        self.assertEqual(repo.calls[0][1],{"signed":"owner"})
+        self.assertEqual(repo.calls[0][2],100)
 
     def test_invalid_repository_receipt_denied(self):
         repo=ApprovalRepository({"approval_id":"wrong","company_id":"revenue",
