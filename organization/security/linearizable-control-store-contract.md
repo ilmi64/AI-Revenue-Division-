@@ -39,8 +39,10 @@ a trusted asymmetric authority before atomic approval/nonce consumption and rele
 No local database can atomically commit arbitrary remote HTTP, exchange, broker,
 wallet or payment effects. Exactly-once delivery is not claimed. Production
 receivers must enforce stable idempotency, immutable action digest, company and
-recipient binding, operation/amount binding, recovery-epoch fencing, and signed
-fresh outcome evidence. Without receiver-side epoch validation, a request
+recipient binding, operation/amount/currency binding, recovery-epoch fencing, and
+signed fresh outcome evidence. The reference checks an optional integer-minor-unit
+amount ceiling but does not define currency; production must bind amount to an
+explicit currency and precision. Without receiver-side epoch validation, a request
 authorized before quarantine may arrive remotely after quarantine.
 
 ## Production blockers
