@@ -20,7 +20,21 @@
       "minItems": 2,
       "items": {
         "$ref": "#/$defs/company"
-      }
+      },
+      "maxItems": 2,
+      "contains": {
+        "type": "object",
+        "properties": {
+          "company_id": {
+            "const": "ai_revenue"
+          }
+        },
+        "required": [
+          "company_id"
+        ]
+      },
+      "minContains": 1,
+      "maxContains": 1
     },
     "decisions": {
       "type": "array",
@@ -438,5 +452,26 @@
         }
       }
     }
-  }
+  },
+  "allOf": [
+    {
+      "properties": {
+        "company_registry": {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "company_id": {
+                "const": "trading_technology"
+              }
+            },
+            "required": [
+              "company_id"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      }
+    }
+  ]
 }
