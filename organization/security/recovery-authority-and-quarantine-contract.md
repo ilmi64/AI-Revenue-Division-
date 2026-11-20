@@ -41,3 +41,9 @@ drills, multi-node race testing, revocation/key rotation, incident runbooks and
 explicit owner release. The caller must wire the actual trusted verifier
 implementations; this prototype does not supply cryptographic signing.
 No external dispatch, wallet, broker, payment or trading action is implemented.
+
+## Initial activation
+A newly registered stream begins in `dispatch_disabled`. It cannot be activated
+directly. It must first have a concrete checkpoint and incident/release scope
+recorded through quarantine, then pass the same signed assessment and owner
+release gate. This intentionally prevents a default-on path.
