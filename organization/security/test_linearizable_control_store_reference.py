@@ -108,13 +108,13 @@ class ControlStoreTests(unittest.TestCase):
 
     def test_amount_limit_is_enforced_before_dispatch(self):
         self.db.issue_approval(approval_id="capped",company="co-a",stream="primary",
-            agent="agent-a",task="task-cap",operation="transfer",resource="wallet/recipient",
+            agent="agent-a",task="task-cap",operation="invoice.issue",resource="invoice/customer-1",
             policy_version="v1",expires_at=1000,now=3,amount_limit_minor=500)
         self.db.enqueue(action_id="over-cap",company="co-a",stream="primary",approval_id="capped",
             idempotency_key="idem-over-cap",intent={"receiver_account":"synthetic-sink",
             "amount_minor":501},now=3)
         result=self.db.authorize_and_start("over-cap",company="co-a",stream="primary",
-            agent="agent-a",task="task-cap",operation="transfer",resource="wallet/recipient",
+            agent="agent-a",task="task-cap",operation="invoice.issue",resource="invoice/customer-1",
             policy_version="v1",now=20)
         self.assertEqual(result["reason"],"amount_limit_exceeded")
         self.assertEqual(self.db.action_state("over-cap"),"queued")
