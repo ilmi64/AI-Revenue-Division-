@@ -25,6 +25,7 @@ CREATE TABLE owner_approval_records (
     signer_key_id TEXT NOT NULL,
     signed_payload_digest CHAR(64) NOT NULL,
     signature_digest CHAR(64) NOT NULL,
+    signed_envelope JSONB NOT NULL,
     revoked_at TIMESTAMPTZ,
     revoked_by TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp(),
