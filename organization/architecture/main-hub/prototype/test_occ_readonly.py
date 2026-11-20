@@ -56,6 +56,12 @@ class OccReadOnlyTests(unittest.TestCase):
         with self.assertRaises(SnapshotError):
             assess_snapshot(snapshot, "ai_revenue", now=NOW)
 
+    def test_naive_reference_clock_rejected(self):
+        snapshot = load("ai-revenue.snapshot.example.json")
+        naive_now = datetime(2026, 11, 20, 12, 39)
+        with self.assertRaises(SnapshotError):
+            assess_snapshot(snapshot, "ai_revenue", now=naive_now)
+
     def test_malformed_nested_incident_record_rejected(self):
         snapshot = load("ai-revenue.snapshot.example.json")
         snapshot["incident_summary"] = []
