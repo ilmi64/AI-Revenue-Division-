@@ -13,6 +13,6 @@
     "first checkpoint must link to genesis",
     "restore must match exact latest sequence and event hash",
     "unknown signer key is rejected",
-    "database/registry integrity failure leaves prior checkpoint head unchanged"
+    "checkpoint registry insert failure leaves the prior head unchanged"
   ]
 }
