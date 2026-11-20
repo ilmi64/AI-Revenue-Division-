@@ -125,11 +125,13 @@ def assess_snapshot(snapshot: dict[str, Any], expected_company: str,
         evidence_refs.append(evidence["reference"])
 
     published = _parse_time(snapshot["published_at"])
+    if now is not None and not isinstance(now, datetime):
+        raise SnapshotError("now must be a timezone-aware datetime")
     if now is not None and (now.tzinfo is None or now.utcoffset() is None):
         raise SnapshotError("now must include a timezone")
     current = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
-    if max_age_hours < 0:
-        raise SnapshotError("max_age_hours cannot be negative")
+    if isinstance(max_age_hours, bool) or not isinstance(max_age_hours, int) or max_age_hours < 0:
+        raise SnapshotError("max_age_hours must be a non-negative integer")
     age_hours = (current - published).total_seconds() / 3600
     is_stale = age_hours > max_age_hours or age_hours < -5 / 60
     synthetic = snapshot["source_revision"].startswith("0000000-synthetic")
