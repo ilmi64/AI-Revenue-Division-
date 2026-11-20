@@ -4,7 +4,7 @@ Status: offline synthetic reference only; not production or deployed.
 
 ## Unified transaction domain
 One company-scoped store holds stream recovery state and monotonically increasing
-epoch, exact-scope approvals and consumption, canonical action intent and stable
+epoch, exact-scope approvals, optional integer-minor-unit amount ceilings and consumption, canonical action intent and stable
 idempotency key, dispatch state, audit append position, and transactional control
 outbox events. The reference uses SQLite to demonstrate local serialization only.
 
