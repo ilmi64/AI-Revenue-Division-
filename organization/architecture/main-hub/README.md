@@ -15,7 +15,7 @@ The prototype currently resides in the AI Revenue architecture branch only as a 
 - `fixtures/main-hub-envelope.example.json`: complete synthetic root-envelope document matching the top-level schema shape.
 - `prototype/`: Python-standard-library offline report generator and tests. This is a reference prototype, not a deployed OCC service.
 
-The individual fixture fragments are intentionally not complete root-envelope documents. The root schema requires the complete envelope with registry, decisions, workstreams and one snapshot; the fragments are separated to keep each synthetic record easy to inspect.
+The individual fixture fragments are intentionally not complete root-envelope documents. The root schema requires the complete envelope with registry, decisions, workstreams and one snapshot per company; the fragments are separated to keep each synthetic record easy to inspect.
 
 ## Safety properties
 - Both company IDs are fixed and distinct.
