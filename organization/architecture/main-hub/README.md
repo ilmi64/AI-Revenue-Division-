@@ -12,9 +12,10 @@ The prototype currently resides in the AI Revenue architecture branch only as a 
 - `fixtures/ai-revenue.snapshot.example.json` and `fixtures/trading-technology.snapshot.example.json`: synthetic snapshot fragments, each corresponding to `$defs.snapshot`.
 - `fixtures/registry-and-workstreams.example.json`: synthetic registry/workstream fragment corresponding to `$defs.company` and `$defs.workstream`.
 - `fixtures/decisions.example.json`: empty decision-log fragment corresponding to `$defs.decision`.
+- `fixtures/main-hub-envelope.example.json`: complete synthetic root-envelope document matching the top-level schema shape.
 - `prototype/`: Python-standard-library offline report generator and tests. This is a reference prototype, not a deployed OCC service.
 
-The fixture fragments are intentionally not complete root-envelope documents. The root schema requires the complete envelope with registry, decisions, workstreams and one snapshot; the fragments are separated to keep each synthetic record easy to inspect.
+The individual fixture fragments are intentionally not complete root-envelope documents. The root schema requires the complete envelope with registry, decisions, workstreams and one snapshot; the fragments are separated to keep each synthetic record easy to inspect.
 
 ## Safety properties
 - Both company IDs are fixed and distinct.
@@ -26,7 +27,7 @@ The fixture fragments are intentionally not complete root-envelope documents. Th
 - Stale data is displayed as `STALE`; missing or malformed inputs fail closed.
 
 ## Validation
-The prototype and its tests use only Python's standard library. Ten tests have been authored but **not yet executed** against the committed revision. Full JSON Schema draft 2020-12 validation has also **not yet been executed**. Do not install packages or trigger GitHub Actions under the current approval restrictions. Record validator name/version and exact commit when validation is later performed in an already-available offline environment.
+The prototype and its tests use only Python's standard library. Ten tests have been authored but **not yet executed** against the committed revision. Full JSON Schema draft 2020-12 validation has also **not yet been executed**. The root schema now constrains the company registry to exactly two entries and requires one record for each company; the complete synthetic envelope is provided for the next semantic-validation pass. Do not install packages or trigger GitHub Actions under the current approval restrictions. Record validator name/version and exact commit when validation is later performed in an already-available offline environment.
 
 ## Current status
 **M1 contract drafted; M2 offline reference prototype committed; test execution and full schema validation pending; authenticated adapters absent; not operational.**
