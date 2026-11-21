@@ -33,7 +33,7 @@ The individual fixture fragments are intentionally not complete root-envelope do
 
 ## Validation
 
-The prototype and its tests use only Python's standard library. **Twenty-three tests are authored; execution against the latest integrity-hardened revision is pending.** A prior 14-test revision passed locally, but that result predates the current expanded suite. Full JSON Schema Draft 2020-12 validation has not yet been executed by a standards-compliant validator. A custom structural check previously passed selected schema assertions and negative cases; it is not a standards-compliant validator.
+The prototype and its tests use only Python's standard library. **Twenty-five tests are authored; execution against the latest strict-JSON-hardened revision is pending.** A prior 14-test revision passed locally, but that result predates the current expanded suite. Full JSON Schema Draft 2020-12 validation has not yet been executed by a standards-compliant validator. A custom structural check previously passed selected schema assertions and negative cases; it is not a standards-compliant validator.
 
 The root schema constrains the company registry and status snapshots to exactly two entries, one for each company. Do not install packages or trigger GitHub Actions under the current approval restrictions. Record validator name/version and exact commit when formal validation is later performed in an already-available offline environment.
 
