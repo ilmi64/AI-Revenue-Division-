@@ -118,3 +118,12 @@ Authored vectors and prototype tests are not execution evidence. The user has no
 - Each company must continue safely if the other company or shared infrastructure is unavailable.
 
 **Current disposition:** substantial design/reference foundation exists; policy gateway is not production-enforced, identity and approval cryptography are not implemented, current approval schema needs reconciliation, durable multi-node controls and receiver enforcement are absent, and all production-readiness gates remain open.
+
+## 8. PG-1 deliverables — canonical operation taxonomies
+
+The company-specific operation vocabularies are now documented:
+
+- AI Revenue: [AI Revenue operation taxonomy](ai-revenue-operation-taxonomy.md) — `AR.*` operation IDs, A0–A4 approval classes, CAD $0 hard budget, external-action and production deny defaults.
+- Trading & Technology: maintained in its own repository at `docs/security/trading-operation-taxonomy.md` — `TT.*` operation IDs, T0–T3 modes, independent risk veto, and hard-deny live financial operations.
+
+These documents refine the coarse task-schema actions; they do not grant permission or change policy. Gateway decisions must require both a valid task capability and an exact operation/resource allowlist. New operations default to deny. Trading's T3 is documented as unavailable, not an authorization tier. PG-1 remains subject to owner review before any policy change or implementation.
