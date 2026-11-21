@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -16,6 +17,14 @@ VALID_SUBSYSTEM = VALID_OVERALL | {"NOT_IMPLEMENTED"}
 VALID_GATE = {"PASS", "FAIL", "BLOCKED", "NOT_RUN", "WAIVED"}
 VALID_SEVERITY = {"low", "medium", "high", "critical"}
 VALID_INCIDENT_SEVERITY = VALID_SEVERITY | {"none"}
+
+# Conservative limits for this offline prototype; revisit only with measured need.
+MAX_FIXTURE_BYTES = 1_048_576
+MAX_JSON_DEPTH = 32
+MAX_JSON_NODES = 20_000
+MAX_ARRAY_ITEMS = 1_000
+MAX_OBJECT_MEMBERS = 256
+MAX_STRING_CHARS = 8_192
 
 
 class SnapshotError(ValueError):
@@ -34,6 +43,42 @@ def _strict_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
 
 def _reject_json_constant(value: str) -> None:
     raise SnapshotError(f"non-standard JSON numeric constant: {value}")
+
+
+def _enforce_json_resource_limits(root: Any) -> None:
+    """Reject oversized JSON structures using an iterative, bounded walk."""
+    stack = [(root, 1)]
+    visited = 0
+    while stack:
+        value, depth = stack.pop()
+        visited += 1
+        if visited > MAX_JSON_NODES:
+            raise SnapshotError(f"JSON exceeds maximum node count ({MAX_JSON_NODES})")
+        if depth > MAX_JSON_DEPTH:
+            raise SnapshotError(f"JSON exceeds maximum nesting depth ({MAX_JSON_DEPTH})")
+        if isinstance(value, dict):
+            if len(value) > MAX_OBJECT_MEMBERS:
+                raise SnapshotError(
+                    f"JSON object exceeds maximum member count ({MAX_OBJECT_MEMBERS})"
+                )
+            for key, child in value.items():
+                if len(key) > MAX_STRING_CHARS:
+                    raise SnapshotError(
+                        f"JSON object key exceeds maximum string length ({MAX_STRING_CHARS})"
+                    )
+                stack.append((child, depth + 1))
+        elif isinstance(value, list):
+            if len(value) > MAX_ARRAY_ITEMS:
+                raise SnapshotError(
+                    f"JSON array exceeds maximum item count ({MAX_ARRAY_ITEMS})"
+                )
+            stack.extend((child, depth + 1) for child in value)
+        elif isinstance(value, str) and len(value) > MAX_STRING_CHARS:
+            raise SnapshotError(
+                f"JSON string exceeds maximum length ({MAX_STRING_CHARS})"
+            )
+        elif isinstance(value, float) and not math.isfinite(value):
+            raise SnapshotError("non-finite JSON number is not accepted")
 
 
 def _keys(record: Any, required: set[str], optional: set[str], label: str) -> None:
@@ -204,20 +249,31 @@ def build_report(fixtures_dir: Path, now: datetime | None = None) -> dict[str, A
     for company_id, filename in EXPECTED.items():
         path = fixtures_dir / filename
         try:
-            with path.open("r", encoding="utf-8") as handle:
-                snapshot = json.load(
-                    handle,
-                    object_pairs_hook=_strict_object,
-                    parse_constant=_reject_json_constant,
+            with path.open("rb") as handle:
+                raw = handle.read(MAX_FIXTURE_BYTES + 1)
+            if len(raw) > MAX_FIXTURE_BYTES:
+                raise SnapshotError(
+                    f"fixture exceeds maximum file size ({MAX_FIXTURE_BYTES} bytes)"
                 )
+            decoded = raw.decode("utf-8")
+            snapshot = json.loads(
+                decoded,
+                object_pairs_hook=_strict_object,
+                parse_constant=_reject_json_constant,
+            )
+            _enforce_json_resource_limits(snapshot)
         except SnapshotError as exc:
             raise SnapshotError(f"fixture {filename} failed strict JSON parsing: {exc}") from exc
         except OSError as exc:
             raise SnapshotError(f"cannot read fixture {filename}: {exc.strerror or exc}") from exc
+        except UnicodeDecodeError as exc:
+            raise SnapshotError(f"fixture {filename} is not valid UTF-8") from exc
         except json.JSONDecodeError as exc:
             raise SnapshotError(
                 f"fixture {filename} contains invalid JSON at line {exc.lineno}, column {exc.colno}"
             ) from exc
+        except RecursionError as exc:
+            raise SnapshotError(f"fixture {filename} exceeds parser nesting limits") from exc
         companies.append(assess_snapshot(snapshot, company_id, now=now))
     return {
         "product": "Main Hub / OCC read-only prototype",
