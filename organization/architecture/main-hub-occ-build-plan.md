@@ -234,3 +234,12 @@ The next policy-enforcement consolidation is recorded in `organization/security/
 The targeted registry/control-plane baseline inventory is recorded at `organization/architecture/intelligence/registry-and-control-plane-baseline-inventory.md`. It records fetched source revisions, distinguishes existing detailed registries from the new portfolio index, and lists the remaining source-level reconciliation and production-control gaps.
 
 The Public APIs catalogue has been evaluated as a permanent discovery/reference input for Research & Intelligence. Its recipient-scoped assessment and API candidate shortlist are recorded in `organization/architecture/research/public-apis-directory-evaluation.md`. It is not an API service, a provider licence, or authorization to connect any listed endpoint.
+
+
+## Research-source updates — 2026-11-21
+
+- Public API provider work orders and existing-source overlap review: `research/provider-api-workorders-and-comparison.md` (AI Revenue: `organization/architecture/research/provider-api-workorders-and-comparison.md`; Trading: `docs/architecture/research/provider-api-workorders-and-comparison.md`).
+- MoonPay PayBox and historical USDC launch-faucet assessment: `research/moonpay-paybox-and-airdrop-assessment.md` (AI Revenue: `organization/architecture/research/moonpay-paybox-and-airdrop-assessment.md`; Trading: `docs/architecture/research/moonpay-paybox-and-airdrop-assessment.md`).
+- PayBox is research-only and is not approved as a company wallet or trading gateway: current published terms prohibit use on behalf of a business entity and identify the contracting provider as unregulated BVI Launchpad Limited.
+- The PayBox USDC launch faucet is historical; current official availability and Canadian eligibility remain unverified. Airdrop research is optional and cannot fund or gate either company's independent launch.
+- No PayBox account, connector, wallet, X authorization, API call, claim, funding, transaction, or installation occurred.
