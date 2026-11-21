@@ -15,6 +15,8 @@ The organization begins with two standalone operating companies, one central coo
 
 The operating-company registry remains exactly two companies. The Research & Intelligence Division is represented separately as an organization-level division/shared service.
 
+The coordinated build method is specified in `parallel-build-launch-programme.md`: AI Revenue, Trading & Technology, Main Hub/OCC and Research & Intelligence proceed in parallel, with independent company launch decisions.
+
 ## 2. Parallel build and independent launch
 
 - Build AI Revenue and Trading & Technology simultaneously, using parallel workstreams and their existing company prototypes, repositories, decisions and architecture. Do not restart either company from scratch.
