@@ -249,3 +249,54 @@ Public supplier pages are self-reported and may change. Their claims are not ind
 - Health Canada, commercial-purpose obligations FAQ: https://www.canada.ca/en/health-canada/services/consumer-product-safety/legislation-guidelines/acts-regulations/canada-consumer-product-safety-act/frequently-asked-questions.html
 
 This is a preliminary opportunity assessment, not legal, tax, accounting or investment advice. It does not establish supplier legitimacy, actual inventory condition, market demand, expected profit or launch readiness.
+
+
+## 12. Additional GTA / Ontario supplier research — 2026-11-21
+
+The following leads were found in a fresh public-source review. They supplement, and do not replace, the earlier supplier register. All supplier descriptions below are self-published claims unless otherwise stated. No supplier has been contacted, independently audited, or approved.
+
+| Lead | Publicly stated offer / location | Current terms or diligence notes | Initial fit |
+|---|---|---|---|
+| Liquidation Flips | Online liquidation auctions; Brampton GTA pickup at 19 Kenview Blvd, Brampton, ON L6T 5W4; Canada shipping on eligible lots | Its site advertises item-level manifests with brand/model/retail reference, pallet weight, and currently no buyer's premium; winning bid plus tax. Card payment is due within 3 days. Live inventory must be inspected lot by lot. | **Best local lead to monitor first** because the claimed manifest detail and local pickup reduce uncertainty and freight exposure. Claims remain unverified. |
+| Bid Boss Inc. | Online auctions; 12 Vulcan St, Unit 4, Etobicoke, ON M9W 1L2 | Published HiBid terms for the Nov 11–18, 2026 auction: 15% buyer's premium, $10 handling per pallet lot, HST; all items as-is/where-is; payment within 48 hours; pickup by deadline or storage/settlement deductions apply; shipping quoted separately. Some higher grades have a narrow 24-hour major-defect claim window; lower grades final sale. | Useful local price/terms benchmark; fee stack and as-is risk make conservative bidding essential. |
+| AmazeDeals | Kitchener, Ontario; manifested Amazon customer-return/overstock truckloads | Its Ontario page describes 23–26 pallets per 53-foot truckload, item-level XLSX manifests, 5,000–8,000+ units, mixed condition, and as-is sale. It says fewer than a full truckload may be discussed, but availability and price require a quote. | **Not a first-pilot fit** at truckload scale. Could be revisited only if a small lot is contractually available and logistics/economics are independently confirmed. |
+| Liquidation Prime | Online auction marketplace; Mississauga-market supplier lead | Buyer page states 15% buyer premium on pallet purchases; all sales final and generally as-is; strict payment/pickup deadlines; first missed deadline may incur 10% of lot price, repeated issues can suspend account and a $100 reactivation fee may apply. Delivery page separately describes potential storage at $50 per pallet per day after pickup deadline. | High operational/penalty risk for a resource-constrained first pilot; do not use without fully reconciling current terms and exact lot fulfilment. |
+
+Primary public references:
+- Liquidation Flips GTA auctions, manifests, fees and pickup: https://liquidationflips.ca/liquidation-toronto-gta.html
+- Bid Boss / HiBid auction terms and current/archived lot conditions: https://canada.hibid.com/lot/330873917/terms-and-conditions
+- AmazeDeals Ontario pallet/truckload guide: https://amazedeals.ca/pages/liquidation-pallets-ontario
+- Liquidation Prime buyer terms: https://liquidationprime.ca/for-buyers
+- Liquidation Prime delivery and pickup policy: https://liquidationprime.ca/delivery
+
+### Local GTA scouting shortlist (research only)
+
+- **Liquidation Flips, Brampton:** strongest publicly documented local auction lead for item-level manifested pallet lots. Verify the exact lot, pickup address, weight, condition and current fees on each listing.
+- **Bid Boss Inc., Etobicoke:** nearby auction source; use published terms to understand buyer-premium, handling and as-is exposure.
+- **Mississauga discount/liquidation stores:** Smart Dealz and Treasure Deals Liquidation surfaced as local inventory/retail scouting leads, but public business listings do not establish that either sells wholesale pallets. Treat them as potential category/price-comparison visits only, not pallet suppliers.
+- **Raas Liquidations, Mississauga:** local liquidation retail lead; wholesale pallet supply and business terms were not verified.
+
+Do not confuse a liquidation retail store, a wooden-pallet supplier, a liquidation auctioneer and a wholesale pallet seller. They are different supplier types. A Google business listing or positive review score is not proof of pallet inventory, upstream authorization, condition or resale economics.
+
+### Updated risk observations
+
+1. **Manifest quality matters more than headline retail value.** Liquidation Flips' stated manifest fields (brand/model/retail reference/weight) are more useful than a generic category count, but still require exact-lot verification and current sold-price research.
+2. **Fee structure can materially change the bid ceiling.** A 15% premium plus handling and HST (Bid Boss) or 15% premium plus strict deadlines (Liquidation Prime) must be included before calculating a maximum bid.
+3. **A truckload is a different business.** AmazeDeals' described 23–26-pallet loads are beyond a cautious first pilot; they require freight capacity, receiving/storage, labour and enough working capital to hold stock through sell-through.
+4. **No-buyer-premium does not mean low total cost.** Freight, tax, pickup vehicle, unloading, time, testing, storage, platform fees and unsold inventory remain.
+5. **The capital-light service remains the stronger first offer.** A manifest audit or resale-recovery report can be prepared from a client's authorized manifest without AI Revenue owning stock. It must be validated with a real buyer before it can be called a business or revenue stream.
+
+### First-pilot stop/go rule (if separately authorized in future)
+
+Do not bid on a pallet unless all of the following are true:
+- exact lot manifest and exact-lot photographs are available;
+- condition grades and claims/return window are written;
+- legal seller identity and title/authority are verified;
+- all buyer fees, HST treatment, freight, loading and pickup deadlines are known;
+- item identities and current realistic sold comparables have been sampled;
+- conservative sellable-unit rate, net realized prices, labour, returns and sell-through time are modelled;
+- a maximum bid is calculated from conservative recoverable cash, not retail value;
+- the lot can be handled safely without paid storage or unapproved equipment;
+- independent CFO/COO/compliance review and explicit owner approval are obtained.
+
+A no-go on any critical item means no bid. A practice auction or public listing review may be used for research only; do not submit a binding bid.
