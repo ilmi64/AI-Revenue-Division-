@@ -228,3 +228,5 @@ The operating priorities are dependability, validation, capital preservation, su
 REA is a cross-organization research capability for lawful evaluation of apps, businesses, bots, agents, APIs, workflows and tools. It remains uninstalled and unintegrated pending supported Windows/Mac/Linux runtime and explicit authorization. The preserved portfolio and no-spend/approval restrictions remain binding.
 
 The canonical portfolio index is `organization/architecture/intelligence/capability-opportunity-registry.md`. It preserves existing named workstreams, records recipient scope and explicit status, defines a weighted evidence-led prioritization method, and requires source-level reconciliation before adoption. It is a planning ledger, not a live feed or approval authority.
+
+The next policy-enforcement consolidation is recorded in `organization/security/policy-gateway-integration-and-gap-closure-plan.md`. It maps existing identity, deterministic policy, durable approval, audit, recovery and dispatch contracts into one staged company-local enforcement path, documents known gaps and preserves all test/deployment approval gates. No production enforcement is claimed.
