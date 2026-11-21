@@ -119,6 +119,7 @@ Candidate offer families to evaluate—not claims of current availability or sal
 - Content/creative production packages.
 - SEO/content operations and research briefs.
 - Digital templates, guides and workflow assets.
+- Liquidation inventory intelligence and listing operations for resellers/liquidators: manifest normalization, SKU research, conservative resale economics, listing preparation and inventory workflow automation. See [Liquidation Inventory & Resale Business Model Assessment](research/liquidation-inventory-resale-business-model-assessment.md). This is a capital-light service hypothesis; inventory-owning pallet resale remains separately gated on approved capital, verified supply, inspection, compliance and positive conservative unit economics.
 - Later: proprietary tools and SaaS only after demand and maintenance economics are demonstrated.
 
 Start with the narrowest deliverable that can be completed reliably at zero or negligible incremental cost. Do not promise autonomous services before the underlying process has been tested.
