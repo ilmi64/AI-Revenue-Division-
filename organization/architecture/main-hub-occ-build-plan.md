@@ -288,3 +288,6 @@ The incident register and recovery assurance standard are also mirrored in both 
 The AI Executive Advisory Desk remains independent above divisions and may challenge, warn, request pauses and recommend safe mode/recovery, but cannot trade, move funds, raise limits, override safeguards or independently execute containment, rollback, liquidation, restart or recovery.
 
 Both companies retain embedded security responsibilities and independent records, credentials, policies, executives and recovery paths. OCC receives only approved aggregate metadata. This is documentation only: no incident monitoring, containment, notifications, backup jobs, restore drills, rollback, restart, deployment or operational recovery has occurred.
+
+
+The Security & Recovery assurance register is maintained separately in each company scope and mirrored as a blank template at organization/architecture/security-recovery/security-control-and-recovery-readiness-register.md and docs/architecture/security-recovery/security-control-and-recovery-readiness-register.md. OCC may receive only allowlisted aggregate control/recovery status; it must not expose detailed control evidence, credentials or forensic records.
