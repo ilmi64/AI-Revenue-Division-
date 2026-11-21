@@ -273,3 +273,7 @@ These documents do not authorize prospect contact, public claims, quotes, paid e
 - [Practical Operations Improvement Audit — internal service brief](practical-operations-improvement-service-brief-internal.md) is a private draft only; it is not published, quoted or offered to customers.
 
 Neither artifact validates demand, pricing or delivery economics.
+
+## 16. Synthetic rehearsal inputs
+
+See [Synthetic Rehearsal Input Pack](synthetic-rehearsal-input-pack.md) for the explicitly fictional figures used to rehearse the proposed workflow audit. All values are synthetic; the pack is not customer evidence or an industry benchmark.
