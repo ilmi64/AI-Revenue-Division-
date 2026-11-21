@@ -149,6 +149,9 @@ It must use customer-authorized manifests and respect marketplace terms, data ri
 See [Liquidation Inventory & Resale Business Model Assessment](research/liquidation-inventory-resale-business-model-assessment.md).
 
 ## 7. Initial delivery assets
+- [Workflow mini-review template](workflow-mini-review-template.md) — narrower paid-diagnostic candidate with an unvalidated three-hour internal delivery-time target.
+- [Synthetic mini-review example](sample-synthetic-workflow-mini-review.md) — fictional example showing how to keep a short diagnostic evidence-led and avoid unsupported savings claims.
+
 
 - [Blank Practical Operations Improvement Audit template](workflow-audit-template.md) — reusable client delivery structure with scope, data minimization, baseline evidence, calculations, risk flags, QA and acceptance.
 - [Synthetic workflow audit demonstration](sample-synthetic-workflow-audit.md) — fictional example showing how the method works without presenting invented figures as customer results.
