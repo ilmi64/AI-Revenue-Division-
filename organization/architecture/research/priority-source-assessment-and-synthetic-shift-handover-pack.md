@@ -122,3 +122,8 @@ See [Grok Desk Event Verification & Challenge Record](grok-desk-event-verificati
 ## 9. Desk roster and assignment protocol
 
 See [Research & Intelligence Desk Roster, Work Assignment & Challenge Protocol](research-intelligence-desk-roster-and-assignment-protocol.md). This defines specialist desk responsibilities, company-scoped work orders, priority, independent challenge, dispositions and day/night handover requirements. It is mirrored in the Trading & Technology repository. The roster is proposed, not staffed or operational.
+
+
+## 10. Organization-level Security & Recovery Division
+
+The organization-level Security & Recovery Division is a first-class division alongside Crypto/Trading, Treasury/Finance, Technology/Infrastructure, Research/Intelligence and Business/Commercial. See [Security & Recovery Division Charter](../security-recovery/security-and-recovery-division-charter.md) and [Incident Register, Corrective Actions & Recovery Assurance Standard](../security-recovery/incident-register-and-recovery-assurance-standard.md). This is separate from AI Revenue's embedded Security, Privacy & Recovery responsibilities; company authority, records, credentials and recovery paths remain isolated. Charter and register are prepared only; no monitoring, containment, backup, restore, rollback or recovery drill is operational.
