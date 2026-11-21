@@ -65,3 +65,7 @@ Before claiming live or continuous operation: desk ownership and coverage roster
 ## 9. Source quality and shift continuity references
 
 Use the [Source Quality Scorecard & Review Protocol](source-quality-scorecard-and-review-protocol.md) for source-level approval, evidence grading, freshness, terms and hard stops. Use [Specialist Desk Coverage & Shift Handover](specialist-desk-coverage-and-shift-handover.md) for coverage status, shift ownership, escalation and acknowledgement. Templates remain non-operational until separately staffed, approved and rehearsed.
+
+## 10. Registry, prioritization and publication contract
+
+Use the [Unified Source & Capability Registry](../intelligence/unified-source-and-capability-registry.md) as the canonical index, the [Task Prioritization Protocol](research-task-prioritization-and-opportunity-scoring.md) for triage and scoring, and the [Recipient-Scoped Delivery Contract](recipient-scoped-intelligence-delivery-contract.md) for publication envelopes and failure handling. Registry entries and priority scores do not grant access or authority.
