@@ -11,7 +11,7 @@
 3. Coordinated launch is conditional: every required division must independently satisfy its readiness gates. If any required division is not ready, the organisation-wide Trading launch gate remains unmet; report the blocker rather than silently switching to a phased division launch.
 4. Trading's target coverage is continuous at the organisational level. Daytime PolyBot and day operations coordinate with night-shift Grok Desk/HyperGrok as one operating system. Each specialist desk respects its own market calendar, session, data availability and approved scope; not every market is represented as open 24/7.
 5. Gold/XAUUSD remains a dedicated specialist division. Its existing research, architecture and requirements are authoritative inputs to integration; do not flatten it into a generic PolyBot subtask or recreate completed work.
-6. AI Revenue must be independently operational and generating verified real revenue before the Trading & Technology/trading division launches. This is a company-level prerequisite, not permission for automatic intercompany transfers. Any capital support requires a separate lawful, documented and owner-approved arrangement that protects AI Revenue solvency and operating needs.
+6. **AI Revenue revenue is not a prerequisite for Trading & Technology to launch.** Trading may launch independently when sufficient lawful starting capital is available and all Trading company/division readiness gates and owner approval are satisfied. The intended plan is parallel preparation and a coordinated launch where feasible. If lawful starting capital is unavailable, Trading goes on standby while AI Revenue pursues revenue as a possible capital source. Any AI Revenue-to-Trading support requires a separate lawful, documented, accounted-for and explicitly owner-approved arrangement that protects AI Revenue solvency and operating needs; no automatic transfers, shared treasury or commingling.
 7. Existing CAD $0 incremental-spend rule remains. No paid subscriptions, APIs, hosting, credits, payment-backed trials, purchases, deposits, borrowing, leverage or other spend.
 8. No installation, deployment, production connection, repository permission change, merge, CI/test run, customer contact, publishing, contract, financial transaction, wallet signing, broker/exchange order or other consequential external action without the relevant explicit approval.
 9. Trading remains research and paper-trading only. Live execution, private keys, signing and exchange/broker execution credentials are not enabled by this architecture.
@@ -190,7 +190,7 @@ Continuity plane:
 - Persistent hosting, monitoring, alerting, backup/restore and on-call coverage proven.
 - Day/night coverage and multi-shift handover rehearsed.
 - Portfolio/capital accounting and any required starting capital lawfully available and separately approved.
-- AI Revenue is independently operational and generating verified real revenue before Trading launch; no automatic cross-company transfer.
+- AI Revenue revenue is not a Trading launch gate. Trading's capital gate is satisfied by sufficient lawful starting capital from an independently approved source. AI Revenue revenue may be a future funding contingency only; any intercompany support requires separate lawful documentation, accounting and explicit owner approval.
 - Explicit owner launch approval after evidence review.
 
 If one required division fails its gate, the coordinated launch does not proceed. Maintain parallel development and report the precise blocker. Do not silently launch only the divisions that happen to be ready.
@@ -268,7 +268,7 @@ No stage is implied by completion of the previous document or by a tool being av
 5. **Limited integration approval:** specific accounts, read-only scopes, data classes, retention and revocation plan approved.
 6. **Shadow/paper operation approval:** bounded, monitored and reversible; no external financial execution.
 7. **Division readiness accepted:** each division's evidence signed off by its accountable leader and independent risk/security reviewers.
-8. **Coordinated launch approval:** every required division passes; AI Revenue revenue prerequisite is verified; owner explicitly authorises launch.
+8. **Trading launch approval:** every required Trading division passes its own gates, sufficient lawful starting capital is available, and the owner explicitly authorises launch. AI Revenue revenue is not a prerequisite. If capital is unavailable, Trading remains on standby; AI Revenue may continue its independent revenue work.
 9. **Any live trading authority:** separate future decision and approvals; never inferred from paper readiness or organisation launch.
 
 ## 7. Immediate next preparation sequence
