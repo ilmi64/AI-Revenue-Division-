@@ -4,7 +4,15 @@ import unittest
 from datetime import datetime, timezone
 from pathlib import Path
 
-from occ_readonly import SnapshotError, assess_snapshot, build_report
+from occ_readonly import (
+    MAX_ARRAY_ITEMS,
+    MAX_FIXTURE_BYTES,
+    MAX_JSON_DEPTH,
+    MAX_STRING_CHARS,
+    SnapshotError,
+    assess_snapshot,
+    build_report,
+)
 
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures"
 NOW = datetime(2026, 11, 20, 12, 39, tzinfo=timezone.utc)
@@ -178,6 +186,43 @@ class OccReadOnlyTests(unittest.TestCase):
         self.assertTrue(result["stale"])
         self.assertEqual(result["display_status"], "STALE")
         self.assertEqual(result["trust"], "SYNTHETIC_UNTRUSTED")
+
+    def test_oversized_fixture_file_rejected(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp)
+            (path / "ai-revenue.snapshot.example.json").write_bytes(
+                b" " * (MAX_FIXTURE_BYTES + 1)
+            )
+            with self.assertRaisesRegex(SnapshotError, "maximum file size"):
+                build_report(path, now=NOW)
+
+    def test_excessive_json_nesting_rejected(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp)
+            nested = "[" * (MAX_JSON_DEPTH + 1) + "0" + "]" * (MAX_JSON_DEPTH + 1)
+            (path / "ai-revenue.snapshot.example.json").write_text(nested, encoding="utf-8")
+            with self.assertRaisesRegex(SnapshotError, "maximum nesting depth"):
+                build_report(path, now=NOW)
+
+    def test_oversized_json_string_rejected(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp)
+            payload = json.dumps({"x": "a" * (MAX_STRING_CHARS + 1)})
+            (path / "ai-revenue.snapshot.example.json").write_text(payload, encoding="utf-8")
+            with self.assertRaisesRegex(SnapshotError, "maximum length"):
+                build_report(path, now=NOW)
+
+    def test_oversized_json_array_rejected(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp)
+            payload = json.dumps({"x": [0] * (MAX_ARRAY_ITEMS + 1)})
+            (path / "ai-revenue.snapshot.example.json").write_text(payload, encoding="utf-8")
+            with self.assertRaisesRegex(SnapshotError, "maximum item count"):
+                build_report(path, now=NOW)
 
 
 if __name__ == "__main__":
