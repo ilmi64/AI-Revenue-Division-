@@ -135,3 +135,7 @@ The field-by-field reconciliation and unified transaction target are documented 
 ## 10. PG-3 deliverable — trusted identity and owner authority
 
 The trust-authority design is documented in [PG-3 trusted identity and owner authority architecture](pg3-trusted-identity-and-owner-authority-architecture.md). It separates company identity issuers, owner approval, policy, scheduler, trusted time, revocation/emergency stop, dispatch, receiver evidence and audit checkpoint authorities. It preserves company-specific key domains and does not create keys or services.
+
+## 11. PG-4 deliverable — enforcement and bypass resistance
+
+The company-local enforcement map is documented in [PG-4 enforcement and bypass-resistance architecture](pg4-enforcement-and-bypass-resistance-architecture.md). It maps scheduler, runtime, MCP/tool broker, data, cost, policy, owner approval, control store/outbox, network egress, sender, receiver evidence and audit boundaries, with bypass threats and company-specific overlays. It is architecture only; no runtime path has been proven or deployed.
