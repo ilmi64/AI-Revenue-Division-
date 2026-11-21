@@ -127,6 +127,24 @@ class OccReadOnlyTests(unittest.TestCase):
             with self.assertRaisesRegex(SnapshotError, "invalid JSON"):
                 build_report(path, now=NOW)
 
+    def test_malformed_gate_record_rejected_as_snapshot_error(self):
+        snapshot = load("ai-revenue.snapshot.example.json")
+        snapshot["gates"] = ["not-an-object"]
+        with self.assertRaises(SnapshotError):
+            assess_snapshot(snapshot, "ai_revenue", now=NOW)
+
+    def test_malformed_blocker_record_rejected_as_snapshot_error(self):
+        snapshot = load("ai-revenue.snapshot.example.json")
+        snapshot["blockers"] = ["not-an-object"]
+        with self.assertRaises(SnapshotError):
+            assess_snapshot(snapshot, "ai_revenue", now=NOW)
+
+    def test_malformed_evidence_record_rejected_as_snapshot_error(self):
+        snapshot = load("ai-revenue.snapshot.example.json")
+        snapshot["evidence"] = ["not-an-object"]
+        with self.assertRaises(SnapshotError):
+            assess_snapshot(snapshot, "ai_revenue", now=NOW)
+
     def test_non_string_enum_value_rejected_cleanly(self):
         snapshot = load("ai-revenue.snapshot.example.json")
         snapshot["gates"][0]["status"] = []
