@@ -2,7 +2,7 @@
 
 **Status:** Canonical execution plan; planning and architecture only  
 **Planning date:** 2026-11-21  
-**Target:** Parallel development with evidence-based activation; AI Revenue must be independently operational and generating verified revenue before Trading & Technology / Crypto launch; no calendar deadline  
+**Target:** Simultaneous development; parallel company launch when Trading capital and both companies' gates are ready; AI Revenue launches first if Trading capital is unavailable; evidence-based activation, no calendar deadline  
 **Budget posture:** CAD $0 incremental by default; no paid services or spending without explicit owner approval  
 **Applies to:** AI Revenue Company, Trading & Technology Company, Main Hub/OCC, and Research & Intelligence Division
 
