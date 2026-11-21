@@ -128,3 +128,23 @@ This evidence snapshot supplements DR-2026-11-21-001. It does not change the agr
 - **Self-hosted VM lab:** PequeRoku (requires separate suitable Linux hardware/host).
 - **Notebook/research compute:** Google Colab and Kaggle Notebooks (ephemeral, dynamic quotas; not production hosting).
 - **Rejected:** Grok Bot cloud computer under current cost rule.
+
+
+## 2026-11-21 research addendum — hosting suitability decision
+
+The dedicated [Shared Infrastructure Hosting Decision Matrix](shared-infrastructure-hosting-decision-matrix.md) has been created in this repository and mirrored in the other company repository. This is a research artifact, not an owner-approved change to the existing shortlist.
+
+### Zo Computer — current official plan clarification
+- Official pricing currently lists Free Trial as a 14-day AI and computer trial. The computer sleeps when the user steps away; ordinary computer access ends after 14 days and then only recovery access remains.
+- The Basic plan is advertised at US$18/month and is the lowest listed tier with always-on compute (4 CPU / 32 GB RAM).
+- The guide clarifies that after the 14-day trial, the computer does not start or renew ordinary access; limited one-hour recovery sessions are provided for file retrieval. BYO API keys or credits do not restore ordinary computer access.
+- Sources: https://www.zo.computer/pricing
+- Source: https://www.zo.computer/guide/billing
+- Assessment: Zo remains the planned future persistent workstation candidate, but is **not a free persistent host**. Do not start the trial or subscribe under the existing CAD $0 rule.
+
+### Current architecture conclusion
+- Codespaces is the present repository-development workspace, not a production always-on host.
+- Cloudroom is a possible bounded cloud-agent sandbox, but documentation says 3,000 credits/30 days while its pricing page labels Free “SOON” and lists different limits. The account-level entitlement and terms remain unresolved.
+- Colab and Kaggle are ephemeral notebook/research compute, not production hosting.
+- E2B and Rig are short-lived/metered sandbox options; PequeRoku requires separate self-hosted Linux/KVM hardware.
+- Therefore, no candidate in the current shortlist is verified as a zero-cost, persistent, always-on host for Paperclip, Ruflo, databases, policy services and continuous Research & Intelligence. Keep platform deployment on hold; continue portable architecture and repository preparation.
