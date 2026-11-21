@@ -22,6 +22,20 @@ class SnapshotError(ValueError):
     """Raised when a company snapshot is malformed or outside the allowlist."""
 
 
+def _strict_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    """Build a JSON object while rejecting duplicate member names."""
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise SnapshotError(f"duplicate JSON object key: {key}")
+        result[key] = value
+    return result
+
+
+def _reject_json_constant(value: str) -> None:
+    raise SnapshotError(f"non-standard JSON numeric constant: {value}")
+
+
 def _keys(record: Any, required: set[str], optional: set[str], label: str) -> None:
     if not isinstance(record, dict):
         raise SnapshotError(f"{label} must be an object")
@@ -191,7 +205,13 @@ def build_report(fixtures_dir: Path, now: datetime | None = None) -> dict[str, A
         path = fixtures_dir / filename
         try:
             with path.open("r", encoding="utf-8") as handle:
-                snapshot = json.load(handle)
+                snapshot = json.load(
+                    handle,
+                    object_pairs_hook=_strict_object,
+                    parse_constant=_reject_json_constant,
+                )
+        except SnapshotError as exc:
+            raise SnapshotError(f"fixture {filename} failed strict JSON parsing: {exc}") from exc
         except OSError as exc:
             raise SnapshotError(f"cannot read fixture {filename}: {exc.strerror or exc}") from exc
         except json.JSONDecodeError as exc:
