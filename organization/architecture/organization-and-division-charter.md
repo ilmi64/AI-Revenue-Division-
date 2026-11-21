@@ -17,6 +17,8 @@ The operating-company registry remains exactly two companies. The Research & Int
 
 The coordinated build method is specified in `parallel-build-launch-programme.md`: AI Revenue, Trading & Technology, Main Hub/OCC and Research & Intelligence proceed in parallel, with independent company launch decisions.
 
+AI Revenue operating blueprint: `ai-revenue-operating-blueprint.md`; department workflows, executive accountability, customer lifecycle, agent swarm, independent readiness gates and company boundaries.
+
 ## 2. Parallel build and independent launch
 
 - Build AI Revenue and Trading & Technology simultaneously, using parallel workstreams and their existing company prototypes, repositories, decisions and architecture. Do not restart either company from scratch.
