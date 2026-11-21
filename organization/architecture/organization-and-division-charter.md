@@ -22,7 +22,7 @@ AI Revenue operating blueprint: `ai-revenue-operating-blueprint.md`; department 
 ## 2. Parallel build and independent launch
 
 - Build AI Revenue and Trading & Technology simultaneously, using parallel workstreams and their existing company prototypes, repositories, decisions and architecture. Do not restart either company from scratch.
-- Target a coordinated January 2027 launch window, subject to each company's own readiness evidence.
+- Develop both companies in parallel. AI Revenue must be independently operational and generating verified real revenue before Trading & Technology / Crypto launches; all activation is evidence-based, with no calendar deadline.
 - Neither company is a prerequisite, funding source, customer, supplier or operational dependency for the other's launch.
 - Neither company must first generate revenue, receive customer payment, complete a customer delivery, or become operational before the other can launch.
 - Each company owns its own launch decision and readiness gates. A delay or failure in one company must not block the other.
