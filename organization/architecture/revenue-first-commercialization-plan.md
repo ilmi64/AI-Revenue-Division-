@@ -300,3 +300,8 @@ Neither document authorizes customer contact, public promotion, spending, contra
 ## 21. Delivery QA and acceptance standard
 
 See [AI Revenue Delivery QA, Acceptance & Time-Capture Standard](ai-revenue-delivery-qa-acceptance-and-time-capture-standard.md). It defines lifecycle states, hands-on versus elapsed time, defect/rework capture, independent QA, customer acceptance and evidence-based full-cycle economics. It is an internal standard only; no rehearsal or customer delivery has been performed.
+
+
+## 22. Reusable engagement record
+
+Use the [AI Revenue Engagement Delivery Record Template](delivery/ai-revenue-engagement-delivery-record-template.md) for any future separately authorized engagement. It captures scope, work logs, evidence, defects, independent QA, customer acceptance and reconciled economics. It is blank and does not authorize customer work.
