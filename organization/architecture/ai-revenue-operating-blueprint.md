@@ -28,6 +28,45 @@ It identifies commercial problems, creates useful AI-enabled products/services, 
 
 Roles may initially be performed by a compact workforce, but each responsibility must have an explicitly named accountable role and review path.
 
+## 2A. What “complete AI-run company” means in practice
+
+The target is an AI-operated company across the full business lifecycle—not a collection of disconnected AI assistants and not merely an AI tool that helps a human deliver one service.
+
+### AI-operated internal business loop
+
+Within approved policies, company resources and role permissions, the AI workforce is expected to perform and coordinate the ordinary internal work of the company end to end:
+
+1. **Executive management:** maintain objectives, plans, priorities, departmental scorecards, budgets for review, risk registers, operating decisions within delegated authority and management reporting.
+2. **Research and opportunity discovery:** continuously identify and qualify customer problems, market demand, competitors, technologies, distribution channels and product opportunities using lawful, approved sources.
+3. **Product and service creation:** design, prototype, document, improve and maintain offers, digital products, software, automation and reusable intellectual property, subject to release controls.
+4. **Marketing and sales operations:** prepare positioning, content, campaigns, prospect research, lead qualification, CRM records, proposals and follow-up drafts. Sending, publishing, making promises or entering commitments remains approval-gated.
+5. **Customer operations:** prepare onboarding, requirements, project plans, status reports, support responses, issue triage, handovers and retention analysis. External customer communications and access to customer systems/data require the relevant authorization.
+6. **Delivery operations:** coordinate specialist agents, produce agreed work, perform independent QA, manage revisions within approved scope, prepare handover packs and record acceptance evidence.
+7. **Finance and administration:** maintain internal budgets, cost models, pricing analysis, forecasts, bookkeeping drafts, invoice records and reconciliation evidence. Payment initiation, transfers, purchases, tax filings and binding financial actions remain approval-gated.
+8. **Engineering and technology:** research, design, build and review systems in authorized environments; maintain documentation, version control plans, security reviews and rollback plans. Installation, paid API use, deployment, production access and permission changes require explicit approval.
+9. **People and workforce operations:** assign work to approved agents, evaluate performance, manage capacity, improve role instructions, coordinate handovers and recommend staffing changes. Agents cannot self-authorize new identities, permissions or spending.
+10. **Security, compliance and resilience:** monitor available approved signals, identify anomalies, maintain evidence, prepare incident responses, backup/restore plans and escalation recommendations. Containment or external remediation that affects systems, accounts, data or funds follows the incident authority and approval policy.
+11. **Continuous improvement:** measure outcomes, identify bottlenecks, run authorized evaluations, learn from failures, update procedures through review and retire ineffective tools or offers.
+
+### Autonomy and approval boundary
+
+- **Autonomous by design:** internal research, analysis, drafting, planning, task coordination, documentation, approved offline/synthetic work, internal QA, monitoring of authorized data, management reporting and reversible internal workflow actions explicitly permitted by policy.
+- **Approval required:** spending or paid services; API usage that can incur charges; installations and deployments; production or customer-system access; external messages or publication; contracts, commitments or pricing exceptions; collection or processing of sensitive/customer data beyond approved scope; account/permission changes; payments, transfers, financial transactions, wallet actions, broker/exchange orders and live trading.
+- **Prohibited without a separate policy and authorization change:** self-granting permissions, bypassing deterministic controls, moving between company tenants, using another company's treasury or private records, concealing actions, or treating an AI recommendation as owner approval.
+
+The owner remains the ultimate authority and can set or revoke delegated permissions. AI executives manage the company within those boundaries; they do not replace ownership, legal accountability or reserved human decisions. The company must fail safely when a required approval, data source, tool, model or human escalation is unavailable.
+
+### Practical maturity sequence
+
+1. **Designed:** responsibilities, policies, workflows and approval boundaries are documented.
+2. **Assembled:** approved agents, tools, company identities, data boundaries and task routing are configured.
+3. **Rehearsed:** end-to-end workflows, exceptions, outages, privacy/security incidents and handovers are exercised with authorized synthetic or controlled inputs.
+4. **Operational:** the company completes repeatable internal work with reliable evidence, observability, recovery and cost control.
+5. **Commercially proven:** customers accept deliverables and cleared revenue is evidenced; unit economics and customer support are demonstrated.
+6. **Expanded autonomy:** additional actions are delegated only after demonstrated reliability, legal review where needed, explicit owner approval and enforceable controls.
+
+A design document or agent roster alone does not establish a higher maturity stage. The current company remains in the designed/preparation stage until configuration, rehearsal and operational evidence are verified.
+
 ## 3. Department operating map
 
 ### A. Product & Service Development
