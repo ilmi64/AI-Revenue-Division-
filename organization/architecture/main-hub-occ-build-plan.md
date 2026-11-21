@@ -209,3 +209,12 @@ These references do not authorize installations, deployments, data sharing, cont
 - Shared Research record schema (mirrored in both repositories): `organization/architecture/research/schemas/research-records.schema.json` / `docs/architecture/research/schemas/research-records.schema.json`.
 
 These are draft contracts. Schema validation, sample-record validation, queue implementation, durable storage, tenant-isolation testing and operational rehearsal remain pending. No test execution or runtime installation is implied.
+
+## 15. Workforce execution, Research operations and queue observability (2026-11-21)
+
+The next architecture layer has been documented; all items below remain design-only, not deployed:
+- AI Revenue identity lifecycle, role-to-queue capability matrix, separation of duties, durable task state, lease fencing, idempotency, retry/dead-letter, company-local policy and exact owner-approval binding: `organization/architecture/workforce/workforce-execution-and-identity.md`.
+- Research & Intelligence workforce roles, specialist desk ownership, source stewardship, day/night handovers and recipient-scoped publication: `organization/architecture/research/research-workforce-and-publication.md`.
+- Read-only OCC workforce/queue observability contract, including tenant-specific publisher channels, strict allowlists, freshness, replay handling and quarantine: `organization/architecture/main-hub/occ-workforce-observability-contract.md`.
+
+These specifications do not create identities or credentials, install Paperclip/Ruflo, start continuous research, connect queues, expose task payloads or enable external actions. Company-local policy remains authoritative; OCC remains read-only. The Trading & Technology company has its own corresponding workforce specification in its own repository.
