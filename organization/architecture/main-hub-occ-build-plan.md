@@ -188,3 +188,14 @@ This section supersedes any earlier sentence in this document that makes AI Reve
 - All standing no-spend, no-deployment, no-installation, no-publishing, no-financial-action and explicit-approval restrictions remain in force.
 
 If any earlier section, table, milestone or copied summary conflicts with this correction, this correction governs. Historical text is retained for traceability, not as active policy.
+
+## 13. Workforce, Research and OCC specifications added (2026-11-21)
+
+The following detailed specifications are part of this build programme and remain design-only until separately implemented, reviewed and authorized:
+- AI Revenue department role catalogue: `organization/architecture/workforce/department-agent-role-catalogue.md`.
+- Trading & Technology specialist role catalogue: `docs/architecture/workforce/trading-specialist-agent-role-catalogue.md`.
+- Research & Intelligence operating system: `organization/architecture/research-intelligence-operating-system.md` / `docs/architecture/research-intelligence-operating-system.md` (mirrored).
+- Shared infrastructure tenancy and failover: `organization/architecture/shared-infrastructure-tenancy-and-failover.md` / `docs/architecture/shared-infrastructure-tenancy-and-failover.md` (mirrored).
+- Read-only OCC operator console specification: `organization/architecture/main-hub/occ-readonly-operator-console-spec.md` / `docs/architecture/main-hub/occ-readonly-operator-console-spec.md` (mirrored).
+
+These references do not authorize installations, deployments, data sharing, continuous unattended operation, external actions or live trading. The two operating companies retain independent launch gates and separate authority.
