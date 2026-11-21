@@ -135,7 +135,7 @@ Strategy discovery outputs must distinguish public claims, hypotheses, reproduce
 
 ## 8. Launch and operating rules
 
-- AI Revenue and Trading & Technology are independent, standalone companies developed in parallel. AI Revenue must be independently operational and generating verified real revenue before Trading & Technology / Crypto launches; each company must pass its own evidence-based launch gates. No calendar deadline is used.
+- AI Revenue and Trading & Technology are independent, standalone companies developed in parallel. Each company must pass its own evidence-based launch gates; neither requires the other's revenue, launch or operational readiness. January 4–8, 2027 is the coordinated target window, not a hold point.
 - Neither company is a prerequisite, supplier, funding source, customer, or operational dependency for the other's launch. Neither must generate revenue, receive customer payment, or reach operational readiness before the other can launch.
 - AI Revenue is a complete AI company with its own executive leadership, departments, agent workforce/swarms, products and services, customer operations, finance, security and independent launch decision.
 - Trading & Technology has its own executive leadership, specialist workforce, trading/technology systems, data, finance, security and independent risk authority and launch decision.
