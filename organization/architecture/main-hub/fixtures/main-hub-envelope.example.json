@@ -40,6 +40,21 @@
       "notes": "Implementation not started; this record is a synthetic schema example."
     },
     {
+      "workstream_id": "WS-RESEARCH-INTELLIGENCE-DIVISION",
+      "name": "Research & Intelligence Division organization-level shared intelligence service",
+      "company_scope": [
+        "shared_service"
+      ],
+      "status": "planned",
+      "owner_role": "Research & Intelligence Division lead",
+      "evidence_refs": [
+        "organization/architecture/organization-and-division-charter.md",
+        "docs/architecture/organization-and-division-charter.md"
+      ],
+      "depends_on": [],
+      "notes": "First-class organization-level division/shared service with its own leadership, specialist workforce, queue, memory and research governance. It is not a third operating company and delivers scoped intelligence without company executive, finance, risk or private-data authority."
+    },
+    {
       "workstream_id": "WS-REA-STRATEGY-INTELLIGENCE",
       "name": "REA bot capability and strategy intelligence",
       "company_scope": [
