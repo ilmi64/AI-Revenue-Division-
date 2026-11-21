@@ -143,3 +143,7 @@ Keep these visible as specialist workstreams:
 ## 11. Specialist source verification
 
 See [Specialist Intelligence Source Verification](specialist-intelligence-source-verification.md) for the public-source review of J7, Buildix.trade and Sanbase/Santiment, including current limitations and adoption gates. All remain research candidates; no integration or paid access is approved.
+
+## 12. Mandatory source-quality assessment
+
+Before any candidate in this registry is used for recurring research, apply the [Source Quality Scorecard & Review Protocol](source-quality-scorecard-and-review-protocol.md) to the exact product, endpoint and metric. Record identity, operator, methodology, provenance, freshness, coverage, terms, access path and intended recipient. Hard-stop conditions override any numerical score. The current J7, Buildix.trade and Sanbase/Santiment dispositions above are qualitative provisional holds/limited-context dispositions, not completed numerical scorecards or integration approvals. Recheck official terms and access limits before future use.
