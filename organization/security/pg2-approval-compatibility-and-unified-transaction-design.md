@@ -185,3 +185,20 @@ This transaction must also serialize correctly against quarantine, task cancella
 - This PG-2 document is a compatibility/design review, not evidence of implemented controls or production readiness.
 
 **Disposition:** PG-2 compatibility findings documented; migration and runtime integration remain blocked pending owner/architecture review and separate authorization.
+
+## 11. Exact source blob manifest for PG-2 reconciliation
+
+The source reads above correspond to these exact AI Revenue branch blobs:
+
+| Source | Blob SHA |
+|---|---|
+| `sqlite_control_store.py` | `ad03f6d771d5f34d36776df0d75f240d286dad96` |
+| `trusted_control_plane_facade_reference.py` | `6ce4856270fb0dbb9fc770b257d9d1d2c497e76e` |
+| `owner-approval-repository-schema.sql` | `525c701718479b0f5c297d58745d33ae98fe80da` |
+| `owner_approval_postgres_repository.py` | `a91b32e46c564da9e295b972b09c8056e9f68eb9` |
+| `transactional-audit-approval-schema.sql` | `41dd71bcc25649c1f03212e668d31d704043bd9a` |
+| `linearizable_control_store_reference.py` | `563cdbcccabef48ff2e9da7f0630822450d56250` |
+| `identity-lifecycle-production-requirements.md` | `d09636c2b08112f2d1b2b0783610e744eecf7293` |
+| `trusted-identity-approval-clock-and-receiver-boundary-contract.md` | `6fed9ef726bd2e1eba7b3b2340bf025376c6514b` |
+
+This manifest pins the reviewed inputs for this design pass only. It is not a claim that the files are merged, deployed, validated by tests or production-approved. Any source revision change requires the compatibility review to be refreshed.
