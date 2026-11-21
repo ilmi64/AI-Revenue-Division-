@@ -82,3 +82,8 @@ Day/night coverage is a target, not a current capability claim. Before describin
 ## 10. Service-level measures
 
 Track intake age, time-to-triage, time-to-publication, source freshness, evidence completeness, correction rate, reproducibility rate, unresolved contradiction age, duplicate research rate, recipient usefulness feedback, missed handovers and coverage gaps. Optimize reliability and decision usefulness, not output volume.
+
+
+## 11. Initial role-based work queue
+
+The initial cross-company preparation queue is mirrored in the AI Revenue repository at [Research & Intelligence Work-Order Backlog and Source Stewardship Register](intelligence/research-work-order-backlog-and-source-stewardship-register.md). The Trading & Technology repository carries the corresponding queue alongside its domain-specific research artifacts. The queue uses proposed role ownership only; it does not imply staffed personnel, active agents, source approvals, monitoring or continuous operation. Company-specific work and publications remain separately scoped.
