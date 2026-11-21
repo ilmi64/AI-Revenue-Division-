@@ -291,3 +291,7 @@ See [Worked Synthetic Practical Operations Improvement Audit](sample-synthetic-p
 - [Future Commercial Models & Opportunity Register](future-commercial-models-and-opportunities-register.md) preserves the AI-enabled recurring marketing-agency model and capital-light liquidation/resale-intelligence model for later evaluation. Both remain deferred and do not displace the first offer.
 
 Neither document authorizes customer contact, public promotion, spending, contracts, paid delivery or inventory purchases.
+
+## 20. Second synthetic rehearsal input
+
+[Scenario 2 — Appointment Confirmation & Preparation](synthetic-second-rehearsal-scenario-pack.md) is a second distinct fictional workflow for a future internally authorized rehearsal. It is an input specification only; not calculated, timed or rehearsed. Two synthetic scenarios do not prove buyer demand, pricing or profitability.
