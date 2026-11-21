@@ -91,3 +91,7 @@ The initial cross-company preparation queue is mirrored in the AI Revenue reposi
 ## Operating model and coverage contract
 
 - [Research & Intelligence Division — Operating Model and Coverage Contract](research-intelligence-division-operating-model-and-coverage-contract.md) — specialist desk remit, Grok Desk/HyperGrok workflow, source lifecycle, recipient boundaries and evidence gates for future continuous coverage. Design only; no staffing or monitoring is active.
+
+## Evidence and publication data contract
+
+- [Research Evidence and Publication Envelope Contract](intelligence/research-evidence-and-publication-envelope-contract.md) — canonical work-order, source, evidence, claim, challenge, publication and distribution record requirements; conceptual draft, not implemented or tested.
