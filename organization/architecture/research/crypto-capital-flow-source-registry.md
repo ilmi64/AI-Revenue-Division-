@@ -139,3 +139,7 @@ Keep these visible as specialist workstreams:
 ## 10. Current disposition
 
 **REGISTRY FRAMEWORK PREPARED; NAMED SOURCES NOT YET VERIFIED; NO API USE, SUBSCRIPTIONS, PRIVATE GROUP ACCESS, WALLET CONNECTIONS OR TRADE SIGNALS.**
+
+## 11. Specialist source verification
+
+See [Specialist Intelligence Source Verification](specialist-intelligence-source-verification.md) for the public-source review of J7, Buildix.trade and Sanbase/Santiment, including current limitations and adoption gates. All remain research candidates; no integration or paid access is approved.
