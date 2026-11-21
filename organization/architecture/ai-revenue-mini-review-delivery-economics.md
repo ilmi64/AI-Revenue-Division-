@@ -125,3 +125,7 @@ A competitor's advertised price is context only. It is not a floor, ceiling or p
 ## 8. Current disposition
 
 **CONTINUE OFFER DESIGN; PRICE NOT SET; DELIVERY CAP NOT VALIDATED; NO PROSPECT CONTACT OR PAID ENGAGEMENT AUTHORIZED.**
+
+## 9. Full-cycle capture worksheet
+
+Use the [Full-Cycle Delivery Economics Capture Worksheet](ai-revenue-full-cycle-delivery-economics-worksheet.md) to record acquisition, qualification, sales, setup, delivery, QA, administration, rework, support and closeout. It is blank and has no measured values; pricing remains unset.
