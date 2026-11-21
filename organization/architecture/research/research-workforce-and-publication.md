@@ -73,3 +73,6 @@ Use the [Unified Source & Capability Registry](../intelligence/unified-source-an
 ## Initial research portfolio and Grok Desk blueprint
 
 The current prioritized work orders, company-specific research sequences, Research & Intelligence shared-service backlog, and Grok Desk/HyperGrok day/night operating blueprint are recorded in `organization/architecture/research/initial-high-priority-research-portfolio-and-grok-desk-blueprint.md`. This is a planning artifact only: desk operations, source monitoring, 24/7 coverage and recipient delivery are not live. Use the existing task-prioritization, source-quality, shift-handover and recipient-scoped publication controls; OCC receives only allowlisted aggregate status.
+## 11. Priority source assessment and synthetic handover pack
+
+The [Priority Source Assessment & Synthetic Shift Handover Pack](priority-source-assessment-and-synthetic-shift-handover-pack.md) records the initial high-priority source queue, current holds/context-only dispositions and a fictional day/night handover. It does not approve any source, create operational coverage or claim 24/7 activity.
