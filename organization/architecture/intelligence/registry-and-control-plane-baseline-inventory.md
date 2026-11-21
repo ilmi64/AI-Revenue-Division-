@@ -68,3 +68,12 @@ The corresponding Trading policy gateway, approval and control-store contracts a
 - Review and recipient-scoped shortlist: `organization/architecture/research/public-apis-directory-evaluation.md` / `docs/architecture/research/public-apis-directory-evaluation.md`.
 - Disposition: discovery/reference only. The catalogue license does not license listed providers' APIs or data. No endpoints called, accounts created, keys issued, MCP servers installed or API integrations authorized.
 - Initial research candidates include DefiLlama, 0x, CoinGecko, CryptoCompare, FRED, SEC EDGAR, Frankfurter, Currency-api, OpenAlex and selected Canadian public data. All remain individually unverified for plan terms, current authentication, data rights, quotas, quality and commercial use.
+
+
+## 7. Additional provider assessment — MoonPay PayBox
+
+- Assessment: `organization/architecture/research/moonpay-paybox-and-airdrop-assessment.md` / `docs/architecture/research/moonpay-paybox-and-airdrop-assessment.md`.
+- Official terms last updated 2026-08-06 identify Launchpad Limited (BVI), state the services are unregulated, and prohibit use on behalf of a business entity. PayBox is therefore excluded as a company wallet, treasury or Trading execution layer under the published terms.
+- PayBox remains a Research & Intelligence technology-intelligence subject for MCP/OAuth, scoped grants, operation-bound approvals, revocation and audit design. Provider claims are not independent certification.
+- The USDC faucet is a historical July 2026 launch promotion. Current official campaign status and Canadian eligibility were not verified; third-party reporting says Canada may be excluded.
+- No PayBox account, wallet, connector, X authorization, API call, claim, installation, funding or transaction was performed.
