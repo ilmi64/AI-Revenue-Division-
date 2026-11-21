@@ -38,6 +38,16 @@ def _nonempty_string(value: Any, label: str) -> None:
         raise SnapshotError(f"{label} must be a non-empty string")
 
 
+def _unique_ids(records: list[dict[str, Any]], field: str, label: str) -> set[str]:
+    seen: set[str] = set()
+    for record in records:
+        value = record[field]
+        if value in seen:
+            raise SnapshotError(f"duplicate {label}: {value}")
+        seen.add(value)
+    return seen
+
+
 def _parse_time(value: Any) -> datetime:
     if not isinstance(value, str):
         raise SnapshotError("published_at must be an ISO-8601 timestamp")
@@ -80,15 +90,21 @@ def assess_snapshot(snapshot: dict[str, Any], expected_company: str,
 
     if not isinstance(snapshot["gates"], list) or not isinstance(snapshot["blockers"], list):
         raise SnapshotError("gates and blockers must be arrays")
+    if not isinstance(snapshot["evidence"], list):
+        raise SnapshotError("evidence must be an array")
+    _unique_ids(snapshot["gates"], "gate_id", "gate_id")
+    _unique_ids(snapshot["blockers"], "blocker_id", "blocker_id")
     for gate in snapshot["gates"]:
         _keys(gate, {"gate_id", "status", "critical", "evidence_refs"}, {"notes"}, "gate")
         _nonempty_string(gate["gate_id"], "gate_id")
         if not isinstance(gate["status"], str) or gate["status"] not in VALID_GATE or not isinstance(gate["critical"], bool):
             raise SnapshotError("invalid gate status or critical flag")
         if not isinstance(gate["evidence_refs"], list) or not all(
-            isinstance(ref, str) for ref in gate["evidence_refs"]
+            isinstance(ref, str) and ref.strip() for ref in gate["evidence_refs"]
         ):
-            raise SnapshotError("gate evidence_refs must be an array of strings")
+            raise SnapshotError("gate evidence_refs must be an array of non-empty strings")
+        if len(gate["evidence_refs"]) != len(set(gate["evidence_refs"])):
+            raise SnapshotError(f"duplicate evidence reference in gate {gate['gate_id']}")
         if "notes" in gate and not isinstance(gate["notes"], str):
             raise SnapshotError("gate notes must be a string")
 
@@ -108,8 +124,8 @@ def assess_snapshot(snapshot: dict[str, Any], expected_company: str,
     if not isinstance(incident["quarantined"], bool):
         raise SnapshotError("incident quarantined must be boolean")
 
-    if not isinstance(snapshot["evidence"], list):
-        raise SnapshotError("evidence must be an array")
+    _unique_ids(snapshot["evidence"], "evidence_id", "evidence_id")
+    evidence_ids = {item["evidence_id"] for item in snapshot["evidence"]}
     evidence_refs = []
     for evidence in snapshot["evidence"]:
         _keys(evidence, {"evidence_id", "reference", "evidence_type"}, {"verified_at"}, "evidence")
@@ -123,6 +139,13 @@ def assess_snapshot(snapshot: dict[str, Any], expected_company: str,
         if evidence.get("verified_at") is not None:
             _parse_time(evidence["verified_at"])
         evidence_refs.append(evidence["reference"])
+
+    for gate in snapshot["gates"]:
+        unresolved = set(gate["evidence_refs"]) - evidence_ids
+        if unresolved:
+            raise SnapshotError(
+                f"gate {gate['gate_id']} references unknown evidence_id(s): {sorted(unresolved)}"
+            )
 
     published = _parse_time(snapshot["published_at"])
     if now is not None and not isinstance(now, datetime):
@@ -166,8 +189,15 @@ def build_report(fixtures_dir: Path, now: datetime | None = None) -> dict[str, A
     companies = []
     for company_id, filename in EXPECTED.items():
         path = fixtures_dir / filename
-        with path.open("r", encoding="utf-8") as handle:
-            snapshot = json.load(handle)
+        try:
+            with path.open("r", encoding="utf-8") as handle:
+                snapshot = json.load(handle)
+        except OSError as exc:
+            raise SnapshotError(f"cannot read fixture {filename}: {exc.strerror or exc}") from exc
+        except json.JSONDecodeError as exc:
+            raise SnapshotError(
+                f"fixture {filename} contains invalid JSON at line {exc.lineno}, column {exc.colno}"
+            ) from exc
         companies.append(assess_snapshot(snapshot, company_id, now=now))
     return {
         "product": "Main Hub / OCC read-only prototype",
@@ -185,12 +215,15 @@ def main() -> int:
     parser.add_argument("--fixtures", type=Path, default=Path(__file__).resolve().parents[1] / "fixtures")
     parser.add_argument("--output", type=Path, help="Optional report path; omitted means stdout only.")
     args = parser.parse_args()
-    report = build_report(args.fixtures)
-    rendered = json.dumps(report, indent=2, sort_keys=True) + "\n"
-    if args.output:
-        args.output.write_text(rendered, encoding="utf-8")
-    else:
-        print(rendered, end="")
+    try:
+        report = build_report(args.fixtures)
+        rendered = json.dumps(report, indent=2, sort_keys=True) + "\n"
+        if args.output:
+            args.output.write_text(rendered, encoding="utf-8")
+        else:
+            print(rendered, end="")
+    except (SnapshotError, OSError) as exc:
+        parser.exit(2, f"error: {exc}\n")
     return 0
 
 
