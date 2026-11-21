@@ -127,6 +127,7 @@ Build a **read-only status and evidence control centre first**. Do not begin wit
 - Existing skill/tool and capability registries; do not re-add tools without a demonstrated gap.
 - Deferred projects remain deferred unless explicitly resumed.
 - Canonical organizational map: `organization/architecture/organization-and-division-charter.md` / `docs/architecture/organization-and-division-charter.md`. It records the full AI Revenue departments, Trading & Technology specialist workstreams, Main Hub/OCC, Research & Intelligence, shared-infrastructure boundaries and independent parallel launch model.
+- Research & Intelligence operating charter: `organization/architecture/research-intelligence-division-charter.md` / `docs/architecture/research-intelligence-division-charter.md`; defines leadership, specialist desks, knowledge governance, day/night handovers, evidence standards and scoped delivery.
 
 Strategy discovery outputs must distinguish public claims, hypotheses, reproduced mechanics, backtest results and independently validated results. No strategy is labelled profitable from marketing claims or synthetic data.
 
