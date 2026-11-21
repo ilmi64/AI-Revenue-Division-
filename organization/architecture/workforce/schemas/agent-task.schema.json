@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://architecture.invalid/ai-revenue/agent-task.schema.json",
+  "title": "AI Revenue Agent Task",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["task_id", "company_id", "queue_id", "task_type", "status", "priority", "created_at", "requester", "scope", "deliverable", "policy"],
+  "properties": {
+    "task_id": {"type": "string", "minLength": 1, "maxLength": 128, "pattern": "^AR-[A-Z0-9-]+$"},
+    "company_id": {"const": "ai_revenue"},
+    "queue_id": {"type": "string", "enum": ["AR-INTAKE", "AR-PRODUCT", "AR-ENGINEERING", "AR-CREATIVE", "AR-PIPELINE", "AR-MARKETING", "AR-DELIVERY", "AR-SUPPORT", "AR-FINANCE", "AR-SECURITY", "AR-EXEC-REVIEW"]},
+    "task_type": {"type": "string", "minLength": 1, "maxLength": 96},
+    "status": {"type": "string", "enum": ["NEW", "TRIAGED", "QUEUED", "ASSIGNED", "IN_PROGRESS", "REVIEW", "APPROVAL_REQUIRED", "BLOCKED", "ACCEPTED", "REJECTED", "CANCELLED", "DEAD_LETTER"]},
+    "priority": {"type": "string", "enum": ["P0", "P1", "P2", "P3"]},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"},
+    "due_at": {"type": ["string", "null"], "format": "date-time"},
+    "requester": {"$ref": "#/$defs/actor"},
+    "assignee": {"anyOf": [{"$ref": "#/$defs/actor"}, {"type": "null"}]},
+    "reviewer": {"anyOf": [{"$ref": "#/$defs/actor"}, {"type": "null"}]},
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["objective", "allowed_data_classes", "allowed_actions", "excluded_actions"],
+      "properties": {
+        "objective": {"type": "string", "minLength": 1, "maxLength": 4000},
+        "allowed_data_classes": {"type": "array", "items": {"type": "string", "enum": ["PUBLIC", "INTERNAL", "CONFIDENTIAL_COMPANY"]}, "uniqueItems": true},
+        "allowed_actions": {"type": "array", "items": {"type": "string", "enum": ["READ", "RESEARCH", "DRAFT", "ANALYZE", "LOCAL_FILE_PREPARATION"]}, "uniqueItems": true},
+        "excluded_actions": {"type": "array", "items": {"type": "string", "enum": ["PUBLISH", "CUSTOMER_CONTACT", "PURCHASE", "PAYMENT", "DEPLOY", "PERMISSION_CHANGE", "PAID_API", "EXTERNAL_COMMITMENT"]}, "uniqueItems": true},
+        "resource_limits": {"type": "object", "additionalProperties": false, "properties": {"max_runtime_seconds": {"type": "integer", "minimum": 1, "maximum": 86400}, "max_output_bytes": {"type": "integer", "minimum": 1, "maximum": 10485760}}}
+      }
+    },
+    "context_refs": {"type": "array", "items": {"$ref": "#/$defs/reference"}, "maxItems": 100},
+    "deliverable": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["format", "acceptance_criteria"],
+      "properties": {
+        "format": {"type": "string", "enum": ["MARKDOWN", "JSON", "CODE_DIFF", "REPORT", "DATASET_REFERENCE"]},
+        "acceptance_criteria": {"type": "array", "items": {"type": "string", "minLength": 1}, "minItems": 1, "maxItems": 50},
+        "output_ref": {"type": ["string", "null"], "maxLength": 1024}
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy_profile", "external_action_allowed", "owner_approval_required"],
+      "properties": {
+        "policy_profile": {"type": "string", "const": "AI_REVENUE_DEFAULT_DENY"},
+        "external_action_allowed": {"type": "boolean", "const": false},
+        "owner_approval_required": {"type": "boolean", "const": true},
+        "approval_ref": {"type": ["string", "null"], "maxLength": 256}
+      }
+    },
+    "handoff": {"type": "object", "additionalProperties": false, "properties": {"from_task_id": {"type": ["string", "null"]}, "handoff_reason": {"type": ["string", "null"], "maxLength": 2000}, "next_queue_id": {"type": ["string", "null"]}}},
+    "completion": {"type": "object", "additionalProperties": false, "properties": {"summary": {"type": ["string", "null"], "maxLength": 8000}, "evidence_refs": {"type": "array", "items": {"$ref": "#/$defs/reference"}}, "review_status": {"type": "string", "enum": ["NOT_REVIEWED", "ACCEPTED", "REJECTED"]}}},
+    "tags": {"type": "array", "items": {"type": "string", "maxLength": 64}, "maxItems": 50}
+  },
+  "$defs": {
+    "actor": {"type": "object", "additionalProperties": false, "required": ["actor_id", "role_id", "actor_type"], "properties": {"actor_id": {"type": "string", "minLength": 1, "maxLength": 128}, "role_id": {"type": "string", "minLength": 1, "maxLength": 96}, "actor_type": {"type": "string", "enum": ["AI_AGENT", "HUMAN"]}, "runtime_id": {"type": ["string", "null"], "maxLength": 128}}},
+    "reference": {"type": "object", "additionalProperties": false, "required": ["ref_id", "ref_type", "classification"], "properties": {"ref_id": {"type": "string", "minLength": 1, "maxLength": 1024}, "ref_type": {"type": "string", "enum": ["FILE", "SOURCE", "RESEARCH", "DECISION", "DATASET", "ISSUE"]}, "classification": {"type": "string", "enum": ["PUBLIC", "INTERNAL", "CONFIDENTIAL_COMPANY"]}, "revision": {"type": ["string", "null"], "maxLength": 128}}}
+  }
+}
