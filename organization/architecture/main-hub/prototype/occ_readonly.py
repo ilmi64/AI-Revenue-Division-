@@ -1,4 +1,4 @@
-"""Offline, read-only Main Hub/OCC prototype. Synthetic fixtures only; no network or writes."""
+"""Offline, read-only Main Hub/OCC prototype. Synthetic fixtures only; no network or company-side writes."""
 from __future__ import annotations
 
 import argparse
@@ -92,8 +92,6 @@ def assess_snapshot(snapshot: dict[str, Any], expected_company: str,
         raise SnapshotError("gates and blockers must be arrays")
     if not isinstance(snapshot["evidence"], list):
         raise SnapshotError("evidence must be an array")
-    _unique_ids(snapshot["gates"], "gate_id", "gate_id")
-    _unique_ids(snapshot["blockers"], "blocker_id", "blocker_id")
     for gate in snapshot["gates"]:
         _keys(gate, {"gate_id", "status", "critical", "evidence_refs"}, {"notes"}, "gate")
         _nonempty_string(gate["gate_id"], "gate_id")
@@ -107,6 +105,7 @@ def assess_snapshot(snapshot: dict[str, Any], expected_company: str,
             raise SnapshotError(f"duplicate evidence reference in gate {gate['gate_id']}")
         if "notes" in gate and not isinstance(gate["notes"], str):
             raise SnapshotError("gate notes must be a string")
+    _unique_ids(snapshot["gates"], "gate_id", "gate_id")
 
     for blocker in snapshot["blockers"]:
         _keys(blocker, {"blocker_id", "severity", "summary"}, set(), "blocker")
@@ -114,6 +113,7 @@ def assess_snapshot(snapshot: dict[str, Any], expected_company: str,
         _nonempty_string(blocker["summary"], "blocker summary")
         if not isinstance(blocker["severity"], str) or blocker["severity"] not in VALID_SEVERITY:
             raise SnapshotError("invalid blocker severity")
+    _unique_ids(snapshot["blockers"], "blocker_id", "blocker_id")
 
     incident = snapshot["incident_summary"]
     _keys(incident, {"open_count", "highest_severity", "quarantined"}, set(), "incident_summary")
@@ -124,8 +124,6 @@ def assess_snapshot(snapshot: dict[str, Any], expected_company: str,
     if not isinstance(incident["quarantined"], bool):
         raise SnapshotError("incident quarantined must be boolean")
 
-    _unique_ids(snapshot["evidence"], "evidence_id", "evidence_id")
-    evidence_ids = {item["evidence_id"] for item in snapshot["evidence"]}
     evidence_refs = []
     for evidence in snapshot["evidence"]:
         _keys(evidence, {"evidence_id", "reference", "evidence_type"}, {"verified_at"}, "evidence")
@@ -140,6 +138,8 @@ def assess_snapshot(snapshot: dict[str, Any], expected_company: str,
             _parse_time(evidence["verified_at"])
         evidence_refs.append(evidence["reference"])
 
+    _unique_ids(snapshot["evidence"], "evidence_id", "evidence_id")
+    evidence_ids = {item["evidence_id"] for item in snapshot["evidence"]}
     for gate in snapshot["gates"]:
         unresolved = set(gate["evidence_refs"]) - evidence_ids
         if unresolved:
