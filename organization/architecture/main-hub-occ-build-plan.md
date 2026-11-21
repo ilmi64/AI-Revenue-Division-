@@ -199,3 +199,13 @@ The following detailed specifications are part of this build programme and remai
 - Read-only OCC operator console specification: `organization/architecture/main-hub/occ-readonly-operator-console-spec.md` / `docs/architecture/main-hub/occ-readonly-operator-console-spec.md` (mirrored).
 
 These references do not authorize installations, deployments, data sharing, continuous unattended operation, external actions or live trading. The two operating companies retain independent launch gates and separate authority.
+
+## 14. Task, queue and research record contracts added (2026-11-21)
+
+- AI Revenue task schema: `organization/architecture/workforce/schemas/agent-task.schema.json`.
+- AI Revenue queue/approval workflow: `organization/architecture/workforce/queue-and-approval-workflows.md`.
+- Trading & Technology task schema: `docs/architecture/workforce/schemas/agent-task.schema.json`.
+- Trading queue and independent CRO workflow: `docs/architecture/workforce/queue-and-risk-workflows.md`.
+- Shared Research record schema (mirrored in both repositories): `organization/architecture/research/schemas/research-records.schema.json` / `docs/architecture/research/schemas/research-records.schema.json`.
+
+These are draft contracts. Schema validation, sample-record validation, queue implementation, durable storage, tenant-isolation testing and operational rehearsal remain pending. No test execution or runtime installation is implied.
