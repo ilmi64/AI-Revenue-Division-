@@ -149,3 +149,8 @@ The synthetic conformance matrix is documented in [PG-5 policy gateway conforman
 ## 13. PG-6 deliverable — durable store, receiver idempotency and recovery
 
 The consolidated target is documented in [PG-6 durable store, receiver idempotency and recovery design](pg6-durable-store-receiver-idempotency-and-recovery-design.md). It reconciles the existing linearizable control-store, transactional dispatch/recovery, outbox and recovery-boundary contracts into one company-local transaction model, immutable action intent, receiver-side idempotency, epoch fencing, ambiguous-outcome reconciliation, audit/checkpoint and restore requirements. This remains architecture only: no production database/receiver/sender/keys/network, no tests or recovery drills, and no exactly-once guarantee is claimed.
+
+
+## PG-7 deliverable — independent security review and operational rehearsal
+
+The final review/rehearsal protocol is documented in [PG-7 independent security review and operational rehearsal plan](pg7-independent-security-review-and-operational-rehearsal-plan.md). It defines independent reviewer qualifications, exact-revision scope, identity/task/policy/approval/cost/data/dispatch/receiver/audit/recovery review domains, separate company overlays, 14 controlled synthetic/tabletop scenarios, finding severity and staged activation gates. PG-7 is authored architecture only: no independent review, test, rehearsal, deployment or production activation has occurred; tests remain unexecuted and require explicit owner authorization.
