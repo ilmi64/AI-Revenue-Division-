@@ -21,7 +21,7 @@ This first ledger is a portfolio-level inventory of the explicitly preserved wor
 
 ## 2. Status vocabulary
 
-- **DISCussed** — explicitly discussed or named in the existing portfolio; no current source review implied.
+- **DISCUSSED** — explicitly discussed or named in the existing portfolio; no current source review implied.
 - **RESEARCH_PENDING** — needs current-source, license, security, cost, platform and capability review.
 - **RESEARCH_IN_PROGRESS** — active documented research with a cited revision or current work record.
 - **VERIFIED** — a narrowly defined claim independently checked against a recorded source/revision; does not imply production readiness.
@@ -39,47 +39,47 @@ No item in this initial portfolio is promoted to VERIFIED or REPRODUCED merely b
 |---|---|---|---|---|---|
 | ORG-AI-WORKFORCE-01 | Paperclip company/agent workforce management | Both companies, isolated tenants | Leading candidate | RESEARCH_PENDING | Verify current architecture, license, security, deployment/runtime and company isolation fit |
 | ORG-AI-ORCH-02 | Ruflo multi-agent orchestration and swarms | Both companies, separate orchestration scopes | Leading candidate | RESEARCH_PENDING | Verify model adapters, boundaries, failure modes, cost and deterministic-policy integration |
-| ORG-AI-CODE-03 | Claude Code and OpenAI Codex coding-agent runtimes | Both companies | Cross-review / bounded engineering candidates | DISCussed | Map supported runtimes, permission controls, review workflow and free-use constraints |
+| ORG-AI-CODE-03 | Claude Code and OpenAI Codex coding-agent runtimes | Both companies | Cross-review / bounded engineering candidates | DISCUSSED | Map supported runtimes, permission controls, review workflow and free-use constraints |
 | ORG-AI-MODEL-04 | Qwen, Llama, Gemini and other compatible models | Both companies | Model-agnostic adapter portfolio | RESEARCH_PENDING | Maintain per-model capability, license, hosting/inference cost, data handling and adapter matrix |
 | ORG-AI-ENG-05 | OpenHands bounded engineering agent | Both companies | Candidate only | RESEARCH_PENDING | Review isolation, tools, network/filesystem permissions and runtime requirements |
 | ORG-AI-MEM-06 | AgentMemory / scoped persistent memory | Both companies, strictly separated | Candidate only | RESEARCH_PENDING | Compare tenancy, deletion, provenance, retrieval leakage and recovery |
 | ORG-AI-OBS-07 | Langfuse and OpenLIT observability/evaluation | Both companies, separate streams | Candidates | RESEARCH_PENDING | Compare telemetry privacy, self-hosting, model coverage, quotas and redaction |
-| ORG-AI-ROUTE-08 | OmniRoute and model routing options | Both companies | Existing named workstream | DISCussed | Inventory source, supported providers, routing policy, cost controls and failover |
-| ORG-AGENT-09 | Agency Agents | Organization-level research; recipient-scoped use | Preserve existing workstream | DISCussed | Locate existing source record and reconcile exact project identity/status |
-| ORG-AGENT-10 | Agent Reach | Organization-level research; recipient-scoped use | Preserve existing workstream | DISCussed | Locate existing source record; verify supported channels, permissions and current state |
-| ORG-RESEARCH-11 | Grok Desk / HyperGrok research concepts | Research & Intelligence | Core planned research capability | DISCussed | Define lawful source access, shift handover, verification and cost/runtime gates |
+| ORG-AI-ROUTE-08 | OmniRoute and model routing options | Both companies | Existing named workstream | DISCUSSED | Inventory source, supported providers, routing policy, cost controls and failover |
+| ORG-AGENT-09 | Agency Agents | Organization-level research; recipient-scoped use | Preserve existing workstream | DISCUSSED | Locate existing source record and reconcile exact project identity/status |
+| ORG-AGENT-10 | Agent Reach | Organization-level research; recipient-scoped use | Preserve existing workstream | DISCUSSED | Locate existing source record; verify supported channels, permissions and current state |
+| ORG-RESEARCH-11 | Grok Desk / HyperGrok research concepts | Research & Intelligence | Core planned research capability | DISCUSSED | Define lawful source access, shift handover, verification and cost/runtime gates |
 | ORG-REA-12 | Reverse Engineer Anything MCP (morluto/rea) | Shared research method; separate company work orders | Priority capability; runtime gate applies | RESEARCH_PENDING | Continue public-source review only; no install, execution, repo modification or PolyBot integration until supported desktop runtime and separate approval |
-| ORG-TOOLS-13 | Superpowers, Matt Pocock Skills, Anthropic Skills, Graphify | Both companies | P0 skills/tool portfolio | DISCussed | Reconcile exact repo revisions, license, platform and applicability before use |
-| ORG-TOOLS-14 | Marketing Skills, Agent Reach, Last 30 Days, UI UX Pro Max | AI Revenue primarily; shared where suitable | P1 skills/tool portfolio | DISCussed | Verify source, license, compatibility and measured value |
+| ORG-TOOLS-13 | Superpowers, Matt Pocock Skills, Anthropic Skills, Graphify | Both companies | P0 skills/tool portfolio | DISCUSSED | Reconcile exact repo revisions, license, platform and applicability before use |
+| ORG-TOOLS-14 | Marketing Skills, Agent Reach, Last 30 Days, UI UX Pro Max | AI Revenue primarily; shared where suitable | P1 skills/tool portfolio | DISCUSSED | Verify source, license, compatibility and measured value |
 | ORG-CREATIVE-15 | HyperFrames | AI Revenue / AI Creative Studio | Priority candidate | RESEARCH_PENDING | Verify current repo/docs, runtime, license, render requirements and zero-cost workflow |
 | ORG-CREATIVE-16 | ComfyUI | AI Revenue / AI Creative Studio | Priority candidate | RESEARCH_PENDING | Verify hardware/runtime requirements, model licensing, storage and free local workflow |
 | ORG-OCC-17 | Main Hub/OCC read-only control plane | Organization-level | M0 inventory complete; M1 drafted; M2 prototype untested | RESEARCH_IN_PROGRESS | Preserve exact-source validator and test execution as awaiting explicit authorization |
-| ORG-RI-18 | Research & Intelligence Division | Organization-level shared service | Core division; not a third company or launch prerequisite | DISCussed | Build source-level registry reconciliation, shift/handover and recipient-scoped queues |
-| ORG-POLICY-19 | Deterministic policy gateway and approval enforcement | Each company independently | Next architecture priority | DISCussed | Inventory existing policy, approval, identity and audit artifacts before adding a canonical implementation spec |
-| AR-COMM-01 | AI Revenue funded-opportunity / customer-problem scanner | AI Revenue only | Early commercial capability priority | DISCussed | Reconcile prior PR #3 and existing offer/opportunity records; no customer contact |
-| AR-COMM-02 | AI workflow/business-process automation offers | AI Revenue only | Early offer candidate | DISCussed | Define one narrow customer problem, delivery scope, cost ceiling and QA evidence |
-| AR-COMM-03 | Small-business websites / landing pages | AI Revenue only | Early offer candidate | DISCussed | Define reproducible delivery slice, support boundary and acceptance checklist |
-| AR-COMM-04 | Content / creative packages and SEO/research briefs | AI Revenue only | Early offer candidates | DISCussed | Build sample workflow and QA rubric; publishing/customer contact requires approval |
-| AR-COMM-05 | Digital templates, guides and workflow assets | AI Revenue only | Early offer candidates | DISCussed | Validate demand and rights before production or listing |
-| AR-CREATIVE-06 | AI Creative Studio | AI Revenue only | Active department; HyperFrames and ComfyUI priority candidates | DISCussed | Continue zero-cost architecture/research and define first demonstrable deliverable |
+| ORG-RI-18 | Research & Intelligence Division | Organization-level shared service | Core division; not a third company or launch prerequisite | DISCUSSED | Build source-level registry reconciliation, shift/handover and recipient-scoped queues |
+| ORG-POLICY-19 | Deterministic policy gateway and approval enforcement | Each company independently | Next architecture priority | DISCUSSED | Inventory existing policy, approval, identity and audit artifacts before adding a canonical implementation spec |
+| AR-COMM-01 | AI Revenue funded-opportunity / customer-problem scanner | AI Revenue only | Early commercial capability priority | DISCUSSED | Reconcile prior PR #3 and existing offer/opportunity records; no customer contact |
+| AR-COMM-02 | AI workflow/business-process automation offers | AI Revenue only | Early offer candidate | DISCUSSED | Define one narrow customer problem, delivery scope, cost ceiling and QA evidence |
+| AR-COMM-03 | Small-business websites / landing pages | AI Revenue only | Early offer candidate | DISCUSSED | Define reproducible delivery slice, support boundary and acceptance checklist |
+| AR-COMM-04 | Content / creative packages and SEO/research briefs | AI Revenue only | Early offer candidates | DISCUSSED | Build sample workflow and QA rubric; publishing/customer contact requires approval |
+| AR-COMM-05 | Digital templates, guides and workflow assets | AI Revenue only | Early offer candidates | DISCUSSED | Validate demand and rights before production or listing |
+| AR-CREATIVE-06 | AI Creative Studio | AI Revenue only | Active department; HyperFrames and ComfyUI priority candidates | DISCUSSED | Continue zero-cost architecture/research and define first demonstrable deliverable |
 | TT-CRYPTO-01 | Crypto / PolyBot | Trading & Technology only | First Trading capability priority | RESEARCH_IN_PROGRESS | Preserve existing Phase 4 research; inventory exact strategy/code/evidence revisions |
-| TT-POLY-02 | PolyBot Phase 4: EMA20/50, RSI, volume anomalies, ATR, regime classification, paper signals | Trading only | Named research components, not proven profitable | DISCussed | Reconcile existing work and define component-specific data and paper acceptance criteria |
-| TT-DATA-03 | Coinbase + Binance normalized comparison / Colab plan | Trading only | Existing named workstream | DISCussed | Reconcile prior notebook/data work, API terms/limits and reproducible comparison criteria |
-| TT-MCP-04 | TradingView MCP | Trading only | Existing named workstream | DISCussed | Verify exact repo, license, data entitlements, permissions and platform |
-| TT-FLOW-05 | Flow Surface | Trading only | One of five preserved order-flow candidates | DISCussed | Verify exact repository identity and compare features/data needs |
-| TT-FLOW-06 | Order Book Heat Map | Trading only | One of five preserved order-flow candidates | DISCussed | Verify exact repository identity and compare features/data needs |
-| TT-FLOW-07 | NinjaTrader Kit | Trading only | One of five preserved order-flow candidates | DISCussed | Verify exact repository identity, platform/license and market-data requirements |
-| TT-FLOW-08 | Order Flowchart | Trading only | One of five preserved order-flow candidates | DISCussed | Verify exact repository identity and compare features/data needs |
-| TT-FLOW-09 | OrderFlowMap | Trading only | One of five preserved order-flow candidates | DISCussed | Verify exact repository identity and compare features/data needs |
-| TT-QUANT-10 | Quantpedia | Trading only | Existing strategy discovery source | DISCussed | Review source/license, strategy claims and reproducibility; no profitability inference |
-| TT-QUANT-11 | FlowGPT | Trading only | Existing strategy/workflow discovery source | DISCussed | Verify exact source, quality, provenance and applicable licensing |
-| TT-MARKET-12 | Forex, indices and Gold/XAUUSD / MT5 | Trading only | Preserved specialist workstreams | DISCussed | Maintain separate instrument/data/venue/risk and halal issue reviews |
-| TT-CAPFLOW-13 | Crypto Capital Flow & Opportunity Intelligence | Trading only, Research-fed | Approved workstream | DISCussed | Reconcile J7, Buildix.trade, Sanbase/Santiment and existing capital-flow research |
-| TT-J7-14 | J7 | Trading only | Named specialist intelligence source | DISCussed | Verify exact product/source, capabilities, access and cost |
-| TT-BUILDIX-15 | Buildix.trade | Trading only | Named specialist intelligence source | DISCussed | Verify exact product/source, capabilities, access and cost |
-| TT-SAN-16 | Sanbase / Santiment | Trading only | Named specialist intelligence source | DISCussed | Verify exact product/source, data coverage, plan limits and cost |
-| TT-REA-17 | REA bot/strategy capability intelligence | Trading only, using shared REA research method | P0 specialist application | DISCussed | Continue public-source research; do not integrate or execute |
-| TT-RISK-18 | Strategy validation, execution costs, risk, recovery and halal issue review | Trading only | Mandatory independent controls | DISCussed | Reconcile risk register and define evidence gates; no live execution |
+| TT-POLY-02 | PolyBot Phase 4: EMA20/50, RSI, volume anomalies, ATR, regime classification, paper signals | Trading only | Named research components, not proven profitable | DISCUSSED | Reconcile existing work and define component-specific data and paper acceptance criteria |
+| TT-DATA-03 | Coinbase + Binance normalized comparison / Colab plan | Trading only | Existing named workstream | DISCUSSED | Reconcile prior notebook/data work, API terms/limits and reproducible comparison criteria |
+| TT-MCP-04 | TradingView MCP | Trading only | Existing named workstream | DISCUSSED | Verify exact repo, license, data entitlements, permissions and platform |
+| TT-FLOW-05 | Flow Surface | Trading only | One of five preserved order-flow candidates | DISCUSSED | Verify exact repository identity and compare features/data needs |
+| TT-FLOW-06 | Order Book Heat Map | Trading only | One of five preserved order-flow candidates | DISCUSSED | Verify exact repository identity and compare features/data needs |
+| TT-FLOW-07 | NinjaTrader Kit | Trading only | One of five preserved order-flow candidates | DISCUSSED | Verify exact repository identity, platform/license and market-data requirements |
+| TT-FLOW-08 | Order Flowchart | Trading only | One of five preserved order-flow candidates | DISCUSSED | Verify exact repository identity and compare features/data needs |
+| TT-FLOW-09 | OrderFlowMap | Trading only | One of five preserved order-flow candidates | DISCUSSED | Verify exact repository identity and compare features/data needs |
+| TT-QUANT-10 | Quantpedia | Trading only | Existing strategy discovery source | DISCUSSED | Review source/license, strategy claims and reproducibility; no profitability inference |
+| TT-QUANT-11 | FlowGPT | Trading only | Existing strategy/workflow discovery source | DISCUSSED | Verify exact source, quality, provenance and applicable licensing |
+| TT-MARKET-12 | Forex, indices and Gold/XAUUSD / MT5 | Trading only | Preserved specialist workstreams | DISCUSSED | Maintain separate instrument/data/venue/risk and halal issue reviews |
+| TT-CAPFLOW-13 | Crypto Capital Flow & Opportunity Intelligence | Trading only, Research-fed | Approved workstream | DISCUSSED | Reconcile J7, Buildix.trade, Sanbase/Santiment and existing capital-flow research |
+| TT-J7-14 | J7 | Trading only | Named specialist intelligence source | DISCUSSED | Verify exact product/source, capabilities, access and cost |
+| TT-BUILDIX-15 | Buildix.trade | Trading only | Named specialist intelligence source | DISCUSSED | Verify exact product/source, capabilities, access and cost |
+| TT-SAN-16 | Sanbase / Santiment | Trading only | Named specialist intelligence source | DISCUSSED | Verify exact product/source, data coverage, plan limits and cost |
+| TT-REA-17 | REA bot/strategy capability intelligence | Trading only, using shared REA research method | P0 specialist application | DISCUSSED | Continue public-source research; do not integrate or execute |
+| TT-RISK-18 | Strategy validation, execution costs, risk, recovery and halal issue review | Trading only | Mandatory independent controls | DISCUSSED | Reconcile risk register and define evidence gates; no live execution |
 | DEFER-ANIMORA-01 | Animora | Separate project | Deferred / on hold | DEFERRED | Do not reactivate without explicit instruction |
 | DEFER-ECOM-02 | Ecommerce / MidnightOtaku / eBay-Printify automation | Separate project | Deferred | DEFERRED | Do not reactivate without explicit instruction |
 | DEFER-TIKTOK-03 | TikTok distribution | AI Revenue marketing | Explicitly excluded | REJECTED | Keep excluded unless user reintroduces |
