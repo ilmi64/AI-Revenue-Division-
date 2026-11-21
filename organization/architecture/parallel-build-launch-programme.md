@@ -168,10 +168,13 @@ A shared platform is a convenience and advantage, not a central authority. If a 
 - Main Hub or Research Division delay does not veto either company.
 
 ### Stage 4 — Coordinated launch window
-- AI Revenue launch gate: independently operational and generating verified real revenue before Trading & Technology / Crypto launches. Trading & Technology / Crypto must separately pass its own evidence-based gates.
-- Develop both companies in parallel. AI Revenue does not wait for Crypto; Crypto does not launch until AI Revenue has verified operational revenue. No calendar date overrides readiness.
+- Build both companies simultaneously and pursue parallel launch if Trading capital is available and both companies independently pass their own readiness gates.
+- If Trading capital is unavailable at the launch review, AI Revenue launches first only if its own readiness gate is passed and launch is separately authorized; Trading & Technology remains on standby for funded operations until capital and its own gates are ready.
+- AI Revenue revenue may be considered as a possible future source of Trading capital only through a separately approved, legally and accountingly sound arrangement. No automatic intercompany transfer, loan, shared treasury, guarantee or funding obligation exists.
+- Do not count projected, unclaimed, airdropped or hypothetical rewards as available capital. Do not borrow, use leverage, paid memberships or deposits to force launch.
+- The coordinated January 4–8, 2027 window is a target, not a hold point. A ready company is not delayed solely because the other company is delayed.
 - Never describe a company as launched, live or revenue-generating without verified evidence.
-- Trading live execution remains a separate approval gate after company launch.
+- Trading live execution remains a separate evidence-based readiness gate and requires explicit owner approval after company launch.
 
 ## 6. Explicit no-dependency matrix
 
