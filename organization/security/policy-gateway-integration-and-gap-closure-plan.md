@@ -139,3 +139,8 @@ The trust-authority design is documented in [PG-3 trusted identity and owner aut
 ## 11. PG-4 deliverable — enforcement and bypass resistance
 
 The company-local enforcement map is documented in [PG-4 enforcement and bypass-resistance architecture](pg4-enforcement-and-bypass-resistance-architecture.md). It maps scheduler, runtime, MCP/tool broker, data, cost, policy, owner approval, control store/outbox, network egress, sender, receiver evidence and audit boundaries, with bypass threats and company-specific overlays. It is architecture only; no runtime path has been proven or deployed.
+
+
+## 12. PG-5 deliverable — deterministic conformance matrix
+
+The synthetic conformance matrix is documented in [PG-5 policy gateway conformance matrix](pg5-policy-gateway-conformance-matrix.md). It defines 44 core identity, task, policy, approval, cost, data, runtime, dispatch, receiver, audit, recovery, resilience, isolation and truthfulness cases, with separate AI Revenue and Trading overlays. This is a test specification only: executable fixtures/harness are not complete, no tests have been run, and every PG-5 case remains NOT_RUN. Test execution requires explicit user authorization.
