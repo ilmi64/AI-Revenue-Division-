@@ -19,6 +19,7 @@ The prototype implementation currently resides in the AI Revenue architecture br
 - `security/authenticated-publisher-design.md`: proposed trust, signature, replay, freshness, key-lifecycle, quarantine, and rollout requirements. Design only; no publisher or adapter is implemented.
 - `verification/m2-verification-matrix.md`: explicit M2 schema, semantic, parser, security-protocol and recovery test matrix. Test plan and execution states are tracked separately.
 - The Research & Intelligence Division is a core organization-level division/shared service documented in the Main Hub build plan; it is not a third operating company and is not yet operational.
+- `../organization-and-division-charter.md` (AI Revenue branch) / `../../organization-and-division-charter.md` (Trading branch): canonical organization structure, all divisions/departments, parallel independent company launch, shared-infrastructure boundaries and workforce governance.
 
 The individual fixture fragments are intentionally not complete root-envelope documents. The root schema requires the complete envelope with registry, decisions, workstreams and one snapshot per company; the fragments are separated to keep each synthetic record easy to inspect.
 
