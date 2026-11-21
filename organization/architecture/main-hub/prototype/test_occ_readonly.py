@@ -89,6 +89,44 @@ class OccReadOnlyTests(unittest.TestCase):
         with self.assertRaises(SnapshotError):
             assess_snapshot(snapshot, "trading_technology", now=NOW)
 
+    def test_duplicate_gate_ids_rejected(self):
+        snapshot = load("ai-revenue.snapshot.example.json")
+        snapshot["gates"].append(dict(snapshot["gates"][0]))
+        with self.assertRaisesRegex(SnapshotError, "duplicate gate_id"):
+            assess_snapshot(snapshot, "ai_revenue", now=NOW)
+
+    def test_duplicate_blocker_ids_rejected(self):
+        snapshot = load("ai-revenue.snapshot.example.json")
+        snapshot["blockers"].append(dict(snapshot["blockers"][0]))
+        with self.assertRaisesRegex(SnapshotError, "duplicate blocker_id"):
+            assess_snapshot(snapshot, "ai_revenue", now=NOW)
+
+    def test_duplicate_evidence_ids_rejected(self):
+        snapshot = load("ai-revenue.snapshot.example.json")
+        snapshot["evidence"].append(dict(snapshot["evidence"][0]))
+        with self.assertRaisesRegex(SnapshotError, "duplicate evidence_id"):
+            assess_snapshot(snapshot, "ai_revenue", now=NOW)
+
+    def test_gate_rejects_unknown_evidence_id(self):
+        snapshot = load("ai-revenue.snapshot.example.json")
+        snapshot["gates"][0]["evidence_refs"] = ["EV-NOT-PRESENT"]
+        with self.assertRaisesRegex(SnapshotError, "unknown evidence_id"):
+            assess_snapshot(snapshot, "ai_revenue", now=NOW)
+
+    def test_gate_rejects_duplicate_evidence_reference(self):
+        snapshot = load("ai-revenue.snapshot.example.json")
+        snapshot["gates"][0]["evidence_refs"] = ["EV-ai_revenue-SYN", "EV-ai_revenue-SYN"]
+        with self.assertRaisesRegex(SnapshotError, "duplicate evidence reference"):
+            assess_snapshot(snapshot, "ai_revenue", now=NOW)
+
+    def test_invalid_fixture_json_fails_with_context(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp)
+            (path / "ai-revenue.snapshot.example.json").write_text("{", encoding="utf-8")
+            with self.assertRaisesRegex(SnapshotError, "invalid JSON"):
+                build_report(path, now=NOW)
+
     def test_non_string_enum_value_rejected_cleanly(self):
         snapshot = load("ai-revenue.snapshot.example.json")
         snapshot["gates"][0]["status"] = []
