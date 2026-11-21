@@ -103,6 +103,9 @@ Roles may initially be performed by a compact workforce, but each responsibility
 
 ## 4. Initial commercial delivery system
 
+The revenue-first, zero-upfront sequence, offer ranking, first workflow-audit specification, commercial funnel and approval controls are maintained in the [Revenue-First, Zero-Upfront Commercialization Plan](revenue-first-commercialization-plan.md). This plan is the current preparation guide; it does not claim validated demand or authorize customer contact.
+
+
 Every offer must have:
 1. A defined buyer and validated problem.
 2. A clear outcome and scope, exclusions and assumptions.
