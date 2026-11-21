@@ -131,10 +131,13 @@ Strategy discovery outputs must distinguish public claims, hypotheses, reproduce
 
 ## 8. Launch and operating rules
 
-- Both companies remain independently governed and are intended to activate simultaneously in January 2027.
-- AI Revenue must have a real commercial stream, accepted customer delivery and actual payment received before company launch.
-- Trading & Technology must pass its own data, security, risk, paper-mode, exit, recovery, incident and rehearsal gates.
-- Live trading is a separate readiness and owner-approval decision; it is not implied by company launch.
+- AI Revenue and Trading & Technology are independent, standalone companies intended to build and launch in parallel in January 2027, each when its own launch-readiness gates are met.
+- Neither company is a prerequisite, supplier, funding source, customer, or operational dependency for the other's launch. Neither must generate revenue, receive customer payment, or reach operational readiness before the other can launch.
+- AI Revenue is a complete AI company with its own executive leadership, departments, agent workforce/swarms, products and services, customer operations, finance, security and independent launch decision.
+- Trading & Technology has its own executive leadership, specialist workforce, trading/technology systems, data, finance, security and independent risk authority and launch decision.
+- Shared infrastructure is limited to approved cooperation and competitive advantage: reusable infrastructure, model/runtime adapters, orchestration technology, scoped research/intelligence and defined interfaces. It does not create shared company authority, executives, finances, private memory, customer/trading data, permissions or operational dependencies.
+- Each company must remain able to operate if the other company or Main Hub/OCC is unavailable. Main Hub/OCC coordinates and reports; it does not control either company or make one company's launch conditional on the other.
+- Trading & Technology must pass its own data, security, risk, paper-mode, exit, recovery, incident and rehearsal gates. Live trading is a separate readiness and owner-approval decision; it is not implied by company launch.
 - Extend the target only where evidence shows it is necessary for safety, integrity or readiness.
 - No paid subscriptions, APIs, credits, hosting, trials with billing risk, purchases or other spending without explicit owner approval.
 - No Actions runs, merges, deployments, public releases, account/permission changes or consequential external actions without separate explicit approval.
