@@ -183,3 +183,7 @@ These are architecture/preparation artifacts only. They do not represent deploye
 ## Role and org-chart configuration
 
 - [Paperclip Role IDs and Organisation-Chart Configuration Draft](paperclip-role-id-and-org-chart-configuration-draft.md) — stable company/shared-service role IDs, first-pass org charts, identity metadata and default-deny permission profiles; draft only, not imported or provisioned.
+
+## Bounded orchestration profiles
+
+- [Ruflo Bounded Swarm Profile Registry](ruflo-bounded-swarm-profile-registry-draft.md) — recipient-scoped research, engineering, quant, PolyBot, business, security and OCC profiles; finite limits, CRO veto, cancellation and synthetic denial cases. Draft only; not installed or tested.
