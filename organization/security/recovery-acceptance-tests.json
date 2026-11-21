@@ -1,0 +1,23 @@
+{
+  "status": "proposed_acceptance_vectors",
+  "scenarios": [
+    "unknown action with fresh authenticated confirmed-applied evidence closes without resend",
+    "unknown action with fresh authenticated confirmed-not-applied evidence closes old intent and requires new intent",
+    "inconclusive evidence quarantines",
+    "unauthenticated evidence quarantines",
+    "wrong action ID or idempotency key quarantines",
+    "stale or future-dated evidence quarantines",
+    "missing evidence digest quarantines",
+    "already-resolved action cannot be reconciled again",
+    "receiver unavailable remains quarantined",
+    "worker lease expiry never auto-requeues",
+    "database corruption blocks dispatch",
+    "audit-chain mismatch blocks restore",
+    "restore verifies consumed approval manifest",
+    "restore detects missing or duplicate consumption",
+    "restore checks independent checkpoint heads",
+    "backup corruption and partial restore fail closed",
+    "post-restore dispatch remains disabled until explicit sign-off",
+    "revocations and emergency-stop state are refreshed after restore"
+  ]
+}

@@ -1,0 +1,128 @@
+{
+  "status": "proposed_not_executed",
+  "design": "linearizable recovery-dispatch transaction boundary",
+  "tests": [
+    [
+      "TXR-01",
+      "dispatch locks stream; quarantine commits first",
+      "dispatch denied; sender counter remains zero"
+    ],
+    [
+      "TXR-02",
+      "dispatch commits authorization first; quarantine follows",
+      "action marked potentially in flight; no blind resend"
+    ],
+    [
+      "TXR-03",
+      "concurrent dispatch and quarantine",
+      "one serial order; no authorization after quarantine commit"
+    ],
+    [
+      "TXR-04",
+      "wrong expected recovery epoch",
+      "deny"
+    ],
+    [
+      "TXR-05",
+      "caller supplies forged company or stream",
+      "trusted binding mismatch denied"
+    ],
+    [
+      "TXR-06",
+      "approval consumed concurrently twice",
+      "exactly one transaction succeeds"
+    ],
+    [
+      "TXR-07",
+      "same idempotency key with changed intent digest",
+      "reject conflict"
+    ],
+    [
+      "TXR-08",
+      "audit append fails",
+      "authorization/quarantine transaction rolls back"
+    ],
+    [
+      "TXR-09",
+      "control outbox insert fails during quarantine",
+      "quarantine transaction rolls back or remains disabled through a separately proven durable fail-safe"
+    ],
+    [
+      "TXR-10",
+      "database serialization/deadlock retry",
+      "retry only transaction; never duplicate sender invocation"
+    ],
+    [
+      "TXR-11",
+      "process crashes before authorization commit",
+      "no sender call; no consumed approval"
+    ],
+    [
+      "TXR-12",
+      "process crashes after authorization commit before sender",
+      "unknown/in-flight; reconcile, no blind retry"
+    ],
+    [
+      "TXR-13",
+      "process crashes after receiver acceptance before local result",
+      "reconcile with signed receiver evidence"
+    ],
+    [
+      "TXR-14",
+      "receiver rejects duplicate idempotency key",
+      "no duplicate side effect"
+    ],
+    [
+      "TXR-15",
+      "receiver rejects stale recovery epoch",
+      "stale dispatch fenced"
+    ],
+    [
+      "TXR-16",
+      "control store unavailable",
+      "fail closed at every mandatory boundary"
+    ],
+    [
+      "TXR-17",
+      "restore from backup with checkpoint mismatch",
+      "quarantine and disable dispatch"
+    ],
+    [
+      "TXR-18",
+      "cross-company foreign key or identifier substitution",
+      "reject and audit security incident"
+    ],
+    [
+      "TXR-19",
+      "release missing signed assessment or owner approval",
+      "remain quarantined"
+    ],
+    [
+      "TXR-20",
+      "valid release",
+      "consume approval, append audit, increment epoch and activate atomically"
+    ],
+    [
+      "TXR-21",
+      "old queued lease after release",
+      "reject; require fresh task and action IDs"
+    ],
+    [
+      "TXR-22",
+      "Trading live operation after release",
+      "absolute hard deny"
+    ],
+    [
+      "TXR-23",
+      "worker attempts direct sender/network path",
+      "gateway denies and alerts"
+    ],
+    [
+      "TXR-24",
+      "audit checkpoint signer or WORM store unavailable",
+      "release denied; dispatch disabled"
+    ]
+  ],
+  "pass_rule": "No authorization can commit after a committed quarantine for the same company/stream; ambiguous already-authorized actions are reconciled, not blindly resent; all boundaries fail closed.",
+  "certification": "none"
+}

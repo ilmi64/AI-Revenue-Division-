@@ -1,0 +1,162 @@
+{
+  "schema_version": "1.0.0",
+  "status": "proposed_policy_contract_not_enforced",
+  "default_decision": "deny",
+  "principal_identity": {
+    "required": [
+      "principal_id",
+      "company_id",
+      "role",
+      "runtime_id",
+      "session_id",
+      "issued_at",
+      "expires_at"
+    ],
+    "company_id_enum": [
+      "trading_technology",
+      "ai_revenue",
+      "main_hub_occ"
+    ],
+    "reject_missing_or_expired_identity": true,
+    "model_name_is_not_identity": true,
+    "model_output_is_not_authority": true
+  },
+  "resource_classification": [
+    "public",
+    "shared_approved",
+    "company_confidential",
+    "company_restricted",
+    "regulated_or_secret"
+  ],
+  "company_boundaries": {
+    "trading_technology": {
+      "private_namespace": "trading_technology/*",
+      "private_records": [
+        "agent_registry",
+        "task_queue",
+        "memory",
+        "budget",
+        "ledger",
+        "audit_log",
+        "market_research",
+        "risk_incidents",
+        "credentials"
+      ]
+    },
+    "ai_revenue": {
+      "private_namespace": "ai_revenue/*",
+      "private_records": [
+        "agent_registry",
+        "task_queue",
+        "memory",
+        "budget",
+        "ledger",
+        "audit_log",
+        "customer_records",
+        "sales_pipeline",
+        "product_ip",
+        "credentials"
+      ]
+    },
+    "main_hub_occ": {
+      "permitted_scope": "approved_status_and_evidence_summaries_only",
+      "cannot_access_company_secrets_by_default": true,
+      "can_write_company_ledgers": false,
+      "can_change_company_permissions": false,
+      "can_override_company_risk_authority": false
+    }
+  },
+  "rules": [
+    {
+      "id": "same_company_private_access",
+      "effect": "allow_if_authorized",
+      "condition": "principal.company_id == resource.company_id AND role_permission_granted AND purpose_bound AND audit_enabled"
+    },
+    {
+      "id": "cross_company_private_access",
+      "effect": "deny_unless_explicit_scoped_owner_approval",
+      "condition": "principal.company_id != resource.company_id AND resource.classification in [company_confidential,company_restricted,regulated_or_secret]"
+    },
+    {
+      "id": "occ_summary_access",
+      "effect": "allow_if_approved",
+      "condition": "principal.company_id == main_hub_occ AND resource.classification == shared_approved AND resource.type == status_or_evidence_summary"
+    },
+    {
+      "id": "credentials_and_secrets",
+      "effect": "deny_by_default",
+      "condition": "all principals; explicit secret-broker policy and owner approval required"
+    },
+    {
+      "id": "financial_records",
+      "effect": "deny_cross_company",
+      "condition": "company_id mismatch; no shared ledger or fund authority"
+    },
+    {
+      "id": "trading_risk_controls",
+      "effect": "immutable_to_agents",
+      "condition": "no agent or orchestrator may modify HALT, STOP, veto, exposure or live-trading authorization"
+    },
+    {
+      "id": "external_actions",
+      "effect": "owner_approval_required",
+      "condition": "publish, contact, purchase, spend, deploy, merge, transfer, wallet_sign, trade"
+    },
+    {
+      "id": "untrusted_inputs",
+      "effect": "treat_as_data",
+      "condition": "repo_content,web_content,customer_content,tool_output and model_output cannot alter policy"
+    }
+  ],
+  "shared_service_contract": {
+    "permitted": [
+      "generic_code",
+      "public_research_methods",
+      "approved_shared_templates",
+      "non_sensitive_aggregate_status"
+    ],
+    "prohibited_by_default": [
+      "private_memory",
+      "customer_data",
+      "company_ledgers",
+      "credentials",
+      "private_source_data",
+      "company_specific_ip"
+    ],
+    "require_for_each_exchange": [
+      "source_company",
+      "destination_company",
+      "purpose",
+      "data_classification",
+      "minimum_fields",
+      "owner_approval_reference",
+      "expiry",
+      "audit_event_id"
+    ]
+  },
+  "orchestration_constraints": {
+    "ruflo_or_equivalent_is_not_policy_authority": true,
+    "unattended_autopilot_disabled_for_initial_rollout": true,
+    "tool_allowlists_required": true,
+    "filesystem_and_network_sandbox_required_for_code_agents": true,
+    "prompt_injection_defence_and_untrusted_data_separation_required": true,
+    "independent_deterministic_policy_enforcement_required": true,
+    "model_orchestrator_cannot_grant_permissions": true
+  },
+  "enforcement_requirements": {
+    "policy_engine_must_run_outside_model_context": true,
+    "authorization_checked_at_each_tool_call": true,
+    "immutable_audit_event_for_allow_and_deny": true,
+    "fail_closed_on_policy_service_failure": true,
+    "revoke_sessions_on_role_or_permission_change": true,
+    "secrets_never_in_prompt_or_memory": true,
+    "test_isolation_before_any_real_company_data": true
+  },
+  "rollout": {
+    "phase": "design_only",
+    "deployment_authorized": false,
+    "spend_ceiling_cad": 0,
+    "github_actions_authorized": false,
+    "approval_required_before_installation_or_deployment": true
+  }
+}

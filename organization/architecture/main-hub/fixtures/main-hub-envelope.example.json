@@ -1,0 +1,174 @@
+{
+  "schema_version": "0.1",
+  "company_registry": [
+    {
+      "company_id": "ai_revenue",
+      "display_name": "AI Revenue Company",
+      "authority_boundary": "independent_company",
+      "records_isolated": true,
+      "readiness_owner": "AI Revenue executive authority",
+      "shared_services": [
+        "Main Hub read-only status reporting"
+      ]
+    },
+    {
+      "company_id": "trading_technology",
+      "display_name": "Trading & Technology Company",
+      "authority_boundary": "independent_company",
+      "records_isolated": true,
+      "readiness_owner": "Trading & Technology executive and independent risk authority",
+      "shared_services": [
+        "Main Hub read-only status reporting"
+      ]
+    }
+  ],
+  "decisions": [],
+  "workstreams": [
+    {
+      "workstream_id": "WS-MAIN-HUB-OCC",
+      "name": "Main Hub / OCC read-only control centre",
+      "company_scope": [
+        "shared_service"
+      ],
+      "status": "planned",
+      "owner_role": "Main Hub architecture",
+      "evidence_refs": [
+        "organization/architecture/main-hub-occ-build-plan.md",
+        "docs/architecture/main-hub-occ-build-plan.md"
+      ],
+      "depends_on": [],
+      "notes": "Implementation not started; this record is a synthetic schema example."
+    },
+    {
+      "workstream_id": "WS-RESEARCH-INTELLIGENCE-DIVISION",
+      "name": "Research & Intelligence Division organization-level shared intelligence service",
+      "company_scope": [
+        "shared_service"
+      ],
+      "status": "planned",
+      "owner_role": "Research & Intelligence Division lead",
+      "evidence_refs": [
+        "organization/architecture/organization-and-division-charter.md",
+        "docs/architecture/organization-and-division-charter.md"
+      ],
+      "depends_on": [],
+      "notes": "First-class organization-level division/shared service with its own leadership, specialist workforce, queue, memory and research governance. It is not a third operating company and delivers scoped intelligence without company executive, finance, risk or private-data authority."
+    },
+    {
+      "workstream_id": "WS-REA-STRATEGY-INTELLIGENCE",
+      "name": "REA bot capability and strategy intelligence",
+      "company_scope": [
+        "trading_technology"
+      ],
+      "status": "research",
+      "owner_role": "Trading research and strategy intelligence",
+      "evidence_refs": [
+        "organization/architecture/github-skills-capability-registry.md",
+        "docs/architecture/github-skills-capability-registry.md"
+      ],
+      "depends_on": [],
+      "notes": "Research/preparation scope; not evidence of REA installation or integration."
+    },
+    {
+      "workstream_id": "WS-AI-REVENUE-FIRST-STREAM",
+      "name": "AI Revenue first verified commercial stream",
+      "company_scope": [
+        "ai_revenue"
+      ],
+      "status": "planned",
+      "owner_role": "AI Revenue CEO and CRO",
+      "evidence_refs": [
+        "strategy/revenue-plan.md"
+      ],
+      "depends_on": [],
+      "notes": "Commercial delivery and payment are AI Revenue's own business objectives and evidence; they are not prerequisites for Trading & Technology launch. AI Revenue has its own independent launch-readiness decision."
+    }
+  ],
+  "status_snapshots": [
+    {
+      "snapshot_id": "SYN-ai_revenue-2026-11-20",
+      "company_id": "ai_revenue",
+      "schema_version": "0.1",
+      "source_revision": "0000000-synthetic-fixture",
+      "published_at": "2026-11-20T12:00:00Z",
+      "overall_status": "UNKNOWN",
+      "subsystems": {
+        "main_hub": "NOT_IMPLEMENTED",
+        "commercial_operations": "UNKNOWN",
+        "ai_workforce": "NOT_IMPLEMENTED"
+      },
+      "gates": [
+        {
+          "gate_id": "operational_readiness",
+          "status": "NOT_RUN",
+          "critical": true,
+          "evidence_refs": [],
+          "notes": "Synthetic fixture; no operational readiness claim."
+        }
+      ],
+      "blockers": [
+        {
+          "blocker_id": "synthetic_only",
+          "severity": "medium",
+          "summary": "Synthetic example data; replace only with authenticated company-published evidence."
+        }
+      ],
+      "incident_summary": {
+        "open_count": 0,
+        "highest_severity": "none",
+        "quarantined": false
+      },
+      "evidence": [
+        {
+          "evidence_id": "EV-ai_revenue-SYN",
+          "reference": "synthetic://fixture",
+          "evidence_type": "other",
+          "verified_at": null
+        }
+      ]
+    },
+    {
+      "snapshot_id": "SYN-trading_technology-2026-11-20",
+      "company_id": "trading_technology",
+      "schema_version": "0.1",
+      "source_revision": "0000000-synthetic-fixture",
+      "published_at": "2026-11-20T12:00:00Z",
+      "overall_status": "UNKNOWN",
+      "subsystems": {
+        "main_hub": "NOT_IMPLEMENTED",
+        "polybot": "UNKNOWN",
+        "paper_trading": "UNKNOWN",
+        "risk_controls": "UNKNOWN"
+      },
+      "gates": [
+        {
+          "gate_id": "operational_readiness",
+          "status": "NOT_RUN",
+          "critical": true,
+          "evidence_refs": [],
+          "notes": "Synthetic fixture; no operational readiness claim."
+        }
+      ],
+      "blockers": [
+        {
+          "blocker_id": "synthetic_only",
+          "severity": "medium",
+          "summary": "Synthetic example data; replace only with authenticated company-published evidence."
+        }
+      ],
+      "incident_summary": {
+        "open_count": 0,
+        "highest_severity": "none",
+        "quarantined": false
+      },
+      "evidence": [
+        {
+          "evidence_id": "EV-trading_technology-SYN",
+          "reference": "synthetic://fixture",
+          "evidence_type": "other",
+          "verified_at": null
+        }
+      ]
+    }
+  ]
+}

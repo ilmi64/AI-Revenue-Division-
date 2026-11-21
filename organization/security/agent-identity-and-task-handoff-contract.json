@@ -1,0 +1,280 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "agent_identity_and_task_handoff_contract",
+  "status": "proposed_contract_not_enforced_or_executed",
+  "company_scope": "AI Revenue",
+  "authority_model": {
+    "identity_issuer": "trusted_control_plane_or_owner_authorized_identity_service",
+    "model_output_is_identity": false,
+    "model_output_is_authority": false,
+    "authorization_enforcement": "deterministic_policy_enforcement_outside_model_context",
+    "default_decision": "deny",
+    "fail_closed": true,
+    "no_self_grant": true,
+    "no_self_approval": true,
+    "no_self_role_escalation": true
+  },
+  "identity": {
+    "required_fields": [
+      "agent_id",
+      "company_id",
+      "role_id",
+      "runtime_id",
+      "model_provider",
+      "model_id",
+      "runtime_version",
+      "capability_profile_id",
+      "session_id",
+      "issuer_id",
+      "issued_at",
+      "expires_at",
+      "lifecycle_state",
+      "audit_correlation_id"
+    ],
+    "immutable_after_issuance": [
+      "agent_id",
+      "company_id",
+      "issuer_id"
+    ],
+    "authentication": "Control-plane-issued credential or signed identity assertion validated outside the model; agent-supplied text fields are never proof.",
+    "session_rules": [
+      "short_lived",
+      "company_bound",
+      "runtime_bound",
+      "revocable",
+      "expiry_checked_on_every_authorized_operation"
+    ],
+    "lifecycle_states": [
+      "pending",
+      "active",
+      "suspended",
+      "revoked",
+      "expired"
+    ],
+    "transitions": {
+      "pending": [
+        "active",
+        "revoked"
+      ],
+      "active": [
+        "suspended",
+        "revoked",
+        "expired"
+      ],
+      "suspended": [
+        "active",
+        "revoked",
+        "expired"
+      ],
+      "revoked": [],
+      "expired": []
+    },
+    "revocation_effect": "Reject new tasks and handoffs immediately; cancel queued work; request cooperative cancellation of running work; terminate runtime through an external supervisor where available; invalidate session credentials; preserve audit evidence."
+  },
+  "capability_profiles": {
+    "principle": "Explicit allowlists by company, role, task, resource, operation and environment.",
+    "default_capabilities": [],
+    "prohibited_without_separate_owner_approval": [
+      "spending",
+      "paid_api_usage",
+      "subscriptions",
+      "purchases",
+      "external_messages",
+      "customer_commitments",
+      "publication",
+      "repository_merge",
+      "github_actions_execution",
+      "deployment",
+      "account_permission_changes",
+      "credential_access",
+      "financial_transactions"
+    ],
+    "secrets": "Never place secrets in prompts, task payloads, agent memory, repository files or ordinary logs. Use a separately controlled secret broker only after explicit approval and least-privilege review.",
+    "runtime": "Sandboxed; no unrestricted host filesystem, shell, browser, network or MCP access."
+  },
+  "task_envelope": {
+    "required_fields": [
+      "task_id",
+      "company_id",
+      "issuer_identity_ref",
+      "assignee_agent_id",
+      "purpose",
+      "scope",
+      "allowed_operations",
+      "allowed_resources",
+      "input_classification",
+      "input_provenance",
+      "expected_output_schema",
+      "created_at",
+      "expires_at",
+      "priority",
+      "cost_cap_cad",
+      "approval_requirements",
+      "idempotency_key",
+      "cancellation_token_ref",
+      "parent_task_id",
+      "audit_correlation_id",
+      "status"
+    ],
+    "defaults": {
+      "cost_cap_cad": 0,
+      "allowed_operations": [],
+      "allowed_resources": [],
+      "approval_requirements": [
+        "owner_approval_for_consequential_external_action"
+      ],
+      "input_classification": "untrusted_until_validated"
+    },
+    "invariants": [
+      "company_id must match issuer and assignee unless a separately approved cross-company data contract exists",
+      "task scope cannot exceed issuer authority or assignee capability profile",
+      "task cannot alter identity, role, capability profile, policy, budget ceiling or audit records",
+      "cost ceiling is enforced by a deterministic meter before any billable call",
+      "expired or replayed tasks are rejected",
+      "idempotency key is unique within company and task operation scope",
+      "task output must conform to declared schema or be rejected/quarantined"
+    ]
+  },
+  "handoff": {
+    "default": "same_company_only",
+    "receiver_checks": [
+      "authenticate_issuer",
+      "authenticate_receiver",
+      "verify_both_sessions_active",
+      "verify_same_company",
+      "verify_task_not_expired",
+      "verify_scope_and_capabilities",
+      "verify_approval_state",
+      "verify_cost_cap",
+      "validate_input_schema",
+      "preserve_provenance_and_untrusted_labels",
+      "record_audit_event"
+    ],
+    "cross_company": "Denied by default. Requires owner-approved, purpose-limited, field-limited, time-limited data-sharing contract; receiving company must independently accept the task. No transfer of credentials, secrets, private memory, ledgers, customer records or risk authority.",
+    "model_routing": "A model may recommend a recipient; only the deterministic scheduler may assign work within approved policies.",
+    "delegation": "Child tasks inherit or narrow parent scope; they cannot expand permissions, cost caps or approval authority."
+  },
+  "lifecycle": {
+    "states": [
+      "created",
+      "queued",
+      "accepted",
+      "running",
+      "awaiting_approval",
+      "completed",
+      "failed",
+      "cancel_requested",
+      "cancelled",
+      "expired",
+      "rejected",
+      "quarantined"
+    ],
+    "transitions": {
+      "created": [
+        "queued",
+        "rejected",
+        "expired"
+      ],
+      "queued": [
+        "accepted",
+        "cancel_requested",
+        "rejected",
+        "expired"
+      ],
+      "accepted": [
+        "running",
+        "awaiting_approval",
+        "cancel_requested",
+        "failed",
+        "expired"
+      ],
+      "running": [
+        "awaiting_approval",
+        "completed",
+        "failed",
+        "cancel_requested",
+        "quarantined"
+      ],
+      "awaiting_approval": [
+        "queued",
+        "running",
+        "cancel_requested",
+        "rejected",
+        "expired"
+      ],
+      "cancel_requested": [
+        "cancelled",
+        "failed"
+      ],
+      "completed": [],
+      "failed": [
+        "queued"
+      ],
+      "cancelled": [],
+      "expired": [],
+      "rejected": [],
+      "quarantined": [
+        "rejected",
+        "queued"
+      ]
+    },
+    "retry_rules": [
+      "Retries require bounded attempt count and backoff",
+      "Only idempotent operations may be retried automatically",
+      "A retry cannot reset expiry, cost cap or approval requirements",
+      "Ambiguous external outcomes are quarantined for reconciliation, not blindly repeated"
+    ],
+    "cancellation": "Cancellation is an out-of-band control-plane action, not a model suggestion. Stop new child tasks, revoke task-scoped grants and record whether the runtime acknowledged cancellation.",
+    "timeout": "Enforce task deadline externally; timeout transitions to failed or cancelled and revokes task-scoped capabilities."
+  },
+  "approvals": {
+    "authority": "Owner or explicitly delegated human approver through an authenticated approval channel.",
+    "binding_fields": [
+      "approval_id",
+      "approver_identity",
+      "company_id",
+      "task_id",
+      "exact_action",
+      "exact_resource",
+      "maximum_amount_cad",
+      "valid_until",
+      "single_use_nonce",
+      "decision",
+      "audit_correlation_id"
+    ],
+    "rules": [
+      "Approval is action-specific, resource-specific, amount-capped and time-limited",
+      "No approval may be inferred from silence, model output, swarm consensus or previous unrelated approval",
+      "No agent may approve its own request",
+      "Any material change to action, amount, recipient or resource requires a new approval"
+    ]
+  },
+  "audit": {
+    "append_only": true,
+    "record_fields": [
+      "event_id",
+      "timestamp",
+      "company_id",
+      "actor_identity_ref",
+      "task_id",
+      "action",
+      "resource",
+      "policy_decision",
+      "approval_ref",
+      "input_provenance_refs",
+      "output_digest",
+      "runtime_ref",
+      "correlation_id"
+    ],
+    "tamper_evidence": "Hash-linked or equivalently tamper-evident records; integrity verification must be implemented and tested.",
+    "secrets_redacted": true
+  },
+  "operations": {
+    "installation_or_deployment_authorized": false,
+    "github_actions_authorized": false,
+    "paid_inference_authorized": false,
+    "external_actions_authorized": false,
+    "production_enforcement": false,
+    "test_execution_status": "not_executed"
+  }
+}

@@ -1,0 +1,514 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/main-hub/records-v0.1.schema.json",
+  "title": "Main Hub OCC records v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "company_registry",
+    "decisions",
+    "workstreams",
+    "status_snapshots"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.1"
+    },
+    "company_registry": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "$ref": "#/$defs/company"
+      },
+      "maxItems": 2,
+      "contains": {
+        "type": "object",
+        "properties": {
+          "company_id": {
+            "const": "ai_revenue"
+          }
+        },
+        "required": [
+          "company_id"
+        ]
+      },
+      "minContains": 1,
+      "maxContains": 1
+    },
+    "decisions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/decision"
+      }
+    },
+    "workstreams": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/workstream"
+      }
+    },
+    "status_snapshots": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "$ref": "#/$defs/snapshot"
+      },
+      "contains": {
+        "type": "object",
+        "properties": {
+          "company_id": {
+            "const": "ai_revenue"
+          }
+        },
+        "required": [
+          "company_id"
+        ]
+      },
+      "minContains": 1,
+      "maxContains": 1
+    }
+  },
+  "$defs": {
+    "company": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "company_id",
+        "display_name",
+        "authority_boundary",
+        "records_isolated",
+        "readiness_owner"
+      ],
+      "properties": {
+        "company_id": {
+          "enum": [
+            "ai_revenue",
+            "trading_technology"
+          ]
+        },
+        "display_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "authority_boundary": {
+          "const": "independent_company"
+        },
+        "records_isolated": {
+          "const": true
+        },
+        "readiness_owner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "shared_services": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decision_id",
+        "decision",
+        "recorded_at",
+        "scope",
+        "approval_state",
+        "status",
+        "affected_companies",
+        "workstream_ids",
+        "evidence_refs"
+      ],
+      "properties": {
+        "decision_id": {
+          "type": "string",
+          "pattern": "^DEC-[A-Z0-9-]+$"
+        },
+        "decision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "scope": {
+          "enum": [
+            "programme",
+            "ai_revenue",
+            "trading_technology",
+            "shared_service"
+          ]
+        },
+        "approval_state": {
+          "enum": [
+            "owner_approved",
+            "pending_owner",
+            "not_required",
+            "unknown"
+          ]
+        },
+        "status": {
+          "enum": [
+            "active",
+            "superseded",
+            "withdrawn",
+            "proposed"
+          ]
+        },
+        "affected_companies": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "ai_revenue",
+              "trading_technology"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "workstream_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "supersedes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "workstream": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workstream_id",
+        "name",
+        "company_scope",
+        "status",
+        "owner_role",
+        "evidence_refs"
+      ],
+      "properties": {
+        "workstream_id": {
+          "type": "string",
+          "pattern": "^WS-[A-Z0-9-]+$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "company_scope": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "ai_revenue",
+              "trading_technology",
+              "shared_service"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "status": {
+          "enum": [
+            "planned",
+            "research",
+            "in_progress",
+            "blocked",
+            "verified",
+            "complete",
+            "deferred"
+          ]
+        },
+        "owner_role": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "depends_on": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "gate_id",
+        "status",
+        "critical",
+        "evidence_refs"
+      ],
+      "properties": {
+        "gate_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "PASS",
+            "FAIL",
+            "BLOCKED",
+            "NOT_RUN",
+            "WAIVED"
+          ]
+        },
+        "critical": {
+          "type": "boolean"
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "blocker": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "blocker_id",
+        "severity",
+        "summary"
+      ],
+      "properties": {
+        "blocker_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "severity": {
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ]
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidence_id",
+        "reference",
+        "evidence_type"
+      ],
+      "properties": {
+        "evidence_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reference": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_type": {
+          "enum": [
+            "commit",
+            "test_run",
+            "report",
+            "approval_record",
+            "deployment_record",
+            "external_source",
+            "other"
+          ]
+        },
+        "verified_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        }
+      }
+    },
+    "snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "snapshot_id",
+        "company_id",
+        "schema_version",
+        "source_revision",
+        "published_at",
+        "overall_status",
+        "subsystems",
+        "gates",
+        "blockers",
+        "incident_summary",
+        "evidence"
+      ],
+      "properties": {
+        "snapshot_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "company_id": {
+          "enum": [
+            "ai_revenue",
+            "trading_technology"
+          ]
+        },
+        "schema_version": {
+          "const": "0.1"
+        },
+        "source_revision": {
+          "type": "string",
+          "minLength": 7
+        },
+        "published_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "overall_status": {
+          "enum": [
+            "HEALTHY",
+            "DEGRADED",
+            "BLOCKED",
+            "UNKNOWN",
+            "STALE"
+          ]
+        },
+        "subsystems": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "enum": [
+              "HEALTHY",
+              "DEGRADED",
+              "BLOCKED",
+              "UNKNOWN",
+              "STALE",
+              "NOT_IMPLEMENTED"
+            ]
+          }
+        },
+        "gates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/gate"
+          }
+        },
+        "blockers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/blocker"
+          }
+        },
+        "incident_summary": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "open_count",
+            "highest_severity",
+            "quarantined"
+          ],
+          "properties": {
+            "open_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "highest_severity": {
+              "enum": [
+                "none",
+                "low",
+                "medium",
+                "high",
+                "critical"
+              ]
+            },
+            "quarantined": {
+              "type": "boolean"
+            }
+          }
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/evidence"
+          }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "properties": {
+        "company_registry": {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "company_id": {
+                "const": "trading_technology"
+              }
+            },
+            "required": [
+              "company_id"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      }
+    },
+    {
+      "properties": {
+        "status_snapshots": {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "company_id": {
+                "const": "trading_technology"
+              }
+            },
+            "required": [
+              "company_id"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      }
+    }
+  ]
+}

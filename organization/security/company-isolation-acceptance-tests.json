@@ -1,0 +1,114 @@
+{
+  "schema_version": "1.0.0",
+  "status": "acceptance_test_vectors_not_executed",
+  "policy_file": "organization/security/company-isolation-policy.json",
+  "cases": [
+    {
+      "id": "T01",
+      "scenario": "AI Revenue agent reads own approved task",
+      "principal_company": "ai_revenue",
+      "resource_company": "ai_revenue",
+      "expected": "allow_if_role_permission_and_purpose_match"
+    },
+    {
+      "id": "T02",
+      "scenario": "AI Revenue agent reads Trading private memory",
+      "principal_company": "ai_revenue",
+      "resource_company": "trading_technology",
+      "expected": "deny"
+    },
+    {
+      "id": "T03",
+      "scenario": "Trading agent reads AI Revenue customer records",
+      "principal_company": "trading_technology",
+      "resource_company": "ai_revenue",
+      "expected": "deny"
+    },
+    {
+      "id": "T04",
+      "scenario": "OCC reads approved aggregate status summary",
+      "principal_company": "main_hub_occ",
+      "resource_company": "shared_approved",
+      "expected": "allow_if_approved"
+    },
+    {
+      "id": "T05",
+      "scenario": "OCC reads company credential",
+      "principal_company": "main_hub_occ",
+      "resource_company": "company_restricted",
+      "expected": "deny"
+    },
+    {
+      "id": "T06",
+      "scenario": "AI Revenue CFO reads Trading ledger",
+      "principal_company": "ai_revenue",
+      "resource_company": "trading_technology",
+      "expected": "deny"
+    },
+    {
+      "id": "T07",
+      "scenario": "Trading agent attempts to alter HALT control",
+      "principal_company": "trading_technology",
+      "resource_company": "trading_technology",
+      "expected": "deny"
+    },
+    {
+      "id": "T08",
+      "scenario": "Ruflo agent requests permission escalation",
+      "principal_company": "ai_revenue",
+      "resource_company": "ai_revenue",
+      "expected": "deny"
+    },
+    {
+      "id": "T09",
+      "scenario": "Model output requests external publication",
+      "principal_company": "ai_revenue",
+      "resource_company": "external_action",
+      "expected": "owner_approval_required"
+    },
+    {
+      "id": "T10",
+      "scenario": "Expired or missing principal identity",
+      "principal_company": "unknown",
+      "resource_company": "company_confidential",
+      "expected": "deny"
+    },
+    {
+      "id": "T11",
+      "scenario": "Policy service unavailable",
+      "principal_company": "any",
+      "resource_company": "any",
+      "expected": "deny"
+    },
+    {
+      "id": "T12",
+      "scenario": "Cross-company data exchange has no approval reference",
+      "principal_company": "ai_revenue",
+      "resource_company": "trading_technology",
+      "expected": "deny_and_audit"
+    },
+    {
+      "id": "T13",
+      "scenario": "Agent reads prompt-injection text from repository file",
+      "principal_company": "ai_revenue",
+      "resource_company": "untrusted_input",
+      "expected": "treat_as_data_no_policy_change"
+    },
+    {
+      "id": "T14",
+      "scenario": "Approved shared generic code is accessed",
+      "principal_company": "trading_technology",
+      "resource_company": "shared_approved",
+      "expected": "allow_if_scope_and_integrity_verified"
+    },
+    {
+      "id": "T15",
+      "scenario": "Agent tries to access secrets through environment or logs",
+      "principal_company": "any",
+      "resource_company": "regulated_or_secret",
+      "expected": "deny_and_alert"
+    }
+  ],
+  "pass_criteria": "Every case must be executed against the independent deterministic policy enforcement point; all expected decisions must match; denied actions must leave no side effects; audit records must identify principal, resource, purpose, decision and policy version.",
+  "prohibited_claim": "Authored test vectors are not test results."
+}

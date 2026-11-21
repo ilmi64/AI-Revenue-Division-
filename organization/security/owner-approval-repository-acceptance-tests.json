@@ -1,0 +1,30 @@
+{
+  "status": "schema_review_requirements_not_executed",
+  "scenarios": [
+    "Approval record contains full company, stream, owner, agent, session, task, operation, resource, recipient and audience scope.",
+    "Amount is integer minor units and currency is a three-letter uppercase code; both null or both present.",
+    "Intent, signed-payload and signature digests use canonical 64-character lowercase SHA-256 hex.",
+    "Expiry is strictly later than issuance.",
+    "Approval nonce is unique within company.",
+    "Approval ID is globally unique.",
+    "Only trusted approval service role can insert records.",
+    "Agents and model runtimes have no SQL credentials.",
+    "Owner signature verification occurs before repository insertion.",
+    "Approval record and approval_issued audit event commit atomically.",
+    "Audit head is locked and advanced transactionally.",
+    "Concurrent consumption of one approval yields at most one winner.",
+    "Consumption is bound to one unique action ID.",
+    "Consumption and approval_consumed audit event commit atomically.",
+    "Revocation and approval_revoked audit event commit atomically.",
+    "Expired or revoked approval cannot be consumed.",
+    "Scope mismatch cannot be consumed.",
+    "Amount or currency mismatch cannot be consumed.",
+    "Intent digest mismatch cannot be consumed.",
+    "Unrelated integrity/audit failure is not misclassified as replay.",
+    "Database outage or ambiguous commit fails closed and requires reconciliation.",
+    "Company A role cannot read or write Company B approval or audit records.",
+    "Audit chain is verified against independently signed checkpoints on restore.",
+    "Approval consumption eventually shares the dispatch/recovery transaction boundary.",
+    "The original verified signed approval envelope is retained for audit and independent re-verification."
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "status": "acceptance_scenarios_proposed_not_executed",
+  "scope": "transactional audit append, owner approval consumption, outbox dispatch and recovery",
+  "database_target": "PostgreSQL-compatible relational design; no live database selected or provisioned",
+  "scenarios": [
+    {"id":"TX-01","case":"two simultaneous consumers race for one approval_id","expected":"exactly one transaction commits; the other fails unique constraint and is denied or returns the recorded idempotent result"},
+    {"id":"TX-02","case":"two approvals reuse one nonce_hash","expected":"unique nonce constraint rejects the second approval"},
+    {"id":"TX-03","case":"transaction fails after consumption insert but before outbox insert","expected":"whole transaction rolls back; no approval is consumed and no dispatch occurs"},
+    {"id":"TX-04","case":"transaction commits but dispatcher crashes before dispatch","expected":"pending outbox survives restart and is safely leased later"},
+    {"id":"TX-05","case":"dispatcher sends request but crashes before recording response","expected":"mark uncertain; reconcile using downstream idempotency key before retry"},
+    {"id":"TX-06","case":"same idempotency key is retried","expected":"same durable intent/result; never create a second non-idempotent action"},
+    {"id":"TX-07","case":"approval revoked before consumption","expected":"transaction observes revocation and denies"},
+    {"id":"TX-08","case":"task cancelled before consumption","expected":"transaction observes cancellation and denies"},
+    {"id":"TX-09","case":"task cancelled after outbox commit but before dispatch","expected":"dispatcher rechecks cancellation and cancels if policy permits; otherwise escalates to owner"},
+    {"id":"TX-10","case":"audit sequence allocation races","expected":"row lock/serializable transaction allocates unique contiguous sequence per stream"},
+    {"id":"TX-11","case":"audit event insertion fails","expected":"business authorization transaction rolls back or enters an explicitly approved fail-closed recovery path"},
+    {"id":"TX-12","case":"audit row update/delete attempted by application writer","expected":"database permissions reject mutation"},
+    {"id":"TX-13","case":"checkpoint signature or external anchor mismatch","expected":"quarantine stream and alert independent auditor"},
+    {"id":"TX-14","case":"database unavailable or serialization retries exhausted","expected":"fail closed; no external side effect"},
+    {"id":"TX-15","case":"cross-company approval or outbox reference","expected":"company-scoped foreign-key/row-policy enforcement denies access"},
+    {"id":"TX-16","case":"backup restore reintroduces an already consumed approval","expected":"externally anchored consumption/checkpoint reconciliation prevents replay before gateways resume"}
+  ],
+  "required_validation": [
+    "real database integration tests with concurrent independent sessions",
+    "transaction rollback and crash injection at every commit/dispatch boundary",
+    "backup/restore and point-in-time recovery rehearsal",
+    "role/permission tests using separate writer, dispatcher and auditor identities",
+    "signature, key rotation, revocation and external checkpoint verification",
+    "independent security review before any production use"
+  ]
+}

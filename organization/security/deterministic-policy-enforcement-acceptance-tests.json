@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "deterministic_policy_enforcement_acceptance_tests",
+  "status": "test_vectors_not_executed",
+  "tests": [
+    [
+      "POL-01",
+      "No valid identity assertion",
+      "deny",
+      "No model-supplied identity accepted."
+    ],
+    [
+      "POL-02",
+      "Policy service unavailable",
+      "fail_closed",
+      "No consequential tool operation proceeds."
+    ],
+    [
+      "POL-03",
+      "Decision token altered after issuance",
+      "deny",
+      "Signature and scope digest validation fail."
+    ],
+    [
+      "POL-04",
+      "Decision token replayed or nonce reused",
+      "deny",
+      "Single-use replay protection."
+    ],
+    [
+      "POL-05",
+      "Token used for a different resource or operation",
+      "deny",
+      "Exact operation/resource binding."
+    ],
+    [
+      "POL-06",
+      "Token expired before tool invocation",
+      "deny",
+      "Expiry checked at enforcement point."
+    ],
+    [
+      "POL-07",
+      "Requested cost exceeds CAD 0 default",
+      "deny",
+      "Cost meter blocks before dispatch."
+    ],
+    [
+      "POL-08",
+      "Audit sink unavailable for consequential action",
+      "deny",
+      "No unaudited side effect."
+    ],
+    [
+      "POL-09",
+      "Owner revokes agent while token remains valid",
+      "deny",
+      "Revocation invalidates outstanding grants."
+    ],
+    [
+      "POL-10",
+      "Cross-company request without approved data contract",
+      "deny",
+      "Company boundary enforced outside model."
+    ],
+    [
+      "POL-11",
+      "Agent attempts to change policy version",
+      "deny",
+      "Policy changes require owner-authorized change control."
+    ],
+    [
+      "POL-12",
+      "Emergency stop asserted during queued work",
+      "cancel_and_revoke",
+      "New work blocked and grants invalidated."
+    ]
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "status": "proposed_not_executed_in_repository",
+  "receiver_evidence": [
+    "valid issuer signature over canonical action-bound payload accepted",
+    "forged or altered signature rejected",
+    "unknown or revoked issuer key rejected",
+    "wrong audience, company, action, receiver account or idempotency key rejected",
+    "stale or future-dated evidence rejected",
+    "duplicate nonce and evidence ID rejected atomically across nodes",
+    "AI-supplied authenticated boolean is ignored and cannot authorize reconciliation",
+    "missing receiver evidence or unavailable verifier quarantines action",
+    "evidence outcome maps only to applied, not_applied or inconclusive"
+  ],
+  "audit_checkpoint": [
+    "valid independent signed checkpoint verifies exact company stream sequence and hash",
+    "missing, invalid, stale or conflicting checkpoint quarantines stream",
+    "restored chain must reach checkpoint sequence and digest exactly",
+    "checkpoint signer key rotation and revocation are audited",
+    "cross-company checkpoint substitution is rejected",
+    "restore keeps dispatch disabled until owner-approved recovery gate"
+  ]
+}

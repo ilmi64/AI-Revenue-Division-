@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "deterministic_policy_enforcement_interface",
+  "status": "proposed_interface_not_implemented_or_enforced",
+  "company_scope": "AI Revenue",
+  "purpose": "Define an external deterministic authorization boundary between AI agents/orchestrators and tools, data, compute or external side effects.",
+  "trust_model": {
+    "policy_engine_is_authoritative": true,
+    "model_and_orchestrator_are_untrusted_requesters": true,
+    "default_decision": "deny",
+    "failure_mode": "fail_closed",
+    "policy_engine_must_run_outside_model_context": true,
+    "agent_cannot_modify_policy_or_sign_decision_tokens": true
+  },
+  "decision_request": {
+    "required_fields": [
+      "request_id",
+      "company_id",
+      "agent_identity_assertion_ref",
+      "session_id",
+      "task_id",
+      "operation",
+      "resource",
+      "scope",
+      "input_classification",
+      "requested_cost_cad",
+      "approval_ref",
+      "idempotency_key",
+      "nonce",
+      "requested_at",
+      "expires_at",
+      "runtime_attestation_ref"
+    ],
+    "validation": [
+      "Authenticate identity assertion with trusted issuer",
+      "Verify company, role, session and task are active",
+      "Check task scope and capability allowlist",
+      "Check resource classification and company boundary",
+      "Check approval binding and expiry where required",
+      "Check cost ceiling and zero-spend policy",
+      "Check nonce, idempotency and replay cache",
+      "Check emergency stop and policy version"
+    ]
+  },
+  "decision_response": {
+    "fields": [
+      "decision_id",
+      "request_id",
+      "decision",
+      "reason_codes",
+      "policy_version",
+      "company_id",
+      "agent_id",
+      "task_id",
+      "operation",
+      "resource",
+      "scope_digest",
+      "approval_ref",
+      "cost_cap_cad",
+      "issued_at",
+      "expires_at",
+      "single_use_nonce",
+      "audit_event_id",
+      "signature"
+    ],
+    "decisions": [
+      "allow",
+      "deny",
+      "require_owner_approval",
+      "quarantine"
+    ],
+    "allow_token_rules": [
+      "Cryptographically authenticated by policy service",
+      "Bound to one company, agent, session, task, operation, resource and scope digest",
+      "Short lived with maximum 30 second validity",
+      "Single use; nonce and request id cannot be replayed",
+      "Cannot be widened or reinterpreted by model or orchestrator",
+      "Must be revalidated at the tool boundary immediately before operation"
+    ]
+  },
+  "enforcement_points": [
+    "scheduler_before_task_assignment",
+    "runtime_before_tool_invocation",
+    "data_gateway_before_read_or_write",
+    "cost_meter_before_billable_inference_or_compute",
+    "external_action_gateway_before_side_effect",
+    "audit_sink_for_every_decision"
+  ],
+  "policy_controls": {
+    "company_isolation": "Deny cross-company access unless an explicit owner-approved, recipient-accepted, field-scoped and time-bounded data contract is present.",
+    "permissions": "Least privilege; explicit allowlists; no wildcard tool or resource grants.",
+    "approvals": "Approval is bound to exact action, resource, recipient, amount, company and expiry; material changes require a new approval.",
+    "spending": "CAD 0 maximum by default. Billable operations denied before dispatch unless the owner changes the budget policy and approves the exact spend.",
+    "secrets": "No secret values returned to model context. Secret broker access is a separate privileged operation and is disabled by default.",
+    "audit": "Append-only, tamper-evident decision and action records; redact secrets and unnecessary personal data.",
+    "revocation": "Revocation and emergency stop invalidate outstanding grants and deny new operations.",
+    "policy_change": "Policy changes require owner-authorized change control, versioning, review and audit; agents cannot propose-and-apply their own policy changes."
+  },
+  "emergency_controls": {
+    "stop_sources": [
+      "owner",
+      "authorized_security_operator",
+      "authorized_company_risk_authority"
+    ],
+    "effects": [
+      "deny_new_consequential_operations",
+      "revoke_outstanding_decision_tokens",
+      "cancel_queued_tasks",
+      "request_running_task_cancellation",
+      "preserve_audit_evidence"
+    ],
+    "restart": "Requires authorized human release and a fresh health and policy-integrity check."
+  },
+  "operational_requirements": {
+    "high_availability_must_not_weaken_fail_closed_semantics": true,
+    "clock_skew_and_expiry_checked": true,
+    "policy_version_pinned_per_decision": true,
+    "audit_write_failure_blocks_consequential_action": true,
+    "runtime_attestation_required_for_privileged_tools": true,
+    "implementation_status": "not_implemented",
+    "tests_status": "not_executed",
+    "deployment_authorized": false
+  }
+}

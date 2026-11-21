@@ -1,0 +1,85 @@
+{
+  "status": "proposed_not_executed_in_production",
+  "scenarios": [
+    {
+      "id": "OB-01",
+      "case": "duplicate enqueue with same key and same intent",
+      "expected": "same action identity retained"
+    },
+    {
+      "id": "OB-02",
+      "case": "same idempotency key with different intent",
+      "expected": "reject conflict"
+    },
+    {
+      "id": "OB-03",
+      "case": "worker lease expires after possible dispatch",
+      "expected": "do not automatically redeliver"
+    },
+    {
+      "id": "OB-04",
+      "case": "worker crashes before external send",
+      "expected": "reconcile; retry only after proof of no effect"
+    },
+    {
+      "id": "OB-05",
+      "case": "remote accepts then worker crashes before local commit",
+      "expected": "outcome_unknown; reconcile remote state"
+    },
+    {
+      "id": "OB-06",
+      "case": "sender timeout with ambiguous acknowledgement",
+      "expected": "outcome_unknown; no blind retry"
+    },
+    {
+      "id": "OB-07",
+      "case": "fresh policy denies action after claim",
+      "expected": "cancel without invoking sender"
+    },
+    {
+      "id": "OB-08",
+      "case": "approval revoked between enqueue and dispatch",
+      "expected": "gateway denies at dispatch boundary"
+    },
+    {
+      "id": "OB-09",
+      "case": "task cancelled after enqueue",
+      "expected": "no dispatch"
+    },
+    {
+      "id": "OB-10",
+      "case": "duplicate completion with identical result",
+      "expected": "return recorded completion"
+    },
+    {
+      "id": "OB-11",
+      "case": "duplicate completion with different result",
+      "expected": "raise incident and quarantine"
+    },
+    {
+      "id": "OB-12",
+      "case": "retry attempts exhausted after proven no-effect",
+      "expected": "failed/quarantined"
+    },
+    {
+      "id": "OB-13",
+      "case": "restart with active lease",
+      "expected": "preserve leased state; require reconciliation"
+    },
+    {
+      "id": "OB-14",
+      "case": "outbox database unavailable",
+      "expected": "fail closed; no sender invocation"
+    },
+    {
+      "id": "OB-15",
+      "case": "remote receiver idempotency retention expired",
+      "expected": "do not retry; manual reconciliation"
+    },
+    {
+      "id": "OB-16",
+      "case": "reconciliation evidence missing",
+      "expected": "deny retry"
+    }
+  ]
+}

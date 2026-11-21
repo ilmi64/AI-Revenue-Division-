@@ -1,0 +1,119 @@
+import hashlib, os, sqlite3, tempfile, threading, unittest
+from atomic_evidence_reconciliation_reference import (
+    SQLiteAtomicReconciliationStore, ReconciliationError, EvidenceReplayError)
+from receiver_evidence_verifier_reference import ReceiverEvidenceVerifier
+
+class AtomicEvidenceReconciliationTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp=tempfile.TemporaryDirectory()
+        self.path=os.path.join(self.tmp.name,"state.sqlite")
+        self.verifier=ReceiverEvidenceVerifier(
+            lambda issuer,payload,signature: issuer=="receiver-A" and
+              signature==hashlib.sha256(payload).hexdigest(),
+            {"receiver-A"},max_age_seconds=300,future_skew_seconds=30)
+        self.store=SQLiteAtomicReconciliationStore(self.path,trusted_verifier=self.verifier)
+        self.store.register_unknown_action(action_id="a1",company="coA",
+            receiver_account="acct1",idempotency_key="idem1")
+    def tearDown(self):
+        self.store.close()
+        self.tmp.cleanup()
+    def evidence(self, *, eid="ev1", nonce="n1", outcome="applied", **overrides):
+        e={"evidence_id":eid,"issuer":"receiver-A","audience":"recovery-gateway",
+           "company":"coA","action_id":"a1","receiver_account":"acct1",
+           "idempotency_key":"idem1","outcome":outcome,"observed_at":100,
+           "nonce":nonce,"signature":""}
+        e.update(overrides)
+        e["signature"]=hashlib.sha256(
+            ReceiverEvidenceVerifier.canonical_signed_payload(e)).hexdigest()
+        return e
+    def reconcile(self,e):
+        return self.store.reconcile(action_id="a1",evidence=e,now=101)
+
+    def test_atomic_receipt_state_and_audit(self):
+        self.assertEqual(self.reconcile(self.evidence()),"reconciled_applied")
+        self.assertEqual(self.store.action_state("a1"),"reconciled_applied")
+        self.assertTrue(self.store.verify_audit("coA"))
+        self.assertEqual(self.store.db.execute("select count(*) from evidence_receipts").fetchone()[0],1)
+    def test_retry_after_commit_is_idempotent(self):
+        e=self.evidence()
+        self.assertEqual(self.reconcile(e),"reconciled_applied")
+        self.assertEqual(self.store.reconcile(action_id="a1",evidence=e,
+            now=103),"duplicate_same_result")
+        self.assertEqual(self.store.db.execute("select count(*) from audit").fetchone()[0],1)
+    def test_audit_failure_rolls_back_receipt_and_state_then_retry_succeeds(self):
+        e=self.evidence()
+        self.store.db.execute("""CREATE TRIGGER reject_audit BEFORE INSERT ON audit
+          BEGIN SELECT RAISE(ABORT,'audit unavailable'); END;""")
+        with self.assertRaises(sqlite3.IntegrityError): self.reconcile(e)
+        self.assertEqual(self.store.action_state("a1"),"outcome_unknown")
+        self.assertEqual(self.store.db.execute("select count(*) from evidence_receipts").fetchone()[0],0)
+        self.store.db.execute("DROP TRIGGER reject_audit")
+        self.assertEqual(self.reconcile(e),"reconciled_applied")
+    def test_nonce_replay_with_new_evidence_id_rejected(self):
+        self.reconcile(self.evidence())
+        e=self.evidence(eid="ev2",nonce="n1")
+        with self.assertRaises(EvidenceReplayError): self.reconcile(e)
+    def test_evidence_id_replay_with_new_nonce_rejected(self):
+        self.reconcile(self.evidence())
+        e=self.evidence(eid="ev1",nonce="n2")
+        with self.assertRaises(EvidenceReplayError): self.reconcile(e)
+    def test_same_evidence_cannot_be_rebound_to_other_action(self):
+        self.reconcile(self.evidence())
+        self.store.register_unknown_action(action_id="a2",company="coA",
+            receiver_account="acct1",idempotency_key="idem2")
+        e=self.evidence(eid="ev1",nonce="n2",action_id="a2",idempotency_key="idem2")
+        with self.assertRaises(EvidenceReplayError):
+            self.store.reconcile(action_id="a2",evidence=e,now=101)
+    def test_invalid_signature_rejected_at_store_boundary(self):
+        e=self.evidence()
+        e["signature"]="forged"
+        with self.assertRaisesRegex(ReconciliationError,"trusted_evidence_verification_failed"):
+            self.reconcile(e)
+        self.assertEqual(self.store.action_state("a1"),"outcome_unknown")
+
+    def test_store_requires_trusted_verifier(self):
+        with self.assertRaisesRegex(ReconciliationError,"trusted_receiver_verifier_required"):
+            SQLiteAtomicReconciliationStore(self.path)
+    def test_store_rejects_untrusted_duck_typed_verifier(self):
+        class FakeVerifier:
+            def verify_for_atomic_reconciliation(self,*args,**kwargs):
+                return {"verified":True}
+        with self.assertRaisesRegex(ReconciliationError,"trusted_receiver_verifier_required"):
+            SQLiteAtomicReconciliationStore(self.path,trusted_verifier=FakeVerifier())
+
+    def test_scope_mismatch_rejected(self):
+        e=self.evidence(receiver_account="other")
+        with self.assertRaises(Exception): self.reconcile(e)
+        self.assertEqual(self.store.action_state("a1"),"outcome_unknown")
+    def test_inconclusive_quarantines_atomically(self):
+        self.assertEqual(self.reconcile(self.evidence(outcome="inconclusive")),"quarantined")
+        self.assertEqual(self.store.action_state("a1"),"quarantined")
+        self.assertTrue(self.store.verify_audit("coA"))
+    def test_not_applied_closes_old_action(self):
+        self.assertEqual(self.reconcile(self.evidence(outcome="not_applied")),"reconciled_not_applied")
+    def test_two_connections_only_one_reconciliation_commits(self):
+        e=self.evidence()
+        barrier=threading.Barrier(2)
+        outcomes=[]
+        def worker():
+            worker_verifier=ReceiverEvidenceVerifier(
+                lambda issuer,payload,signature: issuer=="receiver-A" and
+                  signature==hashlib.sha256(payload).hexdigest(),
+                {"receiver-A"},max_age_seconds=300,future_skew_seconds=30)
+            db=SQLiteAtomicReconciliationStore(self.path,trusted_verifier=worker_verifier)
+            barrier.wait()
+            try:
+                outcomes.append(db.reconcile(action_id="a1",evidence=e,now=101))
+            except (EvidenceReplayError,ReconciliationError):
+                outcomes.append("denied")
+            finally: db.close()
+        threads=[threading.Thread(target=worker) for _ in range(2)]
+        [t.start() for t in threads]
+        [t.join(timeout=5) for t in threads]
+        self.assertTrue(all(not t.is_alive() for t in threads))
+        self.assertEqual(outcomes.count("reconciled_applied"),1)
+        self.assertEqual(outcomes.count("duplicate_same_result"),1)
+        self.assertEqual(self.store.db.execute("select count(*) from evidence_receipts").fetchone()[0],1)
+        self.assertTrue(self.store.verify_audit("coA"))
+
+if __name__=="__main__": unittest.main()
