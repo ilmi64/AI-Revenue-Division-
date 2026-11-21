@@ -52,7 +52,7 @@ As of 2026-11-21:
 - the evidence located is historical, from July/August 2026;
 - no current official MoonPay campaign terms, active claim page, live faucet status, new claim window, reward amount or closing date has been verified;
 - third-party trackers describe the launch promotion as having reopened, but do not establish that it remains active now;
-- one third-party report says Canada was excluded, but an official campaign eligibility document confirming the specific airdrop restriction was not located;
+- third-party reports conflict on geographic scope: one says the promotion was not aimed at UK residents, while another says Canada, the UK and Australia were excluded. Neither is an official campaign-terms source;
 - the general PayBox help material says the product is available in most countries and asks users to check during signup; this does not prove that a particular promotion is available in Canada.
 
 **Disposition:** classify the USDC faucet as **HISTORICAL / CURRENT STATUS UNVERIFIED / CANADIAN ELIGIBILITY UNVERIFIED (POSSIBLY EXCLUDED)**. Do not create an account or connect an X account solely on the assumption that a reward remains available. Do not use VPNs, false residency, alternate identities or other eligibility workarounds. Recheck only against a current official PayBox dashboard notice and official campaign terms.
