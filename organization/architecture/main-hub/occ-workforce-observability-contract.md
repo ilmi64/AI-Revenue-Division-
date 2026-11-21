@@ -53,3 +53,7 @@ OCC operators may view approved aggregate metrics and evidence references. There
 - Audit and recovery preserve publisher sequence, source revision and last-known-good provenance.
 
 This contract is a design target. No feed, authentication mechanism or live queue integration is claimed to exist.
+
+## 8. Research publication observability
+
+Research publication counts, recipient-scoped delivery states, freshness bands and acknowledgement status may be exposed only through the [Recipient-Scoped Intelligence Delivery Contract](../research/recipient-scoped-intelligence-delivery-contract.md) and the existing aggregate allowlist. OCC does not receive report bodies, raw source records or company-private task content.
