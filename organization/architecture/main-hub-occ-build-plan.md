@@ -243,3 +243,19 @@ The Public APIs catalogue has been evaluated as a permanent discovery/reference 
 - PayBox is research-only and is not approved as a company wallet or trading gateway: current published terms prohibit use on behalf of a business entity and identify the contracting provider as unregulated BVI Launchpad Limited.
 - The PayBox USDC launch faucet is historical; current official availability and Canadian eligibility remain unverified. Airdrop research is optional and cannot fund or gate either company's independent launch.
 - No PayBox account, connector, wallet, X authorization, API call, claim, funding, transaction, or installation occurred.
+
+
+## 13. Owner's latest launch-priority and capital-contingency decision (2026-11-21)
+
+This section supersedes the earlier independent-launch wording in this build plan where it conflicts with the owner's latest sequencing decision.
+
+- **Default:** build AI Revenue and Trading & Technology simultaneously. Continue both companies' independent work queues, executive authority, finance, policies, records and readiness gates. Pursue Trading capital in parallel; do not pause Trading preparation while capital is being secured.
+- **Parallel launch path:** if Trading capital is available and Trading independently passes its company-launch gates, both companies may launch in parallel in the coordinated target window, after their own approvals. A ready company is not held back solely by delay in the other.
+- **Capital-shortfall fallback:** if Trading capital is unavailable at launch review, AI Revenue takes first launch priority if it passes its own readiness gate and the owner authorizes launch. Trading remains STANDBY / NOT LAUNCHED for funded/live operations; continue only safe, authorized no-cost research, development and paper preparation.
+- **Reactivation:** reassess Trading when a legitimate capital source is available and its own readiness gates pass. AI Revenue revenue may be considered as a possible future source only through a separately approved, legally/accountingly sound arrangement. There is no automatic intercompany transfer, loan, shared treasury, guarantee or funding obligation.
+- **Capital integrity:** do not count projected, unclaimed, airdropped or hypothetical rewards as available capital. Do not substitute borrowed funds, paid memberships, leverage, deposits or speculative rewards for capital readiness.
+- **Trading live execution:** remains a separate gate after company launch and requires its own evidence-based readiness and explicit owner approval.
+- **No status inflation:** report actual capital availability, source, restrictions, company readiness and launch status separately. If capital is unavailable, Trading is standby—not launched or live.
+- This sequencing does not merge the companies or make one company's private records, executive authority, finance or risk controls subordinate to the other. Main Hub/OCC and Research & Intelligence remain non-operational shared services unless separately authorized and verified.
+
+The four-lane build continues simultaneously across AI Revenue, Trading & Technology, Main Hub/OCC and Research & Intelligence. The capital contingency changes launch order only when required; it does not pause parallel preparation.
