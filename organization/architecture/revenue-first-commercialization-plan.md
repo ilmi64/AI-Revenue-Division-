@@ -305,3 +305,7 @@ See [AI Revenue Delivery QA, Acceptance & Time-Capture Standard](ai-revenue-deli
 ## 22. Reusable engagement record
 
 Use the [AI Revenue Engagement Delivery Record Template](delivery/ai-revenue-engagement-delivery-record-template.md) for any future separately authorized engagement. It captures scope, work logs, evidence, defects, independent QA, customer acceptance and reconciled economics. It is blank and does not authorize customer work.
+
+## 23. Comparative synthetic rehearsal scorecard
+
+Use the [Synthetic Rehearsal Scorecard & Comparative Review Template](synthetic-rehearsal-scorecard-and-comparative-review-template.md) only after separate internal authorization. It consolidates the two fictional scenarios' scope confirmation, full-cycle time capture, QA evidence, defect/rework records, cost exposure and comparative decision. The scorecard is blank; both scenarios remain NOT RUN. Passing it would support only a further internal review, not pricing, customer validation, outreach, paid delivery or launch.
