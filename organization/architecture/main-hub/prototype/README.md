@@ -27,8 +27,8 @@ The default fixture directory is the sibling `../fixtures` directory. The progra
 
 ## Current verification record (2026-11-20)
 
-- Prototype code commit: `f844c158c3171f80ebfcf2a3d3dae093f8363592`.
-- Test-suite commit: updated in the current branch revision (25 authored tests; latest expanded execution pending).
+- Latest prototype code commit: `28bd48fd235e293668160b0ec1bc4f1ab3f63ffe`.
+- Latest test-suite commit: `5a0fb4c4ce3938e6e4f9e2bb21a07cc11278fd07` (25 authored tests; latest expanded execution pending).
 - A custom, offline structural check was applied to the exact committed schema and fixtures. The complete envelope, both company snapshots, registry companies, workstreams, and decisions produced no errors under the checker's implemented schema assertions.
 - Negative checks rejected a missing company snapshot, a duplicated company identity, and an unexpected field.
 - This is a custom structural check, **not** a standards-compliant Draft 2020-12 validator. Formal schema validation remains open.
