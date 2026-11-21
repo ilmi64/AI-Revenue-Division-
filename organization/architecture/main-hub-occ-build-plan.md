@@ -3,7 +3,7 @@
 **Status:** Approved architectural direction; implementation plan only — not deployed  
 **Priority:** First shared workstream  
 **Applies to:** Trading & Technology Company and AI Revenue Company  
-**Target:** Parallel development and evidence-based activation; AI Revenue revenue proof is required before Trading & Technology / Crypto launch; no calendar deadline  
+**Target:** Parallel development and independent evidence-based company launches; coordinated target window January 4–8, 2027; no company or shared-service launch dependency  
 **Budget:** CAD $0 incremental by default
 
 ## 1. Purpose
