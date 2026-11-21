@@ -266,3 +266,10 @@ AI Revenue's independent launch gate still requires its own governance, workforc
 - [Prospect qualification and validation framework](prospect-qualification-and-validation-framework.md) defines fit scoring, hard-stop criteria, evidence standards and an owner-approval-gated validation process.
 
 These documents do not authorize prospect contact, public claims, quotes, paid engagements or customer data access. Pricing remains unset and demand remains unvalidated.
+
+## 15. Internal rehearsal and service brief
+
+- [Synthetic delivery-time rehearsal](synthetic-delivery-time-rehearsal.md) defines the fictional workflow, time-capture stages and quality/economics evidence required before making a delivery-time claim.
+- [Practical Operations Improvement Audit — internal service brief](practical-operations-improvement-service-brief-internal.md) is a private draft only; it is not published, quoted or offered to customers.
+
+Neither artifact validates demand, pricing or delivery economics.
