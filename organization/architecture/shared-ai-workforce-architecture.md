@@ -177,3 +177,5 @@ The Main Hub/OCC must demonstrate governance, authenticated evidence handling, c
 - [Decision & Agreement Register](decision-and-agreement-register.md) — durable append-only owner agreements and material governance decisions.
 
 These are architecture/preparation artifacts only. They do not represent deployed agents, a live host, validated isolation, executed tests or operational coverage.
+
+- [Workforce parent–child task envelope contract](workforce-parent-child-task-envelope-contract.md) — defines deterministic identity/scope inheritance, child-task restrictions, revocation, audit and future synthetic denial cases. Draft only; not implemented or tested.
