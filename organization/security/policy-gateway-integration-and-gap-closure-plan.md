@@ -154,3 +154,7 @@ The consolidated target is documented in [PG-6 durable store, receiver idempoten
 ## PG-7 deliverable — independent security review and operational rehearsal
 
 The final review/rehearsal protocol is documented in [PG-7 independent security review and operational rehearsal plan](pg7-independent-security-review-and-operational-rehearsal-plan.md). It defines independent reviewer qualifications, exact-revision scope, identity/task/policy/approval/cost/data/dispatch/receiver/audit/recovery review domains, separate company overlays, 14 controlled synthetic/tabletop scenarios, finding severity and staged activation gates. PG-7 is authored architecture only: no independent review, test, rehearsal, deployment or production activation has occurred; tests remain unexecuted and require explicit owner authorization.
+
+## 14. PG-1 to PG-7 evidence crosswalk
+
+See [PG-1 to PG-7 Evidence and Blocker Crosswalk](pg1-pg7-evidence-and-blocker-crosswalk.md) for the consolidated distinction between documented controls, implementation evidence, execution, independent verification and remaining blockers.
