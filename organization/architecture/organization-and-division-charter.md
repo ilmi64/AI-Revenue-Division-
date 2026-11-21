@@ -72,6 +72,8 @@ The initial OCC is read-only and evidence-oriented. Company adapters publish onl
 
 ## 5. Research & Intelligence Division
 
+Detailed research governance, roles, specialist desks, source standards, archive rules, service catalogue and day/night handover are specified in `research-intelligence-division-charter.md`.
+
 Research & Intelligence is a first-class organization-level division/shared service with its own:
 - division leadership and research operations lead;
 - specialist AI workforce, identities and task queue;
