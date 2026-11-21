@@ -277,3 +277,7 @@ Neither artifact validates demand, pricing or delivery economics.
 ## 16. Synthetic rehearsal inputs
 
 See [Synthetic Rehearsal Input Pack](synthetic-rehearsal-input-pack.md) for the explicitly fictional figures used to rehearse the proposed workflow audit. All values are synthetic; the pack is not customer evidence or an industry benchmark.
+
+## 17. Source verification refresh
+
+The [Specialist Intelligence Source Verification](research/specialist-intelligence-source-verification.md) was refreshed against current public provider documentation. Buildix and Santiment remain conditional contextual research candidates; J7 remains on hold. No integration or paid access is approved.
