@@ -117,3 +117,8 @@ Synthetic acknowledgement: HANDOVER_ACCEPTED at 2026-11-21T17:05:00-05:00; incom
 ## 8. Reusable event verification and challenge record
 
 See [Grok Desk Event Verification & Challenge Record](grok-desk-event-verification-and-challenge-record.md). It is mirrored in the Trading & Technology repository. The template is advisory and does not authorize automated monitoring, ingestion or publication.
+
+
+## 9. Desk roster and assignment protocol
+
+See [Research & Intelligence Desk Roster, Work Assignment & Challenge Protocol](research-intelligence-desk-roster-and-assignment-protocol.md). This defines specialist desk responsibilities, company-scoped work orders, priority, independent challenge, dispositions and day/night handover requirements. It is mirrored in the Trading & Technology repository. The roster is proposed, not staffed or operational.
