@@ -179,3 +179,7 @@ The Main Hub/OCC must demonstrate governance, authenticated evidence handling, c
 These are architecture/preparation artifacts only. They do not represent deployed agents, a live host, validated isolation, executed tests or operational coverage.
 
 - [Workforce parent–child task envelope contract](workforce-parent-child-task-envelope-contract.md) — defines deterministic identity/scope inheritance, child-task restrictions, revocation, audit and future synthetic denial cases. Draft only; not implemented or tested.
+
+## Role and org-chart configuration
+
+- [Paperclip Role IDs and Organisation-Chart Configuration Draft](paperclip-role-id-and-org-chart-configuration-draft.md) — stable company/shared-service role IDs, first-pass org charts, identity metadata and default-deny permission profiles; draft only, not imported or provisioned.
