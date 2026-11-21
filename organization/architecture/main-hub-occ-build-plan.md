@@ -119,6 +119,9 @@ Build a **read-only status and evidence control centre first**. Do not begin wit
 
 ## 7. Workstreams the Main Hub must preserve
 
+AI Revenue's revenue-first commercial preparation is maintained in [Revenue-First, Zero-Upfront Commercialization Plan](revenue-first-commercialization-plan.md), with the reusable [workflow audit template](workflow-audit-template.md) and [synthetic demonstration](sample-synthetic-workflow-audit.md). These remain company-local business artifacts; OCC receives only approved summary evidence and does not perform customer-facing actions.
+
+
 - Main Hub/OCC and two-company governance. The company registry remains exactly two operating companies; the Research & Intelligence Division is a distinct organization-level division/shared service, not a third company.
 - Research & Intelligence Division: continuous day/night market, strategy, technology, AI, business, competitive, risk and data intelligence; research archives and source/provenance registry; opportunity discovery; evidence grading; specialist research agents; day/night handovers; scoped intelligence delivery to Trading & Technology, AI Revenue and future divisions. Preserve existing research and data rather than restarting it. Public/approved sources only; company-private records remain separately controlled.
 - Trading & Technology: PolyBot, REA bot/capability reverse engineering, strategy discovery, independent strategy implementation, backtesting, paper validation, market data/provenance, capital-flow intelligence, Crypto, Forex, indices, Gold, risk, security and recovery.
