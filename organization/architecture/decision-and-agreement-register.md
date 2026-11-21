@@ -88,3 +88,43 @@ This evidence snapshot supplements DR-2026-11-21-001. It does not change the agr
 - Zo Computer remains the agreed future persistent workstation candidate; its earlier reviewed pricing/trial terms remain subject to the no-spending rule and were not reactivated or reapproved.
 - OpenHands remains a bounded engineering-agent candidate, not a cloud-hosting provider.
 - No service has been installed, activated, connected, or tested. No account status, free entitlement, uptime, persistence, or production suitability is claimed as verified for the user's own accounts.
+
+
+### Additional previously discussed compute and cloud-desktop candidates — recovered and classified
+
+#### Google Colab
+- Officially a hosted Jupyter notebook service with free access to compute, including GPUs/TPUs when available. Google states free-tier limits are dynamic and not guaranteed; maximum runtime can be up to 12 hours depending on availability and usage, with idle timeouts and GPU restrictions.
+- Suitable for notebook-based research, data analysis, and bounded experiments; **not a persistent always-on workstation or general-purpose production host**.
+- Sources: https://research.google.com/colaboratory/faq.html
+- Status: **FREE RESEARCH/NOTEBOOK CANDIDATE**, no activation or compute execution authorized.
+
+#### Kaggle Notebooks
+- Official notebook documentation describes remote CPU/GPU/TPU environments, free accelerators subject to availability/queues, and session limits. Published technical details include up to 12 hours for CPU/GPU sessions, 9 hours for TPU sessions, and a 20 GB autosaved working disk; GPU quota is subject to weekly limits and change.
+- Suitable for bounded research, data science and ML experiments; **not a persistent workstation or dependable always-on agent host**.
+- Sources: https://www.kaggle.com/docs/notebooks
+- Source: https://www.kaggle.com/page/GPU-tips-and-tricks
+- Status: **FREE RESEARCH/NOTEBOOK CANDIDATE**, no activation or compute execution authorized.
+
+#### Rig — identity and cost now verified
+- Exact project identified as kaijiabo/rig / Rig, an MIT-licensed open-source cloud-desktop manager for AI coding agents. It creates Linux desktops through E2B, supports browser/computer use, and pauses idle desktops.
+- Rig itself is free software, but the hosted desktop compute is metered through E2B. The project currently estimates approximately US$0.46/hour for a 4-CPU/16-GB desktop at E2B rates. Therefore it is **not a zero-cost cloud-computer solution** under the current CAD $0 constraint.
+- Rig's optional browser-cookie import can copy many signed-in sessions into cloud desktops (banking/payment sites excluded by default); this creates a material credential/session-exposure risk and must not be used without a dedicated security review and explicit approval. The setup also requires Bun and an E2B account/API key.
+- Source: https://github.com/kaijiabo/rig
+- Status: **HOLD / NO PAID COMPUTE**. Retain only as a future candidate if metered compute becomes affordable and the credential-handling design passes security review.
+
+#### Grok Bot cloud computer
+- Previously reviewed as US$20.99 for the first month, then US$41.99/month or US$419.90/year.
+- Status: **REJECTED under the no-spending constraint**. Do not reactivate or recommend unless the owner explicitly changes the restriction.
+
+#### “Open Frames” name — unresolved
+- The user recalls an additional candidate sounding like “Open Frames.” Its exact product identity has not been verified from prior records or reliable sources.
+- Do not silently replace this name with OpenHands or another similarly named product. OpenHands remains separately classified as a bounded engineering-agent candidate, not a confirmed cloud-computer provider.
+- Status: **UNRESOLVED — recover exact name before classifying or recommending**.
+
+### Updated role classification
+- **Current development:** GitHub Codespaces (free personal-account quota, subject to account confirmation).
+- **Future persistent workstation:** Zo Computer (planned; no paid activation).
+- **Cloud agent desktops / sandboxes:** Cloudroom (free entitlement discrepancy unresolved); E2B (one-time credits, short sessions, possible card verification); Rig (E2B-metered; hold).
+- **Self-hosted VM lab:** PequeRoku (requires separate suitable Linux hardware/host).
+- **Notebook/research compute:** Google Colab and Kaggle Notebooks (ephemeral, dynamic quotas; not production hosting).
+- **Rejected:** Grok Bot cloud computer under current cost rule.
