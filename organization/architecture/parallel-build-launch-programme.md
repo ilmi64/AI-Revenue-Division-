@@ -2,7 +2,7 @@
 
 **Status:** Canonical execution plan; planning and architecture only  
 **Planning date:** 2026-11-21  
-**Target launch window:** 2027-01-04 to 2027-01-08, with January 2027 as the coordinated target  
+**Target:** Parallel development with evidence-based activation; AI Revenue must be independently operational and generating verified revenue before Trading & Technology / Crypto launch; no calendar deadline  
 **Budget posture:** CAD $0 incremental by default; no paid services or spending without explicit owner approval  
 **Applies to:** AI Revenue Company, Trading & Technology Company, Main Hub/OCC, and Research & Intelligence Division
 
@@ -168,8 +168,8 @@ A shared platform is a convenience and advantage, not a central authority. If a 
 - Main Hub or Research Division delay does not veto either company.
 
 ### Stage 4 — Coordinated launch window
-- Target January 4–8, 2027, subject to independent readiness.
-- Coordinate public/company milestones where useful, but do not force simultaneous activation if one company is not ready.
+- AI Revenue launch gate: independently operational and generating verified real revenue before Trading & Technology / Crypto launches. Trading & Technology / Crypto must separately pass its own evidence-based gates.
+- Develop both companies in parallel. AI Revenue does not wait for Crypto; Crypto does not launch until AI Revenue has verified operational revenue. No calendar date overrides readiness.
 - Never describe a company as launched, live or revenue-generating without verified evidence.
 - Trading live execution remains a separate approval gate after company launch.
 
