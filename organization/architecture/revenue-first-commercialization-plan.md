@@ -295,3 +295,8 @@ Neither document authorizes customer contact, public promotion, spending, contra
 ## 20. Second synthetic rehearsal input
 
 [Scenario 2 — Appointment Confirmation & Preparation](synthetic-second-rehearsal-scenario-pack.md) is a second distinct fictional workflow for a future internally authorized rehearsal. It is an input specification only; not calculated, timed or rehearsed. Two synthetic scenarios do not prove buyer demand, pricing or profitability.
+
+
+## 21. Delivery QA and acceptance standard
+
+See [AI Revenue Delivery QA, Acceptance & Time-Capture Standard](ai-revenue-delivery-qa-acceptance-and-time-capture-standard.md). It defines lifecycle states, hands-on versus elapsed time, defect/rework capture, independent QA, customer acceptance and evidence-based full-cycle economics. It is an internal standard only; no rehearsal or customer delivery has been performed.
