@@ -91,3 +91,8 @@ Main Hub/OCC receives only allowlisted aggregate metadata: work-order ID, recipi
 Before claiming operational readiness, demonstrate named accountable leadership and backup; verified roster and shift coverage; source register with rights/freshness/owner; separate company workspaces and access boundaries; durable work queue/audit/recovery; independent challenge capacity; recipient-authenticated delivery and redaction; incident escalation and coverage-gap reporting; resource/cost controls; rehearsed handover/outage recovery; owner and company executive acceptance.
 
 **Disposition:** ORGANIZATIONAL DESIGN PREPARED; NO STAFFING OR AGENT DEPLOYMENT VERIFIED; NO CONTINUOUS MONITORING; NO LIVE PUBLICATION; ADVISORY ONLY.
+
+
+## 10. Boundary with the organization-level Security & Recovery Division
+
+The Research & Intelligence Risk, Security & Integrity Challenge desk is an evidence/challenge function only. It does not replace or report as the organization-level Security & Recovery Division, does not command incidents and cannot authorize containment or recovery. Security & Recovery is a separate first-class organization-level division with its own charter, company-specific security owners, incident coordination and recovery assurance. Research may provide scoped threat/source intelligence; Security & Recovery determines operational relevance with the affected company. Each company retains its own incident authority, records, credentials and recovery path.
