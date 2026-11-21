@@ -87,3 +87,7 @@ Track intake age, time-to-triage, time-to-publication, source freshness, evidenc
 ## 11. Initial role-based work queue
 
 The initial cross-company preparation queue is mirrored in the AI Revenue repository at [Research & Intelligence Work-Order Backlog and Source Stewardship Register](intelligence/research-work-order-backlog-and-source-stewardship-register.md). The Trading & Technology repository carries the corresponding queue alongside its domain-specific research artifacts. The queue uses proposed role ownership only; it does not imply staffed personnel, active agents, source approvals, monitoring or continuous operation. Company-specific work and publications remain separately scoped.
+
+## Operating model and coverage contract
+
+- [Research & Intelligence Division — Operating Model and Coverage Contract](research-intelligence-division-operating-model-and-coverage-contract.md) — specialist desk remit, Grok Desk/HyperGrok workflow, source lifecycle, recipient boundaries and evidence gates for future continuous coverage. Design only; no staffing or monitoring is active.
