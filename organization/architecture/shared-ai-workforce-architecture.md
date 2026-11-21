@@ -2,7 +2,7 @@
 **Status:** Proposed architecture baseline — owner-approved for scoped implementation; not deployed  
 **Applies to:** Trading & Technology Company and AI Revenue Company  
 **Governance:** Main Hub / OCC  
-**Target:** January 2027 simultaneous company activation, subject to separate readiness gates
+**Target:** Parallel development; AI Revenue must be independently operational and generating verified revenue before Trading & Technology / Crypto launch; no calendar deadline
 
 ## 1. Purpose and governing decision
 
@@ -10,7 +10,7 @@ Build one shared, model-agnostic technology foundation for AI workforce manageme
 
 The shared foundation is a reusable technical capability, not a merger of the companies. Each company retains its own executive leadership, agent roster, operational authority, budgets, records, customer data, risk controls and approval boundaries. Shared services must be explicitly scoped and audited.
 
-Both companies are developed in parallel and are intended to activate simultaneously. The calendar target is not permission to waive a safety, commercial, security or operational gate. Extend the launch window only when evidence shows that doing so is necessary to protect the companies.
+Both companies are developed in parallel, but activation is not assumed to be simultaneous. AI Revenue must already be independently operational and generating verified real revenue before Trading & Technology / Crypto launches. Each company must pass its own evidence-based gates; no calendar deadline overrides readiness.
 
 AI Revenue is intended to be AI-operated from its executive leadership through its specialist departments and routine permitted workflows. It is not merely a conventional business with AI assistants. Trading & Technology likewise has its own AI executive and specialist workforce, with independent trading risk authority.
 
@@ -150,7 +150,7 @@ The Main Hub/OCC must demonstrate governance, authenticated evidence handling, c
 | AgentMemory / Langfuse / OpenLIT | Supporting candidates; adoption not decided |
 | Company isolation tests | Not yet demonstrated |
 | Autonomous company operations | Not established |
-| January 2027 simultaneous launch | Target only; subject to separate readiness gates |
+| Evidence-based launch sequence | AI Revenue operational with verified revenue before Trading & Technology / Crypto launch; each company passes its own readiness gates |
 
 ## 11. References
 
