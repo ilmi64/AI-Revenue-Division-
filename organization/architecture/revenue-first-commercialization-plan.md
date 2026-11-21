@@ -285,3 +285,9 @@ The [Specialist Intelligence Source Verification](research/specialist-intelligen
 ## 18. Worked synthetic report example
 
 See [Worked Synthetic Practical Operations Improvement Audit](sample-synthetic-practical-operations-improvement-audit.md) for transparent calculations, evidence labels, improvement hypotheses, missing-data questions and a delivery QA rubric. All inputs are invented; the service rehearsal remains NOT RUN and no customer outcome or savings claim is supported.
+## 19. Current offer specification and future opportunity register
+
+- [Practical Operations Improvement Mini-Review Offer Specification](practical-operations-improvement-mini-review-offer-specification.md) records the current first-offer scope, deliverables, exclusions, qualification, full-cycle measurement and pricing gates. It remains internal, unpriced and unpublished.
+- [Future Commercial Models & Opportunity Register](future-commercial-models-and-opportunities-register.md) preserves the AI-enabled recurring marketing-agency model and capital-light liquidation/resale-intelligence model for later evaluation. Both remain deferred and do not displace the first offer.
+
+Neither document authorizes customer contact, public promotion, spending, contracts, paid delivery or inventory purchases.
