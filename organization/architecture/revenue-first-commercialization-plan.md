@@ -64,6 +64,9 @@ Interpretation: the potential gap is integration and effective use, not simply a
 
 ## 3. Initial offer portfolio and priority
 
+Competitor positioning and advertised Canadian price ranges are tracked separately in the [Canadian Workflow Automation Competitor Benchmark](research/canadian-workflow-automation-competitor-benchmark.md). These are website claims, not verified transactions or an AI Revenue price list. Do not set prices until delivery economics and buyer willingness to pay are validated.
+
+
 Scores below are qualitative planning judgments, not measured market results. "Zero-upfront fit" means the offer can be researched and a synthetic demonstration prepared with existing free tools; it does not mean customer delivery, hosting or integrations are automatically free.
 
 | Rank | Offer hypothesis | Customer outcome | Capital fit | Current disposition |
