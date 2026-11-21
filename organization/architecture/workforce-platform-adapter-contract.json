@@ -120,5 +120,23 @@
     "policy_service": "contract_only_not_implemented",
     "tool_gateway": "contract_only_not_implemented",
     "production_workforce": "not_operational"
+  },
+  "vendor_current_assessment": {
+    "assessment_date": "2026-11-21",
+    "assessment_path": "organization/architecture/workforce-platform-current-technical-assessment.md",
+    "paperclip_candidate_release": "v2026.1106.0",
+    "ruflo_candidate_release": "v3.76.0",
+    "version_status": "observed_upstream_versions_only; not pinned or approved for installation",
+    "paperclip_runtime_constraints": "Node.js 24.11+; pnpm 9.15+; native Linux Runner baseline glibc 2.39+ on x64/ARM64; Android is not a qualified host target",
+    "ruflo_install_surface": "full CLI init adds project configuration, hooks, MCP server and daemon; plugin path has a smaller but still privileged execution surface",
+    "integration_pattern": "Paperclip owns company parent task and accountability; assigned Claude Code/Codex worker exposes Ruflo as bounded MCP/swarm capability; Ruflo child agents inherit immutable parent scope; external deterministic policy and tool/data gateways enforce all permissions",
+    "current_status": "read_only_vendor_assessment_recorded; integration compatibility, isolation and runtime support not verified",
+    "source_urls": [
+      "https://github.com/paperclipai/paperclip/releases",
+      "https://github.com/paperclipai/paperclip/blob/master/docs/adapters/overview.md",
+      "https://github.com/paperclipai/paperclip/blob/master/packages/paperclip-runner/README.md",
+      "https://github.com/ruvnet/ruflo/releases",
+      "https://github.com/ruvnet/ruflo"
+    ]
   }
 }
