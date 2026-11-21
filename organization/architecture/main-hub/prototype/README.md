@@ -26,14 +26,14 @@ The default fixture directory is the sibling `../fixtures` directory. The progra
 - A critical gate is considered unresolved unless its state is exactly `PASS`; `WAIVED` is not a pass.
 - This prototype does not authenticate publishers, verify signatures, prevent replay, prove source-revision provenance, or validate the full JSON Schema. It is not a readiness authority.
 
-## Current verification record (2026-11-20)
+## Current verification record (2026-11-21)
 
 - Latest prototype code commit: `415946922ecf6fd1e4573cfeb0ce18d38dcc2441` (blob `9a39b3d5f1e6a3708bee4271b6be52c1a72b64e5`).
-- Latest test-suite commit: `5a0fb4c4ce3938e6e4f9e2bb21a07cc11278fd07` (blob `75c7a92165f7debaaa196b047230a9f310d28ccf`; 29 authored tests; latest expanded execution pending).
+- Latest test-suite commit: `5a91e4210b3ed7d8e2fcc4a8d5f7f41a27f036a8` (blob `e7c38a0365d604a04ac6d23f2cb7441fe3f6097f`; 29 authored tests; execution pending).
 - A custom, offline structural check was applied to the exact committed schema and fixtures. The complete envelope, both company snapshots, registry companies, workstreams, and decisions produced no errors under the checker's implemented schema assertions.
 - Negative checks rejected a missing company snapshot, a duplicated company identity, and an unexpected field.
 - This is a custom structural check, **not** a standards-compliant Draft 2020-12 validator. Formal schema validation remains open. The latest resource-bound code and four regression tests are authored but have not yet been executed.
-- The exact prior committed source, test and fixture contents were reproduced locally and the 14-test suite passed (2026-11-20). That run predates the current integrity hardening and the expanded 25-test suite; rerun the latest exact revision before treating the expanded suite as verified.
+- The exact prior committed source, test and fixture contents were reproduced locally and the 14-test suite passed (2026-11-20). That run predates the current integrity hardening and the expanded 29-test suite; rerun the latest exact revision before treating the expanded suite as verified.
 
 ## Next required work
 
