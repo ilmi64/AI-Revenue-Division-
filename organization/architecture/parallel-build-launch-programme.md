@@ -20,6 +20,12 @@ Main Hub/OCC is a coordination and evidence layer, not a parent operator or mand
 
 ### Lane A — AI Revenue Company
 
+**Revenue-first commercial preparation**
+- Follow the [Revenue-First, Zero-Upfront Commercialization Plan](revenue-first-commercialization-plan.md): prioritize a narrow workflow improvement service and synthetic proof assets before capital-intensive products or inventory.
+- Retain liquidation intelligence as a capital-light service hypothesis; physical pallet ownership remains deferred until revenue-funded capital, independent review and explicit approval.
+- No customer outreach, publishing, paid pilot, spending or external commitment without separate owner approval.
+
+
 Build and prepare the complete AI-native company in its existing repository and architecture branch.
 
 **Leadership and governance**
