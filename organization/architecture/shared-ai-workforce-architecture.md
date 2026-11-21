@@ -2,7 +2,7 @@
 **Status:** Proposed architecture baseline — owner-approved for scoped implementation; not deployed  
 **Applies to:** Trading & Technology Company and AI Revenue Company  
 **Governance:** Main Hub / OCC  
-**Target:** Parallel development; AI Revenue must be independently operational and generating verified revenue before Trading & Technology / Crypto launch; no calendar deadline
+**Target:** One shared workforce foundation integrated into both independent companies; prepare both in parallel for the January 4–8, 2027 target window, subject to separate readiness gates, available capital and owner approval
 
 ## 1. Purpose and governing decision
 
@@ -10,7 +10,7 @@ Build one shared, model-agnostic technology foundation for AI workforce manageme
 
 The shared foundation is a reusable technical capability, not a merger of the companies. Each company retains its own executive leadership, agent roster, operational authority, budgets, records, customer data, risk controls and approval boundaries. Shared services must be explicitly scoped and audited.
 
-Both companies are developed in parallel, but activation is not assumed to be simultaneous. AI Revenue must already be independently operational and generating verified real revenue before Trading & Technology / Crypto launches. Each company must pass its own evidence-based gates; no calendar deadline overrides readiness.
+Both companies are developed in parallel using the same reusable workforce foundation, integrated into each company's own operating structure. Each company has its own deployment/tenant boundary, executives, agent identities, queues, memory, records, budgets, permissions, policies and launch decision. The portfolio objective is to prepare both for the owner's January 4–8, 2027 target window if each independently passes its readiness gates and the owner approves. Trading & Technology does not universally depend on AI Revenue already generating revenue: if adequate lawful starting capital is unavailable, Trading moves to standby while AI Revenue continues its own revenue work. Any AI Revenue capital support requires a separately approved, lawful, documented and properly accounted-for arrangement that protects AI Revenue's solvency and operating needs. Capital is only one Trading launch gate; no date overrides safety, regulatory, security, operational or risk readiness.
 
 AI Revenue is intended to be AI-operated from its executive leadership through its specialist departments and routine permitted workflows. It is not merely a conventional business with AI assistants. Trading & Technology likewise has its own AI executive and specialist workforce, with independent trading risk authority.
 
@@ -150,7 +150,7 @@ The Main Hub/OCC must demonstrate governance, authenticated evidence handling, c
 | AgentMemory / Langfuse / OpenLIT | Supporting candidates; adoption not decided |
 | Company isolation tests | Not yet demonstrated |
 | Autonomous company operations | Not established |
-| Evidence-based launch sequence | AI Revenue operational with verified revenue before Trading & Technology / Crypto launch; each company passes its own readiness gates |
+| Evidence-based launch sequence | Both prepared in parallel; separate company gates and owner approval; Trading may enter standby if lawful starting capital or another gate is unavailable |
 
 ## 11. References
 
