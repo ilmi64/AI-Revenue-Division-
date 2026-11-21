@@ -131,3 +131,7 @@ These documents refine the coarse task-schema actions; they do not grant permiss
 ## 9. PG-2 deliverable — approval compatibility and transaction design
 
 The field-by-field reconciliation and unified transaction target are documented in [PG-2 approval compatibility and unified transaction design](pg2-approval-compatibility-and-unified-transaction-design.md). It identifies the minimal SQLite schema mismatch, the competing PostgreSQL approval/audit schemas, the incomplete task-store contract and the required single company-local audit/transaction authority. No migration or database action is authorized.
+
+## 10. PG-3 deliverable — trusted identity and owner authority
+
+The trust-authority design is documented in [PG-3 trusted identity and owner authority architecture](pg3-trusted-identity-and-owner-authority-architecture.md). It separates company identity issuers, owner approval, policy, scheduler, trusted time, revocation/emergency stop, dispatch, receiver evidence and audit checkpoint authorities. It preserves company-specific key domains and does not create keys or services.
