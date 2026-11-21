@@ -69,3 +69,7 @@ Use the [Source Quality Scorecard & Review Protocol](source-quality-scorecard-an
 ## 10. Registry, prioritization and publication contract
 
 Use the [Unified Source & Capability Registry](../intelligence/unified-source-and-capability-registry.md) as the canonical index, the [Task Prioritization Protocol](research-task-prioritization-and-opportunity-scoring.md) for triage and scoring, and the [Recipient-Scoped Delivery Contract](recipient-scoped-intelligence-delivery-contract.md) for publication envelopes and failure handling. Registry entries and priority scores do not grant access or authority.
+
+## Initial research portfolio and Grok Desk blueprint
+
+The current prioritized work orders, company-specific research sequences, Research & Intelligence shared-service backlog, and Grok Desk/HyperGrok day/night operating blueprint are recorded in `organization/architecture/research/initial-high-priority-research-portfolio-and-grok-desk-blueprint.md`. This is a planning artifact only: desk operations, source monitoring, 24/7 coverage and recipient delivery are not live. Use the existing task-prioritization, source-quality, shift-handover and recipient-scoped publication controls; OCC receives only allowlisted aggregate status.
