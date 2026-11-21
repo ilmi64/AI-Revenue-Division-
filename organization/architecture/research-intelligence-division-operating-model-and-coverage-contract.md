@@ -227,3 +227,7 @@ Preserve and execute the existing work-order register rather than creating dupli
 This contract is a design artifact only. It does not authorize source subscriptions, paid APIs, automated scraping, data collection, installations, compute use, account connections, agent provisioning, tests, code execution, continuous jobs, external communications, customer contact, publishing, spending, financial actions, trading or deployment.
 
 No R&I staff or agents are currently provisioned; no source registry entries are newly approved by this document; no monitoring or shift coverage is active; no 24/7 capability is established. Any future activation requires explicit owner approval and all applicable technical, legal, security, cost and recipient acceptance gates.
+
+## Evidence and publication data contract
+
+- [Research Evidence and Publication Envelope Contract](intelligence/research-evidence-and-publication-envelope-contract.md) — canonical work-order, source, evidence, claim, challenge, publication and distribution record requirements; conceptual draft, not implemented or tested.
