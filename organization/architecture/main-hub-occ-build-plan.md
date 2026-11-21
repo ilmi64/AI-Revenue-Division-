@@ -218,3 +218,11 @@ The next architecture layer has been documented; all items below remain design-o
 - Read-only OCC workforce/queue observability contract, including tenant-specific publisher channels, strict allowlists, freshness, replay handling and quarantine: `organization/architecture/main-hub/occ-workforce-observability-contract.md`.
 
 These specifications do not create identities or credentials, install Paperclip/Ruflo, start continuous research, connect queues, expose task payloads or enable external actions. Company-local policy remains authoritative; OCC remains read-only. The Trading & Technology company has its own corresponding workforce specification in its own repository.
+
+## 16. Fast-track and continuous improvement programme (2026-11-21)
+
+This build plan is governed by the organization-wide fast-track system at `organization/architecture/fast-track-continuous-improvement-operating-system.md` and the cross-company Technology Intelligence/REA framework at `organization/architecture/research/technology-intelligence-and-rea-framework.md`.
+
+The operating priorities are dependability, validation, capital preservation, sustainable profitability and expansion. Work proceeds in parallel across AI Revenue, Trading & Technology, Main Hub/OCC and Research & Intelligence. Crypto/PolyBot remains the first Trading capability priority; it does not delay or gate AI Revenue's independent launch. Progress is measured by independently verified working capabilities, not document or agent counts.
+
+REA is a cross-organization research capability for lawful evaluation of apps, businesses, bots, agents, APIs, workflows and tools. It remains uninstalled and unintegrated pending supported Windows/Mac/Linux runtime and explicit authorization. The preserved portfolio and no-spend/approval restrictions remain binding.
