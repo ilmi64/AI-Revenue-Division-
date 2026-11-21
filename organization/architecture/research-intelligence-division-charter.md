@@ -169,3 +169,7 @@ The division's [Crypto Capital Flow Source Registry](crypto-capital-flow-source-
 ## 12. Source quality and specialist coverage
 
 The division's [Source Quality Scorecard & Review Protocol](research/source-quality-scorecard-and-review-protocol.md) governs source identity, provenance, methodology, freshness, terms, weighted assessment and hard-stop dispositions. The [Specialist Desk Coverage & Shift Handover](research/specialist-desk-coverage-and-shift-handover.md) defines desk ownership, day/night coverage status, escalation and continuity. These are design controls; they do not establish live coverage or approve integrations.
+
+## 13. Unified registry, prioritization and delivery controls
+
+The canonical [Unified Source & Capability Registry](intelligence/unified-source-and-capability-registry.md) indexes source, model-provider, agent, specialist-tool and method candidates. The [Research Task Prioritization & Opportunity Scoring Protocol](research/research-task-prioritization-and-opportunity-scoring.md) governs transparent triage and value ranking. The [Recipient-Scoped Intelligence Delivery Contract](research/recipient-scoped-intelligence-delivery-contract.md) defines publication envelopes and company boundaries. These remain design artifacts; they do not authorize integrations or external actions.
