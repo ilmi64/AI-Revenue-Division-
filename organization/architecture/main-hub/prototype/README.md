@@ -9,6 +9,7 @@ From this directory:
 ```sh
 python occ_readonly.py
 python -m unittest -v
+python validate_m2_schema.py
 ```
 
 The default fixture directory is the sibling `../fixtures` directory. The program reads two JSON snapshots and prints a JSON report to stdout. An optional `--output` path writes a report file locally.
@@ -25,6 +26,7 @@ The default fixture directory is the sibling `../fixtures` directory. The progra
 - All unauthenticated sources remain `UNKNOWN`; stale sources display `STALE`.
 - A critical gate is considered unresolved unless its state is exactly `PASS`; `WAIVED` is not a pass.
 - This prototype does not authenticate publishers, verify signatures, prevent replay, prove source-revision provenance, or validate the full JSON Schema. It is not a readiness authority.
+- `validate_m2_schema.py` is a separate offline validation utility. It pins exact GitHub blob identities for the schema and synthetic fixtures, invokes the Draft 2020-12 validator with date-time format checking, and checks company/record identity uniqueness. It requires the already-available `jsonschema` package; do not install anything if it is unavailable. The validator script has been authored but has **not** been executed.
 
 ## Current verification record (2026-11-21)
 
@@ -38,6 +40,6 @@ The default fixture directory is the sibling `../fixtures` directory. The progra
 ## Next required work
 
 1. Re-run the expanded standard-library test suite against the exact updated commit and record the result.
-2. Validate the exact committed Draft 2020-12 schema and complete envelope with an already available standards-compliant validator, with date-time format assertion enabled (do not install packages under the current no-spend/no-install rule).
+2. Execute `python validate_m2_schema.py` against the exact pinned schema/fixture blobs, using the already available `jsonschema` package and date-time format assertion. The script is authored; execution and evidence recording remain pending.
 3. Design authenticated, company-owned publishers and freshness/replay protections before accepting any non-synthetic data.
 4. Keep company data stores and decision authority separate.
