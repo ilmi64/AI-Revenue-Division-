@@ -128,6 +128,7 @@ Build a **read-only status and evidence control centre first**. Do not begin wit
 - Deferred projects remain deferred unless explicitly resumed.
 - Canonical organizational map: `organization/architecture/organization-and-division-charter.md` / `docs/architecture/organization-and-division-charter.md`. It records the full AI Revenue departments, Trading & Technology specialist workstreams, Main Hub/OCC, Research & Intelligence, shared-infrastructure boundaries and independent parallel launch model.
 - Research & Intelligence operating charter: `organization/architecture/research-intelligence-division-charter.md` / `docs/architecture/research-intelligence-division-charter.md`; defines leadership, specialist desks, knowledge governance, day/night handovers, evidence standards and scoped delivery.
+- AI Revenue company operating blueprint: `organization/architecture/ai-revenue-operating-blueprint.md` / `docs/architecture/ai-revenue-operating-blueprint.md`; defines the complete AI-native company, departments, workforce and independent launch gates.
 - Parallel execution and independent launch programme: `organization/architecture/parallel-build-launch-programme.md` / `docs/architecture/parallel-build-launch-programme.md`; defines four simultaneous lanes, company-specific gates, optional shared infrastructure and non-dependency rules.
 
 Strategy discovery outputs must distinguish public claims, hypotheses, reproduced mechanics, backtest results and independently validated results. No strategy is labelled profitable from marketing claims or synthetic data.
