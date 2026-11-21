@@ -156,3 +156,26 @@ All work orders are preparation/research only. API calls, account creation, cred
 **Initial priority:** R&I-API-01 and TT-API-02 in parallel with AR-API-04. Keep the Trading Crypto/PolyBot workstream first within Trading, without making AI Revenue dependent on it.
 
 **Current state:** reviewed the repository README, LICENSE and CONTRIBUTING guide at the recorded revisions; selected a research shortlist; no provider endpoint was called, no account or key was created, no package was installed, no MCP server was run, and no API integration or live data validation was performed.
+
+
+## 9. Follow-up provider-documentation review (2026-11-21)
+
+The following official provider documentation was checked after the initial catalogue review. This narrows the shortlist; it does not constitute an API call or live service test.
+
+| Provider | Official documentation finding | Updated disposition |
+|---|---|---|
+| Frankfurter | Official documentation describes free reference rates from central banks and official sources, no API key, no monthly/daily quota, and commercial use of Frankfurter's blended rates. Rates update only when sources publish (often daily), may be delayed/missing/revised, and are explicitly not live market quotes. Direct provider endpoint terms still apply. | **P1 reference-data candidate** for accounting, business workflow and historical/macro context; expressly exclude from live FX pricing, execution, risk and time-critical trading. |
+| SEC EDGAR data.sec.gov | SEC says submissions and extracted XBRL REST APIs are public and require no API key. SEC fair-access rules require a declared User-Agent and limit use to 10 requests/second across machines; excessive or unclassified automation may be blocked. Data update timing differs by endpoint and bulk archives update nightly. | **P1 authoritative public-source candidate** for US public-company filings and financial disclosures. Use an identified, classified client and strict rate limit; not a substitute for Canadian issuer/regulatory data. |
+| OpenAlex | Official docs state casual API use can be keyless; a free key increases daily budget 10× and enables cursor paging. Pricing documentation says a free account receives $1/day usage with no payment method; beyond free budget, usage is paid. | **P1 Research candidate**, with keyless/light use first. Any free account/key creation or endpoint call still requires the appropriate approval; no paid usage. |
+| CoinGecko | Official pricing shows a $0 Demo plan (10,000 calls/month, 100/minute) but its support/licensing documentation says Demo does not include commercial rights; commercial API use requires a paid plan. Public keyless rate limits may vary. | **Research/docs-only for now; blocked for commercial product use** under the current no-spend rule. Do not build a company product, commercial service or trading dependency around free Demo data. |
+| DefiLlama | Official docs state the free API needs no key and distinguish free endpoints from API-plan endpoints; some free yield endpoints are deprecated and scheduled for shutdown. Terms and data-rights restrictions need exact review for the intended use; the directory's no-auth label is not a commercial licence. | **Conditional research candidate**; verify the applicable API terms and permitted internal/commercial use before any data ingestion or redistribution. Exclude deprecated yield endpoints. |
+
+### Updated priority for no-cost preparation
+
+1. **Frankfurter:** strongest low-friction reference-rate candidate, with a hard reference-only boundary.
+2. **SEC EDGAR:** authoritative US filings source for public-company research, subject to fair-access and User-Agent controls.
+3. **OpenAlex:** useful Research & Intelligence source with a defined free budget; monitor usage and never cross into paid usage.
+4. **DefiLlama:** useful crypto research lead but conditional on endpoint and data-use rights.
+5. **CoinGecko:** do not integrate into commercial operations on the free Demo tier; paid commercial licence is currently disallowed.
+
+No provider API was called, no key/account created, no data fetched from endpoints and no integration implemented. Official documentation review only.
