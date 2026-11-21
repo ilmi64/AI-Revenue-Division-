@@ -21,7 +21,7 @@ The OCC must never infer permission to execute actions, move funds, change risk 
 
 ## 3. Proposed signed message
 
-Use a detached Ed25519 signature over a precisely defined canonical byte representation. Before implementation, select and pin a standards-compliant canonicalization implementation (prefer RFC 8785 JSON Canonicalization Scheme) and publish cross-language test vectors. Reject duplicate JSON object keys, invalid UTF-8, non-finite numbers, unsupported encodings, and ambiguous representations.
+Use a detached Ed25519 signature over a precisely defined canonical byte representation. Before implementation, select and pin a standards-compliant canonicalization implementation (prefer RFC 8785 JSON Canonicalization Scheme) and publish cross-language test vectors. Reject duplicate JSON object keys, invalid UTF-8, non-finite numbers, integers outside the interoperable safe range, unsupported encodings, and ambiguous representations. Prefer integer-only protocol fields and prohibit floating-point values in signed claims.
 
 The signed payload should contain only allowlisted OCC summary fields:
 
