@@ -258,3 +258,11 @@ This plan is a preparation framework. It does not establish:
 AI Revenue's independent launch gate still requires its own governance, workforce, offer, repeatable delivery, customer operations, finance, security and owner acceptance evidence. A single successful paid pilot is evidence of revenue, not proof that the whole company is operational or ready to scale.
 
 **Current disposition:** RESEARCH / OFFER DESIGN / SYNTHETIC DEMONSTRATION PREPARATION MAY PROCEED AT CAD $0; EXTERNAL VALIDATION, CUSTOMER CONTACT, PAID PILOTS, SPENDING AND PRODUCTION DELIVERY REQUIRE SEPARATE APPROVAL.
+
+
+## 14. Delivery economics and qualification controls
+
+- [Mini-review delivery economics](ai-revenue-mini-review-delivery-economics.md) defines the full labour/cost model, scenario worksheet and evidence gates before any price is set.
+- [Prospect qualification and validation framework](prospect-qualification-and-validation-framework.md) defines fit scoring, hard-stop criteria, evidence standards and an owner-approval-gated validation process.
+
+These documents do not authorize prospect contact, public claims, quotes, paid engagements or customer data access. Pricing remains unset and demand remains unvalidated.
