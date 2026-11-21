@@ -262,3 +262,7 @@ This section supersedes the earlier independent-launch wording in this build pla
 - This sequencing does not merge the companies or make one company's private records, executive authority, finance or risk controls subordinate to the other. Main Hub/OCC and Research & Intelligence remain non-operational shared services unless separately authorized and verified.
 
 The four-lane build continues simultaneously across AI Revenue, Trading & Technology, Main Hub/OCC and Research & Intelligence. The capital contingency changes launch order only when required; it does not pause parallel preparation.
+
+## Initial Research & Intelligence work portfolio (2026-11-21)
+
+The initial high-priority, recipient-scoped research portfolio and Grok Desk/HyperGrok operating blueprint are recorded in `organization/architecture/research/initial-high-priority-research-portfolio-and-grok-desk-blueprint.md`. This work order separates AI Revenue, Trading & Technology and the core Research & Intelligence shared service; maps dependencies and blockers; and defines aggregate-only OCC reporting. It does not establish live desk coverage, automated source ingestion, authenticated publication, operational readiness or permission for external actions. Company launch gates remain independent.
