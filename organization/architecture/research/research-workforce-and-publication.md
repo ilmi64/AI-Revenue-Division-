@@ -61,3 +61,7 @@ The OCC receives only aggregate desk health, queue counts, freshness bands, inci
 ## 8. Readiness gates
 
 Before claiming live or continuous operation: desk ownership and coverage roster verified; identity and queue isolation implemented; source licensing/provenance controls demonstrated; independent challenge and publication scoping tested; shift handover and missed-coverage alarms rehearsed; backup/restore and incident response proven; recipient interfaces authenticated and allowlisted. Until then status is PLANNED or NOT_RUN, not operational.
+
+## 9. Source quality and shift continuity references
+
+Use the [Source Quality Scorecard & Review Protocol](source-quality-scorecard-and-review-protocol.md) for source-level approval, evidence grading, freshness, terms and hard stops. Use [Specialist Desk Coverage & Shift Handover](specialist-desk-coverage-and-shift-handover.md) for coverage status, shift ownership, escalation and acknowledgement. Templates remain non-operational until separately staffed, approved and rehearsed.
