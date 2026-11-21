@@ -160,3 +160,8 @@ The division is not operational merely because this charter exists. Its staged r
 7. **D6 — Continuous operations:** demonstrate reliable coverage, source freshness monitoring, incident handling, backup/restore and cost controls before describing the service as continuous.
 
 Research & Intelligence can be built in parallel with both companies. Its unfinished implementation must not become a launch prerequisite for either standalone company; each company may use approved public sources and its own research capability while the shared division is being completed.
+
+
+## 11. Crypto Capital Flow & Opportunity Intelligence
+
+The division's [Crypto Capital Flow Source Registry](crypto-capital-flow-source-registry.md) records source tiers, event-specific verification, intelligence-record requirements, named specialist candidates (J7, Buildix.trade and Sanbase/Santiment), and company-scoped publication boundaries. Named vendors remain unverified candidates until identity, methodology, access terms and provenance are reviewed.
