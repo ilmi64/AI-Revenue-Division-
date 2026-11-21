@@ -154,6 +154,10 @@ The Main Hub/OCC must demonstrate governance, authenticated evidence handling, c
 
 ## 11. References
 
+- [Current Paperclip + Ruflo Technical Assessment](workforce-platform-current-technical-assessment.md)
+- [Workforce Platform Adapter Contract](workforce-platform-adapter-contract.json)
+
+
 - Paperclip: https://github.com/paperclipai/paperclip
 - Paperclip adapter overview: https://github.com/paperclipai/paperclip/blob/master/docs/adapters/overview.md
 - Ruflo: https://github.com/ruvnet/ruflo
