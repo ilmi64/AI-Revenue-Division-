@@ -35,6 +35,7 @@ A pass in one layer does not imply a pass in another. JSON Schema validity does 
 | M2-014 | Fail-closed | Missing/unreadable fixture and invalid JSON | Controlled error; no partial trusted report | Existing tests authored; expanded run pending |
 | M2-015 | Status | WAIVED critical gate | Never counts as PASS | Existing behavior; regression verification pending |
 | M2-016 | Negative schema | Missing required field, extra field, invalid enum, wrong company cardinality | Reject | Negative cases partly checked in a reconstructed local copy; exact-blob run pending |
+| M2-017 | Resource bounds | Oversized fixture, excessive nesting and oversized arrays/strings | Reject within bounded resource use | Not implemented; prototype is not hardened for hostile input |
 
 ## 3. Authenticated publisher protocol test matrix (future M2/M3 security work)
 
