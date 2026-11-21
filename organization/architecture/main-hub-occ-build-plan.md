@@ -277,3 +277,14 @@ The incident register and recovery assurance standard are also mirrored in both 
 The AI Executive Advisory Desk remains independent above divisions and may challenge, warn, request pauses and recommend safe mode/recovery, but cannot trade, move funds, raise limits, override safeguards or independently execute containment, rollback, liquidation, restart or recovery.
 
 Both companies retain embedded security responsibilities and independent records, credentials, policies, executives and recovery paths. OCC receives only approved aggregate metadata. This is documentation only: no incident monitoring, containment, notifications, backup jobs, restore drills, rollback, restart, deployment or operational recovery has occurred.
+
+
+## Organization-level Security & Recovery Division (2026-11-21)
+
+Security & Recovery is a first-class organization-level division alongside Crypto/Trading, Treasury/Finance, Technology/Infrastructure, Research/Intelligence and Business/Commercial. Its charter and proposed specialist units are recorded in the AI Revenue repository at organization/architecture/security-recovery/security-and-recovery-division-charter.md and mirrored in the Trading repository at docs/architecture/security-recovery/security-and-recovery-division-charter.md.
+
+The incident register and recovery assurance standard are also mirrored in both repositories. The register is intentionally empty. It defines evidence-backed incident handling, Risk owner → Executive → affected division/system owner escalation for critical/high incidents, SHA-256 backup-integrity checks, restore-after-corruption drills, rollback/restart validation and owner-approved closure.
+
+The AI Executive Advisory Desk remains independent above divisions and may challenge, warn, request pauses and recommend safe mode/recovery, but cannot trade, move funds, raise limits, override safeguards or independently execute containment, rollback, liquidation, restart or recovery.
+
+Both companies retain embedded security responsibilities and independent records, credentials, policies, executives and recovery paths. OCC receives only approved aggregate metadata. This is documentation only: no incident monitoring, containment, notifications, backup jobs, restore drills, rollback, restart, deployment or operational recovery has occurred.
