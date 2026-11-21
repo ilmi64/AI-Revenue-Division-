@@ -145,7 +145,12 @@ It must use customer-authorized manifests and respect marketplace terms, data ri
 
 See [Liquidation Inventory & Resale Business Model Assessment](research/liquidation-inventory-resale-business-model-assessment.md).
 
-## 7. Zero-upfront preparation programme
+## 7. Initial delivery assets
+
+- [Blank Practical Operations Improvement Audit template](workflow-audit-template.md) — reusable client delivery structure with scope, data minimization, baseline evidence, calculations, risk flags, QA and acceptance.
+- [Synthetic workflow audit demonstration](sample-synthetic-workflow-audit.md) — fictional example showing how the method works without presenting invented figures as customer results.
+
+## 8. Zero-upfront preparation programme
 
 ### Workstream A — offer and proof assets
 - Prepare the workflow audit template, questionnaire, process-map notation, impact calculator and report format.
@@ -177,7 +182,7 @@ See [Liquidation Inventory & Resale Business Model Assessment](research/liquidat
 - Do not provide extensive unpaid custom work as a substitute for validation.
 - Count revenue only after payment is actually received and reconciled; distinguish proposal, booked work, invoice, payment pending and cleared funds.
 
-## 8. Opportunity qualification scorecard
+## 9. Opportunity qualification scorecard
 
 Score each offer hypothesis from 0–5 and record evidence, not intuition alone.
 
@@ -193,7 +198,7 @@ Score each offer hypothesis from 0–5 and record evidence, not intuition alone.
 
 A high score is not an automatic go. Critical legal, privacy, safety, security, cost or capability blockers override the numeric score. A paid pilot and actual cleared payment are stronger evidence than survey statistics or competitor claims.
 
-## 9. Commercial funnel and evidence states
+## 10. Commercial funnel and evidence states
 
 Use distinct states:
 - IDEA: unqualified hypothesis.
@@ -212,7 +217,7 @@ Use distinct states:
 
 Do not skip states or represent pipeline value as cash.
 
-## 10. Approval and finance controls
+## 11. Approval and finance controls
 
 - CAD $0 incremental spend remains the default across AI Revenue.
 - No paid inference/API/hosting/subscription, credits, domain, ad spend, marketplace fee, contractor or purchase without separate approval.
@@ -223,7 +228,7 @@ Do not skip states or represent pipeline value as cash.
 - Use Canadian/Ontario legal, privacy, tax, consumer and contract review before commercial launch; escalate qualified matters rather than asserting legal conclusions.
 - Halal/Shafi'i concerns apply to financial products or financing if they arise; do not infer a ruling.
 
-## 11. First 30-day preparation sequence (not a calendar commitment)
+## 12. First 30-day preparation sequence (not a calendar commitment)
 
 1. Select one narrow workflow and define a synthetic example.
 2. Prepare the report template, process map, impact model and QA checklist.
@@ -236,7 +241,7 @@ Do not skip states or represent pipeline value as cash.
 
 If the first offer fails validation, revise or reject it quickly and test the next offer. Do not build a SaaS product, buy inventory or spend money to rescue a weak hypothesis.
 
-## 12. Launch and revenue truthfulness
+## 13. Launch and revenue truthfulness
 
 This plan is a preparation framework. It does not establish:
 - a live company, staffed department or functioning autonomous sales pipeline;
