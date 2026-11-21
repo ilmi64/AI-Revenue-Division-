@@ -145,6 +145,26 @@ class OccReadOnlyTests(unittest.TestCase):
         with self.assertRaises(SnapshotError):
             assess_snapshot(snapshot, "ai_revenue", now=NOW)
 
+    def test_duplicate_json_object_key_rejected(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp)
+            (path / "ai-revenue.snapshot.example.json").write_text(
+                '{"snapshot_id":"first","snapshot_id":"second"}', encoding="utf-8"
+            )
+            with self.assertRaisesRegex(SnapshotError, "duplicate JSON object key"):
+                build_report(path, now=NOW)
+
+    def test_non_standard_json_nan_rejected(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp)
+            (path / "ai-revenue.snapshot.example.json").write_text(
+                '{"snapshot_id":NaN}', encoding="utf-8"
+            )
+            with self.assertRaisesRegex(SnapshotError, "non-standard JSON numeric constant"):
+                build_report(path, now=NOW)
+
     def test_non_string_enum_value_rejected_cleanly(self):
         snapshot = load("ai-revenue.snapshot.example.json")
         snapshot["gates"][0]["status"] = []
