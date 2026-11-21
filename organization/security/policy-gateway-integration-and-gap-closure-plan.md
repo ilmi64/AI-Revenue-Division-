@@ -127,3 +127,7 @@ The company-specific operation vocabularies are now documented:
 - Trading & Technology: maintained in its own repository at `docs/security/trading-operation-taxonomy.md` — `TT.*` operation IDs, T0–T3 modes, independent risk veto, and hard-deny live financial operations.
 
 These documents refine the coarse task-schema actions; they do not grant permission or change policy. Gateway decisions must require both a valid task capability and an exact operation/resource allowlist. New operations default to deny. Trading's T3 is documented as unavailable, not an authorization tier. PG-1 remains subject to owner review before any policy change or implementation.
+
+## 9. PG-2 deliverable — approval compatibility and transaction design
+
+The field-by-field reconciliation and unified transaction target are documented in [PG-2 approval compatibility and unified transaction design](pg2-approval-compatibility-and-unified-transaction-design.md). It identifies the minimal SQLite schema mismatch, the competing PostgreSQL approval/audit schemas, the incomplete task-store contract and the required single company-local audit/transaction authority. No migration or database action is authorized.
