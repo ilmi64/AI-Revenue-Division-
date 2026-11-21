@@ -17,6 +17,7 @@ The prototype implementation currently resides in the AI Revenue architecture br
 - `fixtures/main-hub-envelope.example.json`: complete synthetic root-envelope document matching the top-level schema shape.
 - `prototype/`: Python-standard-library offline report generator and tests. This is a reference prototype, not a deployed OCC service.
 - `security/authenticated-publisher-design.md`: proposed trust, signature, replay, freshness, key-lifecycle, quarantine, and rollout requirements. Design only; no publisher or adapter is implemented.
+- `verification/m2-verification-matrix.md`: explicit M2 schema, semantic, parser, security-protocol and recovery test matrix. Test plan only; execution states are tracked separately.
 
 The individual fixture fragments are intentionally not complete root-envelope documents. The root schema requires the complete envelope with registry, decisions, workstreams and one snapshot per company; the fragments are separated to keep each synthetic record easy to inspect.
 
