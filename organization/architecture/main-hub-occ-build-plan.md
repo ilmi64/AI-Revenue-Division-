@@ -3,7 +3,7 @@
 **Status:** Approved architectural direction; implementation plan only — not deployed  
 **Priority:** First shared workstream  
 **Applies to:** Trading & Technology Company and AI Revenue Company  
-**Target:** January 2027 simultaneous activation, subject to independent readiness gates  
+**Target:** Parallel development and evidence-based activation; AI Revenue revenue proof is required before Trading & Technology / Crypto launch; no calendar deadline  
 **Budget:** CAD $0 incremental by default
 
 ## 1. Purpose
@@ -135,7 +135,7 @@ Strategy discovery outputs must distinguish public claims, hypotheses, reproduce
 
 ## 8. Launch and operating rules
 
-- AI Revenue and Trading & Technology are independent, standalone companies intended to build and launch in parallel in January 2027, each when its own launch-readiness gates are met.
+- AI Revenue and Trading & Technology are independent, standalone companies developed in parallel. AI Revenue must be independently operational and generating verified real revenue before Trading & Technology / Crypto launches; each company must pass its own evidence-based launch gates. No calendar deadline is used.
 - Neither company is a prerequisite, supplier, funding source, customer, or operational dependency for the other's launch. Neither must generate revenue, receive customer payment, or reach operational readiness before the other can launch.
 - AI Revenue is a complete AI company with its own executive leadership, departments, agent workforce/swarms, products and services, customer operations, finance, security and independent launch decision.
 - Trading & Technology has its own executive leadership, specialist workforce, trading/technology systems, data, finance, security and independent risk authority and launch decision.
