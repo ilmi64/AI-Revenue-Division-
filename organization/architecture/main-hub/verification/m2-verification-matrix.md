@@ -36,6 +36,7 @@ A pass in one layer does not imply a pass in another. JSON Schema validity does 
 | M2-015 | Status | WAIVED critical gate | Never counts as PASS | Existing behavior; regression verification pending |
 | M2-016 | Negative schema | Missing required field, extra field, invalid enum, wrong company cardinality | Reject | Negative cases partly checked in a reconstructed local copy; exact-blob run pending |
 | M2-017 | Resource bounds | Oversized fixture, excessive nesting and oversized arrays/strings | Reject within bounded resource use | Explicit parser bounds are committed in the AI Revenue architecture branch; four regression tests are authored; execution pending. Prototype is not a hostile-network parser |
+| M2-018 | Exact-source schema validation | Verify pinned Git-blob SHAs, Draft 2020-12 meta-schema, full envelope and asserted date-time formats | Reject source drift or any schema/format violation | `validate_m2_schema.py` is authored with exact pins for schema and synthetic fixtures; it uses the already-available `jsonschema` package; execution pending |
 
 ## 3. Authenticated publisher protocol test matrix (future M2/M3 security work)
 
