@@ -260,6 +260,17 @@ AI Revenue's independent launch gate still requires its own governance, workforc
 **Current disposition:** RESEARCH / OFFER DESIGN / SYNTHETIC DEMONSTRATION PREPARATION MAY PROCEED AT CAD $0; EXTERNAL VALIDATION, CUSTOMER CONTACT, PAID PILOTS, SPENDING AND PRODUCTION DELIVERY REQUIRE SEPARATE APPROVAL.
 
 
+
+## 13A. Portfolio launch coordination — correction logged 2026-11-21
+
+This AI Revenue plan governs AI Revenue's own readiness; it does **not** impose a prerequisite that AI Revenue must already be earning before Trading & Technology may launch.
+
+The portfolio strategy is to prepare both independent companies in parallel and aim to launch both within the owner’s January 4–8, 2027 target window, subject to each company independently satisfying its launch gates and explicit owner approval. If sufficient lawful, genuinely available starting capital is not available for Trading & Technology, that company remains on standby while AI Revenue pursues revenue and, if needed, a separately approved capital-support arrangement is evaluated. This is a contingency, not the default launch sequence.
+
+Any transfer, loan, contribution or other funding between companies requires a separately approved, lawful, documented and properly accounted-for arrangement; there is no automatic transfer, shared treasury, guarantee or cross-company access. AI Revenue’s launch and financial independence must not be compromised to fund Trading. No borrowing, leverage, forced deposits or unsafe trading is permitted to meet the target.
+
+The target dates are an objective, not a promise. Each company must report its own readiness evidence and blockers. Revenue, a pilot or a launch date alone does not establish full operational readiness.
+
 ## 14. Delivery economics and qualification controls
 
 - [Mini-review delivery economics](ai-revenue-mini-review-delivery-economics.md) defines the full labour/cost model, scenario worksheet and evidence gates before any price is set.
