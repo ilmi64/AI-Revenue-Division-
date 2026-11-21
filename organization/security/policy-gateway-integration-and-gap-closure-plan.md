@@ -144,3 +144,8 @@ The company-local enforcement map is documented in [PG-4 enforcement and bypass-
 ## 12. PG-5 deliverable — deterministic conformance matrix
 
 The synthetic conformance matrix is documented in [PG-5 policy gateway conformance matrix](pg5-policy-gateway-conformance-matrix.md). It defines 44 core identity, task, policy, approval, cost, data, runtime, dispatch, receiver, audit, recovery, resilience, isolation and truthfulness cases, with separate AI Revenue and Trading overlays. This is a test specification only: executable fixtures/harness are not complete, no tests have been run, and every PG-5 case remains NOT_RUN. Test execution requires explicit user authorization.
+
+
+## 13. PG-6 deliverable — durable store, receiver idempotency and recovery
+
+The consolidated target is documented in [PG-6 durable store, receiver idempotency and recovery design](pg6-durable-store-receiver-idempotency-and-recovery-design.md). It reconciles the existing linearizable control-store, transactional dispatch/recovery, outbox and recovery-boundary contracts into one company-local transaction model, immutable action intent, receiver-side idempotency, epoch fencing, ambiguous-outcome reconciliation, audit/checkpoint and restore requirements. This remains architecture only: no production database/receiver/sender/keys/network, no tests or recovery drills, and no exactly-once guarantee is claimed.
