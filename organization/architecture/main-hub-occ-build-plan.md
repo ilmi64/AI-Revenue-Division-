@@ -173,3 +173,18 @@ Main Hub v0.1 is complete only when:
 - tests are run against an exact recorded revision and retained as evidence.
 
 **Current disposition:** M0 COMPLETE / M1 DRAFTED / M2 REFERENCE PROTOTYPE COMMITTED BUT UNTESTED / NOT OPERATIONAL.
+
+## 12. Authoritative parallel-launch correction (2026-11-21)
+
+This section supersedes any earlier sentence in this document that makes AI Revenue revenue, AI Revenue launch, Trading & Technology launch, Main Hub/OCC activation, or Research & Intelligence activation a prerequisite for another operating company's launch.
+
+- AI Revenue and Trading & Technology are built in parallel and have separate readiness evidence, executive decisions and launch gates.
+- Neither operating company is a prerequisite for the other's launch, revenue, staffing, funding, infrastructure or operational continuity.
+- AI Revenue does not need to generate revenue before Trading & Technology can launch. Trading & Technology does not need to launch before AI Revenue can launch.
+- Main Hub/OCC and Research & Intelligence are organization-level shared services and are not launch prerequisites for either company.
+- The January 4–8, 2027 window is a coordination target, not a hold point. A company that independently satisfies its own launch gates may launch when authorized, even if another lane is delayed.
+- Trading & Technology company launch remains distinct from live-trading authorization. Research/paper operation is the default; live execution requires its own evidence-based gate and separate explicit owner approval.
+- Shared infrastructure is optional, scoped and replaceable. Each company must continue safely if the other company or any shared service is unavailable.
+- All standing no-spend, no-deployment, no-installation, no-publishing, no-financial-action and explicit-approval restrictions remain in force.
+
+If any earlier section, table, milestone or copied summary conflicts with this correction, this correction governs. Historical text is retained for traceability, not as active policy.
