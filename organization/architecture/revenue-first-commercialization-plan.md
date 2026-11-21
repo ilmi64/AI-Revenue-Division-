@@ -281,3 +281,7 @@ See [Synthetic Rehearsal Input Pack](synthetic-rehearsal-input-pack.md) for the 
 ## 17. Source verification refresh
 
 The [Specialist Intelligence Source Verification](research/specialist-intelligence-source-verification.md) was refreshed against current public provider documentation. Buildix and Santiment remain conditional contextual research candidates; J7 remains on hold. No integration or paid access is approved.
+
+## 18. Worked synthetic report example
+
+See [Worked Synthetic Practical Operations Improvement Audit](sample-synthetic-practical-operations-improvement-audit.md) for transparent calculations, evidence labels, improvement hypotheses, missing-data questions and a delivery QA rubric. All inputs are invented; the service rehearsal remains NOT RUN and no customer outcome or savings claim is supported.
