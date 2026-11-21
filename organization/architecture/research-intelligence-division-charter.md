@@ -165,3 +165,7 @@ Research & Intelligence can be built in parallel with both companies. Its unfini
 ## 11. Crypto Capital Flow & Opportunity Intelligence
 
 The division's [Crypto Capital Flow Source Registry](crypto-capital-flow-source-registry.md) records source tiers, event-specific verification, intelligence-record requirements, named specialist candidates (J7, Buildix.trade and Sanbase/Santiment), and company-scoped publication boundaries. Named vendors remain unverified candidates until identity, methodology, access terms and provenance are reviewed.
+
+## 12. Source quality and specialist coverage
+
+The division's [Source Quality Scorecard & Review Protocol](research/source-quality-scorecard-and-review-protocol.md) governs source identity, provenance, methodology, freshness, terms, weighted assessment and hard-stop dispositions. The [Specialist Desk Coverage & Shift Handover](research/specialist-desk-coverage-and-shift-handover.md) defines desk ownership, day/night coverage status, escalation and continuity. These are design controls; they do not establish live coverage or approve integrations.
