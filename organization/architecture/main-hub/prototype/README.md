@@ -17,7 +17,7 @@ The default fixture directory is the sibling `../fixtures` directory. The progra
 
 - Python standard library only; no package installation required.
 - No network calls, web server, database, credentials, external actions, or company adapter.
-- Strict field allowlist; rejects identity mismatch, unexpected fields, invalid reference clocks, and invalid freshness limits.
+- Strict field allowlist; rejects identity mismatch, unexpected fields, duplicate JSON object keys, non-standard JSON constants, invalid reference clocks, and invalid freshness limits.
 - Rejects duplicate gate, blocker, and evidence IDs; gate evidence references must resolve to evidence IDs in the same company snapshot.
 - Malformed or missing fixture files fail closed with a concise contextual error.
 - Synthetic source revisions are explicitly untrusted.
@@ -28,7 +28,7 @@ The default fixture directory is the sibling `../fixtures` directory. The progra
 ## Current verification record (2026-11-20)
 
 - Prototype code commit: `f844c158c3171f80ebfcf2a3d3dae093f8363592`.
-- Test-suite commit: updated in the current branch revision (23 authored tests; latest expanded execution pending).
+- Test-suite commit: updated in the current branch revision (25 authored tests; latest expanded execution pending).
 - A custom, offline structural check was applied to the exact committed schema and fixtures. The complete envelope, both company snapshots, registry companies, workstreams, and decisions produced no errors under the checker's implemented schema assertions.
 - Negative checks rejected a missing company snapshot, a duplicated company identity, and an unexpected field.
 - This is a custom structural check, **not** a standards-compliant Draft 2020-12 validator. Formal schema validation remains open.
