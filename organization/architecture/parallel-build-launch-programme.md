@@ -218,3 +218,33 @@ Continue all lanes in parallel, with the next concrete tasks:
 6. **Integration:** verify the four lanes exchange only approved summaries and that no shared component creates a launch dependency.
 
 **Success condition:** both operating companies can be built, rehearsed, launched and operated independently, while using approved shared infrastructure and intelligence to gain an edge. Main Hub/OCC and Research & Intelligence improve coordination and capability without becoming prerequisites or sources of cross-company control.
+
+
+## 10. Owner's latest capital-contingency and launch-priority decision (2026-11-21)
+
+This section is the latest controlling decision and supersedes earlier conflicting launch-sequencing statements in this programme, including any wording that makes AI Revenue's verified revenue an unconditional prerequisite for Trading & Technology launch or, conversely, assumes Trading must launch regardless of capital availability.
+
+### Default operating plan — build both simultaneously and pursue parallel launch
+
+- Continue building AI Revenue and Trading & Technology simultaneously, with separate company work queues, executive authority, finances, policies, records, risk controls and readiness gates.
+- Pursue capital for Trading & Technology independently while building it. Do not pause Trading research, PolyBot, data, risk, security, paper-mode or operational-readiness work while capital is being pursued.
+- If the required capital is available and Trading independently passes its company-launch gates, pursue launch alongside AI Revenue in the coordinated launch window. Do not delay a ready company solely because the other company is delayed.
+- AI Revenue must independently establish a viable offer, delivery, customer, finance, security and support operation. Trading must independently establish its own legal, financial, data, risk, security, strategy and operational readiness.
+- Company launch is not equivalent to live trading. Live execution remains separately disabled until its own evidence-based gate and explicit owner approval are satisfied.
+
+### Capital-shortfall contingency — AI Revenue launches first; Trading stands by
+
+- If Trading capital is not available when launch is considered, AI Revenue becomes the first company launch priority, provided AI Revenue itself passes its readiness gate and the owner authorizes launch.
+- Trading & Technology remains in standby for funded/live operations rather than being represented as launched or live. Continue only the safe, authorized no-cost preparation and paper/research work that remains feasible.
+- Reassess Trading when a legitimate capital source becomes available and its own gates are satisfied. Capital may be independently obtained; AI Revenue revenue may be considered as a possible future source only through a separately approved, legally/accountingly sound arrangement.
+- There is no automatic transfer, loan, intercompany funding, shared treasury, cross-company guarantee or obligation for AI Revenue to fund Trading. Each company's finance and governance remain separate.
+- If capital is not available, do not manufacture a launch through an airdrop, borrowed funds, paid memberships, leverage, deposits or speculative rewards. Wait rather than compromise capital preservation or risk controls.
+
+### Decision rule and reporting
+
+- **Now:** simultaneous build; parallel capital-readiness work; no company is put on hold merely because the other is still preparing.
+- **At launch review:** if Trading capital and all Trading gates are ready, both companies may launch in parallel after their respective approvals. If Trading capital is unavailable, launch AI Revenue first if ready and authorized; mark Trading STANDBY / NOT LAUNCHED.
+- **After AI Revenue launch:** continue AI Revenue commercial operations and Trading's independent preparation; revisit the Trading capital gate when evidence changes.
+- Report actual capital availability, source, restrictions and approval separately from projected capital. Never call expected, airdropped, unclaimed or hypothetical funds available capital.
+- This contingency changes sequencing only. It does not merge the companies, make AI Revenue subordinate to Trading, grant Main Hub/OCC authority, or authorize external financial actions.
+
