@@ -168,3 +168,12 @@ The Main Hub/OCC must demonstrate governance, authenticated evidence handling, c
 
 ---
 **Owner approval boundary:** This document authorises architecture planning and scoped repository documentation only. It does not authorise installation, execution, paid usage, external account access, workflow runs, deployment, publication, financial actions or live trading.
+
+
+## Current implementation-preparation artifacts
+
+- [Shared infrastructure hosting decision matrix](shared-infrastructure-hosting-decision-matrix.md) — distinguishes development workspaces, ephemeral research compute, bounded sandboxes and persistent hosting; confirms that no zero-cost always-on host is currently verified.
+- [Initial workforce roster and tenant blueprint](initial-workforce-roster-and-tenant-blueprint.md) — maps the two independent company workforces, first-class Research & Intelligence and Security & Recovery services, Paperclip tenant topology, bounded Ruflo profiles, role permissions and acceptance gates.
+- [Decision & Agreement Register](decision-and-agreement-register.md) — durable append-only owner agreements and material governance decisions.
+
+These are architecture/preparation artifacts only. They do not represent deployed agents, a live host, validated isolation, executed tests or operational coverage.
