@@ -58,3 +58,13 @@ The corresponding Trading policy gateway, approval and control-store contracts a
 6. Keep all validation/test execution, installation, credentials, spending, deployments, Actions, publishing, customer contact and live financial actions behind their existing separate approvals.
 
 **Disposition:** targeted source inventory captured; detailed legacy research reconciliation and all runtime/production gates remain pending.
+
+## 6. Additional discovery source reviewed — Public APIs
+
+- Repository: `public-apis/public-apis` (MIT-licensed catalogue, not a service).
+- README blob at review: `9374f27062f9fa239ba7a00a5b1ae8babe5536ff`.
+- LICENSE blob: `196b23b178fbf71317fc55c3d3e01d481b5760e5`.
+- CONTRIBUTING blob: `a8181acab01ac58ca80f3ef807b99fd5ec5e6e9d`.
+- Review and recipient-scoped shortlist: `organization/architecture/research/public-apis-directory-evaluation.md` / `docs/architecture/research/public-apis-directory-evaluation.md`.
+- Disposition: discovery/reference only. The catalogue license does not license listed providers' APIs or data. No endpoints called, accounts created, keys issued, MCP servers installed or API integrations authorized.
+- Initial research candidates include DefiLlama, 0x, CoinGecko, CryptoCompare, FRED, SEC EDGAR, Frankfurter, Currency-api, OpenAlex and selected Canadian public data. All remain individually unverified for plan terms, current authentication, data rights, quotas, quality and commercial use.
