@@ -187,3 +187,7 @@ These are architecture/preparation artifacts only. They do not represent deploye
 ## Bounded orchestration profiles
 
 - [Ruflo Bounded Swarm Profile Registry](ruflo-bounded-swarm-profile-registry-draft.md) — recipient-scoped research, engineering, quant, PolyBot, business, security and OCC profiles; finite limits, CRO veto, cancellation and synthetic denial cases. Draft only; not installed or tested.
+
+## Security & Recovery service contract
+
+- [Security & Recovery Service Contracts and Boundary/Revocation Standard](security-recovery-service-contracts-and-boundary-revocation-standard.md) — defines identity/access governance, company isolation, revocation propagation, incident severity, backup/recovery and Trading loss-reconciliation boundaries. Design only; not implemented or tested.
