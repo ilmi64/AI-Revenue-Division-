@@ -1,6 +1,6 @@
 # Main Hub / OCC M2 verification matrix
 
-**Status:** Test plan only. The rows below are requirements and execution records, not claims that tests have run. The current 29-test Python suite has not been rerun after strict-JSON hardening.
+**Status:** Test plan only. The rows below are requirements and execution records, not claims that tests have run. The current 29-test Python suite (including four resource-bound regression tests) has not been executed against the latest committed revision.
 
 ## 1. Verification layers
 
@@ -35,7 +35,7 @@ A pass in one layer does not imply a pass in another. JSON Schema validity does 
 | M2-014 | Fail-closed | Missing/unreadable fixture and invalid JSON | Controlled error; no partial trusted report | Existing tests authored; expanded run pending |
 | M2-015 | Status | WAIVED critical gate | Never counts as PASS | Existing behavior; regression verification pending |
 | M2-016 | Negative schema | Missing required field, extra field, invalid enum, wrong company cardinality | Reject | Negative cases partly checked in a reconstructed local copy; exact-blob run pending |
-| M2-017 | Resource bounds | Oversized fixture, excessive nesting and oversized arrays/strings | Reject within bounded resource use | Explicit parser bounds and four regression tests authored; execution pending. Not a hostile-network parser. |
+| M2-017 | Resource bounds | Oversized fixture, excessive nesting and oversized arrays/strings | Reject within bounded resource use | Explicit parser bounds are committed in the AI Revenue architecture branch; four regression tests are authored; execution pending. Prototype is not a hostile-network parser |
 
 ## 3. Authenticated publisher protocol test matrix (future M2/M3 security work)
 
