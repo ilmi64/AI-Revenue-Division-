@@ -300,3 +300,20 @@ Do not bid on a pallet unless all of the following are true:
 - independent CFO/COO/compliance review and explicit owner approval are obtained.
 
 A no-go on any critical item means no bid. A practice auction or public listing review may be used for research only; do not submit a binding bid.
+
+
+## 13. Portfolio status update — deferred until internally funded
+
+**Owner decision (2026-11-21):** retain physical liquidation-pallet resale in the AI Revenue opportunity portfolio, but defer inventory acquisition until the company has generated revenue and has sufficient genuinely available capital. The no-upfront-spending rule remains in force.
+
+Portfolio classification:
+- **Capital-light liquidation intelligence and listing-operations service:** eligible for future no-cost research, offer design and prototype preparation alongside other AI Revenue revenue-first work. It is not yet validated for customer demand or revenue.
+- **Inventory-owning pallet resale:** DEFERRED / CAPITAL-GATED. Not a launch dependency, not an initial revenue engine and not authorized for bidding or purchasing.
+- **Supplier and market intelligence:** may continue through public-source research without accounts, contact, deposits, bids or commitments.
+- **Pilot readiness:** requires an independently reviewed business case and a separate explicit owner approval.
+
+The future inventory pilot must be funded only from available company capital after core operating reserves and obligations are protected. A proposed allocation is not available capital. Revenue received by AI Revenue does not automatically become Trading capital or pallet-purchase capital; any intercompany or internal allocation requires separate accounting, legal and owner approval.
+
+Before any purchase, the company must be able to absorb a total loss of the proposed pilot amount without impairing essential operations, meet the full landed and handling cost, and retain a reserve for returns, refunds, storage and slow sell-through. No borrowing, leverage, paid membership, deposit-based supplier reservation or speculative reward is permitted to force the pilot.
+
+**Current decision:** KEEP IN PORTFOLIO; CONTINUE CAPITAL-LIGHT RESEARCH; DEFER INVENTORY PURCHASE UNTIL REVENUE AND CAPITAL CAPACITY; NO BID OR PURCHASE WITHOUT SEPARATE APPROVAL.
