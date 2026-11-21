@@ -113,3 +113,7 @@ Synthetic acknowledgement: HANDOVER_ACCEPTED at 2026-11-21T17:05:00-05:00; incom
 
 ## 7. Current disposition
 **SOURCE QUEUE PREPARED; NO NEW SOURCE APPROVED; NO SCORES INVENTED; SYNTHETIC HANDOVER ONLY; NO STAFFED SHIFT OR CONTINUOUS MONITORING CLAIMED.**
+
+## 8. Reusable event verification and challenge record
+
+See [Grok Desk Event Verification & Challenge Record](grok-desk-event-verification-and-challenge-record.md). It is mirrored in the Trading & Technology repository. The template is advisory and does not authorize automated monitoring, ingestion or publication.
