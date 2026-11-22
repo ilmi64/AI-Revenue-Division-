@@ -290,3 +290,28 @@ Keep all four lanes active in parallel. When a task is blocked by owner approval
 
 ### January target control
 The coordinated January 4–8, 2027 target remains unchanged. Use short evidence-based checkpoints and critical-path blockers; do not turn the date into permission to waive legal, financial, security, data, risk, quality or owner-approval gates.
+
+
+## 12. Execution checkpoint — 2026-11-21 continuation (second pass)
+
+### Lane A — AI Revenue
+- Added a five-card R&I priority work-order packet covering zero-upfront demand acquisition, Mini-Review delivery/economics evidence, Trading multi-market source qualification, crypto capital-flow evidence and R&I day/night coverage readiness. All five are PREPARED / NOT ASSIGNED / NOT STARTED.
+- Extended the opportunity acquisition report and tracker with a second Canadian service-marketplace screen. Taskly is a conditional lead but held because its terms say Canadian identity verification may involve a non-refundable $35 CAD plus tax; whether the fee is mandatory or waived remains unresolved. GEND.ME roles are held because platform-wallet/DGEN cash redemption is not proven; Web Developer eligibility also requires 2+ years of WordPress client work. A third-party micro1 role lead remains unverified.
+- No accounts, applications, paid verification, trials, customer outreach, external submissions or tests performed. No expected income recorded.
+- Next: continue zero-upfront acquisition research and internal delivery-readiness evidence mapping; prioritize routes with verified Canadian cash payout and no mandatory upfront spend.
+
+### Lane B — Trading & Technology
+- Added a PG-1–PG-7 interface implementation specification mapping IF-001–IF-010, request envelope, decision/approval records, durable dispatch protocol, failure behavior and conformance case design.
+- Linked the specification from the PG closure sequence and division readiness matrix. Architecture/security review remains outstanding; crypto/key custody, trusted time, storage, receiver and complete mediation choices remain open.
+- No implementation, tests, Python, CI, merge, deployment, account connection, live feeds, paper trading activation or live trading.
+
+### Lane C — Main Hub / OCC
+- Continue static M2 reconciliation and source-pin coverage work. The 29 authored tests remain NOT_RUN; no publisher/receiver activation or OCC operational claim.
+
+### Lane D — Research & Intelligence
+- Five work-order proposals now turn the existing shared R&I charter and evidence/publication contracts into a concrete, recipient-scoped queue.
+- The queue remains a prepared proposal set, not assigned work or active monitoring. Source approval, named reviewer assignment, staffing and shift acknowledgement remain open.
+- Next: preserve the separate company recipients, register source candidates only after intake acceptance, and map the prepared work orders to IF-016–022 without activating live collection.
+
+### January target control
+The January 4–8, 2027 target remains unchanged. No readiness gate is waived by this checkpoint.
