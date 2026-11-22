@@ -33,7 +33,7 @@ def summarize_effort(exercise_id: str, entries: Iterable[EffortEntry]) -> Effort
     The 180-minute offer target and 210-minute rehearsal allocation are
     deliberately separate comparisons. Neither is a validated promise.
     """
-    if not exercise_id or not exercise_id.strip():
+    if not isinstance(exercise_id, str) or not exercise_id.strip():
         raise ValueError("exercise_id is required")
     rows = tuple(entries)
     if not rows:
@@ -41,9 +41,18 @@ def summarize_effort(exercise_id: str, entries: Iterable[EffortEntry]) -> Effort
     for row in rows:
         if row.exercise_id != exercise_id:
             raise ValueError("mixed exercise IDs")
-        if not row.contributor.strip() or not row.stage.strip():
+        if (
+            not isinstance(row.contributor, str) or not row.contributor.strip()
+            or not isinstance(row.stage, str) or not row.stage.strip()
+        ):
             raise ValueError("contributor and stage are required")
-        if not row.active_minutes.is_finite() or row.active_minutes < 0:
+        if not isinstance(row.rework, bool):
+            raise ValueError("rework must be boolean")
+        if (
+            not isinstance(row.active_minutes, Decimal)
+            or not row.active_minutes.is_finite()
+            or row.active_minutes < 0
+        ):
             raise ValueError("active minutes must be finite and nonnegative")
     active = sum((r.active_minutes for r in rows), Decimal(0))
     rework = sum((r.active_minutes for r in rows if r.rework), Decimal(0))
