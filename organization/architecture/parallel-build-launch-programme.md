@@ -257,3 +257,36 @@ This section is the latest controlling decision and supersedes earlier conflicti
 - Report actual capital availability, source, restrictions and approval separately from projected capital. Never call expected, airdropped, unclaimed or hypothetical funds available capital.
 - This contingency changes sequencing only. It does not merge the companies, make AI Revenue subordinate to Trading, grant Main Hub/OCC authority, or authorize external financial actions.
 
+
+
+## 11. Execution checkpoint — 2026-11-21 continuation
+
+This checkpoint records tangible work completed against the existing parallel stages. It does not restart or replace the programme.
+
+### Lane A — AI Revenue
+- Company-wide revenue stream catalogue and governance preserved, including historical ideas and deferred/hold states.
+- Commercial opportunity lifecycle, IF-042/043/044, dossier and bug-bounty authorization/review templates prepared.
+- Practical Operations Improvement Mini-Review remains the first narrow service offer; rehearsal authorization packet is PREPARED FOR OWNER REVIEW / NOT AUTHORIZED / NOT EXECUTED.
+- Second-pass opportunity acquisition screen and bounty freshness audit created. BOSS remains active watch, Algora watchlist, Meta HOLD pending current official terms; zero exact claim-ready coding tasks verified.
+- Next: continue offer delivery-economics/QA preparation and zero-upfront customer-demand research in parallel with source-verified bounty acquisition. Do not wait for bounty revenue. No customer contact, account creation, external claim, live security test, submission, paid pilot or publishing without separate approval.
+
+### Lane B — Trading & Technology
+- Forex and Indices domain annexes prepared and referenced in the division readiness matrix.
+- PG-1–PG-7 dependency-ordered security closure sequence prepared and referenced in the readiness matrix.
+- Paper portfolio ledger contract prepared; IF-027 expanded and field-level mapping completed.
+- IF-027 schema resolution proposal prepared for versioned envelope/closed enums, immutable PaperFill records, exact decimal precision, instrument-specific freshness policies and native-currency posting templates. CFO/Finance, Quant, CRO, Market Data and Security review remains outstanding.
+- Next: reconcile remaining canonical interface ownership and field semantics; continue Gold feature-chain and ATR14 independent review preparation; advance PG implementation interface specifications. No tests, CI, merge, deployment, live feed, paper trading activation or live trading.
+
+### Lane C — Main Hub / OCC
+- Continue static source-pin, schema and evidence reconciliation against existing M2 work; preserve the 29 authored tests as NOT_RUN.
+- Next: close static gaps and source-integrity evidence without making OCC a company launch dependency. No tests or publisher activation without separate approval.
+
+### Lane D — Research & Intelligence
+- Continue company-scoped opportunity acquisition and the day/night research operating design.
+- Next: make source qualification, evidence capture, claim challenge, publication and recipient-scoped handover records usable as the common research work queue. Do not claim continuous 24/7 coverage until staffed, monitored and rehearsed.
+
+### Cross-lane fast-track rule
+Keep all four lanes active in parallel. When a task is blocked by owner approval, paid access, external access, missing source terms or an unavailable reviewer, record the blocker and move to the next independent no-cost work item; do not idle the whole programme or silently bypass the gate.
+
+### January target control
+The coordinated January 4–8, 2027 target remains unchanged. Use short evidence-based checkpoints and critical-path blockers; do not turn the date into permission to waive legal, financial, security, data, risk, quality or owner-approval gates.
