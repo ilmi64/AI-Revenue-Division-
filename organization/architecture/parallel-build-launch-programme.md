@@ -315,3 +315,9 @@ The coordinated January 4–8, 2027 target remains unchanged. Use short evidence
 
 ### January target control
 The January 4–8, 2027 target remains unchanged. No readiness gate is waived by this checkpoint.
+
+
+### Lane C — Main Hub / OCC (static gap specification)
+- Added a dedicated M2 static gap-closure/source-attestation plan, with 12 proposed gaps and a no-execution sequencing boundary.
+- Linked it from the M2 requirement-to-evidence crosswalk. The plan is documentation only; no code or tests changed, and the 29 authored tests plus schema validator remain NOT_RUN.
+- Default-branch placement was corrected: the artifact is retained on the architecture branch only; the unintended default-branch copy was deleted and its absence confirmed by the GitHub 404 response.
