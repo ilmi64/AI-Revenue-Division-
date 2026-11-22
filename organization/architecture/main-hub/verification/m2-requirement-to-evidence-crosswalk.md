@@ -87,3 +87,8 @@ The schema's expected blob SHA is also pinned in `validate_m2_schema.py`. The va
 7. Require independent security and recovery review before any owner decision about a limited read-only connection.
 
 **Conclusion:** M2 has meaningful reference implementation and authored verification coverage, but it is not verified complete. The accurate state is **REFERENCE_CODE_PRESENT_UNVERIFIED; TESTS_AUTHORED_NOT_RUN; SCHEMA_VALIDATION_AUTHORED_NOT_RUN; AUTHENTICATED_PUBLISHER_NOT_IMPLEMENTED; OCC_NOT_OPERATIONAL**.
+
+
+## 4. Companion static gap-closure plan
+
+The companion [M2 Static Gap-Closure and Source-Attestation Plan](m2-static-gap-closure-and-source-attestation-plan.md) enumerates the missing dedicated negative cases (schema-version mutation, Infinity/-Infinity, node/object-member limits, invalid UTF-8, missing company fixture and freshness boundaries), plus the validator/reader/test/matrix/publisher source-attestation gap. It is a design backlog only. It does not modify the reader, tests, validator or schema, and does not authorize execution. All 29 tests and schema validation remain NOT_RUN.
