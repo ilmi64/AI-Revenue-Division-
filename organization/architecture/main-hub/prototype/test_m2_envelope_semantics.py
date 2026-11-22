@@ -45,6 +45,15 @@ class M2EnvelopeSemanticTests(unittest.TestCase):
         with self.assertRaisesRegex(EnvelopeSemanticError, "differs from pinned"):
             check_snapshot_fixture_agreement(self.envelope, fixtures)
 
+    def test_pinned_snapshot_wrong_identity_rejected(self):
+        fixtures = {
+            item["company_id"]: copy.deepcopy(item)
+            for item in self.envelope["status_snapshots"]
+        }
+        fixtures["ai_revenue"]["company_id"] = "trading_technology"
+        with self.assertRaisesRegex(EnvelopeSemanticError, "pinned fixture identity mismatch"):
+            check_snapshot_fixture_agreement(self.envelope, fixtures)
+
     def test_pinned_snapshot_missing_company_rejected(self):
         fixtures = {"ai_revenue": copy.deepcopy(self.envelope["status_snapshots"][0])}
         with self.assertRaisesRegex(EnvelopeSemanticError, "company set mismatch"):
