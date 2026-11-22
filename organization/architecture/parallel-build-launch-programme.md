@@ -2,7 +2,7 @@
 
 **Status:** Canonical execution plan; planning and architecture only  
 **Planning date:** 2026-11-21  
-**Target:** Simultaneous development; parallel company launch when Trading capital and both companies' gates are ready; AI Revenue launches first if Trading capital is unavailable; evidence-based activation, no calendar deadline  
+**Target:** Simultaneous parallel development with a coordinated January 4–8, 2027 launch target for both companies, subject to each company's independent readiness gates and Trading's lawful starting-capital requirement. If one company misses its own gates, the ready company may launch independently and the other remains on standby; no gate is waived and neither company is a prerequisite for the other.  
 **Budget posture:** CAD $0 incremental by default; no paid services or spending without explicit owner approval  
 **Applies to:** AI Revenue Company, Trading & Technology Company, Main Hub/OCC, and Research & Intelligence Division
 
