@@ -1,10 +1,15 @@
-"""Authored only, not executed: offline envelope semantic regression cases."""
+"""Offline envelope semantic regression cases."""
 import copy
 import json
 import unittest
 from pathlib import Path
 
-from m2_envelope_semantics import EnvelopeSemanticError, check_m2_envelope_semantics, check_snapshot_fixture_agreement
+from m2_envelope_semantics import (
+    EnvelopeSemanticError,
+    check_companion_fixture_agreement,
+    check_m2_envelope_semantics,
+    check_snapshot_fixture_agreement,
+)
 
 ENVELOPE = Path(__file__).resolve().parents[1] / "fixtures" / "main-hub-envelope.example.json"
 
@@ -58,6 +63,29 @@ class M2EnvelopeSemanticTests(unittest.TestCase):
         fixtures = {"ai_revenue": copy.deepcopy(self.envelope["status_snapshots"][0])}
         with self.assertRaisesRegex(EnvelopeSemanticError, "company set mismatch"):
             check_snapshot_fixture_agreement(self.envelope, fixtures)
+
+    def test_companion_fixtures_match_exact_envelope(self):
+        registry_path = ENVELOPE.with_name("registry-and-workstreams.example.json")
+        decisions_path = ENVELOPE.with_name("decisions.example.json")
+        registry = json.loads(registry_path.read_text(encoding="utf-8"))
+        decisions = json.loads(decisions_path.read_text(encoding="utf-8"))
+        check_companion_fixture_agreement(self.envelope, registry, decisions)
+
+    def test_companion_drift_and_extra_fields_fail_closed(self):
+        registry = {key: copy.deepcopy(self.envelope[key]) for key in (
+            "schema_version", "company_registry", "workstreams"
+        )}
+        decisions = {key: copy.deepcopy(self.envelope[key]) for key in (
+            "schema_version", "decisions"
+        )}
+        for key in registry:
+            changed = {**registry, key: None}
+            with self.subTest(key=key), self.assertRaisesRegex(EnvelopeSemanticError, key):
+                check_companion_fixture_agreement(self.envelope, changed, decisions)
+        with self.assertRaisesRegex(EnvelopeSemanticError, "differs from envelope: decisions"):
+            check_companion_fixture_agreement(self.envelope, registry, {**decisions, "decisions": [{}]})
+        with self.assertRaisesRegex(EnvelopeSemanticError, "unexpected fields"):
+            check_companion_fixture_agreement(self.envelope, registry, {**decisions, "workstreams": []})
 
     def test_duplicate_company_record(self):
         self.envelope["company_registry"][1] = copy.deepcopy(self.envelope["company_registry"][0])

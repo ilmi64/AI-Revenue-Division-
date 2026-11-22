@@ -107,3 +107,16 @@ def check_snapshot_fixture_agreement(envelope, standalone):
             raise EnvelopeSemanticError(
                 f"envelope snapshot differs from pinned company fixture: {company_id}"
             )
+
+def check_companion_fixture_agreement(envelope, registry_and_workstreams, decisions):
+    """Require each independently pinned companion to match the full envelope."""
+    for label, companion, fields in (
+        ("registry/workstreams", registry_and_workstreams, ("company_registry", "workstreams")),
+        ("decisions", decisions, ("decisions",)),
+    ):
+        keys = ("schema_version", *fields)
+        if not isinstance(companion, Mapping) or set(companion) != set(keys):
+            raise EnvelopeSemanticError(f"{label} companion has unexpected fields")
+        for key in keys:
+            if key not in envelope or companion[key] != envelope[key]:
+                raise EnvelopeSemanticError(f"{label} companion differs from envelope: {key}")

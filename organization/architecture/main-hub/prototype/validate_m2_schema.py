@@ -15,7 +15,11 @@ from typing import Any
 
 from jsonschema import Draft202012Validator, FormatChecker
 
-from m2_envelope_semantics import check_m2_envelope_semantics, check_snapshot_fixture_agreement
+from m2_envelope_semantics import (
+    check_companion_fixture_agreement,
+    check_m2_envelope_semantics,
+    check_snapshot_fixture_agreement,
+)
 from occ_readonly import assess_snapshot
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -29,7 +33,7 @@ EXPECTED_BLOB_SHAS = {
     "fixtures/main-hub-envelope.example.json": "9f3d7d83ee0d87f7cba1fbda7002c5b9b7d856d0",
     "fixtures/ai-revenue.snapshot.example.json": "e2a1019ae9327dd4bed56f1bf8a1801b49aaae33",
     "fixtures/trading-technology.snapshot.example.json": "ecc536031e115eadc71493a3da81ec3c8839e3ac",
-    "fixtures/registry-and-workstreams.example.json": "d001e4ee87544ab6628ad6b95d1ddb9e5c87ea98",
+    "fixtures/registry-and-workstreams.example.json": "fe831b3798d2a4e5c0a097b08b033e76421262a7",
     "fixtures/decisions.example.json": "a6ebb6a7596248568f0c26888b2984e66b48c9e0",
 }
 
@@ -115,6 +119,13 @@ def main() -> int:
     }
     check_snapshot_fixture_agreement(envelope, standalone)
     print("PASS exact semantic agreement between envelope and pinned company fixtures")
+
+    check_companion_fixture_agreement(
+        envelope,
+        loaded["fixtures/registry-and-workstreams.example.json"],
+        loaded["fixtures/decisions.example.json"],
+    )
+    print("PASS exact semantic agreement between envelope and pinned companion fixtures")
 
     # The envelope and the standalone reader must agree on the snapshot contract.
     # This checks nested gate/evidence semantics, not publisher authenticity.
