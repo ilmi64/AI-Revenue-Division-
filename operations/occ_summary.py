@@ -8,7 +8,7 @@ import json
 from collections import Counter
 from pathlib import Path
 
-ALLOWED = {"review_ready", "hold", "rejected", "blocked", "ready_for_manual_delivery"}
+ALLOWED = {"review_ready", "hold", "rejected", "blocked", "checklist_complete_unverified"}
 def summarize(decisions):
     if not isinstance(decisions, list):
         raise ValueError("decisions must be a list")
