@@ -212,3 +212,19 @@ AI Revenue may launch once one or more divisions are independently ready to deli
 ### 11.3 Current non-claims
 
 No bounty has been selected or submitted; no bug bounty testing has been performed; no programme eligibility or payout has been verified for a particular opportunity; no customer has been contacted; no product/service is represented as live; no cleared AI Revenue income is evidenced. Documentation does not authorize external action.
+
+
+### 11.4 Commercial opportunity lifecycle and engineering/bounty interfaces (2026-11-21)
+
+**New architecture artifact:** `commercial-opportunity-intake-selection-and-payout-reconciliation-contract.md` — DESIGNED / NOT OPERATIONAL. It defines a company-scoped opportunity record, hard gates, lifecycle states, effort/economics assessment, independent QA, exact owner-approval binding, programme-specific bug bounty authorization, and cleared-payment reconciliation.
+
+| Interface | Purpose | Evidence added | Current status / blocker |
+|---|---|---|---|
+| IF-042 Commercial Opportunity Record & Lifecycle | One immutable, auditable opportunity state machine across all AI Revenue divisions | Commercial opportunity intake/selection/payout contract | PROPOSED; no queue, schema validator, CRM or automated state machine |
+| IF-043 Bounty / Bug Bounty Submission & Award Reconciliation | Exact programme scope, eligibility, reviewer, payload-bound approval, submission/acceptance and payout evidence | Commercial opportunity contract; revenue stream catalogue and bug bounty safeguards | PROPOSED; no programme selected, no target authorization, no account, no test or submission |
+| IF-044 Engineering Work Product & Independent Acceptance | Source revision, licence/IP/dependency provenance, deliverable digest, QA and release approval | Commercial opportunity contract; existing delivery QA and engagement records | PROPOSED; no automated engineering evidence/acceptance pipeline |
+
+**Reconciliation:** Existing prospect qualification and engagement delivery templates remain customer-service-specific and continue to apply. R&I work orders and source/evidence records remain research-specific. The new commercial opportunity record is the portfolio-level parent that references those records where applicable; it does not collapse research intake, customer engagement, engineering tasks, bounty submissions and financial ledger entries into one mutable record.
+
+**Required next preparation:** define a blank opportunity dossier, programme-specific authorization record and independent bounty QA checklist; cross-reference the company ledger evidence contract; map owners and record retention. These are architecture tasks only. No tests, external research/testing, programme registration, submissions, customer contact, paid tools, account connections or financial actions were performed or authorized.
+
