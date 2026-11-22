@@ -224,3 +224,34 @@ Commercial traction and actual payment are important business outcomes and shoul
 This blueprint is not evidence of a live AI company, deployed agents, active customer pipeline, accepted delivery or revenue. All such claims require direct evidence.
 
 No paid subscriptions, API usage, credits, hosting, installations, trials with billing risk, publishing, customer contact, external commitments, financial transactions, deployments or permission changes are authorized by this blueprint. Existing free/current tools and documentation work only, within the standing approval rules.
+
+
+## 9. Expanded revenue portfolio and first-class division map (owner agreement, 2026-11-21)
+
+The company-wide revenue mandate and historical opportunity inventory are maintained in `ai-revenue-stream-catalogue-and-governance.md`. The company includes these first-class divisions/workstreams:
+
+1. **Software Engineering & Development** — websites, applications, SaaS, APIs, databases, integrations, bots, internal software, bug fixes, features, maintenance, testing, documentation and commissioned/open-source development.
+2. **Coding Bounties & Technical Challenges** — paid coding issues, open-source bounty/sponsorship programmes, developer challenges, hackathons, competitive programming, smart-contract/blockchain challenges, AI/data/ML challenges, and a dedicated **Bug Bounty & Vulnerability Research** workstream including Meta and other eligible programmes.
+3. **AI Creative Studio** — images, video, advertising, branding, social/product creative, scripts, storyboards and content-production services.
+4. **AI Automation & Business Solutions** — small-business process automation, AI customer-service implementations, assistants, lead/CRM/document workflows, reporting and managed processes.
+5. **Digital Products & IP** — templates, guides, downloads, reusable code/tools, applications, SaaS and subscriptions.
+6. **Research, Intelligence & Opportunity Acquisition** — commercial/technical research, business intelligence, paid reports and qualification of contracts, bounties, grants and product opportunities.
+7. **Revenue Operations & Commercial Management** — qualification, estimating, pricing economics, delivery, independent QA, acceptance, support, retention and cleared-payment reconciliation.
+
+Historical revenue families remain included: SEO/digital services; recurring maintenance, support and content contracts; AI-enabled recurring marketing services; research reports; digital products/subscriptions; ecommerce/online commercial opportunities; capital-light liquidation manifest/resale intelligence; and longer-term proprietary technology/online businesses. Their current statuses and holds are in the catalogue and future-commercial register. Mining infrastructure remains a long-horizon candidate only, not an active build. Existing ecommerce/Animora holds are not changed.
+
+### Revenue engines and common lifecycle
+
+- **Earn by doing:** coding and bug bounties, software/website projects, automation implementation, creative production, SEO/content services and research work.
+- **Earn by building:** proprietary software, SaaS/apps, digital products, developer tools, reusable automation and owned IP.
+- **Earn by operating:** managed automation, AI customer service, maintenance/support, recurring content/SEO/marketing operations and subscriptions.
+
+All work follows: discover/register → verify eligibility/terms → qualify risk and economics → prioritize → owner-approved selection → internal execution → independent QA → owner-approved external submission/delivery → acceptance verification → cleared-payment reconciliation → post-mortem. Advertised rewards, pipeline, submitted work and pending awards are not cleared revenue.
+
+### Launch principle
+
+Prepare the broad portfolio, but AI Revenue may launch with one or more independently ready divisions; it need not wait for every division to be complete. The Practical Operations Improvement Mini-Review remains the first-offer preparation track. This expanded scope does not establish customer validation, bounty eligibility, staffing, deployment, cleared revenue or operational readiness.
+
+### Bug bounty safety and approval boundary
+
+For Meta and all other programmes, research is limited to the exact authorized scope and methods. Programme rules, eligibility, safe-harbour, disclosure, payout, jurisdiction and IP must be verified. No arbitrary scanning, unauthorized access/exploitation, persistence, disruption, data extraction or fabricated findings. No bounty submissions, vulnerability disclosures, customer/programme contact, paid tools, API use, hosting, deployment or other external actions without separate explicit owner approval.
