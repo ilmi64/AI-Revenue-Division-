@@ -51,6 +51,11 @@ class HandoffTests(unittest.TestCase):
             with self.subTest(url=url):
                 self.assertIn("issue_scope_mismatch", handoff_blockers(replace(self.good, issue_url=url)))
 
+    def test_malformed_url_authority_fails_closed(self):
+        for url in ("https://[invalid/issues/26", "https://[::1/issues/26"):
+            with self.subTest(url=url):
+                self.assertIn("issue_scope_mismatch", handoff_blockers(replace(self.good, issue_url=url)))
+
     def test_branch_traversal_fails(self):
         self.assertIn("invalid_task_branch", handoff_blockers(replace(
             self.good, task_branch="implementation/../main")))
