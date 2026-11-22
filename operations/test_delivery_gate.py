@@ -19,10 +19,25 @@ def record():
     }
 
 class DeliveryGateTests(unittest.TestCase):
-    def test_ready_still_requires_manual_delivery(self):
+    def test_checklist_cannot_authorize_manual_delivery(self):
         result = decide(record())
-        self.assertEqual(result["status"], "ready_for_manual_delivery")
+        self.assertEqual(result["status"], "checklist_complete_unverified")
+        self.assertFalse(result["evidence_verified"])
+        self.assertFalse(result["release_authorized"])
+        self.assertEqual(result["next_action"], "independent_evidence_and_owner_review_required")
         self.assertFalse(result["external_actions_performed"])
+    def test_self_attested_authority_never_grants_release(self):
+        item = record()
+        item["evidence"]["source_commit"] = "f" * 40
+        item["evidence"]["test_log_ref"] = "local:claimed-success.log"
+        item["approvals"]["delivery_authorized"] = True
+        item["approvals"]["scope_reviewed"] = True
+        decision = decide(item)
+        self.assertEqual(decision["status"], "checklist_complete_unverified")
+        self.assertFalse(decision["release_authorized"])
+        self.assertFalse(decision["evidence_verified"])
+        self.assertFalse(decision["external_actions_performed"])
+
     def test_missing_approval_blocks(self):
         item = record()
         item["approvals"]["delivery_authorized"] = False
@@ -48,7 +63,11 @@ class DeliveryGateTests(unittest.TestCase):
         item["opportunity"]["cost_cad"] = 5
         self.assertIn("intake_not_review_ready", decide(item)["reasons"])
     def test_malformed_input_blocks(self):
-        self.assertEqual(decide(None)["status"], "blocked")
+        result = decide(None)
+        self.assertEqual(result["status"], "blocked")
+        self.assertFalse(result["evidence_verified"])
+        self.assertFalse(result["release_authorized"])
+        self.assertFalse(result["external_actions_performed"])
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,7 +1,7 @@
 """Offline delivery workflow. No execution, network, billing or submission.
 
 Input: local JSON object with `opportunity`, `evidence`, `approvals`.
-Outputs an audit-ready decision only; does not change any external system.
+Outputs an unverified checklist decision only; does not change any external system.
 """
 import argparse
 import json
@@ -11,7 +11,9 @@ from opportunity_intake import assess
 STAGES = ("intake", "assignment", "qa", "delivery")
 def decide(record):
     if not isinstance(record, dict):
-        return {"status": "blocked", "reasons": ["invalid_record"]}
+        return {"status": "blocked", "reasons": ["invalid_record"],
+                "next_action": "resolve_blockers", "evidence_verified": False,
+                "release_authorized": False, "external_actions_performed": False}
     opportunity = record.get("opportunity")
     intake = assess(opportunity)
     reasons = list(intake.get("reasons", []))
@@ -39,9 +41,11 @@ def decide(record):
         reasons.append("scope_not_reviewed")
     return {
         "opportunity_id": opportunity.get("id") if isinstance(opportunity, dict) else None,
-        "status": "ready_for_manual_delivery" if not reasons else "blocked",
+        "status": "checklist_complete_unverified" if not reasons else "blocked",
         "reasons": sorted(set(reasons)),
-        "next_action": "manual_delivery_only" if not reasons else "resolve_blockers",
+        "next_action": "independent_evidence_and_owner_review_required" if not reasons else "resolve_blockers",
+        "evidence_verified": False,
+        "release_authorized": False,
         "external_actions_performed": False,
     }
 

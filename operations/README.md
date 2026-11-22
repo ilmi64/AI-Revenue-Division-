@@ -4,7 +4,7 @@ Status: **draft, offline only, not deployed**. This branch contains no opportuni
 
 ## Components
 - `operations/opportunity_intake.py`: accepts a **local JSON array** of opportunities, classifies each for human review. The `review_ready` status is not authorization to work, access systems or contact customers.
-- `operations/delivery_gate.py`: accepts a **local JSON object** with opportunity, evidence and approvals. A positive result means only **ready for manual delivery**.
+- `operations/delivery_gate.py`: accepts a **local JSON object** with opportunity, evidence and approvals. Even when all caller-supplied checklist fields are positive, the result is **`checklist_complete_unverified`**, not delivery authorization. `release_authorized` and `evidence_verified` are always false until a separately implemented independent verifier is available.
 - `operations/test_opportunity_intake.py` and `operations/test_delivery_gate.py`: authored offline regression tests.
 
 ## Reproducible checks
@@ -21,6 +21,7 @@ Save the command, Python version, commit SHA, stdout/stderr, exit code and UTC t
 - A source URL is syntax-checked, **not fetched or reputation-checked**.
 - The SHA is format-checked, **not compared to an actual GitHub commit**.
 - `tests_passed` and `test_log_ref` are self-reported, **not independently validated**.
+- The delivery gate intentionally **fails closed**: its local checklist does not grant release authority, even if every input flag is true. A future verifier must bind company, opportunity, artifact digest, actual source commit, independently retained QA log, reviewer identity, recipient, delivery channel, owner approval and expiry; this verifier is **not implemented**.
 - Therefore neither script may be used to bypass an actual authorized human review or trigger delivery, payment, credential access, code execution or a public submission.
 - Do not put private customer data, credentials or confidential bounty information in public Issues or PRs.
 
