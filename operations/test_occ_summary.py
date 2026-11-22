@@ -7,7 +7,7 @@ class OCCSummaryTests(unittest.TestCase):
                             {"status": "checklist_complete_unverified"}])
         self.assertEqual(report["total"], 3)
         self.assertEqual(report["counts"]["hold"], 2)
-        self.assertEqual(report["counts"]["ready_for_manual_delivery"], 1)
+        self.assertEqual(report["counts"]["checklist_complete_unverified"], 1)
 
     def test_legacy_delivery_ready_status_is_rejected(self):
         with self.assertRaises(ValueError):
