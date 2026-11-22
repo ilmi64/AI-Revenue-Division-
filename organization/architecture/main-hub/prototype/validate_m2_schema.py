@@ -106,6 +106,19 @@ def main() -> int:
     check_m2_envelope_semantics(envelope)
     print("PASS offline M2 envelope referential-integrity checks")
 
+    # The independently pinned company fixture and the combined envelope must
+    # describe the same synthetic snapshot. A divergence is a source-integrity
+    # failure even when both JSON documents separately satisfy their schemas.
+    standalone = {
+        "ai_revenue": loaded["fixtures/ai-revenue.snapshot.example.json"],
+        "trading_technology": loaded["fixtures/trading-technology.snapshot.example.json"],
+    }
+    for snapshot in envelope["status_snapshots"]:
+        company_id = snapshot["company_id"]
+        if snapshot != standalone[company_id]:
+            raise ValueError(f"envelope snapshot differs from pinned company fixture: {company_id}")
+    print("PASS exact semantic agreement between envelope and pinned company fixtures")
+
     # The envelope and the standalone reader must agree on the snapshot contract.
     # This checks nested gate/evidence semantics, not publisher authenticity.
     for snapshot in envelope["status_snapshots"]:
