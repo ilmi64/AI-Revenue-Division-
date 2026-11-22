@@ -348,3 +348,11 @@ January 4–8, 2027 remains the target. No approval or readiness gate is implied
 ### Lane D — Research & Intelligence interface readiness
 - Added the IF-016–IF-022 execution crosswalk for work-order validation, source lifecycle, evidence capture, atomic claim records, independent challenge, recipient-scoped publication and acknowledged distribution.
 - Linked it from the five-work-order packet. The queue remains PREPARED / NOT ASSIGNED; no source approvals, evidence captures, claims, publication or monitoring were created.
+
+
+## 2026-11-21 late-session fast-track additions
+
+- **Trading / ATR14:** Added `docs/architecture/research/atr14-independent-review-decision-packet.md`. It records the proposed previous-close TR formula, 14-valid-observation arithmetic seed, Wilder recurrence, known-answer vectors, invalid-sequence cases, discrepancy questions, and required Quant, Market Data, independent-challenger, CRO/Risk, and owner dispositions. Status remains prepared only; no implementation or tests.
+- **AI Revenue / acquisition:** Added `organization/architecture/mini-review-buyer-validation-and-zero-cost-acquisition-plan.md`. It narrows buyer hypotheses, defines evidence to capture, a discovery script, no-cost channel hypotheses, claim thresholds, selection scorecard, and stop conditions. Status remains prepared only; no outreach, publication, customer contact, or data collection.
+- **Taskly:** Current public materials remain inconsistent: the onboarding page says verification is free during founding-team recruitment, another Taskly page advertises CA$5 for founding Taskers, while the Terms retain a conditional CA$35 plus tax non-refundable fee. Treat the checkout amount as unverified; no application or identity step. See the current Terms and onboarding pages before any future owner-authorized consideration.
+- These additions do not alter the four active work queues, independent company launch gates, CAD $0 default, or January 4–8, 2027 target. No approvals are inferred.
