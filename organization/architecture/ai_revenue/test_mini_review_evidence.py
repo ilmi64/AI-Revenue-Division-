@@ -39,6 +39,10 @@ class MiniReviewEvidenceTests(unittest.TestCase):
             with self.subTest(row=row), self.assertRaises(ValueError):
                 summarize_effort("S1", [row])
 
+    def test_reject_non_entry_records(self):
+        with self.assertRaisesRegex(ValueError, "EffortEntry"):
+            summarize_effort("S1", [{"exercise_id": "S1"}])
+
     def test_reject_non_string_exercise_id(self):
         with self.assertRaises(ValueError):
             summarize_effort(None, [EffortEntry("S1", "p", "draft", Decimal("1"))])
