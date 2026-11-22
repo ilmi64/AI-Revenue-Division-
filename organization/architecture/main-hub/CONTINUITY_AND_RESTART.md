@@ -12,7 +12,7 @@ Preserve source, decisions, current blockers and restart instructions independen
 - Trading & Technology: standalone company; paper-mode safety and market/data verification before any separate authorization for live trading.
 - Both companies build in parallel and can launch independently. Shared infrastructure must not create shared private authority or a prerequisite for either company.
 - Zero-upfront-cost preference; no paid services, API spend, deployments, live trades, merges or external customer contact without explicit approval.
-- Target: January 2027 launch window (working dates January 4–8), per explicit user decision on 2026-11-22. December 2026 acceleration CANCELLED. Both companies prepare and launch independently; mandatory security, financial, legal, and operational gates remain pre-launch. Noncritical improvements may continue after launch.
+- Target: January 2027 launch window (preferred January 4–8), per explicit user decisions on 2026-11-22. December 2026 acceleration CANCELLED. December is the full integration, testing, hardening and operational-readiness cycle, not merely minimum viable scope. If justified by incomplete reliability, security, revenue-workflow or independent-company readiness gates, extend to mid-January (January 11–22) or late January (January 25–29). Both companies remain independent; no launch date overrides mandatory approval, financial, legal or operational safeguards. Noncritical enhancements may continue after launch.
 
 ## Current verified GitHub handoff artifacts
 AI Revenue repository: https://github.com/ilmi64/AI-Revenue-Division-
