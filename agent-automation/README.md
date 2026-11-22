@@ -35,6 +35,8 @@ This is a narrow AI research assistant, not yet a multi-agent orchestration plat
 - [Security and approval policy](security-and-approval-policy.md)
 - [Implementation roadmap](implementation-roadmap.md)
 - [Research Radar collector](research_radar.py)
+- [Multi-lane revenue source registry](REVENUE-LANE-REGISTRY.md)
+- [Revenue lane registry validator](validate_revenue_lane_registry.py)
 - [Local AI research agent](ai_research_agent.py)
 
 ## Status

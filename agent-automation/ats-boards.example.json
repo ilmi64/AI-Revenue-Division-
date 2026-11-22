@@ -1,0 +1,20 @@
+{
+  "boards": [
+    {
+      "provider": "greenhouse",
+      "board": "employer-board-slug",
+      "company": "Employer display name"
+    },
+    {
+      "provider": "lever",
+      "board": "employer-board-slug",
+      "company": "Employer display name",
+      "region": "global"
+    },
+    {
+      "provider": "ashby",
+      "board": "employer-board-name",
+      "company": "Employer display name"
+    }
+  ]
+}

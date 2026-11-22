@@ -1,0 +1,83 @@
+name: Multi-Division Revenue Intelligence Radar
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "agent-automation/**"
+      - ".github/workflows/revenue-opportunity-radar.yml"
+  push:
+    branches: [revenue-intelligence-agent-foundation]
+  workflow_dispatch:
+  schedule:
+    - cron: "41 13 * * 2,5"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: multi-division-revenue-opportunity-radar
+  cancel-in-progress: true
+
+jobs:
+  discover-triage-risk-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+      - name: Run agent tests
+        working-directory: agent-automation
+        run: |
+          PYTHONPATH=. python -m unittest test_opportunity_intelligence.py -v
+          PYTHONPATH=. python -m unittest test_boss_bounty_sources.py -v
+          PYTHONPATH=. python -m unittest test_development_task_agent.py -v
+          PYTHONPATH=. python -m unittest test_risk_review_agent.py -v
+          PYTHONPATH=. python -m unittest test_finance_payout_agent.py -v
+          PYTHONPATH=. python -m unittest test_executive_reporting_agent.py -v
+          PYTHONPATH=. python -m unittest test_division_intake_agent.py -v
+          PYTHONPATH=. python -m unittest test_external_opportunity_sources.py -v
+          PYTHONPATH=. python -m unittest test_ats_job_board_sources.py -v
+          PYTHONPATH=. python -m unittest test_validate_ats_board_candidates.py -v
+          PYTHONPATH=. python -m unittest test_validate_revenue_lane_registry.py -v
+      - name: Validate review-only revenue lane registry
+        run: PYTHONPATH=agent-automation python agent-automation/validate_revenue_lane_registry.py
+      - name: Collect public GitHub opportunity leads
+        run: python agent-automation/opportunity_intelligence.py
+      - name: Collect BOSS-marked GitHub bounty leads (read-only)
+        run: python agent-automation/boss_bounty_sources.py
+      - name: Fetch public remote-work feeds (read-only)
+        run: python agent-automation/external_opportunity_sources.py
+      - name: Validate review-only Canadian employer ATS candidates (read-only)
+        run: PYTHONPATH=agent-automation python agent-automation/validate_ats_board_candidates.py
+      - name: Fetch configured employer ATS boards (read-only)
+        run: PYTHONPATH=agent-automation python agent-automation/ats_job_board_sources.py
+      - name: Normalize all division feeds into shared opportunity intake
+        run: python agent-automation/division_intake_agent.py
+      - name: Prepare engineering triage briefs
+        run: python agent-automation/development_task_agent.py --input opportunity-output/all-opportunities.json
+      - name: Run deterministic risk review
+        run: python agent-automation/risk_review_agent.py
+      - name: Prepare finance and payout due-diligence report
+        run: python agent-automation/finance_payout_agent.py --input opportunity-output/all-opportunities.json
+      - name: Generate executive readiness report
+        run: python agent-automation/executive_reporting_agent.py
+      - name: Upload unified division, triage, risk and executive reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: github-revenue-opportunity-radar
+          path: |
+            opportunity-output/
+            division-inputs/
+            external-source-output/
+            development-output/
+            risk-output/
+            finance-output/
+            executive-output/
+          if-no-files-found: warn
+          retention-days: 30
