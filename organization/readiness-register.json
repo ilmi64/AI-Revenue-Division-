@@ -1,0 +1,235 @@
+{
+  "schema_version": 1,
+  "policy": "Readiness is evidence-based. A division cannot be marked standby or operational solely because a plan or repository exists.",
+  "last_reviewed": "2026-11-15",
+  "checks": [
+    {
+      "id": "mandate-defined",
+      "name": "Mandate and boundaries documented",
+      "required_for": [
+        "standby",
+        "operational"
+      ]
+    },
+    {
+      "id": "responsible-owner",
+      "name": "Responsible owner and escalation route defined",
+      "required_for": [
+        "standby",
+        "operational"
+      ]
+    },
+    {
+      "id": "core-workflow",
+      "name": "Core workflow implemented and documented",
+      "required_for": [
+        "standby",
+        "operational"
+      ]
+    },
+    {
+      "id": "tests",
+      "name": "Relevant automated and manual tests passed",
+      "required_for": [
+        "standby",
+        "operational"
+      ]
+    },
+    {
+      "id": "failure-handling",
+      "name": "Failure, recovery, and rollback procedures tested",
+      "required_for": [
+        "standby",
+        "operational"
+      ]
+    },
+    {
+      "id": "security",
+      "name": "Secrets, permissions, and data-handling review completed",
+      "required_for": [
+        "standby",
+        "operational"
+      ]
+    },
+    {
+      "id": "dependencies",
+      "name": "Dependencies and cross-division handoffs verified",
+      "required_for": [
+        "standby",
+        "operational"
+      ]
+    },
+    {
+      "id": "approval-gates",
+      "name": "Owner approval gates and prohibited actions enforced",
+      "required_for": [
+        "standby",
+        "operational"
+      ]
+    },
+    {
+      "id": "monitoring",
+      "name": "Monitoring, reporting, and audit evidence available",
+      "required_for": [
+        "operational"
+      ]
+    }
+  ],
+  "division_assessments": [
+    {
+      "division_id": "executive",
+      "claimed_status": "building",
+      "verified_status": "building",
+      "evidence": [
+        "Initial organisation charter and division registry added on a development branch.",
+        "Organisation Control Centre validator, dashboard builders, dependency report, work queue, incident, recovery, security and governance checks passed GitHub Actions run 43343966117."
+      ],
+      "open_gaps": [
+        "Control Centre remains a draft feature branch; no merge, deployment or persistent live dashboard.",
+        "Division owners and escalation contacts need formal confirmation.",
+        "Several divisions still lack independently verified operating evidence."
+      ]
+    },
+    {
+      "division_id": "ai-revenue",
+      "claimed_status": "building",
+      "verified_status": "building",
+      "evidence": [
+        "Repository contains opportunity intelligence, division intake, engineering triage, deterministic risk review, finance/payout due diligence and executive reporting agents.",
+        "All AI Revenue workflow tests, Canadian employer ATS candidate validation, read-only feed collection, intake, triage, risk, finance and executive report steps passed run 43473069742."
+      ],
+      "open_gaps": [
+        "Opportunity eligibility, platform terms, payout mechanics and individual leads still require source-level human verification.",
+        "No verified customer revenue recorded.",
+        "No approved customer acquisition, application, outreach or delivery workflow yet."
+      ]
+    },
+    {
+      "division_id": "crypto",
+      "claimed_status": "testing",
+      "verified_status": "testing",
+      "evidence": [
+        "Repository README explicitly defines paper-trading-only scope.",
+        "Paper position lifecycle includes atomic partial exits, versioned stop/trailing/take-profit decisions, FIFO P&L reconciliation, persistent drawdown and allow-listed PAPER_ONLY state persistence.",
+        "All 135 then-current paper-engine tests and synthetic simulation passed run 43473656375.",
+        "Read-only Forex and Indices context specialists and their synthetic tests passed the 153-test suite in run 43474468908; specialist and position-engine scope is documented on a draft branch."
+      ],
+      "open_gaps": [
+        "Position and exit-engine work remains on unmerged draft branches; no live capability is approved.",
+        "Independent Risk review of the position lifecycle, drawdown controls, ledger and recovery assumptions remains outstanding.",
+        "Current specialist modules consume caller-supplied synthetic/test data; permitted production data sources, provenance, licensing, freshness and outage handling are not yet integrated.",
+        "Forex and Indices are analysis-only foundations, not completed source-connected specialist services.",
+        "No durable hosted paper service, continuous monitoring, alerting or independently tested production recovery environment.",
+        "Historical/out-of-sample evaluation with realistic network fees, liquidity and slippage assumptions remains incomplete.",
+        "No live-trading readiness claim is permitted."
+      ]
+    },
+    {
+      "division_id": "ecommerce",
+      "claimed_status": "deferred",
+      "verified_status": "deferred",
+      "evidence": [
+        "Read-only listing CSV audit MVP exists."
+      ],
+      "open_gaps": [
+        "Major development intentionally deferred."
+      ]
+    },
+    {
+      "division_id": "animora",
+      "claimed_status": "deferred",
+      "verified_status": "deferred",
+      "evidence": [
+        "Long-term studio ambition recorded in strategic planning."
+      ],
+      "open_gaps": [
+        "Expansion waits until the main organisation is successful and can fund it sustainably."
+      ]
+    },
+    {
+      "division_id": "tisrd",
+      "claimed_status": "building",
+      "verified_status": "building",
+      "evidence": [
+        "A distinct TISRD charter and Ontario-first source qualification policy are documented in Solana-memecoins PR #39 (draft and unmerged).",
+        "The charter defines authorized replication and information-only research paths, a paper lifecycle, independent risk challenge, and no-execution boundaries."
+      ],
+      "open_gaps": [
+        "The charter is documentation-only; no production workflow, source-permission registry, connector, or strategy observation store is verified.",
+        "Platform-by-platform rights, Ontario eligibility, retention, automation and copy-trading permissions remain unverified or restricted; no unauthorized trader profiling or scraping is permitted.",
+        "No reproducible paper-replication dataset, isolated strategy ledger, out-of-sample results, or benchmark evidence is established.",
+        "Named accountable owner, escalation route, monitoring, and cross-division rehearsal evidence remain outstanding.",
+        "No platform application, paid feed, wallet connection, or live execution is authorized."
+      ]
+    },
+    {
+      "division_id": "technology",
+      "claimed_status": "building",
+      "verified_status": "building",
+      "evidence": [
+        "Control Centre draft includes security-posture, readiness, dependency, work-queue, execution-log and incident validators plus isolated fixture recovery checks; latest workflow confirms these validation steps passed before the test stage.",
+        "Crypto development branches contain read-only Solana RPC, provider failover and paper-ingestion components with synthetic test coverage."
+      ],
+      "open_gaps": [
+        "No approved hosted runtime, persistent monitoring, alert routing or independently tested production failover is established.",
+        "Live RPC/provider connectivity, endpoint independence, credential governance and sustained outage/restart behaviour remain unverified.",
+        "Control Centre and Crypto changes remain draft/unmerged; no production deployment or permission changes are authorized."
+      ]
+    },
+    {
+      "division_id": "research",
+      "claimed_status": "building",
+      "verified_status": "building",
+      "evidence": [
+        "Research and source-qualification mandates are documented in the Control Centre framework and TISRD charter PR #39.",
+        "Official source reviews have identified explicit data-rights and Ontario constraints for Pump.fun, Polymarket, Kalshi and other candidate sources."
+      ],
+      "open_gaps": [
+        "No unified, operational source-permission register with accountable review ownership is implemented.",
+        "Several platform permissions, data retention rights, Ontario eligibility and automated-use rights remain restricted, unclear or unverified.",
+        "No continuously refreshed research service or independently rehearsed handoff to every division is established."
+      ]
+    },
+    {
+      "division_id": "finance",
+      "claimed_status": "planned",
+      "verified_status": "planned",
+      "evidence": [
+        "The Control Centre records CAD 0 as the default operating budget and reserves financial transactions, borrowing and paid commitments for explicit owner approval.",
+        "Crypto PR #37 documents a paper-only CAD ledger and fee-inclusive FIFO accounting/reconciliation prototype."
+      ],
+      "open_gaps": [
+        "No independently verified finance operating workflow, cash-flow record, reserve policy or reconciled bank/account evidence is connected.",
+        "No confirmed finance owner, approval ledger, tax/accounting export or full organisation-wide cost reporting is established.",
+        "No borrowing, yield, interest or investment activity is authorized; halal-sensitive structures require separate review."
+      ]
+    },
+    {
+      "division_id": "risk",
+      "claimed_status": "building",
+      "verified_status": "building",
+      "evidence": [
+        "The Control Centre draft contains risk, incident, security and recovery records plus validators and a temporary-fixture recovery drill.",
+        "Crypto PR #37 contains a recovery charter and local SQLite case-register prototype with synthetic tests."
+      ],
+      "open_gaps": [
+        "No active incident cases are recorded; the repository drill validates temporary fixtures only, not production recovery.",
+        "No production case-register RBAC, encryption, tamper-evident evidence export, authenticated case ownership or tested alert/deadline workflow is established.",
+        "Independent named risk/recovery ownership, cross-division incident rehearsals and production containment/recovery evidence remain outstanding."
+      ]
+    },
+    {
+      "division_id": "business-commercial",
+      "claimed_status": "building",
+      "verified_status": "building",
+      "evidence": [
+        "A distinct Business & Commercial division, support scope and approval boundary are now recorded in the Control Centre operating framework."
+      ],
+      "open_gaps": [
+        "No verified customer pipeline, commercial operating workflow, named owner or escalation route is established.",
+        "No approved client outreach, proposal submission, contract, customer delivery or revenue-recognition workflow is active.",
+        "Market demand, pricing, fulfilment capacity, contract terms and customer-acquisition costs require source-backed validation before any commercial commitment."
+      ]
+    }
+  ]
+}
