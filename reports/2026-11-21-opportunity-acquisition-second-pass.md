@@ -118,3 +118,20 @@ Sources reviewed:
 - micro1 lead was surfaced through a third-party role listing; primary verification remains outstanding.
 
 **Additional screen disposition:** one potentially relevant marketplace held by a possible $35 verification fee; two GEND.ME roles held by unverified cash redemption/qualification; one third-party AI-work lead not primary-verified. Zero new claim-ready or cash-ready opportunities.
+
+
+## 9. Taskly founding-team verification clarification — 2026-11-21
+
+A fresh primary-source check narrows the earlier hold. Taskly's current Canadian Tasker onboarding page says the Stripe identity check is normally CA$35 but is currently free while it builds its founding Tasker team. It says sign-up, profile, interview and listing are free, and describes bank payout 2–3 business days after payment release. Its Canadian earn page, updated November 2026, likewise says joining and sending offers are free and payouts to a Canadian bank through Stripe are live. The Terms still preserve the possibility of a $35 plus tax non-refundable charge where the Canadian identity-checking flow applies, with promotional discounts potentially reducing checkout cost. The support page says any fee, if applicable, is shown before payment.
+
+**Revised interpretation:** Taskly is a **conditional zero-upfront lead with a currently advertised founding-team fee waiver**, not a proven guaranteed $0 onboarding route. The public onboarding page is a stronger current signal than the earlier generic Terms-only interpretation, but the fee shown at the actual verification step and Tasker approval criteria have not been observed. Do not proceed to identity verification, account creation or onboarding in this workflow. If the owner later elects to consider it, first confirm the checkout shows exactly C$0, no card/payment commitment, and no other mandatory spend; otherwise abandon the route. This research does not authorize an application.
+
+The 20% platform commission remains a post-earning deduction, not an upfront subscription. Taskly is an independent-contractor marketplace, not employment; no tasks, demand volume, acceptance probability or earnings are guaranteed.
+
+Primary sources:
+- Tasker onboarding and founding-team fee waiver: https://tasklyanything.ca/how-it-works/tasker
+- Canadian earn page: https://tasklyanything.ca/ca/earn
+- Terms, last updated 2026-10-26: https://tasklyanything.ca/terms
+- Support and payment explanation: https://tasklyanything.ca/support
+
+**Updated disposition:** Taskly moves from HOLD_NO_UPFRONT_FEE_UNVERIFIED to CONDITIONAL_ZERO_UPFRONT_FOUNDING_WAIVER_ADVERTISED / CHECKOUT_NOT_VERIFIED. It is not yet claim-ready or cash-ready, and no account or application has been made.
