@@ -3,6 +3,7 @@ import argparse
 import json
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.parse import urlsplit
 
 KINDS = {"coding", "coding_bounty", "bug_bounty", "automation", "creative", "research"}
 STATES = {"hold", "review_ready", "rejected"}
@@ -19,12 +20,21 @@ def assess(item, now=None):
     reasons = []
     if not isinstance(item["id"], str) or not item["id"].strip():
         reasons.append("invalid_id")
-    if item["kind"] not in KINDS:
+    if not isinstance(item["kind"], str) or item["kind"] not in KINDS:
         reasons.append("unsupported_kind")
     if not isinstance(item["title"], str) or not item["title"].strip():
         reasons.append("invalid_title")
     url = item["source_url"]
-    if not isinstance(url, str) or not url.startswith("https://") or any(c.isspace() for c in url):
+    try:
+        parsed_url = urlsplit(url) if isinstance(url, str) else None
+        valid_url = (parsed_url is not None and parsed_url.scheme == "https"
+                     and bool(parsed_url.hostname) and not parsed_url.username
+                     and not parsed_url.password and not any(c.isspace() for c in url))
+        if valid_url:
+            _ = parsed_url.port
+    except (ValueError, TypeError):
+        valid_url = False
+    if not valid_url:
         reasons.append("unverified_source_url")
     if item["scope_authorized"] is not True:
         reasons.append("authorization_unverified")
@@ -58,7 +68,8 @@ def evaluate(items, now=None):
     results = []
     for item in items:
         result = assess(item, now)
-        key = item.get("id") if isinstance(item, dict) else None
+        raw_id = item.get("id") if isinstance(item, dict) else None
+        key = raw_id if isinstance(raw_id, (str, int, float, bool, type(None))) else None
         if isinstance(key, str) and key in seen:
             result = {"status": "rejected", "reasons": ["duplicate_id"],
                       "next_action": "human_review_only"}
