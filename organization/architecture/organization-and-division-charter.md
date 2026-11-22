@@ -2,7 +2,8 @@
 
 **Status:** Canonical architecture baseline; implementation and staffing remain staged and unverified  
 **Applies to:** Main Hub/OCC, AI Revenue Company, Trading & Technology Company, and the Research & Intelligence Division  
-**Operating principle:** Build the two companies in parallel for a coordinated launch window; preserve independent authority, operations and launch decisions.
+**Operating principle:** Build the two companies in parallel for a coordinated launch window; preserve independent authority, operations and launch decisions.  
+**Launch target:** Coordinated January 4–8, 2027 launch window, subject to each company's independent readiness gates; Trading also requires sufficient lawful starting capital. If one company misses its own gates, the ready company may launch independently and the other remains on standby. No gate is waived.  
 
 ## 1. Organizational structure
 
