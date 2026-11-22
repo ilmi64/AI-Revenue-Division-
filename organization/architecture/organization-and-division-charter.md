@@ -22,7 +22,7 @@ AI Revenue operating blueprint: `ai-revenue-operating-blueprint.md`; department 
 ## 2. Parallel build and independent launch
 
 - Build AI Revenue and Trading & Technology simultaneously, using parallel workstreams and their existing company prototypes, repositories, decisions and architecture. Do not restart either company from scratch.
-- Develop both companies in parallel. AI Revenue must be independently operational and generating verified real revenue before Trading & Technology / Crypto launches; all activation is evidence-based, with no calendar deadline.
+- Develop both companies in parallel with independent launch gates. Trading & Technology launches when it has sufficient lawful starting capital, passes its own readiness gates and receives explicit owner approval. AI Revenue revenue is not a prerequisite for Trading launch. If Trading lacks lawful starting capital, it may remain on standby while AI Revenue pursues its own revenue; that is a capital contingency only, not a revenue prerequisite. Any optional AI Revenue-to-Trading capital support requires a separate lawful, documented, accounted-for and explicitly owner-approved arrangement that protects AI Revenue solvency and operating needs. Neither company is otherwise a prerequisite, funding source, customer, supplier or operational dependency for the other's launch.
 - Neither company is a prerequisite, funding source, customer, supplier or operational dependency for the other's launch.
 - Neither company must first generate revenue, receive customer payment, complete a customer delivery, or become operational before the other can launch.
 - Each company owns its own launch decision and readiness gates. A delay or failure in one company must not block the other.
