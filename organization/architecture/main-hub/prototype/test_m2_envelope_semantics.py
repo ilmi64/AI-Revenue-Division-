@@ -32,6 +32,13 @@ class M2EnvelopeSemanticTests(unittest.TestCase):
         with self.assertRaisesRegex(EnvelopeSemanticError, "self-dependent"):
             check_m2_envelope_semantics(self.envelope)
 
+    def test_cyclic_workstream_dependency(self):
+        first, second = self.envelope["workstreams"][:2]
+        first["depends_on"] = [second["workstream_id"]]
+        second["depends_on"] = [first["workstream_id"]]
+        with self.assertRaisesRegex(EnvelopeSemanticError, "cyclic workstream dependency"):
+            check_m2_envelope_semantics(self.envelope)
+
     def test_decision_unknown_workstream(self):
         # The committed fixture intentionally has no decisions; inject a synthetic one.
         self.envelope["decisions"].append({"decision_id": "DEC-SYNTHETIC", "workstream_ids": ["WS-UNKNOWN"]})
