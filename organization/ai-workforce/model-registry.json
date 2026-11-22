@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0.0",
+  "policy": {
+    "incremental_spend_cad": 0,
+    "paid_apis": false,
+    "paid_trials": false,
+    "default_tool_permission": "read_only",
+    "approval_required": [
+      "spending",
+      "subscriptions",
+      "applications",
+      "outreach",
+      "publishing",
+      "contracts",
+      "account_or_permission_changes",
+      "financial_transactions",
+      "wallet_actions",
+      "live_trading",
+      "merges",
+      "deployments",
+      "production_launches"
+    ],
+    "never_request_or_store": [
+      "passwords",
+      "mfa_codes",
+      "seed_phrases",
+      "private_keys",
+      "api_secrets"
+    ]
+  },
+  "models": [
+    {
+      "id": "qwen-primary-pilot",
+      "provider": "Qwen",
+      "model": "qwen2.5:1.5b",
+      "runtime": "Ollama",
+      "deployment": "ephemeral GitHub Actions runner",
+      "status": "integrated_in_main_unverified_end_to_end",
+      "evidence": {
+        "repository": "ilmi64/AI-Revenue-Division-",
+        "pull_request": 2,
+        "merge_commit": "874dabc99ed04814b3e024964b158322669c9ba8",
+        "merged_at": "2026-11-13"
+      },
+      "scope": [
+        "read_only_release_research",
+        "draft_summaries",
+        "structured_extraction"
+      ],
+      "limitations": [
+        "small_model",
+        "draft_output_only",
+        "no_external_actions"
+      ],
+      "next_gate": "After Actions usage reset, run the workflow and review artifact quality, runtime, factuality, repeatability and prompt-injection resistance."
+    },
+    {
+      "id": "llama-review-candidate",
+      "provider": "Meta",
+      "model": "llama3.2:1b",
+      "runtime": "Ollama candidate",
+      "deployment": "not_installed_or_verified",
+      "status": "evaluation_candidate",
+      "scope": [
+        "independent_summary_review",
+        "contradiction_detection",
+        "structured_output_checks"
+      ],
+      "limitations": [
+        "license_review_required",
+        "hardware_and_quality_unverified"
+      ],
+      "next_gate": "Verify exact model tag, license, device capacity and benchmark; installation requires separate approval."
+    },
+    {
+      "id": "qwen-next-generation-candidate",
+      "provider": "Qwen",
+      "model": "qwen3.5:0.8b",
+      "runtime": "Ollama candidate",
+      "deployment": "not_installed_or_verified",
+      "status": "benchmark_candidate_only",
+      "scope": [
+        "comparative_reasoning",
+        "structured_extraction",
+        "prompt_injection_tests"
+      ],
+      "limitations": [
+        "not_a_replacement_for_qwen2.5",
+        "tag_license_and_runtime_unverified"
+      ],
+      "next_gate": "Benchmark against the existing pilot before considering migration."
+    }
+  ],
+  "routing": {
+    "coordinator": "ChatGPT",
+    "small_model_role": "draft_classify_extract_summarize_critique_only",
+    "independent_review": "Use a second model or deterministic validation for material or uncertain outputs.",
+    "source_of_truth": "Original records, official sources, deterministic code and human-approved decisions outrank model summaries.",
+    "failure_policy": "Timeout, invalid output or unavailable model creates a blocked/review task; never silently invent or blindly retry."
+  }
+}
