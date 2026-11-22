@@ -53,6 +53,32 @@ def check_m2_envelope_semantics(envelope):
             raise EnvelopeSemanticError("self-dependent workstream")
         if set(dependencies) - workstream_ids:
             raise EnvelopeSemanticError("unknown workstream dependency")
+    # Detect cycles as well as direct self-references; a cyclic dependency
+    # cannot be treated as a valid readiness chain.
+    graph = {
+        record["workstream_id"]: tuple(record.get("depends_on", []))
+        for record in envelope["workstreams"]
+    }
+    visiting = set()
+    visited = set()
+    for root in graph:
+        if root in visited:
+            continue
+        stack = [(root, False)]
+        while stack:
+            node, leaving = stack.pop()
+            if leaving:
+                visiting.remove(node)
+                visited.add(node)
+                continue
+            if node in visited:
+                continue
+            if node in visiting:
+                raise EnvelopeSemanticError("cyclic workstream dependency")
+            visiting.add(node)
+            stack.append((node, True))
+            for dependency in reversed(graph[node]):
+                stack.append((dependency, False))
     for decision in envelope["decisions"]:
         references = decision.get("workstream_ids", [])
         if not isinstance(references, list) or any(
