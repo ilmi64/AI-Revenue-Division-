@@ -327,3 +327,19 @@ The January 4–8, 2027 target remains unchanged. No readiness gate is waived by
 - Added the corresponding Trading & Technology M2 static gap-closure/source-attestation mirror and linked it from the Trading M2 crosswalk/readiness matrix.
 - Both company views retain the same shared prototype baseline while explicitly preventing one company's source hashes or validation from attesting the other company's policy, data or readiness.
 - No code, schema, fixture or test changes; all tests and schema validation remain NOT_RUN.
+
+
+## 13. Execution checkpoint — 2026-11-21 continuation (third pass)
+
+### Lane A — AI Revenue offer readiness
+- Added the Mini-Review offer promise-to-evidence traceability matrix. Every offer deliverable now has minimum evidence, acceptance criteria and hard stops.
+- Made the 180-minute offer target versus 210-minute rehearsal plan a formal owner/reviewer decision before any authorized rehearsal. Neither is a validated promise; QA, privacy, evidence, independent review and closeout cannot be silently compressed.
+- Updated Taskly's acquisition status after fresh primary-source review: the Tasker page currently advertises the normally C$35 ID verification as free during founding-team onboarding, while Terms retain a conditional fee provision. It is a conditional zero-upfront lead, checkout not verified; no account or application.
+
+### Lane B — Trading & Technology Gold
+- Added a current-architecture Gold/XAUUSD reconciliation matrix across IF-023–IF-030.
+- Preserved PR #44/#68/#69 dependency and documentary-evidence gates; specified identity/product-form distinctions, calendar, specialist scope, observation semantics, ledger, CRO risk, strategy evaluation and shift handover requirements.
+- Gold remains blocked from integration pending exact source/product/legal terms and independent reviews. No branch merge, tests, feed or signal.
+
+### Launch target
+January 4–8, 2027 remains the target. No approval or readiness gate is implied by these documentation milestones.
