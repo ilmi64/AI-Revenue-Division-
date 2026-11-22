@@ -52,5 +52,18 @@ class IntakeTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             evaluate({"id": "wrong"}, NOW)
 
+    def test_unhashable_kind_fails_closed(self):
+        self.assertIn("unsupported_kind", assess(fixture(kind=["coding"]), NOW)["reasons"])
+
+    def test_url_missing_hostname_fails_closed(self):
+        self.assertIn("unverified_source_url", assess(fixture(source_url="https://"), NOW)["reasons"])
+
+    def test_malformed_url_port_fails_closed(self):
+        self.assertIn("unverified_source_url", assess(fixture(source_url="https://example.org:bad/path"), NOW)["reasons"])
+
+    def test_unhashable_id_does_not_crash_batch(self):
+        result = evaluate([fixture(id=["bad"])], NOW)
+        self.assertEqual(result[0]["status"], "hold")
+
 if __name__ == "__main__":
     unittest.main()
