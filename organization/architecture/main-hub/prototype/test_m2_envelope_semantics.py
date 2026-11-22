@@ -16,6 +16,19 @@ class M2EnvelopeSemanticTests(unittest.TestCase):
     def test_exact_fixture_semantics(self):
         check_m2_envelope_semantics(self.envelope)
 
+    def test_snapshot_gate_unknown_evidence_rejected_by_reader(self):
+        from occ_readonly import SnapshotError, assess_snapshot
+        snapshot = self.envelope["status_snapshots"][0]
+        snapshot["gates"][0]["evidence_refs"] = ["EV-NOT-FOUND"]
+        with self.assertRaisesRegex(SnapshotError, "unknown evidence_id"):
+            assess_snapshot(snapshot, "ai_revenue")
+
+    def test_snapshot_wrong_company_rejected_by_reader(self):
+        from occ_readonly import SnapshotError, assess_snapshot
+        snapshot = self.envelope["status_snapshots"][0]
+        with self.assertRaisesRegex(SnapshotError, "company identity mismatch"):
+            assess_snapshot(snapshot, "trading_technology")
+
     def test_duplicate_company_record(self):
         self.envelope["company_registry"][1] = copy.deepcopy(self.envelope["company_registry"][0])
         with self.assertRaises(EnvelopeSemanticError):
