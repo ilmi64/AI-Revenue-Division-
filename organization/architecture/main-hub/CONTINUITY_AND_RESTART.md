@@ -56,3 +56,32 @@ Trading repository: https://github.com/ilmi64/Solana-memecoins
 - No 'Group' suffix on either Aevora operating company. The brand names do not imply shared treasury, execution authority, credentials or legal incorporation. Preserve separate company boundaries and existing GitHub repositories.
 - Names remain working brands pending Ontario/Canadian corporate, trademark and domain availability checks; no registration, purchases or renaming of repositories authorized.
 - Launch: preferred January 4–8, 2027; evidence-based extension through mid or late January. Continue fast-track implementation and comprehensive verification throughout December.
+
+## Expanded architecture direction — confirmed 2026-11-22
+These are organizational requirements and candidate integrations, **not evidence that services are deployed, authenticated, continuously running or revenue-generating**.
+
+### Shared parent governance and workforce
+- Daivora Group Main Hub/OCC: read-only organization-wide visibility, audit and coordination with company-specific approval boundaries.
+- **AI Executive Advisory Desk**: established name for ChatGPT's advisory, technical coordination and executive-review interface; not a substitute for a persistent backend or an autonomous cloud runner.
+- **Research & Intelligence Division**: first-class shared division, company-scoped outputs, source/evidence governance, day/night coverage design and independently reviewed intelligence.
+- **Security & Recovery**: threat/incident response, business continuity and recovery workflows; trading loss analysis/recovery does not imply recovering losses by taking additional unapproved risk.
+- **AI leadership and workforce**: independent executive desks and specialist agents for each company; candidate agent orchestration includes Paperclip, Ruflo, Claude swarms and other open-source components, only after compatibility/security verification.
+- **Cloud-computer and OpenFrames concepts**: assess free, supported infrastructure; do not assume background execution or spend money without authorization.
+- **Grok Desk / HyperGrok**: night-shift intelligence, market monitoring, independent risk challenge and audited handover; do not claim 24/7 operations before deployed coverage is verified.
+
+### Aevora AI — commercial operations
+- Coding/software fixes, authorized coding bounties and bug bounties, QA, automation services, research, digital products, creative production and proprietary software.
+- Creative Studio candidates include HyperFrames and ComfyUI, with scripting, asset production, quality checks and approved delivery.
+- Revenue operations must track: opportunity qualification → permission/scope checks → work assignment → offline QA → review → approved submission/delivery → accepted work/invoice → collected funds. Pipeline readiness is not earned revenue.
+
+### Aevora Trading & Technology — independent operations
+- PolyBot day-shift monitoring, paper-trading and strategy evaluation; Grok Desk/HyperGrok night-shift coverage design with independent audited handover.
+- Crypto, Gold, Forex, indices, prediction-market research and arbitrage strategies remain separately risk-gated. TISRD (Trader Intelligence & Strategy Replication) is a candidate research/strategy function.
+- Trading Issue #73 and draft PR #74 contain the offline spot arbitrage evaluator and synthetic tests. This is not a live scanner or proof of profitable execution.
+- No leverage, derivatives/funding-rate execution, deposits, live orders or financial operations without separate approval, legal and halal suitability review and verified safety controls.
+
+### Integration, evidence and launch
+- The AI Executive Advisory Desk, OCC and Research & Intelligence coordinate through auditable, company-scoped handoffs. No shared secrets, treasury, customer records or execution privileges.
+- Keep GitHub issue-first engineering queues, draft PR reviews, exact-source tests and explicit human gates. No fabricated Codex Cloud automation.
+- January 4–8, 2027 is the preferred window; mid/late January extensions are acceptable for substantial hardening. Do not reduce launch to a bare-minimum prototype; prioritize working, tested, recoverable operations and commercial readiness.
+- Keep future expansions on a governed backlog, not as launch blockers.
