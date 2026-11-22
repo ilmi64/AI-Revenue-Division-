@@ -105,6 +105,24 @@ The research does **not** support treating a headline bounty or a platform's his
 - This review did not verify a currently live funded issue or complete payout/fee/Canada eligibility terms.
 - Link: https://oss.issuehunt.io/
 
+
+### 3.8 Additional live GitHub issue checks — no zero-cost execution candidate yet
+
+A second pass queried currently open GitHub issues carrying bounty signals and fetched the canonical issue bodies and comment histories. This reduced several apparent opportunities to the following dispositions:
+
+- **Paraspell / xcm-tools #2591** — open and labelled `Bug bounty`, with a concrete Polkadot.js/Hydration fee-asset bug description. However, the issue body and available comment history do not state a reward amount, a funded escrow, payment asset/network, acceptance/payout conditions, or explicit confirmation that external contributors are invited. A public bounty label alone is insufficient. **Status: WATCH / TERMS UNVERIFIED; do not begin work.**
+  - https://github.com/paraspell/xcm-tools/issues/2591
+- **Claude Builders Bounty #5** — open and advertises US$200 for an n8n weekly GitHub summary workflow, payable on merge. Its acceptance criteria explicitly require the Anthropic Claude API and a successful run on a real n8n instance. The paid API requirement conflicts with CAD $0/no paid API usage; the exact current Opire payout and eligibility terms also need independent verification. **Status: BLOCKED BY PAID API / EXCLUDE FROM CURRENT ZERO-SPEND QUEUE.**
+  - https://github.com/claude-builders-bounty/claude-builders-bounty/issues/5
+- **Githoney documentation #3** — issue remains open and has a bounty label, but its bot history records a 10 ADA bounty with a January 20, 2025 deadline and a later merged-PR message stating the bounty was closed. **Status: STALE / CLOSED REWARD; EXCLUDE.**
+  - https://github.com/githoney-io/documentation/issues/3
+- **Lateralus language #447** — open issue with a substantive compiler defect description, but no verified funded reward or payout terms were present in the fetched issue record. A proposed autonomous solution comment is not sponsor authorization or evidence of a bounty. **Status: UNFUNDED / TERMS UNVERIFIED; WATCH ONLY.**
+  - https://github.com/bad-antics/lateralus-lang/issues/447
+- **Paid Lean mathematics #223** — open research coordination issue, but the body describes multiple distinct prize sources and requirements; no single bounded, Canada-eligible, zero-upfront, payment-ready task was established in this screen. It also has a high and uncertain proof-effort profile. **Status: DEFER pending exact prize-specific terms and effort assessment.**
+  - https://github.com/1337isnot1337/solved-conjectures/issues/223
+
+**Screen result:** despite several open issues carrying bounty signals, this pass has not yet verified a currently funded, claimable, Canada-eligible, zero-upfront coding issue with complete payment terms. This is a discovery gap, not a reason to lower the selection standard or begin unpaid work speculatively.
+
 ## 4. Execution gates and zero-cost operating rules
 
 No external work starts until the individual opportunity dossier contains:
