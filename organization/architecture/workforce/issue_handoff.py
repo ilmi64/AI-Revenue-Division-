@@ -51,7 +51,11 @@ def handoff_blockers(item: object) -> tuple[str, ...]:
         blockers.append("invalid_company")
     if type(item.issue_number) is not int or item.issue_number < 1:
         blockers.append("invalid_issue_number")
-    parsed = urlparse(item.issue_url) if isinstance(item.issue_url, str) else None
+    try:
+        parsed = urlparse(item.issue_url) if isinstance(item.issue_url, str) else None
+    except ValueError:
+        # Malformed IPv6 authorities and invalid netlocs must fail closed.
+        parsed = None
     expected = REPOS.get(item.company) if isinstance(item.company, Company) else None
     if (
         parsed is None or parsed.scheme != "https" or parsed.netloc != "github.com"
