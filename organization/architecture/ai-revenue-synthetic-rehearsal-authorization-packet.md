@@ -50,25 +50,29 @@ No real wallet, financial account, private key, seed phrase, credential or recov
 
 ## 4. Governing artifacts to freeze before authorization
 
-The following are the controlling materials already identified in the repository:
-1. `organization/architecture/practical-operations-improvement-mini-review-offer-specification.md`
-2. `organization/architecture/synthetic-delivery-time-rehearsal.md`
-3. `organization/architecture/synthetic-rehearsal-scorecard-and-comparative-review-template.md`
-4. `organization/architecture/workflow-mini-review-template.md`
-5. `organization/architecture/ai-revenue-mini-review-delivery-economics.md`
-6. `organization/architecture/ai-revenue-full-cycle-delivery-economics-worksheet.md`
-7. The committed Scenario 1 and Scenario 2 synthetic input packs.
-8. The current Delivery QA, Acceptance & Time-Capture Standard.
+The following exact artifacts were fetched from branch `architecture/shared-ai-workforce-foundation`; blob SHAs are recorded to freeze the baseline:
 
-The offer specification explicitly identifies related materials, but this packet does not assume every linked filename/path has been independently resolved in this review. Before any authorization is exercised, the exact Scenario 1/2 packs, QA standard, economics worksheet and template versions must be fetched, their blob SHAs recorded, and any missing or stale references resolved. Do not substitute a guessed file or a reconstructed pack.
+| Artifact | Exact repository path | Blob SHA |
+|---|---|---|
+| Offer specification | `organization/architecture/practical-operations-improvement-mini-review-offer-specification.md` | `4b28e54e14fb9c641c9908fe42bc9ac8dbabf4b7` |
+| Rehearsal plan | `organization/architecture/synthetic-delivery-time-rehearsal.md` | `7363a15beb7eb8f34f16647abf1bfa55f9891b83` |
+| Scenario 1 input pack | `organization/architecture/synthetic-rehearsal-input-pack.md` | `3e90a72e143a119df721da1b308c4ba133c1407b` |
+| Scenario 2 input pack | `organization/architecture/synthetic-second-rehearsal-scenario-pack.md` | `604214567ec5d59770397618ad044433b47376ac` |
+| QA / acceptance / time capture | `organization/architecture/ai-revenue-delivery-qa-acceptance-and-time-capture-standard.md` | `c5895fdeaf8ccc6e58abb622970ab2bfd68b1936` |
+| Scorecard | `organization/architecture/synthetic-rehearsal-scorecard-and-comparative-review-template.md` | `0425ba2b6116435daa304ad2f1b6bfdd459fd6d2` |
+| Delivery template | `organization/architecture/workflow-mini-review-template.md` | `537928b4267b6a0504b5e532405578c4b2309c07` |
+| Mini-review economics model | `organization/architecture/ai-revenue-mini-review-delivery-economics.md` | `5482bd174f33b2114864c213a41ce2272ea96bf2` |
+| Full-cycle economics worksheet | `organization/architecture/ai-revenue-full-cycle-delivery-economics-worksheet.md` | `82ac4260b7cbf6f8f0174e4a084b3868b5519793` |
+
+The files are present and their exact paths/SHAs are now identified. Before authorization, the owner/reviewer must still confirm the frozen versions are the intended ones and reconcile the target-time inconsistency: the rehearsal plan totals 210 minutes, while the offer and delivery template describe a 180-minute target. Neither target is validated; no target may be silently substituted or represented as a promise.
 
 ## 5. Preconditions — all must pass before starting either rehearsal
 
 | ID | Precondition | Required evidence | Current state |
 |---|---|---|---|
 | PRE-01 | Explicit owner authorization for this exact scenario | Written decision, scope, exercise ID and timestamp | NOT GRANTED |
-| PRE-02 | Exact synthetic input pack verified | Repository path, branch, blob SHA and synthetic-only review | NOT VERIFIED IN THIS PACKET |
-| PRE-03 | Current offer, QA and economics templates frozen | Exact paths and blob SHAs | PARTIALLY IDENTIFIED; FREEZE PENDING |
+| PRE-02 | Exact synthetic input pack verified | Repository path, branch, blob SHA and synthetic-only review | PATHS/SHAS VERIFIED; OWNER/REVIEWER CONFIRMATION PENDING |
+| PRE-03 | Current offer, QA and economics templates frozen | Exact paths and blob SHAs | PATHS/SHAS RECORDED; VERSION ACCEPTANCE PENDING |
 | PRE-04 | Named producer and independent reviewer | Role assignment and independence declaration | NOT ASSIGNED |
 | PRE-05 | CAD $0 incremental budget confirmed | Tool/access inventory; no paid dependencies | NOT VERIFIED FOR EXECUTION |
 | PRE-06 | Data boundary checked | Written confirmation no real or sensitive data | NOT PERFORMED |
@@ -161,9 +165,9 @@ Each of those requires separate owner approval and applicable legal, privacy, ta
 |---|---|
 | Offer specification | PREPARED; NOT PUBLISHED / NOT PRICED |
 | Rehearsal plan | PREPARED; NOT EXECUTED |
-| Scenario input packs | REFERENCED; EXACT VERSION FREEZE PENDING |
-| QA standard | REFERENCED; EXACT VERSION FREEZE PENDING |
-| Economics worksheet | REFERENCED; EXACT VERSION FREEZE PENDING |
+| Scenario input packs | EXACT PATHS/SHAS RECORDED; OWNER/REVIEWER CONFIRMATION PENDING |
+| QA standard | EXACT PATH/SHA RECORDED; OWNER/REVIEWER CONFIRMATION PENDING |
+| Economics worksheet | EXACT PATH/SHA RECORDED; OWNER/REVIEWER CONFIRMATION PENDING |
 | Scorecard | BLANK TEMPLATE; NOT EXECUTED |
 | Producer / reviewer | NOT ASSIGNED |
 | Owner authorization | NOT GRANTED |
