@@ -39,6 +39,8 @@ def summarize_effort(exercise_id: str, entries: Iterable[EffortEntry]) -> Effort
     if not rows:
         raise ValueError("at least one contemporaneously recorded entry is required")
     for row in rows:
+        if not isinstance(row, EffortEntry):
+            raise ValueError("each entry must be an EffortEntry")
         if row.exercise_id != exercise_id:
             raise ValueError("mixed exercise IDs")
         if (
