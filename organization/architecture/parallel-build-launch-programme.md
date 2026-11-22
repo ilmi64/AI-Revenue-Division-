@@ -343,3 +343,8 @@ The January 4–8, 2027 target remains unchanged. No readiness gate is waived by
 
 ### Launch target
 January 4–8, 2027 remains the target. No approval or readiness gate is implied by these documentation milestones.
+
+
+### Lane D — Research & Intelligence interface readiness
+- Added the IF-016–IF-022 execution crosswalk for work-order validation, source lifecycle, evidence capture, atomic claim records, independent challenge, recipient-scoped publication and acknowledged distribution.
+- Linked it from the five-work-order packet. The queue remains PREPARED / NOT ASSIGNED; no source approvals, evidence captures, claims, publication or monitoring were created.
