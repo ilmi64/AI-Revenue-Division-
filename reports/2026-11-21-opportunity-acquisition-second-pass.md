@@ -78,3 +78,43 @@ No account was created, no terms accepted, no target selected, no testing perfor
 Bounty hunting remains one acquisition lane, not the sole route to January launch. In parallel, Software Engineering & Development, AI Automation & Business Solutions and the first Practical Operations Improvement Mini-Review offer continue through internal readiness. The revenue engine must not wait for a bounty to appear.
 
 **Disposition:** SECOND-PASS SCREEN COMPLETE; ZERO CLAIM-READY TASKS; CONTINUE PARALLEL COMMERCIAL PREPARATION.
+
+
+## 8. Additional Canadian service-marketplace screen — 2026-11-21
+
+A further read-only scan found two relevant service marketplaces and one adjacent role lead. These are opportunity leads only; no account, application, trial, profile, customer contact or work claim was made.
+
+| Candidate | Verified public terms | Material blockers / unknowns | Disposition |
+|---|---|---|---|
+| Taskly Canada | Its Canadian page lists AI setup, automation expert, chatbot developer, WordPress/Shopify developer and dashboard-builder categories; says Tasker offers are free, platform commission is 20%, and payouts route through Stripe to a Canadian bank. The marketplace states it serves the GTA including Mississauga. | The Taskly Terms of Service say Canadian identity verification may involve a one-time non-refundable $35 CAD fee plus tax, though promotional discounts may reduce it. The public earn page says joining is free. Whether this fee is mandatory for Tasker approval or can be waived to $0 is unresolved. No current task volume, acceptance rate or first-task timing was verified. | **HOLD — NO-UPFRONT FEE UNRESOLVED.** Potentially the strongest service-category fit if the verification cost is genuinely waived; do not pay or onboard without separate approval. |
+| GEND.ME Project Consultant | Public role page advertises free application, remote independent-contractor work and commissions on completed project tasks/referrals. | Role page says Canadian-dollar compensation credited to the gend.me wallet; separate DGEN documentation says DGEN is an internal earned-only unit, intended for spending on gend.me services, with any payout governed by terms. Cash withdrawal/redemption was not verified. Commission depends on real customer sales and no earnings are guaranteed. | **HOLD — CASH REDEMPTION AND TERMS UNVERIFIED.** Do not count as cash income or use a paid plan/trial. |
+| GEND.ME Web Developer | Public role page advertises free application, $15 CAD per approved developer credit plus AI Builder Tokens, paid seven days after customer approval. | Role requires 2+ years of client WordPress development and practical block-theme, HTML/CSS, JavaScript and PHP skills. Payment is described as going to the gend.me wallet; DGEN documentation does not establish withdrawable CAD. No task volume or fit is verified. | **HOLD — QUALIFICATION AND CASH-OUT UNVERIFIED.** Not an assumed fit; no account or app installation. |
+| micro1 Generalist Canada | A third-party listing observed a Canada-only remote contractor role, advertised at USD $30–49/hour, with AI interview and Deel payout. | Third-party listing only; current official role, phone/payment-card requirements, selection probability, project availability and exact terms need primary verification. Work only begins if selected. | **RESEARCH LEAD ONLY.** No application or interview. |
+
+### Taskly fee interpretation
+
+The official Taskly earn page's “free to join” statement must be read alongside its Terms of Service. The Terms state that, where the Canadian identity-checking flow applies, a one-time $35 CAD plus tax verification fee may be charged and is non-refundable, although discounts may apply. The fee is not assumed mandatory in every case, but until Taskly confirms a genuinely zero-cost onboarding path, it fails the standing no-upfront-spend rule. Taskly's 20% commission and Stripe payout route are post-earning terms, not an upfront subscription.
+
+### GEND.ME payment interpretation
+
+GEND.ME role pages describe earnings in CAD and credit to a platform wallet, while its DGEN page describes DGEN as an earned-only internal unit accounted at 1:1 with CAD, used to pay for gend.me services, not sold, and says any payout option is governed by its Terms of Service. That does not establish that a contractor can withdraw funds to a Canadian bank account. Treat advertised CAD values as platform-accounting amounts, not cleared cash, until withdrawal rights, fees, minimums, KYC and redemption rails are verified from the current terms.
+
+### Acquisition decision
+
+1. Keep the AI Revenue offer, software/automation delivery and open-source bounty lanes active in parallel.
+2. Taskly is a conditional lead, not a current zero-cost route. Revisit only if the $35 verification requirement is waived or not applicable and the owner separately approves onboarding.
+3. GEND.ME remains a non-cash/terms hold until its exact contractor payment clause and practical CAD withdrawal route are proven.
+4. Do not apply for micro1 based only on a third-party listing; verify the official role and fit first.
+5. No expected income, customer pipeline, bounty reward or wallet balance is recognized from these listings.
+
+Sources reviewed:
+- Taskly Canada earn page: https://tasklyanything.ca/ca/earn
+- Taskly Terms of Service (last updated 2026-10-26): https://tasklyanything.ca/terms
+- Taskly support/payment explanation: https://tasklyanything.ca/support
+- GEND.ME Project Consultant role: https://gend.me/apply/project-consultant/
+- GEND.ME Web Developer role: https://gend.me/apply/web-developer/
+- GEND.ME DGEN unit and payout explanation: https://gend.me/dgen-token/
+- GEND.ME Smart Contracts / settlement description: https://gend.me/smart-contracts/
+- micro1 lead was surfaced through a third-party role listing; primary verification remains outstanding.
+
+**Additional screen disposition:** one potentially relevant marketplace held by a possible $35 verification fee; two GEND.ME roles held by unverified cash redemption/qualification; one third-party AI-work lead not primary-verified. Zero new claim-ready or cash-ready opportunities.
