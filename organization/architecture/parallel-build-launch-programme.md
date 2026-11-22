@@ -321,3 +321,9 @@ The January 4–8, 2027 target remains unchanged. No readiness gate is waived by
 - Added a dedicated M2 static gap-closure/source-attestation plan, with 12 proposed gaps and a no-execution sequencing boundary.
 - Linked it from the M2 requirement-to-evidence crosswalk. The plan is documentation only; no code or tests changed, and the 29 authored tests plus schema validator remain NOT_RUN.
 - Default-branch placement was corrected: the artifact is retained on the architecture branch only; the unintended default-branch copy was deleted and its absence confirmed by the GitHub 404 response.
+
+
+### Lane C — Main Hub / OCC (recipient-scoped mirror)
+- Added the corresponding Trading & Technology M2 static gap-closure/source-attestation mirror and linked it from the Trading M2 crosswalk/readiness matrix.
+- Both company views retain the same shared prototype baseline while explicitly preventing one company's source hashes or validation from attesting the other company's policy, data or readiness.
+- No code, schema, fixture or test changes; all tests and schema validation remain NOT_RUN.
