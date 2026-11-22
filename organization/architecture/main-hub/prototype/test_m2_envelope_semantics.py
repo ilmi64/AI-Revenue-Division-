@@ -4,7 +4,7 @@ import json
 import unittest
 from pathlib import Path
 
-from m2_envelope_semantics import EnvelopeSemanticError, check_m2_envelope_semantics
+from m2_envelope_semantics import EnvelopeSemanticError, check_m2_envelope_semantics, check_snapshot_fixture_agreement
 
 ENVELOPE = Path(__file__).resolve().parents[1] / "fixtures" / "main-hub-envelope.example.json"
 
@@ -28,6 +28,27 @@ class M2EnvelopeSemanticTests(unittest.TestCase):
         snapshot = self.envelope["status_snapshots"][0]
         with self.assertRaisesRegex(SnapshotError, "company identity mismatch"):
             assess_snapshot(snapshot, "trading_technology")
+
+    def test_pinned_snapshot_agreement(self):
+        fixtures = {
+            item["company_id"]: copy.deepcopy(item)
+            for item in self.envelope["status_snapshots"]
+        }
+        check_snapshot_fixture_agreement(self.envelope, fixtures)
+
+    def test_pinned_snapshot_drift_rejected(self):
+        fixtures = {
+            item["company_id"]: copy.deepcopy(item)
+            for item in self.envelope["status_snapshots"]
+        }
+        fixtures["ai_revenue"]["overall_status"] = "HEALTHY"
+        with self.assertRaisesRegex(EnvelopeSemanticError, "differs from pinned"):
+            check_snapshot_fixture_agreement(self.envelope, fixtures)
+
+    def test_pinned_snapshot_missing_company_rejected(self):
+        fixtures = {"ai_revenue": copy.deepcopy(self.envelope["status_snapshots"][0])}
+        with self.assertRaisesRegex(EnvelopeSemanticError, "company set mismatch"):
+            check_snapshot_fixture_agreement(self.envelope, fixtures)
 
     def test_duplicate_company_record(self):
         self.envelope["company_registry"][1] = copy.deepcopy(self.envelope["company_registry"][0])
