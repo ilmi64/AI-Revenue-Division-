@@ -33,5 +33,17 @@ class RecipientScopeGuardTests(unittest.TestCase):
         )
 
 
+    def test_malformed_scope_fails_closed(self):
+        self.assertEqual(scope_blockers(None, Recipient.AI_REVENUE), ("invalid_publication_scope",))
+        self.assertEqual(scope_blockers(PublicationScope(**self.good), "AI_REVENUE"), ("invalid_expected_recipient",))
+        bad = PublicationScope(**dict(self.good, publication_id=None))
+        self.assertIn("missing_publication_id", scope_blockers(bad, Recipient.AI_REVENUE))
+        bad = PublicationScope(**dict(self.good, private_company_scopes=["AI_REVENUE"]))
+        self.assertIn("invalid_private_scope", scope_blockers(bad, Recipient.AI_REVENUE))
+        bad = PublicationScope(**dict(self.good, independently_reviewed=1))
+        self.assertIn("invalid_independently_reviewed", scope_blockers(bad, Recipient.AI_REVENUE))
+        bad = PublicationScope(**dict(self.good, recipient="AI_REVENUE"))
+        self.assertIn("invalid_recipient_type", scope_blockers(bad, Recipient.AI_REVENUE))
+
 if __name__ == "__main__":
     unittest.main()
