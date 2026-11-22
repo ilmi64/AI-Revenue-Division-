@@ -27,14 +27,30 @@ class PublicationScope:
 
 def scope_blockers(item: PublicationScope, expected_recipient: Recipient) -> tuple[str, ...]:
     """Return blockers, never permission or a publication command."""
+    if not isinstance(item, PublicationScope):
+        return ("invalid_publication_scope",)
+    if not isinstance(expected_recipient, Recipient):
+        return ("invalid_expected_recipient",)
     reasons = []
-    if not item.publication_id.strip():
+    if not isinstance(item.recipient, Recipient) or not isinstance(item.audience, Recipient):
+        reasons.append("invalid_recipient_type")
+    if not isinstance(item.private_company_scopes, frozenset) or any(
+        not isinstance(scope, Recipient) for scope in item.private_company_scopes
+    ):
+        reasons.append("invalid_private_scope")
+        private_scopes = frozenset()
+    else:
+        private_scopes = item.private_company_scopes
+    for name in ("independently_reviewed", "approved_for_publication", "fresh", "digest_verified"):
+        if not isinstance(getattr(item, name), bool):
+            reasons.append("invalid_" + name)
+    if not isinstance(item.publication_id, str) or not item.publication_id.strip():
         reasons.append("missing_publication_id")
     if item.recipient != expected_recipient or item.audience != expected_recipient:
         reasons.append("wrong_recipient")
-    if item.private_company_scopes - {expected_recipient}:
+    if private_scopes - {expected_recipient}:
         reasons.append("cross_company_private_context")
-    if expected_recipient == Recipient.ORGANIZATION and item.private_company_scopes:
+    if expected_recipient == Recipient.ORGANIZATION and private_scopes:
         reasons.append("organization_private_context")
     if not item.independently_reviewed:
         reasons.append("independent_review_missing")
