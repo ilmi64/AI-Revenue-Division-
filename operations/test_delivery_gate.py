@@ -63,7 +63,11 @@ class DeliveryGateTests(unittest.TestCase):
         item["opportunity"]["cost_cad"] = 5
         self.assertIn("intake_not_review_ready", decide(item)["reasons"])
     def test_malformed_input_blocks(self):
-        self.assertEqual(decide(None)["status"], "blocked")
+        result = decide(None)
+        self.assertEqual(result["status"], "blocked")
+        self.assertFalse(result["evidence_verified"])
+        self.assertFalse(result["release_authorized"])
+        self.assertFalse(result["external_actions_performed"])
 
 if __name__ == "__main__":
     unittest.main()
