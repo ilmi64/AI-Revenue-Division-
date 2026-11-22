@@ -28,6 +28,21 @@ class MiniReviewEvidenceTests(unittest.TestCase):
             with self.subTest(value=value), self.assertRaises(ValueError):
                 summarize_effort("S1", [EffortEntry("S1", "p", "draft", value)])
 
+    def test_reject_malformed_entry_types(self):
+        invalid = [
+            EffortEntry("S1", None, "draft", Decimal("1")),
+            EffortEntry("S1", "p", None, Decimal("1")),
+            EffortEntry("S1", "p", "draft", 1),
+            EffortEntry("S1", "p", "draft", Decimal("1"), "false"),
+        ]
+        for row in invalid:
+            with self.subTest(row=row), self.assertRaises(ValueError):
+                summarize_effort("S1", [row])
+
+    def test_reject_non_string_exercise_id(self):
+        with self.assertRaises(ValueError):
+            summarize_effort(None, [EffortEntry("S1", "p", "draft", Decimal("1"))])
+
     def test_zero_effort_does_not_invent_rework_share(self):
         result = summarize_effort("S1", [EffortEntry("S1", "p", "draft", Decimal("0"))])
         self.assertIsNone(result.rework_share)
