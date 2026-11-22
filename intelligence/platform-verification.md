@@ -56,3 +56,16 @@ See [Paid Coding Opportunity Freshness Audit](../reports/2026-11-21-bounty-fresh
 The second-pass audit rejected the IssueHunt/apache-superset#3821 card because the primary GitHub issue is closed, locked and stale (closed 2022-03-16). It rejected the Algora TSPerf $15,000 challenge from the active queue because the official page now displays a winner section and says the prize goes to the first successful solution. These are explicit false-positive controls, not missed revenue.
 
 **Queue status remains:** zero exact claim-ready paid coding issues verified. Platform availability, historical bounty totals, search snippets and funded badges are not sufficient. Every candidate must pass same-day primary-source state, funding, competition, licence, AI-use, Canada/payee, net payout and acceptance checks.
+
+
+## Second-pass acquisition screen — 2026-11-21
+
+See [Opportunity Acquisition Second-Pass Screen](../reports/2026-11-21-opportunity-acquisition-second-pass.md).
+
+- BOSS remains ACTIVE WATCH: Canada payout support is documented, but no exact currently open, funded and claimable issue was selected.
+- Algora remains WATCHLIST: Canada payout support is documented; no exact live funded task verified.
+- BountyOS reports one verified $91 listing but withholds exact issue details from the free public page. This is a lead only, not independently actionable; no paid subscription is approved.
+- Meta's official portal/scope/payout/data-abuse endpoints returned HTTP 429 during this review. Historical programme awards do not establish current scope, eligibility or payout. Meta remains HOLD.
+- TSPerf and Apache Superset #3821 remain rejected as stale/winner-present false positives.
+
+**Updated screen result:** zero claim-ready tasks. No account creation, terms acceptance, claims, comments, code contribution, live testing, disclosure or submission.
