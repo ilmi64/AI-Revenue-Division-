@@ -69,7 +69,7 @@ def evaluate(items, now=None):
     for item in items:
         result = assess(item, now)
         raw_id = item.get("id") if isinstance(item, dict) else None
-        key = raw_id if isinstance(raw_id, (str, int, float, bool, type(None))) else None
+        key = raw_id if isinstance(raw_id, str) else None
         if isinstance(key, str) and key in seen:
             result = {"status": "rejected", "reasons": ["duplicate_id"],
                       "next_action": "human_review_only"}
