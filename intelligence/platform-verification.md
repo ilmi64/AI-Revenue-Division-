@@ -47,3 +47,12 @@ This section records a dated public-source review. It does not authorize account
 See [Zero-Upfront Revenue Opportunity Screen — 2026-11-21](../reports/2026-11-21-zero-upfront-opportunity-screen.md) for evidence IDs, detailed limitations, ranking and execution gates.
 
 **Screen result:** no exact claim-ready paid coding issue verified; no account action, task claim, external code contribution, security test, report, submission, spending or revenue occurred.
+
+
+## Follow-up freshness audit — 2026-11-21
+
+See [Paid Coding Opportunity Freshness Audit](../reports/2026-11-21-bounty-freshness-audit.md).
+
+The second-pass audit rejected the IssueHunt/apache-superset#3821 card because the primary GitHub issue is closed, locked and stale (closed 2022-03-16). It rejected the Algora TSPerf $15,000 challenge from the active queue because the official page now displays a winner section and says the prize goes to the first successful solution. These are explicit false-positive controls, not missed revenue.
+
+**Queue status remains:** zero exact claim-ready paid coding issues verified. Platform availability, historical bounty totals, search snippets and funded badges are not sufficient. Every candidate must pass same-day primary-source state, funding, competition, licence, AI-use, Canada/payee, net payout and acceptance checks.
