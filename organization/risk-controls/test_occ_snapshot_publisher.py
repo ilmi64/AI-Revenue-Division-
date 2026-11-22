@@ -42,8 +42,19 @@ class SnapshotPublisherTests(unittest.TestCase):
         fixture_path = Path(__file__).parent / "fixtures" / "occ-control-envelope.test.json"
         fixture = json.loads(fixture_path.read_text(encoding="utf-8"))
         secret = bytes.fromhex(fixture["secret_hex"])
-        actual = sign_snapshot(fixture["envelope"]["snapshot"], secret)
-        self.assertEqual(actual, fixture["envelope"]["signature_hex"])
+        snapshot = fixture["envelope"]["snapshot"]
+        expected = fixture["envelope"]["signature_hex"]
+        self.assertEqual(sign_snapshot(snapshot, secret), expected)
+        self.assertEqual(sign_snapshot(dict(reversed(tuple(snapshot.items()))), secret), expected)
+
+        for field in ("generated_at_epoch", "expires_at_epoch"):
+            with self.subTest(timestamp=field):
+                self.assertIs(type(snapshot[field]), float)
+                tampered = {**snapshot, field: int(snapshot[field])}
+                self.assertNotEqual(canonical_snapshot_bytes(tampered), canonical_snapshot_bytes(snapshot))
+                self.assertNotEqual(sign_snapshot(tampered, secret), expected)
+        tampered = {**snapshot, "evidence_refs": ["occ:test-vector:altered"]}
+        self.assertNotEqual(sign_snapshot(tampered, secret), expected)
 
     def test_policy_file_digest_uses_exact_file_bytes(self):
         policy_path = Path(self.temp.name) / "policy.json"
@@ -125,6 +136,13 @@ class SnapshotPublisherTests(unittest.TestCase):
     def test_sequence_state_survives_restart(self):
         self.issue_clear(now=1000)
         restarted = SnapshotSequenceStore(Path(self.temp.name) / "sequence.sqlite3")
+        for timestamp in (999, 1000):
+            with self.subTest(timestamp=timestamp), self.assertRaises(SnapshotPublisherError):
+                restarted.issue(
+                    status="CLEAR", stop_conditions=[], evidence_refs=[],
+                    policy_sha256=POLICY, portfolio_version=0,
+                    now_epoch=timestamp, ttl_seconds=60, secret=SECRET,
+                )
         envelope = restarted.issue(
             status="CLEAR", stop_conditions=[], evidence_refs=[],
             policy_sha256=POLICY, portfolio_version=0,
