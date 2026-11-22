@@ -15,7 +15,7 @@ from typing import Any
 
 from jsonschema import Draft202012Validator, FormatChecker
 
-from m2_envelope_semantics import check_m2_envelope_semantics
+from m2_envelope_semantics import check_m2_envelope_semantics, check_snapshot_fixture_agreement
 from occ_readonly import assess_snapshot
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -113,10 +113,7 @@ def main() -> int:
         "ai_revenue": loaded["fixtures/ai-revenue.snapshot.example.json"],
         "trading_technology": loaded["fixtures/trading-technology.snapshot.example.json"],
     }
-    for snapshot in envelope["status_snapshots"]:
-        company_id = snapshot["company_id"]
-        if snapshot != standalone[company_id]:
-            raise ValueError(f"envelope snapshot differs from pinned company fixture: {company_id}")
+    check_snapshot_fixture_agreement(envelope, standalone)
     print("PASS exact semantic agreement between envelope and pinned company fixtures")
 
     # The envelope and the standalone reader must agree on the snapshot contract.
