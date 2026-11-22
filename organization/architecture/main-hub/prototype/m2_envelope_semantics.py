@@ -88,3 +88,19 @@ def check_m2_envelope_semantics(envelope):
         if set(references) - workstream_ids:
             raise EnvelopeSemanticError("decision references unknown workstream")
     return None
+
+
+def check_snapshot_fixture_agreement(envelope, standalone):
+    """Reject drift between the envelope and separately pinned company snapshots."""
+    if not isinstance(envelope, Mapping) or not isinstance(standalone, Mapping):
+        raise EnvelopeSemanticError("snapshot comparison requires objects")
+    snapshots = envelope.get("status_snapshots")
+    ids = _ids(snapshots, "company_id", "status_snapshots")
+    if ids != COMPANIES or set(standalone) != COMPANIES:
+        raise EnvelopeSemanticError("snapshot fixture company set mismatch")
+    for snapshot in snapshots:
+        company_id = snapshot["company_id"]
+        if snapshot != standalone[company_id]:
+            raise EnvelopeSemanticError(
+                f"envelope snapshot differs from pinned company fixture: {company_id}"
+            )
