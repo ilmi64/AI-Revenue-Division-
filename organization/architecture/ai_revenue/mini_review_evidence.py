@@ -66,3 +66,114 @@ def summarize_effort(exercise_id: str, entries: Iterable[EffortEntry]) -> Effort
         target_180_variance_minutes=active - Decimal(180),
         rehearsal_210_variance_minutes=active - Decimal(210),
     )
+
+
+# Match the criteria in the Delivery QA, Acceptance & Time-Capture Standard.
+QA_CRITERIA = (
+    "scope_conformity",
+    "source_traceability",
+    "calculation_integrity",
+    "baseline_integrity",
+    "recommendation_quality",
+    "privacy_data_minimization",
+    "security_and_rights",
+    "halal_or_regulated_issue_flags",
+    "limitations_and_uncertainty",
+    "readability_and_actionability",
+    "recipient_and_version_control",
+    "commercial_honesty",
+)
+_NON_WAIVABLE_CRITERIA = (
+    "scope_conformity",
+    "source_traceability",
+    "calculation_integrity",
+    "privacy_data_minimization",
+    "security_and_rights",
+    "recipient_and_version_control",
+    "commercial_honesty",
+)
+
+
+@dataclass(frozen=True)
+class QACriterionEvidence:
+    criterion: str
+    disposition: str
+    evidence_ref: str = ""
+    rationale: str = ""
+
+
+@dataclass(frozen=True)
+class QAEvidenceSummary:
+    exercise_id: str
+    draft_ref: str
+    reviewer_id: str
+    blockers: tuple[str, ...]
+
+
+def summarize_qa_evidence(
+    exercise_id: str,
+    *,
+    draft_ref: str,
+    producer_id: str,
+    reviewer_id: str,
+    evidence_class: str,
+    criteria: Iterable[QACriterionEvidence],
+    unresolved_critical_defects: int,
+    unresolved_major_defects: int,
+) -> QAEvidenceSummary:
+    """Summarize blockers from a recorded synthetic review of one draft.
+
+    Evidence references are recorded identifiers. An empty blocker list
+    makes no claim about evidence authenticity, review authorization,
+    customer readiness, or release.
+    """
+    if evidence_class != "SYNTHETIC":
+        raise ValueError("only synthetic QA evidence is supported")
+    for name, value in (
+        ("exercise_id", exercise_id),
+        ("draft_ref", draft_ref),
+        ("producer_id", producer_id),
+        ("reviewer_id", reviewer_id),
+    ):
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError(f"{name} is required")
+
+    blockers = []
+    if producer_id.strip().casefold() == reviewer_id.strip().casefold():
+        blockers.append("reviewer_matches_producer")
+    for severity, count in (
+        ("critical", unresolved_critical_defects),
+        ("major", unresolved_major_defects),
+    ):
+        if type(count) is not int or count < 0:
+            raise ValueError(f"unresolved {severity} defects must be a nonnegative integer")
+        if count:
+            blockers.append(f"unresolved_{severity}_defects")
+
+    by_criterion = {}
+    for result in criteria:
+        if not isinstance(result, QACriterionEvidence) or result.criterion not in QA_CRITERIA:
+            raise ValueError("unknown QA criterion or invalid record")
+        if result.criterion in by_criterion:
+            raise ValueError(f"duplicate QA criterion: {result.criterion}")
+        if result.disposition not in ("PASS", "FAIL", "NOT_APPLICABLE", "BLOCKED"):
+            raise ValueError(f"invalid QA disposition: {result.criterion}")
+        if not isinstance(result.evidence_ref, str) or not isinstance(result.rationale, str):
+            raise ValueError(f"invalid QA evidence reference or rationale: {result.criterion}")
+        by_criterion[result.criterion] = result
+
+    for criterion in QA_CRITERIA:
+        result = by_criterion.get(criterion)
+        if result is None:
+            blockers.append(f"missing:{criterion}")
+        elif result.disposition in ("FAIL", "BLOCKED"):
+            blockers.append(f"{result.disposition.lower()}:{criterion}")
+        elif result.disposition == "PASS" and not result.evidence_ref.strip():
+            blockers.append(f"missing_evidence:{criterion}")
+        elif result.disposition == "NOT_APPLICABLE":
+            if criterion in _NON_WAIVABLE_CRITERIA:
+                blockers.append(f"required:{criterion}")
+            elif not result.rationale.strip():
+                blockers.append(f"missing_rationale:{criterion}")
+
+    return QAEvidenceSummary(exercise_id, draft_ref, reviewer_id, tuple(blockers))
