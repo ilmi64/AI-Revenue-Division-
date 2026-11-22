@@ -121,3 +121,10 @@ No work order is currently marked IN_PROGRESS. A separate intake/triage decision
 - [ ] Distribution receipt/acknowledgement recorded.
 
 **Disposition:** FIVE BOUNDED WORK-ORDER PROPOSALS PREPARED; NONE ASSIGNED, STARTED, SOURCE-APPROVED OR PUBLISHED.
+
+
+## 6. IF-016–IF-022 execution crosswalk
+
+The companion [Priority Work-Order to IF-016–IF-022 Execution Crosswalk](priority-work-order-to-if016-if022-execution-crosswalk.md) maps the five proposals into work-order validation, source stewardship, evidence capture, atomic claims, independent challenge, recipient-scoped publication and distribution receipts. It defines source lifecycle states, evidence/claim records, publication gates, acknowledgements and safe-mode triggers.
+
+This is a design mapping only: no source is approved, no evidence capture or claim is created by this crosswalk, no reviewer is assigned, and no publication or distribution is authorized.
