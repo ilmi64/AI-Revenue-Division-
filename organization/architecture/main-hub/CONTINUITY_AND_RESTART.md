@@ -48,3 +48,11 @@ Trading repository: https://github.com/ilmi64/Solana-memecoins
 - No independently verified cloud Codex dispatcher or automatic GitHub issue-to-task launch.
 - Full Python test suites not yet evidenced as executed.
 - This register summarizes known decisions but does not prove complete capture of every past conversation or repository.
+
+## Agreed working brand architecture (2026-11-22)
+- **Daivora Group**: proposed parent organization / shared governance identity.
+- **Aevora AI**: proposed brand for the standalone AI Revenue company.
+- **Aevora Trading & Technology**: proposed brand for the standalone Trading & Technology company.
+- No 'Group' suffix on either Aevora operating company. The brand names do not imply shared treasury, execution authority, credentials or legal incorporation. Preserve separate company boundaries and existing GitHub repositories.
+- Names remain working brands pending Ontario/Canadian corporate, trademark and domain availability checks; no registration, purchases or renaming of repositories authorized.
+- Launch: preferred January 4–8, 2027; evidence-based extension through mid or late January. Continue fast-track implementation and comprehensive verification throughout December.
