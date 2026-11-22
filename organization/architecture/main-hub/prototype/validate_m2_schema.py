@@ -16,6 +16,7 @@ from typing import Any
 from jsonschema import Draft202012Validator, FormatChecker
 
 from m2_envelope_semantics import check_m2_envelope_semantics
+from occ_readonly import assess_snapshot
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA_PATH = ROOT / "schema" / "records.schema.json"
@@ -104,6 +105,16 @@ def main() -> int:
     # Semantic referential-integrity validation complements, never replaces, schema checks.
     check_m2_envelope_semantics(envelope)
     print("PASS offline M2 envelope referential-integrity checks")
+
+    # The envelope and the standalone reader must agree on the snapshot contract.
+    # This checks nested gate/evidence semantics, not publisher authenticity.
+    for snapshot in envelope["status_snapshots"]:
+        assessed = assess_snapshot(snapshot, snapshot["company_id"])
+        if assessed["display_status"] not in {"UNKNOWN", "STALE"}:
+            raise ValueError("unauthenticated snapshot was promoted to trusted status")
+        if assessed["trust"] not in {"SYNTHETIC_UNTRUSTED", "UNAUTHENTICATED"}:
+            raise ValueError("snapshot trust classification is unexpectedly elevated")
+    print("PASS conservative standalone snapshot semantics (untrusted only)")
 
     company_ids = unique_values(
         envelope["company_registry"], "company_id", "company_registry"
