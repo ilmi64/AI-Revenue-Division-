@@ -59,3 +59,22 @@ is responsible for the test result's meaning.
 The only receipt is `verified_for_owner_review` with
 `release_authorized: false`. The checklist and OCC summary retain their current
 behavior. There is no sender, customer access or publication path.
+
+### Fictional manual-delivery commissioning rehearsal
+
+Run `python -m synthetic_delivery_rehearsal` from `operations` to print the
+deterministic synthetic audit bundle for all scenarios. The fixture creates
+its own temporary SQLite database and emits a private audit alongside a
+separate redacted OCC projection. Share only that projection with OCC.
+An evidence receipt is internal and every scenario explicitly denies external
+delivery. The fixture log records two checks actually executed on the fictional
+artifact, without making any statement about customer or production data.
+
+The rollback tests force a database transaction failure and restore an earlier
+snapshot. The rehearsal detects snapshot rollback using a checkpoint retained
+outside the database for that run. Persistent, independently managed checkpoint
+storage and recovery remain prerequisites for production rollback protection.
+All keys and identities are synthetic. The rehearsal does not convene real
+reviewers or record real approvals.
+
+Run the focused regression suite with `python -m unittest -v test_synthetic_delivery_rehearsal`.
