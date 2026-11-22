@@ -228,3 +228,13 @@ No bounty has been selected or submitted; no bug bounty testing has been perform
 
 **Required next preparation:** define a blank opportunity dossier, programme-specific authorization record and independent bounty QA checklist; cross-reference the company ledger evidence contract; map owners and record retention. These are architecture tasks only. No tests, external research/testing, programme registration, submissions, customer contact, paid tools, account connections or financial actions were performed or authorized.
 
+
+
+### 11.5 Reusable commercial and bug bounty control templates (2026-11-21)
+
+Two blank templates have been added:
+- `opportunity-dossier-template.md` — captures source provenance, eligibility, scope, economics, owner approval, work/evidence, independent QA, outcome and payment reconciliation for any AI Revenue opportunity.
+- `bug-bounty-programme-authorization-and-finding-review-template.md` — captures current official programme terms, researcher eligibility, exact asset/method scope, separate owner testing authorization, safe research plan, suspected finding, independent technical review, disclosure approval and award/payment evidence.
+
+**Status:** DOCUMENTED / BLANK TEMPLATES ONLY. They do not authorize programme registration, terms acceptance, live security testing, vendor contact, disclosure, submission, spending, account connections or payment actions. No bug bounty programme has been qualified, no target authorized, no finding created and no reward claimed.
+
