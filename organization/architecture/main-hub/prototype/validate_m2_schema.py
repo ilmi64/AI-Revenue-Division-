@@ -15,6 +15,8 @@ from typing import Any
 
 from jsonschema import Draft202012Validator, FormatChecker
 
+from m2_envelope_semantics import check_m2_envelope_semantics
+
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA_PATH = ROOT / "schema" / "records.schema.json"
 ENVELOPE_PATH = ROOT / "fixtures" / "main-hub-envelope.example.json"
@@ -98,6 +100,10 @@ def main() -> int:
             print(f"FAIL schema validation {location}: {error.message}")
         return 1
     print("PASS Draft 2020-12 schema and asserted format validation")
+
+    # Semantic referential-integrity validation complements, never replaces, schema checks.
+    check_m2_envelope_semantics(envelope)
+    print("PASS offline M2 envelope referential-integrity checks")
 
     company_ids = unique_values(
         envelope["company_registry"], "company_id", "company_registry"
