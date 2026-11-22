@@ -35,3 +35,27 @@ Save the command, Python version, commit SHA, stdout/stderr, exit code and UTC t
 7. Keep Aevora Trading & Technology separate: no shared treasury, trade execution or secrets.
 
 January 4–8, 2027 remains the preferred launch window, with a mid/late-January extension when warranted by security, operational and revenue-readiness evidence.
+
+## Synthetic delivery-evidence verification
+
+`evidence_verifier.py` is an offline prototype for AI Revenue review. A trusted
+caller supplies the exact expected company, opportunity, source commit,
+recipient, channel, policy version and producer. The manifest binds these
+fields to artifact and test-log SHA-256 digests, nonce and expiry. The
+prototype encodes the manifest as sorted, compact ASCII JSON and authenticates
+the same digest in separate, purpose-bound independent QA and owner-review
+attestations.
+
+The synthetic harness provisions `evidence_verifier_replay.sql` in its own
+temporary database. The verifier requires that existing store and consumes
+the company-scoped nonce once before returning a receipt. Keep the scope,
+clock, current revocation records, fixture keys and replay database under
+verifier control. Production signing, identity, revocation freshness, store
+backup/rollback protection and independent audit require a separate design
+and review. The prototype uses synthetic HMAC credentials only and verifies
+the binding of test-log bytes to an attestation. The independent QA reviewer
+is responsible for the test result's meaning.
+
+The only receipt is `verified_for_owner_review` with
+`release_authorized: false`. The checklist and OCC summary retain their current
+behavior. There is no sender, customer access or publication path.
