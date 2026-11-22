@@ -1,0 +1,20 @@
+{
+  "status": "proposed_not_executed",
+  "tests": [
+    "store requires a real ReceiverEvidenceVerifier instance and rejects caller-supplied verified claims",
+    "invalid signature and untrusted issuer fail at the store boundary",
+    "verification failure leaves action outcome_unknown",
+    "atomic verification does not consume replay state before transaction commit",
+    "atomic path rejects a separately configured replay store",
+    "valid evidence atomically inserts receipt, transitions action and appends audit",
+    "exact retry after commit returns same result without duplicate audit",
+    "audit failure rolls back receipt and action transition; exact evidence can be retried",
+    "same issuer and nonce with different evidence ID is rejected",
+    "same issuer and evidence ID with different nonce is rejected",
+    "same evidence cannot be rebound to another action",
+    "company, receiver account, action ID, idempotency key and audience mismatch fail closed",
+    "inconclusive evidence atomically quarantines the action",
+    "not-applied evidence closes old action and never reuses its approval",
+    "two concurrent connections produce one commit and one exact duplicate result"
+  ]
+}

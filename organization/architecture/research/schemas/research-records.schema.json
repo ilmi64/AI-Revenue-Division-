@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://architecture.invalid/research-intelligence/research-records.schema.json",
+  "title": "Research and Intelligence Records",
+  "oneOf": [
+    {"$ref": "#/$defs/intake"},
+    {"$ref": "#/$defs/source"},
+    {"$ref": "#/$defs/evidence"},
+    {"$ref": "#/$defs/publication"},
+    {"$ref": "#/$defs/handover"}
+  ],
+  "$defs": {
+    "intake": {
+      "type": "object", "additionalProperties": false,
+      "required": ["record_type", "research_id", "requesting_scope", "question", "decision_relevance", "priority", "status", "created_at", "allowed_source_classes", "acceptance_criteria"],
+      "properties": {
+        "record_type": {"const": "RESEARCH_INTAKE"},
+        "research_id": {"type": "string", "pattern": "^RI-[A-Z0-9-]+$"},
+        "requesting_scope": {"type": "string", "enum": ["ORGANIZATION", "AI_REVENUE", "TRADING_TECHNOLOGY"]},
+        "question": {"type": "string", "minLength": 1, "maxLength": 5000},
+        "decision_relevance": {"type": "string", "minLength": 1, "maxLength": 3000},
+        "priority": {"type": "string", "enum": ["P0", "P1", "P2", "P3"]},
+        "status": {"type": "string", "enum": ["NEW", "TRIAGED", "QUEUED", "IN_PROGRESS", "CHALLENGE_REVIEW", "READY_TO_PUBLISH", "PUBLISHED", "BLOCKED", "SUPERSEDED", "CLOSED"]},
+        "created_at": {"type": "string", "format": "date-time"},
+        "updated_at": {"type": "string", "format": "date-time"},
+        "due_at": {"type": ["string", "null"], "format": "date-time"},
+        "topic_tags": {"type": "array", "items": {"type": "string"}, "maxItems": 50},
+        "allowed_source_classes": {"type": "array", "items": {"type": "string", "enum": ["PRIMARY_OFFICIAL", "DIRECT_DATASET", "ACADEMIC", "ESTABLISHED_REPORTING", "VENDOR", "COMMUNITY", "OPEN_SOURCE", "PUBLIC_LEDGER", "INTERNAL_EXPERIMENT"]}, "uniqueItems": true},
+        "prohibited_sources_or_actions": {"type": "array", "items": {"type": "string", "maxLength": 256}},
+        "assigned_desk": {"type": ["string", "null"], "maxLength": 128},
+        "reviewer_id": {"type": ["string", "null"], "maxLength": 128},
+        "acceptance_criteria": {"type": "array", "items": {"type": "string", "minLength": 1}, "minItems": 1},
+        "recipient_scopes": {"type": "array", "items": {"type": "string", "enum": ["AI_REVENUE", "TRADING_TECHNOLOGY", "ORGANIZATION"]}, "uniqueItems": true}
+      }
+    },
+    "source": {
+      "type": "object", "additionalProperties": false,
+      "required": ["record_type", "source_id", "canonical_name", "source_class", "publisher", "locator", "first_seen_at", "last_checked_at", "permitted_use", "steward_id"],
+      "properties": {
+        "record_type": {"const": "SOURCE"},
+        "source_id": {"type": "string", "pattern": "^SRC-[A-Z0-9-]+$"},
+        "canonical_name": {"type": "string", "minLength": 1, "maxLength": 512},
+        "source_class": {"type": "string", "enum": ["PRIMARY_OFFICIAL", "DIRECT_DATASET", "ACADEMIC", "ESTABLISHED_REPORTING", "VENDOR", "COMMUNITY", "OPEN_SOURCE", "PUBLIC_LEDGER", "INTERNAL_EXPERIMENT"]},
+        "publisher": {"type": "string", "maxLength": 512},
+        "locator": {"type": "string", "minLength": 1, "maxLength": 2048},
+        "first_seen_at": {"type": "string", "format": "date-time"},
+        "last_checked_at": {"type": "string", "format": "date-time"},
+        "published_at": {"type": ["string", "null"], "format": "date-time"},
+        "revision_or_hash": {"type": ["string", "null"], "maxLength": 256},
+        "license_or_terms": {"type": ["string", "null"], "maxLength": 2000},
+        "permitted_use": {"type": "array", "items": {"type": "string", "enum": ["READ", "QUOTE_WITH_ATTRIBUTION", "ANALYZE", "REDISTRIBUTE_METADATA", "INTERNAL_RESEARCH"]}, "uniqueItems": true},
+        "known_bias_or_limits": {"type": "array", "items": {"type": "string", "maxLength": 1000}},
+        "reliability_history_refs": {"type": "array", "items": {"type": "string"}},
+        "steward_id": {"type": "string", "minLength": 1, "maxLength": 128}
+      }
+    },
+    "evidence": {
+      "type": "object", "additionalProperties": false,
+      "required": ["record_type", "evidence_id", "claim", "claim_type", "source_refs", "retrieved_at", "confidence", "limitations", "review_status"],
+      "properties": {
+        "record_type": {"const": "EVIDENCE"},
+        "evidence_id": {"type": "string", "pattern": "^EVD-[A-Z0-9-]+$"},
+        "claim": {"type": "string", "minLength": 1, "maxLength": 5000},
+        "claim_type": {"type": "string", "enum": ["FACT", "INFERENCE", "HYPOTHESIS", "FORECAST", "OPINION"]},
+        "source_refs": {"type": "array", "items": {"type": "string", "pattern": "^SRC-[A-Z0-9-]+$"}, "minItems": 1, "uniqueItems": true},
+        "retrieved_at": {"type": "string", "format": "date-time"},
+        "locator_or_excerpt_ref": {"type": ["string", "null"], "maxLength": 2048},
+        "transformation_steps": {"type": "array", "items": {"type": "string", "maxLength": 1000}},
+        "corroboration_refs": {"type": "array", "items": {"type": "string"}},
+        "contradiction_refs": {"type": "array", "items": {"type": "string"}},
+        "confidence": {"type": "string", "enum": ["CONFIRMED_PRIMARY", "CORROBORATED", "SUPPORTED", "TENTATIVE", "DISPUTED", "UNVERIFIED", "REJECTED"]},
+        "limitations": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "analyst_id": {"type": "string", "minLength": 1, "maxLength": 128},
+        "review_status": {"type": "string", "enum": ["NOT_REVIEWED", "CHALLENGED", "ACCEPTED", "REJECTED"]}
+      }
+    },
+    "publication": {
+      "type": "object", "additionalProperties": false,
+      "required": ["record_type", "publication_id", "research_id", "version", "recipient_scope", "summary", "evidence_refs", "published_at", "author_id", "reviewer_id", "content_digest"],
+      "properties": {
+        "record_type": {"const": "PUBLICATION"},
+        "publication_id": {"type": "string", "pattern": "^PUB-[A-Z0-9-]+$"},
+        "research_id": {"type": "string", "pattern": "^RI-[A-Z0-9-]+$"},
+        "version": {"type": "integer", "minimum": 1},
+        "recipient_scope": {"type": "string", "enum": ["AI_REVENUE", "TRADING_TECHNOLOGY", "ORGANIZATION"]},
+        "summary": {"type": "string", "minLength": 1, "maxLength": 10000},
+        "evidence_refs": {"type": "array", "items": {"type": "string", "pattern": "^EVD-[A-Z0-9-]+$"}},
+        "counter_evidence": {"type": "array", "items": {"type": "string"}},
+        "limitations": {"type": "array", "items": {"type": "string"}},
+        "source_freshness_at": {"type": ["string", "null"], "format": "date-time"},
+        "next_review_at": {"type": ["string", "null"], "format": "date-time"},
+        "published_at": {"type": "string", "format": "date-time"},
+        "author_id": {"type": "string", "minLength": 1},
+        "reviewer_id": {"type": "string", "minLength": 1},
+        "content_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "supersedes_publication_id": {"type": ["string", "null"]}
+      }
+    },
+    "handover": {
+      "type": "object", "additionalProperties": false,
+      "required": ["record_type", "shift_id", "timezone", "coverage_start", "coverage_end", "outgoing_lead", "incoming_lead", "active_research_ids", "coverage_gaps", "accepted"],
+      "properties": {
+        "record_type": {"const": "HANDOVER"},
+        "shift_id": {"type": "string", "pattern": "^SHIFT-[A-Z0-9-]+$"},
+        "timezone": {"type": "string", "minLength": 1, "maxLength": 64},
+        "coverage_start": {"type": "string", "format": "date-time"},
+        "coverage_end": {"type": "string", "format": "date-time"},
+        "outgoing_lead": {"type": "string", "minLength": 1},
+        "incoming_lead": {"type": "string", "minLength": 1},
+        "active_research_ids": {"type": "array", "items": {"type": "string", "pattern": "^RI-[A-Z0-9-]+$"}},
+        "critical_developments": {"type": "array", "items": {"type": "string"}},
+        "unresolved_claims": {"type": "array", "items": {"type": "string"}},
+        "coverage_gaps": {"type": "array", "items": {"type": "string"}},
+        "next_actions": {"type": "array", "items": {"type": "string"}},
+        "accepted": {"type": "boolean"}
+      }
+    }
+  }
+}

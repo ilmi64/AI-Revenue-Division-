@@ -1,0 +1,20 @@
+{
+  "status": "proposed_acceptance_vectors",
+  "scenarios": [
+    "enqueue does not consume approval",
+    "trusted resolver reloads principal and task",
+    "payload agent/company/task mismatch denied",
+    "missing or malformed payload fields denied",
+    "policy version rechecked after claim",
+    "emergency stop rechecked after claim",
+    "approval consumed exactly once at final dispatch",
+    "approval mismatch/replay/expiry denies before sender",
+    "Trading hard-deny remains effective even when task allowlists operation",
+    "audit unavailable denies before sender",
+    "sender receives stable idempotency key",
+    "sender timeout transitions to outcome_unknown",
+    "ambiguous outcome requires reconciliation evidence before retry",
+    "expired lease is not automatically reissued",
+    "cancellation and revocation checked immediately before dispatch"
+  ]
+}

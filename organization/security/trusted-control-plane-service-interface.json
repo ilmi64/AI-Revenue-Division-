@@ -1,0 +1,260 @@
+{
+  "schema_version": "1.0",
+  "status": "proposed_service_interface_not_implemented",
+  "deployment": {
+    "service": "company-scoped trusted control-plane facade",
+    "per_company_isolation": true,
+    "database_access": "trusted service identities only; never agent/runtime credentials",
+    "trusted_dependencies": [
+      "identity_issuer",
+      "task_scheduler",
+      "trusted_clock",
+      "revocation_service",
+      "policy_authority",
+      "owner_approval_authority",
+      "recovery_assessor",
+      "receiver_evidence_verifier",
+      "audit_checkpoint_store"
+    ],
+    "failure_mode": "fail_closed"
+  },
+  "operations": [
+    {
+      "name": "resolve_principal_and_task",
+      "caller": "authenticated_runtime_gateway",
+      "inputs": [
+        "signed_identity_assertion",
+        "transport_session"
+      ],
+      "authoritative_reads": [
+        "identity_registry",
+        "revocation_service",
+        "task_scheduler",
+        "trusted_clock"
+      ],
+      "returns": [
+        "verified_principal",
+        "immutable_task_envelope",
+        "policy_version",
+        "recovery_epoch"
+      ],
+      "transaction": "read_consistent_snapshot",
+      "denies": [
+        "caller_selected_company",
+        "caller_selected_role",
+        "expired_or_revoked_identity",
+        "unassigned_task"
+      ]
+    },
+    {
+      "name": "issue_owner_approval",
+      "caller": "owner_approval_authority_only",
+      "inputs": [
+        "owner_signed_approval_envelope"
+      ],
+      "authoritative_reads": [
+        "owner_trust_roots",
+        "trusted_clock",
+        "current_policy"
+      ],
+      "transaction": "insert_approval_and_audit_atomically",
+      "returns": [
+        "approval_id",
+        "scope_digest",
+        "expiry",
+        "audit_event_id"
+      ],
+      "denies": [
+        "agent_or_runtime_caller",
+        "invalid_owner_signature",
+        "scope_mismatch",
+        "missing_currency_for_amount",
+        "replay_nonce"
+      ]
+    },
+    {
+      "name": "enqueue_action",
+      "caller": "trusted_scheduler_only",
+      "inputs": [
+        "verified_task_reference",
+        "agent_action_proposal"
+      ],
+      "authoritative_reads": [
+        "verified_principal",
+        "task_scheduler",
+        "stream_state",
+        "trusted_clock"
+      ],
+      "transaction": "insert_immutable_intent_and_audit_atomically",
+      "returns": [
+        "action_id",
+        "intent_digest",
+        "idempotency_key",
+        "enqueue_epoch"
+      ],
+      "denies": [
+        "agent_supplied_authority_fields",
+        "mutable_destination",
+        "cross_company_scope",
+        "idempotency_conflict"
+      ]
+    },
+    {
+      "name": "authorize_dispatch",
+      "caller": "authenticated_dispatch_worker",
+      "inputs": [
+        "action_id",
+        "worker_identity_assertion"
+      ],
+      "authoritative_reads": [
+        "principal_and_task",
+        "immutable_action_intent",
+        "current_policy",
+        "approval_state",
+        "revocation_state",
+        "emergency_stop",
+        "recovery_stream"
+      ],
+      "transaction": "lock_stream_then_action_then_approval; recheck_all; consume_approval; set_dispatch_started; append_audit; commit",
+      "returns": [
+        "single_use_dispatch_permit",
+        "intent_digest",
+        "receiver_idempotency_key",
+        "recovery_epoch"
+      ],
+      "denies": [
+        "any_trading_hard_deny",
+        "stale_policy",
+        "revoked_or_expired_approval",
+        "quarantine_or_epoch_mismatch",
+        "untrusted_identity",
+        "dependency_unavailable"
+      ]
+    },
+    {
+      "name": "quarantine_stream",
+      "caller": "trusted_incident_authority",
+      "inputs": [
+        "verified_incident",
+        "checkpoint_digest"
+      ],
+      "authoritative_reads": [
+        "current_stream_state",
+        "trusted_clock"
+      ],
+      "transaction": "lock_stream; increment_epoch; quarantine; audit_and_outbox; commit",
+      "returns": [
+        "new_epoch",
+        "quarantine_event_id"
+      ],
+      "denies": [
+        "unverified_incident_authority",
+        "invalid_checkpoint_digest"
+      ]
+    },
+    {
+      "name": "release_stream",
+      "caller": "trusted_recovery_service",
+      "inputs": [
+        "owner_signed_release_approval",
+        "assessor_signed_recovery_assessment"
+      ],
+      "authoritative_reads": [
+        "owner_and_assessor_trust_roots",
+        "checkpoint_store",
+        "audit_store",
+        "revocation_service",
+        "emergency_stop",
+        "unknown_action_ledger",
+        "trusted_clock"
+      ],
+      "transaction": "lock_stream; recheck_quarantine_epoch; consume_owner_approval_and_nonce; increment_epoch; activate; audit_and_outbox; commit",
+      "returns": [
+        "new_epoch",
+        "release_event_id"
+      ],
+      "denies": [
+        "caller_supplied_verifier",
+        "missing_assessment",
+        "unknown_action_unresolved",
+        "checkpoint_mismatch",
+        "owner_approval_replay"
+      ]
+    },
+    {
+      "name": "record_receiver_evidence",
+      "caller": "trusted_reconciliation_service",
+      "inputs": [
+        "signed_receiver_evidence"
+      ],
+      "authoritative_reads": [
+        "immutable_action_intent",
+        "receiver_issuer_registry",
+        "trusted_clock",
+        "durable_replay_store"
+      ],
+      "transaction": "verify_bound_evidence; atomically_receipt_nonce_transition_action_append_audit",
+      "returns": [
+        "verified_outcome",
+        "evidence_digest",
+        "new_action_state"
+      ],
+      "denies": [
+        "sender_result_label_only",
+        "wrong_destination_or_digest",
+        "stale_or_replayed_evidence",
+        "unverifiable_outcome"
+      ]
+    },
+    {
+      "name": "read_company_health_summary",
+      "caller": "company_executives_or_owner_scoped_occ",
+      "inputs": [
+        "authenticated_read_scope"
+      ],
+      "authoritative_reads": [
+        "health_projection"
+      ],
+      "transaction": "read_only",
+      "returns": [
+        "readiness_flags",
+        "incident_counts",
+        "service_health",
+        "evidence_references"
+      ],
+      "denies": [
+        "private_records_without_scope",
+        "secrets",
+        "cross_company_ledger_or_memory"
+      ]
+    }
+  ],
+  "invariants": [
+    "Company identity derives from verified principal and authoritative task, never free-form request fields.",
+    "Trading hard-deny is enforced at policy and final dispatch boundary; owner approval cannot override.",
+    "All authority-bearing decisions use trusted time and current revocation/policy state.",
+    "One company-stream transaction domain serializes quarantine, release and dispatch authorization.",
+    "Every dispatch permit is single-use, short-lived and bound to immutable intent digest and recovery epoch.",
+    "External sender is invoked only after dispatch authorization commit.",
+    "Unknown remote outcomes are reconciled using signed receiver evidence; never blindly resent.",
+    "No model/runtime receives database credentials, trust roots, private keys or verifier substitution rights.",
+    "Company A and Company B use separate security principals, stores, keys and audit streams.",
+    "OCC receives summary-only access unless owner grants a scoped, time-limited exception."
+  ],
+  "forbidden_operations_for_trading": [
+    "trade.live_order",
+    "wallet.sign",
+    "funds.transfer",
+    "broker.order",
+    "exchange.withdraw",
+    "wallet.withdraw",
+    "risk.halt.modify",
+    "risk.stop.modify",
+    "risk.limits.modify"
+  ],
+  "non_goals": [
+    "This interface is not implemented or deployed.",
+    "No live financial actions are authorized.",
+    "No production security guarantee is claimed."
+  ]
+}

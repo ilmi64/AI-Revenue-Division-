@@ -1,0 +1,145 @@
+{
+  "schema_version": "1.0.0",
+  "status": "proposed_interface_contract_not_implemented",
+  "scope": "one isolated instance per company; never one shared authority for both companies",
+  "identity": {
+    "company_id": "trusted immutable tenant identity",
+    "stream_id": "trusted stream identifier",
+    "principal_id": "trusted workload identity",
+    "task_id": "trusted task assignment",
+    "session_id": "trusted session identifier"
+  },
+  "stream_state": {
+    "status": [
+      "dispatch_disabled",
+      "quarantined",
+      "active"
+    ],
+    "recovery_epoch": "monotonically increasing integer; authority-generated",
+    "checkpoint_digest": "digest of latest independently verified checkpoint",
+    "incident_id": "required while disabled or quarantined"
+  },
+  "dispatch_authorization_request": {
+    "required": [
+      "company_id",
+      "stream_id",
+      "principal_id",
+      "task_id",
+      "action_id",
+      "operation",
+      "resource",
+      "recipient_binding",
+      "immutable_intent_digest",
+      "idempotency_key",
+      "approval_id",
+      "approval_nonce",
+      "policy_version",
+      "expected_recovery_epoch"
+    ],
+    "untrusted_fields": "All caller/model/runtime supplied values are claims; rebind to trusted control-plane records before authorization."
+  },
+  "dispatch_authorization_result": {
+    "allowed": true,
+    "decision_id": "unique immutable decision ID",
+    "company_id": "exact company",
+    "stream_id": "exact stream",
+    "recovery_epoch": "epoch serialized with quarantine",
+    "action_id": "exact action",
+    "idempotency_key": "stable receiver key",
+    "authorization_commit_id": "database commit/event reference",
+    "expires_at": "short-lived; single-use",
+    "sender_permitted": "only after successful transaction commit"
+  },
+  "quarantine_request": {
+    "required": [
+      "company_id",
+      "stream_id",
+      "incident_id",
+      "reason_code",
+      "checkpoint_digest",
+      "trusted_actor"
+    ],
+    "effect": "lock authoritative stream row; increment epoch; disable dispatch; append audit and control outbox in one transaction"
+  },
+  "release_request": {
+    "required": [
+      "company_id",
+      "stream_id",
+      "incident_id",
+      "checkpoint_digest",
+      "assessment_id",
+      "assessment_digest",
+      "owner_approval_id",
+      "owner_approval_nonce",
+      "expected_recovery_epoch"
+    ],
+    "effect": "verify assessment and owner approval; atomically consume approval, append audit, increment epoch and activate stream"
+  },
+  "enforcement": {
+    "mandatory_points": [
+      "scheduler",
+      "agent_runtime",
+      "tool_data_gateway",
+      "cost_gateway",
+      "queue_retry_worker",
+      "outbox_dispatcher",
+      "external_action_gateway",
+      "startup_restore"
+    ],
+    "default": "deny",
+    "unavailable": "fail_closed",
+    "stale_epoch": "deny",
+    "cross_company": "deny",
+    "model_or_orchestrator_authority": false,
+    "occ_release_authority": false
+  },
+  "concurrency": {
+    "shared_serialization_key": [
+      "company_id",
+      "stream_id"
+    ],
+    "lock_order": [
+      "company_stream",
+      "action_intent",
+      "owner_approval",
+      "approval_consumption",
+      "audit_stream_head",
+      "control_outbox"
+    ],
+    "quarantine_dispatch_order": "linearized by same transactional stream row",
+    "already_authorized_action": "potentially_in_flight; stop subsequent actions and reconcile",
+    "exactly_once_remote_delivery": false,
+    "receiver_fencing_required_for_strong_remote_quarantine": "receiver validates monotonically increasing recovery epoch and idempotency key"
+  },
+  "immutable_action_rules": {
+    "intent_mutation": "forbidden; supersede with new action_id",
+    "approval_consumption": "single use; unique by approval_id, nonce and action_id",
+    "retry": "never resend ambiguous remote action without trusted receiver reconciliation",
+    "old_epoch_leases": "invalid after epoch change"
+  },
+  "prohibited_trading_operations": [
+    "trade.live_order",
+    "wallet.sign",
+    "funds.transfer",
+    "broker.order",
+    "exchange.withdraw",
+    "risk.halt.modify"
+  ],
+  "audit": {
+    "append_same_transaction": true,
+    "per_company_stream": true,
+    "hash_linked": true,
+    "independent_signed_checkpoint": true,
+    "immutable_external_store_required": true,
+    "secrets_allowed": false
+  },
+  "production_dependencies_not_selected": [
+    "linearizable transactional database and documented isolation semantics",
+    "independent per-company identity and key authorities",
+    "signed checkpoint authority and WORM storage",
+    "receiver idempotency and epoch fencing",
+    "policy, revocation and emergency-stop services",
+    "monitoring, alerting, backup, restore and failover drills"
+  ],
+  "approval_boundary": "architecture and offline synthetic work only; no install, deploy, paid usage, CI/Actions, merge, account access, external action or live trading"
+}

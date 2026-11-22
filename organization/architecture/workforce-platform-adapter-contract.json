@@ -1,0 +1,142 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "workforce_platform_adapter_contract",
+  "status": "proposed_adapter_contract_not_implemented",
+  "company_scope": "AI Revenue",
+  "target_platforms": {
+    "workforce_control_plane": {
+      "candidate": "Paperclip",
+      "authority": "task and workforce lifecycle interface only",
+      "must_not_be_authority_for": [
+        "identity_issuance",
+        "policy_decisions",
+        "owner_approval",
+        "secret_access",
+        "financial_authority"
+      ]
+    },
+    "orchestration": {
+      "candidate": "Ruflo",
+      "authority": "bounded task decomposition and agent coordination only",
+      "must_not_be_authority_for": [
+        "identity_issuance",
+        "permission_grants",
+        "policy_override",
+        "cross_company_access",
+        "owner_approval"
+      ]
+    },
+    "model_runtimes": {
+      "candidates": [
+        "Claude Code",
+        "OpenAI Codex",
+        "Qwen-compatible runtime",
+        "Llama-compatible runtime",
+        "Gemini-compatible runtime",
+        "OpenHands"
+      ],
+      "requirement": "Each model/runtime adapter must be separately tested, version-pinned, cost-classified and permission-scoped."
+    }
+  },
+  "architecture": {
+    "components": [
+      "owner_approval_channel",
+      "identity_issuer",
+      "deterministic_policy_service",
+      "paperclip_adapter",
+      "ruflo_adapter",
+      "model_runtime_gateway",
+      "tool_gateway",
+      "data_gateway",
+      "cost_meter",
+      "append_only_audit_sink",
+      "revocation_and_emergency_stop_service"
+    ],
+    "trust_boundary": "All platform and model inputs are untrusted until authenticated and authorized by external services.",
+    "flow": [
+      "Owner or approved scheduler creates scoped task",
+      "Identity issuer attaches verified company-bound agent identity",
+      "Paperclip adapter submits task metadata to workforce control plane",
+      "Ruflo adapter decomposes only within parent task scope",
+      "Each child task is validated by deterministic policy service",
+      "Model runtime gateway selects an approved compatible runtime",
+      "Tool/data gateway rechecks authorization immediately before each operation",
+      "Cost meter blocks billable work above task and company caps",
+      "Audit sink records decisions, provenance, output digests and side-effect results",
+      "Revocation service can cancel tasks and invalidate grants at any time"
+    ]
+  },
+  "adapter_requirements": {
+    "identity_mapping": "Map external immutable agent_id, company_id, role_id, runtime_id and session_id to platform metadata; never trust platform display names as authentication.",
+    "task_mapping": "Preserve task_id, parent_task_id, company_id, issuer, assignee, scope, allowed tools, resource classes, expiry, cost cap, idempotency key and approval requirements without lossy conversion.",
+    "permission_translation": "Fail closed when a platform cannot express a requested deny rule or scope restriction. Never silently broaden permissions to fit platform capability.",
+    "tool_invocation": "All tools execute through a gateway that validates a fresh, single-use policy decision; direct model-to-tool bypass is prohibited.",
+    "memory_access": "Memory is company- and agent-scoped; every retrieval is authorized by the data gateway; shared memory is disabled by default.",
+    "model_selection": "Routing may optimize task suitability but cannot alter company, identity, permissions, budget, approval or data scope.",
+    "event_handling": "Consume task accepted, started, completed, failed, timed out, cancelled and revoked events; authenticate event origin and enforce monotonic state transitions.",
+    "retry_handling": "Retries are bounded and idempotency-aware; uncertain external outcomes go to reconciliation/quarantine rather than blind retry.",
+    "observability": "Trace task, agent, runtime, model, tool, policy decision, source provenance, cost and audit correlation IDs; redact secrets.",
+    "versioning": "Pin platform, adapter, model and policy versions; upgrades require compatibility and regression tests before promotion."
+  },
+  "non_bypassable_invariants": [
+    "No direct tool execution from model context.",
+    "No Paperclip or Ruflo setting can override external policy service decisions.",
+    "No model or agent can issue or sign its own identity or authorization token.",
+    "No task can expand parent scope, capability profile, cost cap or approval authority.",
+    "No cross-company memory, credentials, task payload or records by default.",
+    "No paid inference or compute when CAD 0 cost cap applies.",
+    "No external side effect without exact owner approval where required.",
+    "Policy, audit or revocation service failure blocks consequential operations."
+  ],
+  "compatibility_gate": {
+    "test_synthetic_data_only": true,
+    "read_only_first": true,
+    "no_credentials": true,
+    "no_external_side_effects": true,
+    "required_tests": [
+      "identity_binding",
+      "company_isolation",
+      "task_scope_preservation",
+      "deny_rule_translation",
+      "tool_gateway_interposition",
+      "memory_isolation",
+      "cost_meter_enforcement",
+      "approval_binding",
+      "cancellation_and_revocation",
+      "audit_completeness",
+      "prompt_injection_resistance",
+      "replay_and_idempotency",
+      "failure_closed"
+    ],
+    "accepted_only_if": "All critical negative tests pass and there is evidence that the runtime cannot bypass the policy and tool gateways.",
+    "install_or_deploy_authorized": false,
+    "github_actions_authorized": false,
+    "paid_services_authorized": false
+  },
+  "status_ledger": {
+    "paperclip_adapter": "candidate_only_not_connected",
+    "ruflo_adapter": "candidate_only_not_connected",
+    "model_adapters": "not_verified",
+    "policy_service": "contract_only_not_implemented",
+    "tool_gateway": "contract_only_not_implemented",
+    "production_workforce": "not_operational"
+  },
+  "vendor_current_assessment": {
+    "assessment_date": "2026-11-21",
+    "assessment_path": "organization/architecture/workforce-platform-current-technical-assessment.md",
+    "paperclip_candidate_release": "v2026.1106.0",
+    "ruflo_candidate_release": "v3.76.0",
+    "version_status": "observed_upstream_versions_only; not pinned or approved for installation",
+    "paperclip_runtime_constraints": "Node.js 24.11+; pnpm 9.15+; native Linux Runner baseline glibc 2.39+ on x64/ARM64; Android is not a qualified host target",
+    "ruflo_install_surface": "full CLI init adds project configuration, hooks, MCP server and daemon; plugin path has a smaller but still privileged execution surface",
+    "integration_pattern": "Paperclip owns company parent task and accountability; assigned Claude Code/Codex worker exposes Ruflo as bounded MCP/swarm capability; Ruflo child agents inherit immutable parent scope; external deterministic policy and tool/data gateways enforce all permissions",
+    "current_status": "read_only_vendor_assessment_recorded; integration compatibility, isolation and runtime support not verified",
+    "source_urls": [
+      "https://github.com/paperclipai/paperclip/releases",
+      "https://github.com/paperclipai/paperclip/blob/master/docs/adapters/overview.md",
+      "https://github.com/paperclipai/paperclip/blob/master/packages/paperclip-runner/README.md",
+      "https://github.com/ruvnet/ruflo/releases",
+      "https://github.com/ruvnet/ruflo"
+    ]
+  }
+}

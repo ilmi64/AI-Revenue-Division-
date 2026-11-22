@@ -1,0 +1,28 @@
+{
+  "status": "proposed_not_executed",
+  "test_file": "test_owner_approval_postgres_repository.py",
+  "scenarios": [
+    "issue_valid_approval_and_append_audit_atomically",
+    "reject_wrong_company_or_audience",
+    "reject_non_single_use_approval",
+    "reject_expired_or_invalid_lifetime",
+    "reject_malformed_payload_or_signature_digest",
+    "reject_invalid_intent_digest",
+    "enforce_amount_currency_pair",
+    "rollback_approval_when_audit_append_fails",
+    "revoke_and_audit_in_one_transaction",
+    "consume_exact_scope_in_caller_transaction",
+    "consume_never_commits_or_rolls_back_callers_connection",
+    "reject_company_stream_owner_agent_session_task_mismatch",
+    "reject_operation_resource_recipient_intent_mismatch",
+    "reject_policy_audience_amount_currency_mismatch",
+    "reject_expired_or_revoked_approval",
+    "reject_duplicate_approval_action_or_nonce",
+    "serialize_concurrent_consume_attempts",
+    "rollback_consumption_when_unified_audit_append_fails",
+    "revoke_vs_consume_race_has_one_serialized_winner",
+    "company_scoped_database_role_cannot_read_other_company",
+    "restore_preserves_consumption_and_audit_chain"
+  ],
+  "note": "Only mocked DB-API contract tests are authored here. PostgreSQL integration/race tests require a separately approved test database and were not run."
+}
