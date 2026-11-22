@@ -186,3 +186,53 @@ acknowledged_at: UNKNOWN
 ```
 
 **Current status:** Desk architecture and handover template prepared. No shift roster, live monitoring, continuous coverage, automated alerts or operational handovers are established by this document.
+
+
+## 13. 2026-11-21 shared day/night coverage and recipient-scoped handover
+
+This shared Research & Intelligence coverage design supports both independent recipient companies. It does not create a shared company tenant, shared treasury, shared customer record or shared decision authority.
+
+### 13.1 Day/night operating pattern
+
+- **Day coverage:** scheduled work-order intake, primary-source verification, commercial/product research, methodology review, recipient-specific publication preparation and owner escalations.
+- **Night coverage / Grok Desk and HyperGrok:** bounded cross-time-zone discovery, source-health review, event triage, contradiction search and draft synthesis under the same source, identity, cost and publication controls.
+- **Independent challenge:** remains a distinct review function. A night synthesis is not self-approved, and multiple model outputs using the same upstream evidence are not independent corroboration.
+- **Recipient separation:** AI Revenue and Trading & Technology tasks retain separate company IDs, data classifications, approved source scopes, publication envelopes and audit trails. Shared R&I infrastructure does not permit cross-company reads or copying raw private content into a common handover.
+- **Uncovered periods:** if no accountable owner, approved source access, reliable queue or escalation route is available, mark UNCOVERED or PAUSED. A model, prompt, scheduled task or generated report is not evidence of staffed coverage.
+
+### 13.2 Mandatory shared handover envelope
+
+Every shift transition records:
+- handover ID, UTC timestamp, named outgoing/incoming lead, timezone and coverage window;
+- R&I work-order IDs, desk, priority, deadline, owner, reviewer and status;
+- recipient company ID and publication scope for every material output;
+- source registry revision, source health, last event/retrieval timestamps, rights state and quarantine flags;
+- evidence IDs, claim confidence, counter-evidence, source-dependence and unresolved contradictions;
+- incident/escalation IDs, severity, recipient, acknowledgement and next update deadline;
+- queue watermark, retries, dead-letter status and cancellation/revocation state;
+- resource/cost status, free-tier limits and stop conditions;
+- archive revision, correction/supersession links and next actions.
+
+Only minimum scoped references may be carried in the shared operations envelope. Company-private payloads stay in the originating company's tenant and are retrieved only by an authorized recipient identity.
+
+### 13.3 Recipient-specific handover boundaries
+
+| Recipient | Permitted handover summary | Prohibited shortcut |
+|---|---|---|
+| AI Revenue | Its own offer, customer-demand, product, competitor, delivery, economics and operational work orders | No Trading positions, account data, strategy details or private capital-flow intelligence unless separately approved and lawfully sanitized |
+| Trading & Technology | Its own market, instrument, source, quant, risk and technology research references | No AI Revenue customer records, commercial pipeline, private economics or credentials |
+| Shared R&I operations | Work-order metadata, coverage status, source governance and sanitized cross-company service-health metrics | No pooled private datasets, shared memory authority or cross-tenant publication |
+
+### 13.4 Coverage status remains evidence-based
+
+| Capability | Status |
+|---|---|
+| Shared day/night coverage design | DESIGN_PRESENT |
+| Grok Desk / HyperGrok workflow | DESIGN_PRESENT / NOT_OPERATIONAL |
+| Recipient-scoped handover envelope | DESIGN_PRESENT; no live queue integration |
+| Named day/night roster and backup | NOT_STAFFED |
+| Persistent queue, source monitoring and alerting | NOT_CONFIGURED |
+| Multi-shift rehearsal | NOT_RUN |
+| Continuous 24/7 coverage | NOT_OPERATIONAL / NOT_CLAIMED |
+
+**No false-coverage rule:** continuous coverage is an architectural target only. Do not claim staffed shifts, live monitoring, autonomous night operations or successful handovers until named ownership, approved access, persistent queues, monitoring, escalation, recovery and independently assessed rehearsals are evidenced.
