@@ -48,6 +48,12 @@ class IntakeTests(unittest.TestCase):
     def test_invalid_url(self):
         self.assertEqual(assess(fixture(source_url="http://example.org"), NOW)["status"], "hold")
 
+    def test_control_characters_in_url_are_rejected(self):
+        for char in (chr(0), chr(1), chr(31), chr(127)):
+            with self.subTest(codepoint=ord(char)):
+                result = assess(fixture(source_url="https://exam" + char + "ple.org/task"), NOW)
+                self.assertIn("unverified_source_url", result["reasons"])
+
     def test_non_list_rejected(self):
         with self.assertRaises(ValueError):
             evaluate({"id": "wrong"}, NOW)

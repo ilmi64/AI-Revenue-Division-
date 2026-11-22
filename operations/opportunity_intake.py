@@ -29,7 +29,7 @@ def assess(item, now=None):
         parsed_url = urlsplit(url) if isinstance(url, str) else None
         valid_url = (parsed_url is not None and parsed_url.scheme == "https"
                      and bool(parsed_url.hostname) and not parsed_url.username
-                     and not parsed_url.password and not any(c.isspace() for c in url))
+                     and not parsed_url.password and not any(ord(char) < 32 or ord(char) == 127 or char.isspace() for char in url))
         if valid_url:
             _ = parsed_url.port
     except (ValueError, TypeError):
