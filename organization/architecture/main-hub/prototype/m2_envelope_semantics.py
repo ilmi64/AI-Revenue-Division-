@@ -100,7 +100,10 @@ def check_snapshot_fixture_agreement(envelope, standalone):
         raise EnvelopeSemanticError("snapshot fixture company set mismatch")
     for snapshot in snapshots:
         company_id = snapshot["company_id"]
-        if snapshot != standalone[company_id]:
+        pinned = standalone[company_id]
+        if not isinstance(pinned, Mapping) or pinned.get("company_id") != company_id:
+            raise EnvelopeSemanticError(f"pinned fixture identity mismatch: {company_id}")
+        if snapshot != pinned:
             raise EnvelopeSemanticError(
                 f"envelope snapshot differs from pinned company fixture: {company_id}"
             )
