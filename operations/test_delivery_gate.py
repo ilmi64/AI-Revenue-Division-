@@ -26,6 +26,18 @@ class DeliveryGateTests(unittest.TestCase):
         self.assertFalse(result["release_authorized"])
         self.assertEqual(result["next_action"], "independent_evidence_and_owner_review_required")
         self.assertFalse(result["external_actions_performed"])
+    def test_self_attested_authority_never_grants_release(self):
+        item = record()
+        item["evidence"]["source_commit"] = "f" * 40
+        item["evidence"]["test_log_ref"] = "local:claimed-success.log"
+        item["approvals"]["delivery_authorized"] = True
+        item["approvals"]["scope_reviewed"] = True
+        decision = decide(item)
+        self.assertEqual(decision["status"], "checklist_complete_unverified")
+        self.assertFalse(decision["release_authorized"])
+        self.assertFalse(decision["evidence_verified"])
+        self.assertFalse(decision["external_actions_performed"])
+
     def test_missing_approval_blocks(self):
         item = record()
         item["approvals"]["delivery_authorized"] = False
