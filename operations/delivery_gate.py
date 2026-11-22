@@ -11,7 +11,9 @@ from opportunity_intake import assess
 STAGES = ("intake", "assignment", "qa", "delivery")
 def decide(record):
     if not isinstance(record, dict):
-        return {"status": "blocked", "reasons": ["invalid_record"]}
+        return {"status": "blocked", "reasons": ["invalid_record"],
+                "next_action": "resolve_blockers", "evidence_verified": False,
+                "release_authorized": False, "external_actions_performed": False}
     opportunity = record.get("opportunity")
     intake = assess(opportunity)
     reasons = list(intake.get("reasons", []))
