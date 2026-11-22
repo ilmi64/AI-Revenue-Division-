@@ -33,7 +33,8 @@ class M2EnvelopeSemanticTests(unittest.TestCase):
             check_m2_envelope_semantics(self.envelope)
 
     def test_decision_unknown_workstream(self):
-        self.envelope["decisions"][0]["workstream_ids"] = ["WS-UNKNOWN"]
+        # The committed fixture intentionally has no decisions; inject a synthetic one.
+        self.envelope["decisions"].append({"decision_id": "DEC-SYNTHETIC", "workstream_ids": ["WS-UNKNOWN"]})
         with self.assertRaisesRegex(EnvelopeSemanticError, "decision references unknown"):
             check_m2_envelope_semantics(self.envelope)
 
