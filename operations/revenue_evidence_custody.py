@@ -9,6 +9,7 @@ import sqlite3
 from pathlib import Path
 
 ID = re.compile(r"[A-Za-z0-9_-]{1,80}\Z")
+TASK_ID = re.compile(r"[A-Za-z0-9_-]{1,80}:[0-9]{2}\Z")
 DIGEST = re.compile(r"[0-9a-f]{64}\Z")
 
 
@@ -41,15 +42,34 @@ class LocalEvidenceCustody:
                 record_digest TEXT NOT NULL UNIQUE
             )""")
 
+    @staticmethod
+    def _chain_valid(rows) -> bool:
+        previous = "0" * 64
+        for expected, row in enumerate(rows, 1):
+            seq, task, actor, role, artifact, prior, digest = row
+            if (seq != expected or prior != previous
+                    or not isinstance(artifact, str) or not DIGEST.fullmatch(artifact)):
+                return False
+            payload = json.dumps([seq, task, actor, role, artifact, prior],
+                                 separators=(",", ":"), ensure_ascii=True)
+            if hashlib.sha256(payload.encode("ascii")).hexdigest() != digest:
+                return False
+            previous = digest
+        return True
+
     def append(self, task_id: str, actor_id: str, actor_role: str,
                artifact: bytes) -> EvidenceReceipt:
-        if (not all(isinstance(v, str) and ID.fullmatch(v) for v in
-                    (task_id.replace(":", "_"), actor_id, actor_role))
+        if (not isinstance(task_id, str) or not TASK_ID.fullmatch(task_id)
+                or not all(isinstance(v, str) and ID.fullmatch(v) for v in
+                           (actor_id, actor_role))
                 or not isinstance(artifact, bytes) or not 0 < len(artifact) <= 1_000_000):
             raise ValueError("invalid evidence input")
         with sqlite3.connect(self.path, timeout=5) as db:
             db.execute("BEGIN IMMEDIATE")
-            last = db.execute("SELECT sequence, record_digest FROM evidence ORDER BY sequence DESC LIMIT 1").fetchone()
+            rows = db.execute("SELECT sequence,task_id,actor_id,actor_role,artifact_digest,previous_digest,record_digest FROM evidence ORDER BY sequence").fetchall()
+            if not self._chain_valid(rows):
+                raise ValueError("existing evidence chain invalid; append blocked")
+            last = (rows[-1][0], rows[-1][6]) if rows else None
             seq = last[0] + 1 if last else 1
             previous = last[1] if last else "0" * 64
             artifact_digest = hashlib.sha256(artifact).hexdigest()
@@ -83,14 +103,4 @@ class LocalEvidenceCustody:
     def verify_chain(self) -> bool:
         with sqlite3.connect(self.path) as db:
             rows = db.execute("SELECT sequence,task_id,actor_id,actor_role,artifact_digest,previous_digest,record_digest FROM evidence ORDER BY sequence").fetchall()
-        previous = "0" * 64
-        for expected, row in enumerate(rows, 1):
-            seq, task, actor, role, artifact, prior, digest = row
-            if seq != expected or prior != previous or not isinstance(artifact, str) or not DIGEST.fullmatch(artifact):
-                return False
-            payload = json.dumps([seq, task, actor, role, artifact, prior],
-                                 separators=(",", ":"), ensure_ascii=True)
-            if hashlib.sha256(payload.encode("ascii")).hexdigest() != digest:
-                return False
-            previous = digest
-        return True
+        return self._chain_valid(rows)
