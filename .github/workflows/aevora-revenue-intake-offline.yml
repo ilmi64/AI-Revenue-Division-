@@ -1,0 +1,26 @@
+name: Aevora revenue intake offline regression
+on:
+  pull_request:
+    paths:
+      - "operations/revenue_intake_sandbox.py"
+      - "operations/test_revenue_intake_sandbox.py"
+      - ".github/workflows/aevora-revenue-intake-offline.yml"
+permissions:
+  contents: read
+jobs:
+  offline-intake:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout exact triggering commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Record reviewed commit
+        run: echo "Reviewed commit $GITHUB_SHA"
+      - name: Compile and test offline qualification
+        env:
+          PYTHONPATH: operations
+        run: |
+          python -m py_compile operations/revenue_intake_sandbox.py operations/test_revenue_intake_sandbox.py
+          python -m unittest -v test_revenue_intake_sandbox
