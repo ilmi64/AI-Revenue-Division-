@@ -35,6 +35,20 @@ class CustodyTests(unittest.TestCase):
             db.execute("DELETE FROM evidence WHERE sequence=1")
         self.assertFalse(self.custody.verify_chain())
 
+    def test_independently_held_head_detects_truncation(self):
+        self.custody.append("demo_001:01", "agent_1", "engineering", b"first")
+        self.custody.append("demo_001:02", "agent_1", "engineering", b"second")
+        anchor = self.custody.head()
+        self.assertTrue(self.custody.verify_anchor(*anchor))
+        with sqlite3.connect(self.path) as db:
+            db.execute("DELETE FROM evidence WHERE sequence=2")
+        self.assertTrue(self.custody.verify_chain())
+        self.assertFalse(self.custody.verify_anchor(*anchor))
+
+    def test_invalid_external_anchor_fails_closed(self):
+        self.assertFalse(self.custody.verify_anchor(True, "0" * 64))
+        self.assertFalse(self.custody.verify_anchor(0, "not-a-digest"))
+
     def test_invalid_evidence_rejected(self):
         with self.assertRaises(ValueError):
             self.custody.append("demo_001:01", "agent_1", "engineering", b"")
