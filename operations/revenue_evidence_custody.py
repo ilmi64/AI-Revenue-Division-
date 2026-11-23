@@ -60,6 +60,26 @@ class LocalEvidenceCustody:
                        (seq, task_id, actor_id, actor_role, artifact_digest, previous, digest))
         return EvidenceReceipt(seq, task_id, actor_id, actor_role, artifact_digest, previous, digest)
 
+    def head(self) -> tuple[int, str]:
+        """Export a checkpoint for independent custody; does not attest to it."""
+        with sqlite3.connect(self.path) as db:
+            row = db.execute(
+                "SELECT sequence,record_digest FROM evidence ORDER BY sequence DESC LIMIT 1"
+            ).fetchone()
+        return (row[0], row[1]) if row else (0, "0" * 64)
+
+    def verify_anchor(self, expected_sequence: int, expected_digest: str) -> bool:
+        """Compare to a separately held, independently authenticated checkpoint.
+
+        Caller MUST establish provenance independently. A self-supplied anchor
+        offers no protection against full-chain rewriting or truncation.
+        """
+        if (type(expected_sequence) is not int or expected_sequence < 0
+                or not isinstance(expected_digest, str)
+                or not DIGEST.fullmatch(expected_digest)):
+            return False
+        return self.verify_chain() and self.head() == (expected_sequence, expected_digest)
+
     def verify_chain(self) -> bool:
         with sqlite3.connect(self.path) as db:
             rows = db.execute("SELECT sequence,task_id,actor_id,actor_role,artifact_digest,previous_digest,record_digest FROM evidence ORDER BY sequence").fetchall()
