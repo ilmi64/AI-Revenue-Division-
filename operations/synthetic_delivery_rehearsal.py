@@ -4,6 +4,7 @@ from dataclasses import asdict, replace
 import hashlib
 import hmac
 import json
+import argparse
 from pathlib import Path
 import sqlite3
 from tempfile import TemporaryDirectory
@@ -62,10 +63,15 @@ def _checkpoint_present(path: Path, manifest: EvidenceManifest, digest: str) -> 
     return row == (digest,)
 
 
-def run_rehearsal(scenario: str = "baseline") -> dict:
-    """Return private audit evidence and a separate read-only OCC projection."""
+def run_unanchored_fixture_rehearsal(scenario: str = "baseline") -> dict:
+    """Historical characterization fixture for the pinned unanchored review."""
     if scenario not in _SCENARIOS:
         raise ValueError("unknown synthetic scenario")
+    return _run_rehearsal(scenario, _verify_fixture)
+
+
+def _run_rehearsal(scenario, verify_fixture):
+    """Share the stages and redaction without changing verifier selection."""
     audit = []
     opportunity = {
         "id": _FIXTURE_SCOPE.opportunity_id, "title": "Fictional workflow material", "kind": "coding",
@@ -91,7 +97,7 @@ def run_rehearsal(scenario: str = "baseline") -> dict:
     receipt = None
     if intake["status"] == "review_ready" and checklist["status"] == "checklist_complete_unverified":
         try:
-            receipt = _verify_fixture(scenario, artifact, test_log, audit)
+            receipt = verify_fixture(scenario, artifact, test_log, audit)
             audit.append({"stage": "verification", "status": receipt["status"]})
             # The OCC vocabulary deliberately exposes only the existing checklist state.
             public_status = checklist["status"]
@@ -172,8 +178,23 @@ def _verify_fixture(scenario: str, artifact: bytes, test_log: bytes, audit: list
         return asdict(receipt)
 
 
+def run_rehearsal(*, mode: str, scenario: str = "baseline") -> dict:
+    """Run the synthetic delivery workflow with an explicitly selected anchor."""
+    from anchored_delivery_rehearsal import run_anchored_rehearsal
+
+    return run_anchored_rehearsal(mode=mode, scenario=scenario)
+
+
 def main() -> None:
-    print(json.dumps([run_rehearsal(scenario) for scenario in _SCENARIOS], indent=2, sort_keys=True))
+    from anchored_delivery_rehearsal import SCENARIOS
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--mode", required=True, choices=("anchored",))
+    args = parser.parse_args()
+    print(json.dumps(
+        [run_rehearsal(mode=args.mode, scenario=scenario) for scenario in SCENARIOS],
+        indent=2, sort_keys=True,
+    ))
 
 
 if __name__ == "__main__":

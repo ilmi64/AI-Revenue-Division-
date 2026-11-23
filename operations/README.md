@@ -62,19 +62,42 @@ behavior. There is no sender, customer access or publication path.
 
 ### Fictional manual-delivery commissioning rehearsal
 
-Run `python -m synthetic_delivery_rehearsal` from `operations` to print the
-deterministic synthetic audit bundle for all scenarios. The fixture creates
-its own temporary SQLite database and emits a private audit alongside a
-separate redacted OCC projection. Share only that projection with OCC.
-An evidence receipt is internal and every scenario explicitly denies external
-delivery. The fixture log records two checks actually executed on the fictional
-artifact, without making any statement about customer or production data.
+The public rehearsal requires explicit anchored mode. Run these commands from
+`operations` in a local sandbox with external sockets blocked.
 
-The rollback tests force a database transaction failure and restore an earlier
-snapshot. The rehearsal detects snapshot rollback using a checkpoint retained
-outside the database for that run. Persistent, independently managed checkpoint
-storage and recovery remain prerequisites for production rollback protection.
-All keys and identities are synthetic. The rehearsal does not convene real
-reviewers or record real approvals.
+```sh
+python -m synthetic_delivery_rehearsal --mode anchored
+python -m unittest -v test_anchored_delivery_rehearsal
+python -m unittest -v test_anchored_delivery_rehearsal test_anchored_evidence_verifier test_delivery_independent_challenge
+python -m unittest discover -v
+```
 
-Run the focused regression suite with `python -m unittest -v test_synthetic_delivery_rehearsal`.
+The same intake and checklist drive the hardened verifier and a separately
+provisioned synthetic anchor and audit database. A verified receipt is
+read back against the audit chain before the rehearsal reports it. The
+workflow projects only allowlisted counts to the read-only OCC summary.
+Every scenario denies release and external delivery. The full report
+contains private audit evidence and stays in Aevora AI's review scope.
+The CLI refuses omitted or unanchored mode. The historical Python fixture
+is retained for the pinned challenge regressions.
+
+| Rehearsal fault | Expected outcome |
+| --- | --- |
+| Anchor or audit missing | Block verification. No fallback. |
+| Revocation/trust epoch or policy stale | Reject against the current anchor. |
+| Company or recipient differs from trusted scope | Reject the manifest. |
+| Audit row corrupted | Reject during receipt readback. |
+| Audit committed with stale anchor | Block on divergence. The hardened-verifier suite separately exercises actual child exit between commits. |
+| Nonce used after verifier reopen | Reject the replay. |
+| Anchor and audit restored together | Reject receipt readback against the receipt retained outside both files for this run. |
+
+The coordinated rollback case uses a retained receipt within the rehearsal.
+Restoring that reference as well as both local stores is outside the local
+proof. The fixture keys and identities are synthetic. This workflow
+does not provision production trust or change Aevora AI's eligible markets.
+
+Before production review, obtain asymmetric signer and independent
+reviewer identity provisioning, managed revocation and current policy,
+an independently controlled monotonic anchor, signed audit with custody
+and restore validation, a reviewed interrupted-commit recovery procedure,
+independent Security & Recovery signoff, and a real owner decision.
