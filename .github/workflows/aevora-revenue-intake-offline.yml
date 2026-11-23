@@ -10,6 +10,8 @@ on:
       - "operations/test_revenue_agent_queue.py"
       - "operations/revenue_task_evidence.py"
       - "operations/test_revenue_task_evidence.py"
+      - "operations/revenue_evidence_custody.py"
+      - "operations/test_revenue_evidence_custody.py"
       - ".github/workflows/aevora-revenue-intake-offline.yml"
 permissions:
   contents: read
@@ -28,5 +30,5 @@ jobs:
         env:
           PYTHONPATH: operations
         run: |
-          python -m py_compile operations/revenue_intake_sandbox.py operations/test_revenue_intake_sandbox.py operations/revenue_delivery_plan.py operations/test_revenue_delivery_plan.py operations/revenue_agent_queue.py operations/test_revenue_agent_queue.py operations/revenue_task_evidence.py operations/test_revenue_task_evidence.py
-          python -m unittest -v test_revenue_intake_sandbox test_revenue_delivery_plan test_revenue_agent_queue test_revenue_task_evidence
+          python -m py_compile operations/revenue_intake_sandbox.py operations/test_revenue_intake_sandbox.py operations/revenue_delivery_plan.py operations/test_revenue_delivery_plan.py operations/revenue_agent_queue.py operations/test_revenue_agent_queue.py operations/revenue_task_evidence.py operations/test_revenue_task_evidence.py operations/revenue_evidence_custody.py operations/test_revenue_evidence_custody.py
+          python -m unittest -v test_revenue_intake_sandbox test_revenue_delivery_plan test_revenue_agent_queue test_revenue_task_evidence test_revenue_evidence_custody
