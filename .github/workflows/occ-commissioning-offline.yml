@@ -1,0 +1,43 @@
+name: OCC commissioning offline regression
+on:
+  pull_request:
+    paths:
+      - "operations/occ_commissioning_projection.py"
+      - "operations/test_occ_commissioning_projection.py"
+      - "operations/test_occ_commissioning_adversarial.py"
+      - "operations/test_occ_commissioning_isolation.py"
+      - "operations/test_occ_provenance_boundary.py"
+      - ".github/workflows/occ-commissioning-offline.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: occ-commissioning-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  offline-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONPATH: operations
+    steps:
+      - name: Checkout exact triggering commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Record reviewed commit
+        run: |
+          printf 'Checked-out SHA: '
+          git rev-parse HEAD
+          printf 'Event SHA: %s\n' "$GITHUB_SHA"
+      - name: Python syntax and standard-library regression
+        run: |
+          python3 -B -m unittest -v \
+            operations.test_occ_commissioning_projection \
+            operations.test_occ_commissioning_adversarial \
+            operations.test_occ_commissioning_isolation \
+            operations.test_occ_provenance_boundary
