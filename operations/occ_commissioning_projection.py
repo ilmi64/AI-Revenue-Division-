@@ -8,7 +8,9 @@ import re
 
 COMPANIES = frozenset({"aevora_ai", "trading_technology"})
 STATES = frozenset({"BLOCKED", "UNKNOWN", "RECONCILIATION_REQUIRED"})
-TEST_PROVENANCE = frozenset({"UNVERIFIED", "OFFLINE_REPORTED", "INDEPENDENTLY_REPRODUCED"})
+TEST_PROVENANCE = frozenset({"UNVERIFIED", "OFFLINE_REPORTED"})
+# Independent reproduction cannot be asserted by company-supplied input. A future
+# authenticated verifier must issue that classification outside this projection.
 BLOCKERS = frozenset({"custody", "trusted_time", "recovery", "signers", "lineage", "risk", "security", "research", "operations", "owner", "ci"})
 FIELDS = frozenset({"company_id", "commit_sha", "gate", "test_provenance", "blockers", "evidence_digest"})
 HEX40 = re.compile(r"[0-9a-f]{40}\Z")
