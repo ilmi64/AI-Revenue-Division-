@@ -49,6 +49,18 @@ class CustodyTests(unittest.TestCase):
         self.assertFalse(self.custody.verify_anchor(True, "0" * 64))
         self.assertFalse(self.custody.verify_anchor(0, "not-a-digest"))
 
+    def test_corrupted_chain_blocks_future_append(self):
+        self.custody.append("demo_001:01", "agent_1", "engineering", b"first")
+        with sqlite3.connect(self.path) as db:
+            db.execute("UPDATE evidence SET actor_role='tampered' WHERE sequence=1")
+        with self.assertRaises(ValueError):
+            self.custody.append("demo_001:02", "agent_1", "engineering", b"second")
+        self.assertEqual(self.custody.head()[0], 1)
+
+    def test_task_identity_must_match_queue_format(self):
+        with self.assertRaises(ValueError):
+            self.custody.append("demo_001::01", "agent_1", "engineering", b"artifact")
+
     def test_invalid_evidence_rejected(self):
         with self.assertRaises(ValueError):
             self.custody.append("demo_001:01", "agent_1", "engineering", b"")
