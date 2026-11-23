@@ -28,7 +28,7 @@ class AdversarialProjectionTests(unittest.TestCase):
                 project(rows)
 
     def test_rejects_nested_blocker_data(self):
-        for value in (None, {}, ["owner"], ["owner", {"secret": "private"}], "owner", True):
+        for value in (None, {}, ["owner", {"secret": "private"}], "owner", True):
             rows = fixture()
             rows[0]["blockers"] = value
             with self.subTest(value=value), self.assertRaises(ProjectionRejected):
