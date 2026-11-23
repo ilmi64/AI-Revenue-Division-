@@ -87,6 +87,16 @@ class AnchoredReviewReceipt:
     release_authorized: bool = field(default=False, init=False)
 
 
+@dataclass(frozen=True)
+class AnchoredCheckpoint:
+    store_id: str
+    trust_epoch: int
+    trust_fingerprint: str
+    policy_version: str
+    audit_sequence: int
+    audit_sha256: str
+
+
 class _AnchorLedger:
     def __init__(self, anchor_path: Path, audit_path: Path, company_id: str):
         self.anchor_path = anchor_path
@@ -147,25 +157,33 @@ class _AnchorLedger:
             "observed_at": observed_at,
         })
 
-    def verify_receipt(self, receipt: AnchoredReviewReceipt) -> None:
+    def verify_receipt(self, receipt: AnchoredReviewReceipt) -> AnchoredCheckpoint:
         """Independently check continuity and the private receipt's anchored row."""
         if not isinstance(receipt, AnchoredReviewReceipt):
             raise VerificationBlocked("invalid_audit_receipt")
         with self.locked() as (anchor, audit):
-            self.validated_state(anchor, audit)
+            state = self.validated_state(anchor, audit)
             found = audit.execute(
                 "SELECT manifest, digest FROM review_audit WHERE sequence=?",
                 (receipt.audit_sequence,),
             ).fetchone()
             if found != (receipt.manifest_sha256, receipt.audit_sha256):
                 raise VerificationBlocked("audit_receipt_not_anchored")
+            return AnchoredCheckpoint(*state)
+
+
+def read_anchored_checkpoint(
+    anchor_path: Path, audit_path: Path, company_id: str, receipt: AnchoredReviewReceipt,
+) -> AnchoredCheckpoint:
+    """Read the current chain tip after validating the private receipt and audit."""
+    return _AnchorLedger(anchor_path, audit_path, company_id).verify_receipt(receipt)
 
 
 def verify_anchored_receipt(
     anchor_path: Path, audit_path: Path, company_id: str, receipt: AnchoredReviewReceipt,
 ) -> None:
     """Check an existing receipt without issuing an authority decision."""
-    _AnchorLedger(anchor_path, audit_path, company_id).verify_receipt(receipt)
+    read_anchored_checkpoint(anchor_path, audit_path, company_id, receipt)
 
 
 class _PendingClaim:
