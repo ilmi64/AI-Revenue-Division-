@@ -5,6 +5,7 @@ on:
       - "operations/occ_commissioning_projection.py"
       - "operations/test_occ_commissioning_projection.py"
       - "operations/test_occ_commissioning_adversarial.py"
+      - "operations/test_occ_commissioning_isolation.py"
       - ".github/workflows/occ-commissioning-offline.yml"
   workflow_dispatch:
 
@@ -36,4 +37,5 @@ jobs:
         run: |
           python3 -B -m unittest -v \
             operations.test_occ_commissioning_projection \
-            operations.test_occ_commissioning_adversarial
+            operations.test_occ_commissioning_adversarial \
+            operations.test_occ_commissioning_isolation
