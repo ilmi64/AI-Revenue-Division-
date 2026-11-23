@@ -17,7 +17,7 @@ from evidence_verifier import (
     TrustedKey, VerificationBlocked, attestation_payload,
 )
 from occ_summary import summarize
-from synthetic_delivery_rehearsal import run_rehearsal
+from synthetic_delivery_rehearsal import run_unanchored_fixture_rehearsal as run_rehearsal
 
 
 class DeliveryIndependentChallenge(unittest.TestCase):

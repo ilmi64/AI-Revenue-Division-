@@ -2,7 +2,7 @@
 import json
 import unittest
 
-from synthetic_delivery_rehearsal import run_rehearsal
+from synthetic_delivery_rehearsal import run_unanchored_fixture_rehearsal as run_rehearsal
 
 
 class SyntheticDeliveryRehearsalTests(unittest.TestCase):
