@@ -50,6 +50,7 @@ class CommissioningEvidence:
     approval_bundle_sha256: str
     checked_at: int
     valid_until: int
+    reviews: tuple[ExternalReview, ...] = field(default=(), repr=False)
     status: str = field(default="synthetic_commissioning_evidence_recorded", init=False)
     release_authorized: bool = field(default=False, init=False)
 
@@ -82,6 +83,15 @@ def review_payload(request: CommissioningRequest, review: ExternalReview) -> byt
         "disposition": review.disposition,
         "expires_at": review.expires_at,
     })
+
+
+def review_bundle_fingerprint(request: CommissioningRequest, reviews: tuple[ExternalReview, ...]) -> str:
+    return hashlib.sha256(_canonical({
+        "reviews": [{
+            "payload_sha256": hashlib.sha256(review_payload(request, review)).hexdigest(),
+            "signature_hex": review.signature.hex(),
+        } for review in reviews],
+    })).hexdigest()
 
 
 def _sha(value: object) -> bool:
@@ -187,7 +197,7 @@ class CommissioningReviewer:
             raise VerificationBlocked("commissioning_request_scope_mismatch")
 
         signers = [_key(current, checkpoint.key_id, "checkpoint", now), _key(current, proof.key_id, "audit", now)]
-        signatures = []
+        reviews = (audit, recovery)
         expiries = [observation.expires_at, checkpoint.checkpoint.expires_at]
         for purpose, review in (("external_audit", audit), ("external_recovery", recovery)):
             if (
@@ -202,10 +212,6 @@ class CommissioningReviewer:
             payload = review_payload(request, review)
             _verify_signature(key.public_key, review.signature, payload)
             signers.append(key)
-            signatures.append({
-                "payload_sha256": hashlib.sha256(payload).hexdigest(),
-                "signature_hex": review.signature.hex(),
-            })
             expiries.append(review.expires_at)
 
         principals = {
@@ -223,8 +229,8 @@ class CommissioningReviewer:
             raise VerificationBlocked("commissioning_authority_expired_during_review")
         expiries.append(observation.observed_at + self.maximum_observation_age + 1)
         evidence = CommissioningEvidence(
-            request, hashlib.sha256(_canonical({"reviews": signatures})).hexdigest(),
-            checked_at, min(expiries),
+            request, review_bundle_fingerprint(request, reviews),
+            checked_at, min(expiries), reviews,
         )
         try:
             recorded = self.authority.record_if_current(observation, evidence)

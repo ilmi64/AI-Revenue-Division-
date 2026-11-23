@@ -1,0 +1,16 @@
+{
+  "counts": {
+    "blocked": 0,
+    "checklist_complete_unverified": 1,
+    "hold": 0,
+    "rejected": 0,
+    "review_ready": 0
+  },
+  "execution_authorized": false,
+  "external_actions_performed": false,
+  "mode": "read_only_aggregate",
+  "organization": "Daivora Group",
+  "recipient": "Main Hub/OCC",
+  "source_company": "Aevora AI",
+  "total": 1
+}
