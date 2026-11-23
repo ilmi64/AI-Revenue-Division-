@@ -1,0 +1,51 @@
+{
+  "checkpoint_sha256": "76cf31d98c368e10edeb491a9a17cf7e7d323de57e36078821c2092c60b19c8b",
+  "classification": "SYNTHETIC_PRIVATE",
+  "custody_pin": {
+    "company_id": "aevora-ai",
+    "head": "63a394287be60620b47f528de0a740a3a0ca9b6491211ce735183580c377a813",
+    "sequence": 2,
+    "store_id": "synthetic-independent-store"
+  },
+  "custody_revision": 11,
+  "external_actions_performed": false,
+  "owner_approval": "NOT_GRANTED",
+  "records": [
+    {
+      "approval_bundle_sha256": "0a18c72f44fcbe9fddd21feb400ed2309620146f362e5f88bf59779fe3bb2834",
+      "checked_at": 100,
+      "release_authorized": false,
+      "request": {
+        "checkpoint_sha256": "76cf31d98c368e10edeb491a9a17cf7e7d323de57e36078821c2092c60b19c8b",
+        "company_id": "aevora-ai",
+        "custody_revision": 11,
+        "manifest_sha256": "a7f64b065334b397c362b2f3b19038802f04e5446507982894538571177bddaf",
+        "request_id": "recovery-review-fixture",
+        "signer_revision": 23
+      },
+      "reviews": [
+        {
+          "disposition": "accepted",
+          "evidence_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "expires_at": 125,
+          "key_id": "external-audit",
+          "purpose": "external_audit",
+          "signature": "43d380630b56c3ba25779ab806faaa4b61e7a9e131a8e21a5f8fa8a7142072214e8acdb320a79f62d898c2ce380002ccbdf51d4e950b50ed528704f7e7aaaa0b"
+        },
+        {
+          "disposition": "accepted",
+          "evidence_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "expires_at": 125,
+          "key_id": "external-recovery",
+          "purpose": "external_recovery",
+          "signature": "93712c43d9c06cc8e5841b05bd5cd703ad534819dc82476ef5193bd573b47ed103c410c37d747905164cc20dbca7145612d6b63fec4521ef566e52b894365900"
+        }
+      ],
+      "status": "synthetic_commissioning_evidence_recorded",
+      "valid_until": 106
+    }
+  ],
+  "release_authorized": false,
+  "schema": "aevora-synthetic-commissioning-evidence-v1",
+  "signer_revision": 23
+}
