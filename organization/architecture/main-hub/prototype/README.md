@@ -130,3 +130,26 @@ from a restored journal to approve a rollback. Production custody, key
 transitions, an independently durable authority, a crash reconciliation
 runbook, privacy-reviewed authenticated channels and protocol review remain
 open.
+
+A separately stored `DurableReceiptAnchor` implements the same interface with
+transactional compare-and-advance. Provide an out-of-band synthetic custodian
+public key for each company. Use a distinct authority file per company to
+isolate authority outages, and keep each authority outside its receipt
+journal's restore domain. Reopening the authority requires the original
+public verification key. Neither verification store is created during an
+ordinary replay check.
+
+After a lost local receipt commit, `reconcile_pending_receipt` repairs only
+one exact signed receipt when that wire is still valid and matches the
+independent checkpoint. It does not publish or advance the checkpoint. Other
+mismatches require an exact aligned backup and independent review. Replacing
+publisher custody requires `transition_custody`, aligned journal history,
+and an independent Ed25519 authorization bound to the exact company,
+current checkpoint, replacement configuration and approval window. Existing
+receipt history is retained and approval replay fails closed. Aevora's
+aggregate uses sequence-derived snapshot IDs, so a replacement publisher
+must continue with fresh IDs even if its key-local sequence could restart.
+
+Rolling back the authority and journals together remains outside this local
+fixture threat model. Production key custody, protected independent storage,
+recovery drills, and owner authorization remain separate requirements.

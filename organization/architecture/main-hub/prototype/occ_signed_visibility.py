@@ -2,7 +2,7 @@
 
 from collections.abc import Mapping
 from contextlib import closing
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime, timedelta, timezone
 from hashlib import sha256
 import json
@@ -167,25 +167,25 @@ class ReceiptJournal:
             raise ValueError("independent receipt checkpoint is outside company scope")
         return checkpoint
 
-    def _verify_anchor(self, db, trust):
+    def _anchor_checkpoints(self, db, trust):
         table = db.execute(
             "SELECT 1 FROM sqlite_schema WHERE type='table' AND name='receipt_anchor'",
         ).fetchone()
         if bool(table) != (self.anchor is not None):
             raise ValueError("receipt anchor binding mode does not match")
         if self.anchor is None:
-            return None
+            return None, None
         checkpoint = self._read_checkpoint()
         binding = db.execute(
             "SELECT journal_id, custody_sha256 FROM receipt_anchor WHERE singleton=1",
         ).fetchone()
         if (
-            binding != (checkpoint.journal_id, checkpoint.custody_sha256)
+            binding is None or binding[0] != checkpoint.journal_id
             or custody_digest(trust) != checkpoint.custody_sha256
         ):
             raise ValueError("receipt anchor and publisher custody do not match")
         local = ReceiptCheckpoint.genesis(
-            checkpoint.company_id, checkpoint.journal_id, checkpoint.custody_sha256,
+            checkpoint.company_id, checkpoint.journal_id, binding[1],
         )
         for row in db.execute(
             "SELECT company_id, publisher_id, key_id, sequence, snapshot_id, digest FROM receipt ORDER BY rowid",
@@ -193,6 +193,10 @@ class ReceiptJournal:
             if local.count >= checkpoint.count:
                 raise ValueError("local receipt state is ahead of the independent checkpoint")
             local = local.append(row)
+        return replace(local, custody_sha256=checkpoint.custody_sha256), checkpoint
+
+    def _verify_anchor(self, db, trust):
+        local, checkpoint = self._anchor_checkpoints(db, trust)
         if local != checkpoint:
             raise ValueError("local receipt state does not match the independent checkpoint")
         return checkpoint
@@ -209,33 +213,73 @@ class ReceiptJournal:
     def _connect(self):
         return sqlite3.connect(f"{Path(self.path).resolve().as_uri()}?mode=rw", uri=True, timeout=1)
 
+    def _verify_local_scope(self, db, expected_company):
+        bound_journal = db.execute(
+            "SELECT 1 FROM sqlite_schema WHERE type='table' AND name='receipt_binding'"
+        ).fetchone()
+        if bool(bound_journal) != (self.company_id is not None):
+            raise ValueError("receipt journal binding mode does not match")
+        if bound_journal:
+            binding = db.execute("SELECT company_id FROM receipt_binding WHERE singleton=1").fetchone()
+            if binding != (self.company_id,) or expected_company != self.company_id:
+                raise ValueError("receipt journal company does not match")
+
+    def _pending_row(self, db, claims, wire):
+        key = (claims["company_id"], claims["publisher_id"], claims["key_id"])
+        latest = db.execute(
+            "SELECT MAX(sequence) FROM receipt WHERE company_id=? AND publisher_id=? AND key_id=?",
+            key,
+        ).fetchone()[0]
+        if latest is not None and claims["sequence"] <= latest:
+            raise ValueError("receipt is not newer")
+        return (*key, claims["sequence"], claims["snapshot_id"], sha256(wire).hexdigest())
+
     def _accept(self, claims, wire, *, trust):
         with closing(self._connect()) as db, db:
             db.execute("PRAGMA trusted_schema=OFF")
+            db.execute("PRAGMA synchronous=FULL")
             db.execute("BEGIN IMMEDIATE")
-            bound_journal = db.execute(
-                "SELECT 1 FROM sqlite_schema WHERE type='table' AND name='receipt_binding'"
-            ).fetchone()
-            if bool(bound_journal) != (self.company_id is not None):
-                raise ValueError("receipt journal binding mode does not match")
-            if bound_journal:
-                binding = db.execute("SELECT company_id FROM receipt_binding WHERE singleton=1").fetchone()
-                if binding != (self.company_id,) or claims["company_id"] != self.company_id:
-                    raise ValueError("receipt journal company does not match")
+            self._verify_local_scope(db, claims["company_id"])
             checkpoint = self._verify_anchor(db, trust)
-            key = (claims["company_id"], claims["publisher_id"], claims["key_id"])
-            latest = db.execute(
-                "SELECT MAX(sequence) FROM receipt WHERE company_id=? AND publisher_id=? AND key_id=?",
-                key,
-            ).fetchone()[0]
-            if latest is not None and claims["sequence"] <= latest:
-                raise ValueError("receipt is not newer")
-            row = (*key, claims["sequence"], claims["snapshot_id"], sha256(wire).hexdigest())
+            row = self._pending_row(db, claims, wire)
             db.execute("INSERT INTO receipt VALUES (?, ?, ?, ?, ?, ?)", row)
             if checkpoint is not None:
-                # An advance before the local commit makes an uncertain crash
-                # fail closed. Reconcile to the exact anchored image offline.
+                # An uncertain advance leaves the feed suspended until exact repair.
                 self._advance_anchor(checkpoint, row)
+
+    def reconcile_pending_receipt(self, wire, *, trust, now):
+        """Repair exactly one missing anchored receipt; produce no view or new receipt."""
+        claims, _ = _verify(wire, trust, self.company_id, _utc(now))
+        with closing(self._connect()) as db, db:
+            db.execute("PRAGMA trusted_schema=OFF")
+            db.execute("PRAGMA synchronous=FULL")
+            db.execute("BEGIN IMMEDIATE")
+            self._verify_local_scope(db, claims["company_id"])
+            local, checkpoint = self._anchor_checkpoints(db, trust)
+            row = self._pending_row(db, claims, wire)
+            if local is None or local.append(row) != checkpoint or self._read_checkpoint() != checkpoint:
+                raise ValueError("receipt does not match the single anchored interruption")
+            db.execute("INSERT INTO receipt VALUES (?, ?, ?, ?, ?, ?)", row)
+
+    def transition_custody(self, current, replacement, authorization, *, now):
+        """Apply an explicitly authorized replacement only from aligned local history."""
+        now = _utc(now)
+        _trust_matches_company(replacement, self.company_id, now)
+        if not isinstance(current, PublisherTrust) or current.company_id != self.company_id:
+            raise ValueError("current publisher is outside the company scope")
+        if current.public_key != replacement.public_key and current.key_id == replacement.key_id:
+            raise ValueError("a replacement key requires a distinct key ID")
+        transition = getattr(self.anchor, "transition", None)
+        if transition is None:
+            raise ValueError("custody transition authority unavailable")
+        with closing(self._connect()) as db, db:
+            db.execute("PRAGMA trusted_schema=OFF")
+            db.execute("BEGIN IMMEDIATE")
+            self._verify_local_scope(db, self.company_id)
+            checkpoint = self._verify_anchor(db, current)
+            successor = transition(checkpoint, replacement, authorization, now=now)
+            if self._read_checkpoint() != successor:
+                raise ValueError("custody transition could not be confirmed")
 
 
 def _trust_matches_company(trust, company_id, now):
