@@ -98,6 +98,14 @@ summary. Each company's acceptance and sanitized display remain separate. The
 view's authentication flag attests to the scoped signature and local receipt;
 it confers no evidence verification, readiness, or company-side authority.
 
+For a company-isolated rehearsal, initialize separate files with
+`ReceiptJournal.initialize(path, company_id=company)` and pass them as
+`journal_by_company` keyed by `ai_revenue` and `trading_technology`. The stored
+company binding rejects a journal assigned to the wrong scope. Missing or
+unavailable state for one company rejects its receipt while the peer still uses
+its own journal. Shared-journal mode remains available for earlier offline
+fixtures. An isolated call never falls back to it.
+
 Persistent replay checks cover normal restart and concurrent delivery on the
 same journal. Independently anchored journal restoration, production key
 custody and revocation, privacy-reviewed authenticated channels, receipt

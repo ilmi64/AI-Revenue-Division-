@@ -107,13 +107,17 @@ def sign_fixture(payload, *, trust, sequence, issued_at, expires_at, private_key
 @dataclass(frozen=True)
 class ReceiptJournal:
     path: Path
+    company_id: str | None = None
 
     @classmethod
-    def initialize(cls, path):
-        """Explicitly create a new offline journal. Never overwrite existing state."""
-        journal = cls(Path(path))
+    def initialize(cls, path, *, company_id=None):
+        """Provision an offline journal without overwriting existing state."""
+        if company_id is not None and company_id not in _COMPANIES:
+            raise ValueError("unknown receipt journal company")
+        journal = cls(Path(path), company_id)
         journal.path.touch(mode=0o600, exist_ok=False)
         with closing(journal._connect()) as db, db:
+            db.execute("BEGIN IMMEDIATE")
             db.execute("""
                 CREATE TABLE receipt (
                     company_id TEXT NOT NULL, publisher_id TEXT NOT NULL, key_id TEXT NOT NULL,
@@ -122,6 +126,14 @@ class ReceiptJournal:
                     UNIQUE (company_id, snapshot_id)
                 )
             """)
+            if company_id is not None:
+                db.execute("""
+                    CREATE TABLE receipt_binding (
+                        singleton INTEGER PRIMARY KEY CHECK(singleton = 1),
+                        company_id TEXT NOT NULL
+                    )
+                """)
+                db.execute("INSERT INTO receipt_binding VALUES (1, ?)", (company_id,))
         return journal
 
     def _connect(self):
@@ -129,7 +141,17 @@ class ReceiptJournal:
 
     def _accept(self, claims, wire):
         with closing(self._connect()) as db, db:
+            db.execute("PRAGMA trusted_schema=OFF")
             db.execute("BEGIN IMMEDIATE")
+            bound_journal = db.execute(
+                "SELECT 1 FROM sqlite_schema WHERE type='table' AND name='receipt_binding'"
+            ).fetchone()
+            if bool(bound_journal) != (self.company_id is not None):
+                raise ValueError("receipt journal binding mode does not match")
+            if bound_journal:
+                binding = db.execute("SELECT company_id FROM receipt_binding WHERE singleton=1").fetchone()
+                if binding != (self.company_id,) or claims["company_id"] != self.company_id:
+                    raise ValueError("receipt journal company does not match")
             key = (claims["company_id"], claims["publisher_id"], claims["key_id"])
             latest = db.execute(
                 "SELECT MAX(sequence) FROM receipt WHERE company_id=? AND publisher_id=? AND key_id=?",
@@ -228,10 +250,16 @@ def _verify(wire, trust, company_id, now):
 
 
 def build_authenticated_visibility(
-    *, ai_revenue_wire=None, trading_wire=None, trust_by_company, journal, now,
+    *, ai_revenue_wire=None, trading_wire=None, trust_by_company, journal=None,
+    journal_by_company=None, now,
 ):
     """Verify and consume separate synthetic feeds; no unsigned fallback."""
     _utc(now)
+    if journal is not None and journal_by_company is not None:
+        raise ValueError("provide one receipt journal configuration")
+    isolated = journal_by_company is not None
+    if isolated and not isinstance(journal_by_company, Mapping):
+        journal_by_company = {}
     companies = {}
     if not isinstance(trust_by_company, Mapping):
         trust_by_company = {}
@@ -246,10 +274,13 @@ def build_authenticated_visibility(
                 trust.public_key == peer.public_key or trust.publisher_id == peer.publisher_id
             ):
                 raise ValueError("trust roots are not company-separated")
-            if not isinstance(journal, ReceiptJournal):
+            receipt_journal = journal_by_company.get(company_id) if isolated else journal
+            if not isinstance(receipt_journal, ReceiptJournal):
                 raise ValueError("receipt journal is unavailable")
+            if isolated and receipt_journal.company_id != company_id:
+                raise ValueError("receipt journal is not company-scoped")
             claims, view = _verify(wire, trust, company_id, now)
-            journal._accept(claims, wire)
+            receipt_journal._accept(claims, wire)
         except (InvalidSignature, ValueError, TypeError, KeyError, RecursionError, OverflowError, OSError, sqlite3.Error):
             companies[company_id] = {"input_status": "REJECTED", "authentication": "UNVERIFIED"}
             continue

@@ -139,3 +139,48 @@ class SignedVisibilityTests(unittest.TestCase):
                 [ReceiptJournal(self.journal.path), ReceiptJournal(self.journal.path)],
             ))
         self.assertCountEqual(outcomes, ["AUTHENTICATED_OFFLINE", "UNVERIFIED"])
+
+    def test_isolated_journal_outage_preserves_peer(self):
+        ai = ReceiptJournal.initialize(self.journal.path.with_name("ai.sqlite"), company_id=AI)
+        trading = ReceiptJournal.initialize(self.journal.path.with_name("trading.sqlite"), company_id=TRADING)
+        journals = {AI: ai, TRADING: trading}
+        arguments = {"journal": None, "journal_by_company": journals}
+        first = self.report(ai_revenue_wire=self.signed(AI), trading_wire=self.signed(TRADING), **arguments)
+        self.assertTrue(all(view["authentication"] == "AUTHENTICATED_OFFLINE"
+                            for view in first["companies"].values()))
+
+        trading.path.unlink()
+        next_snapshot = {**self.trading, "snapshot_id": "next-trading-fixture"}
+        renewed = self.report(
+            ai_revenue_wire=self.signed(AI, sequence=2),
+            trading_wire=self.signed(TRADING, next_snapshot, sequence=2), **arguments,
+        )
+        self.assertEqual(renewed["companies"][AI], first["companies"][AI])
+        self.assertEqual(renewed["companies"][TRADING]["input_status"], "REJECTED")
+        self.assertFalse(trading.path.exists())
+
+    def test_relabelled_peer_journal_rejects_only_wrong_scope(self):
+        trading = ReceiptJournal.initialize(self.journal.path.with_name("trading.sqlite"), company_id=TRADING)
+        relabelled = ReceiptJournal(trading.path, company_id=AI)
+        result = self.report(
+            ai_revenue_wire=self.signed(AI), trading_wire=self.signed(TRADING), journal=None,
+            journal_by_company={AI: relabelled, TRADING: trading},
+        )
+        self.assertEqual(result["companies"][AI]["input_status"], "REJECTED")
+        self.assertEqual(result["companies"][TRADING]["authentication"], "AUTHENTICATED_OFFLINE")
+
+    def test_isolated_journal_rejects_legacy_and_missing_partitions_without_fallback(self):
+        ai = ReceiptJournal.initialize(self.journal.path.with_name("ai.sqlite"), company_id=AI)
+        for partitions in ({}, {AI: self.journal}, {AI: ReceiptJournal(self.journal.path, company_id=AI)}):
+            with self.subTest(partitions=partitions):
+                report = self.report(ai_revenue_wire=self.signed(AI), journal=None, journal_by_company=partitions)
+                self.assertEqual(report["companies"][AI]["input_status"], "REJECTED")
+
+        with self.assertRaisesRegex(ValueError, "one receipt journal"):
+            self.report(ai_revenue_wire=self.signed(AI), journal_by_company={AI: ai})
+
+        reopened = ReceiptJournal(ai.path)
+        legacy_attempt = self.report(ai_revenue_wire=self.signed(AI), journal=reopened)
+        self.assertEqual(legacy_attempt["companies"][AI]["input_status"], "REJECTED")
+        report = self.report(ai_revenue_wire=self.signed(AI), journal=None, journal_by_company={AI: ai})
+        self.assertEqual(report["companies"][AI]["authentication"], "AUTHENTICATED_OFFLINE")
