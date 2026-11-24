@@ -20,12 +20,19 @@ class ServiceProfile:
     country: str
     task: str
     fixture_id: str
+    queue_role: str = "engineering"
+    role_id: str = "ar_engineering_worker"
+    producer_id: str = "fixture-engineering-builder"
 
 
 PROFILES = MappingProxyType({
     "app_build": ServiceProfile("synthetic_catalogue_preflight", "CA", "build_offline_demo", "synthetic-listings.csv"),
     "coding": ServiceProfile("synthetic_invoice_rounding", "US", "draft_patch", "invoice-rounding-fixture-v1"),
     "ai_setup": ServiceProfile("synthetic_ai_review_routing", "GB", "simulate_agent_tasks", "review-routing-fixture-v1"),
+    "authorized_bug_bounty": ServiceProfile(
+        "synthetic_defensive_terms_review", "CA", "verify_program_scope", "defensive-terms-fixture-v1",
+        "compliance", "ar_compliance_researcher", "fixture-compliance-reviewer",
+    ),
 })
 _SOURCE = b"""sku,title,price,quantity,shipping
 FIX-001,Fictional notebook,12.00,3,2.00
@@ -61,7 +68,8 @@ def canonical(value: dict) -> bytes:
 
 
 def fixture_ticket(service: str, task: QueueItem) -> FixtureTicket:
-    return FixtureTicket(service, task.task_id, PROFILES[service].fixture_id)
+    profile = PROFILES[service]
+    return FixtureTicket(service, task.task_id, profile.fixture_id, role_id=profile.role_id)
 
 
 def _listing_fixture_report() -> tuple[dict, dict, str]:
@@ -125,10 +133,28 @@ def _review_routing_fixture_report() -> tuple[dict, dict, str]:
     }, {"algorithm": "fixed_rule_routing"}, _sha(canonical({"rows": rows}))
 
 
+def _defensive_terms_fixture_report() -> tuple[dict, dict, str]:
+    terms = {
+        "program": "fictional-terms-only",
+        "review_input": "fixed_synthetic_terms",
+        "permitted_action": "read_fictional_terms",
+        "testing_permission": False,
+        "submission_permission": False,
+        "target_count": 0,
+    }
+    return {
+        "fixture": "defensive-terms-fixture-v1",
+        "disposition": "INTERNAL_STATIC_TERMS_REVIEW_ONLY",
+        "terms": terms,
+        "external_action_performed": False,
+    }, {"algorithm": "read_fixture_terms_only"}, _sha(canonical(terms))
+
+
 _WORKERS = MappingProxyType({
     "app_build": _listing_fixture_report,
     "coding": _invoice_fixture_report,
     "ai_setup": _review_routing_fixture_report,
+    "authorized_bug_bounty": _defensive_terms_fixture_report,
 })
 
 
@@ -164,6 +190,25 @@ def _known_answer(service: str, output: object) -> tuple[str, ...]:
         ],
     }:
         return ("queue_review_only", "hold_missing_evidence", "hold_external_action")
+    elif service == "authorized_bug_bounty" and output == {
+        "fixture": "defensive-terms-fixture-v1",
+        "disposition": "INTERNAL_STATIC_TERMS_REVIEW_ONLY",
+        "terms": {
+            "program": "fictional-terms-only",
+            "review_input": "fixed_synthetic_terms",
+            "permitted_action": "read_fictional_terms",
+            "testing_permission": False,
+            "submission_permission": False,
+            "target_count": 0,
+        },
+        "external_action_performed": False,
+    } and (
+        output["external_action_performed"] is False
+        and output["terms"]["testing_permission"] is False
+        and output["terms"]["submission_permission"] is False
+        and type(output["terms"]["target_count"]) is int
+    ):
+        return ("fictional_terms_only", "zero_targets", "testing_and_submission_denied")
     raise VerificationBlocked("offline_worker_known_answer_failed")
 
 
@@ -179,7 +224,7 @@ def validate_fixture_scope(ticket: FixtureTicket, task: QueueItem) -> None:
     position = TASKS[ticket.service].index(profile.task) + 1
     if (
         task.task != profile.task or task.opportunity_reference != profile.reference
-        or task.role != "engineering" or task.state != "AWAITING_INTERNAL_REVIEW"
+        or task.role != profile.queue_role or task.state != "AWAITING_INTERNAL_REVIEW"
         or type(task.sequence) is not int or task.sequence != position
         or task.task_id != f"{profile.reference}:{position:02d}"
         or task.execution_authorized is not False or task.external_delivery_authorized is not False

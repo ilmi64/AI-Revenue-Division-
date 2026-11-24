@@ -6,8 +6,9 @@ import sqlite3
 from anchored_delivery_rehearsal import _verify_anchored_fixture
 from evidence_verifier import VerificationBlocked
 from revenue_agent_queue import QueueItem
+from revenue_commercial_scope import fixed_review_scope
 from revenue_fixture_dispatch import (
-    FixtureTicket, canonical, dispatch_fixture, validate_fixture_scope,
+    PROFILES, FixtureTicket, canonical, dispatch_fixture, validate_fixture_scope,
 )
 from revenue_task_evidence import EvidenceDecision, TaskEvidence, review_evidence
 from synthetic_delivery_rehearsal import _sha
@@ -103,6 +104,9 @@ class FixtureMediation:
         if (
             record.get("classification") != "SYNTHETIC_INTERNAL_ONLY"
             or record.get("reference") != self._task.opportunity_reference
+            or canonical(record.get("commercial_review_scope")) != canonical(
+                asdict(fixed_review_scope(self._delegation.ticket.service)),
+            )
             or tested_bytes != self._tested_bytes
             or len(matching_tasks) != 1
             or any(matching_tasks[0].get(field) != value for field, value in asdict(self._task).items())
@@ -155,7 +159,7 @@ class FixtureMediation:
                 "baseline" if anchor_available is True else "missing_anchor",
                 self._artifact, self._log, self.events,
                 opportunity_id=self._task.opportunity_reference,
-                producer_id="fixture-engineering-builder",
+                producer_id=PROFILES[self._delegation.ticket.service].producer_id,
             )
         except (OSError, sqlite3.Error) as exc:
             raise VerificationBlocked("offline_anchor_evidence_unavailable") from exc

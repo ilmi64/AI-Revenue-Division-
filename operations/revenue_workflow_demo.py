@@ -6,6 +6,7 @@ import json
 from evidence_verifier import VerificationBlocked
 from occ_summary import summarize
 from revenue_agent_queue import prepare_queue
+from revenue_commercial_scope import CommercialReviewScope, fixed_review_scope, validate_review_scope
 from revenue_delivery_plan import plan_delivery
 from revenue_fixture_dispatch import PROFILES, canonical as _canonical, fixture_ticket
 from revenue_intake_sandbox import Opportunity, qualify
@@ -31,6 +32,8 @@ _CHARTER_BY_ROLE = {
     "engineering": ("fixture-engineering-builder", "Technology & Infrastructure", "ar_engineering_worker"),
     "quality": ("fixture-risk-reviewer", "Risk & Recovery", "ar_qa_reviewer"),
     "security": ("fixture-security-reviewer", "Risk & Recovery", "ar_security_analyst"),
+    "compliance": ("fixture-compliance-reviewer", "Legal / Compliance Review", "ar_compliance_researcher"),
+    "research": ("fixture-research-reader", "Research & Intelligence", "ar_opportunity_researcher"),
 }
 
 
@@ -45,10 +48,14 @@ def _assignment(task, profile) -> dict:
         "tools_scope": "local_read_only_fixture",
         "verification": "check_against_fixed_fixture",
         "human_review_required": True,
+        "fixture_dispatchable": task.task == profile.task,
     }
 
 
-def run_demo(*, mode: str, scenario: str = "baseline", service: str = "app_build") -> dict:
+def run_demo(
+    *, mode: str, scenario: str = "baseline", service: str = "app_build",
+    commercial_scope: CommercialReviewScope | None = None,
+) -> dict:
     """Prepare private evidence by running one fixed synthetic fixture worker."""
     if mode != "anchored":
         raise ValueError("explicit anchored mode required")
@@ -57,6 +64,8 @@ def run_demo(*, mode: str, scenario: str = "baseline", service: str = "app_build
     if not isinstance(service, str) or service not in PROFILES:
         raise ValueError("service must select an allowlisted fixture")
     profile = PROFILES[service]
+    commercial_scope = fixed_review_scope(service) if commercial_scope is None else commercial_scope
+    validate_review_scope(commercial_scope, service)
     changes = {
         "missing_scope": {"authorization_evidence": False},
         "paid_dependency": {"upfront_cost_cad": 1},
@@ -79,6 +88,11 @@ def run_demo(*, mode: str, scenario: str = "baseline", service: str = "app_build
         "agent_execution_authorized": False,
         "customer_contact_authorized": False,
         "spending_authorized": False,
+        "private_commercial_review": {
+            "scope": asdict(commercial_scope),
+            "status": "HOLD",
+            "external_approval": "NOT_GRANTED",
+        },
         "private_runtime": {
             "state": "NOT_DELEGATED",
             "commissioning": {
@@ -110,6 +124,7 @@ def run_demo(*, mode: str, scenario: str = "baseline", service: str = "app_build
         outcome, source_digest = mediation.run_worker()
         artifact = _canonical({
             "classification": report["classification"],
+            "commercial_review_scope": asdict(commercial_scope),
             "reference": item.reference,
             "synthetic_source_sha256": source_digest,
             "intake": asdict(intake),
@@ -130,6 +145,7 @@ def run_demo(*, mode: str, scenario: str = "baseline", service: str = "app_build
                        "test_log_sha256": _sha(_canonical(report["private_test_log"]))})
         receipt = mediation.anchor(anchor_available=scenario != "missing_anchor")
         report["private_runtime"]["state"] = "REVIEW_READY"
+        report["private_commercial_review"]["status"] = "INTERNAL_EVIDENCE_READY"
         report["receipt"] = receipt
         public_status = "checklist_complete_unverified"
     except VerificationBlocked as exc:
