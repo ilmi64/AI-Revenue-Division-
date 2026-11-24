@@ -65,3 +65,40 @@ snapshot contributes no counts, and each other input is evaluated independently.
 Synthetic and unauthenticated inputs never establish operational readiness. The
 viewer writes only to stdout and does not expose evidence references, raw
 identifiers, descriptions, approvals, or action controls.
+
+### Authenticated synthetic visibility
+
+`occ_signed_visibility.py` implements an offline prototype for the publisher
+design above. It uses Ed25519, existing `cryptography` and `jsonschema` modules,
+and an explicit SQLite receipt journal. It does not attach to the viewer CLI,
+run a service, discover publishers, or read signing secrets. A verifier accepts
+a caller-provisioned `PublisherTrust` for each company's own synthetic public
+key, publisher ID, key ID, validity window and exact producer commit. Trading's
+optional `payload_source_revision` distinguishes the paper source revision
+reported by M2 from the revision of the publisher code.
+
+A synthetic fixture incidentally re-signed under the wrong company key fails
+scope and signature checks. Only the M2 report for Trading and the existing
+redacted Aevora operations aggregate have prototype report type IDs. The signed
+format is a local test format. It uses the UTF-8-compatible ASCII output of
+Python JSON with sorted object keys, no spaces, escaped non-ASCII, no floats,
+and safe-range integers. The wire record has exactly `claims` and
+`signature_hex`. Ed25519 signs the bytes of `daivora.occ.visibility/synthetic-v1`
+followed by NUL and the canonical claims. Claims bind the company and publisher,
+key, audience, type, source revision, snapshot ID, sequence, UTC timestamps,
+and SHA-256 of the canonical payload; inbound messages must be byte-for-byte
+canonical. This format does not assert RFC 8785 or cross-language conformance.
+
+For synthetic verification, provision a new temporary
+`ReceiptJournal.initialize(path)`, wrap redacted fixtures with `sign_fixture`
+using test-only keys, and supply the resulting bytes with
+`build_authenticated_visibility`. This adds to the OCC-owned journal only.
+A missing journal or stale, invalid or replayed message cannot produce a
+summary. Each company's acceptance and sanitized display remain separate. The
+view's authentication flag attests to the scoped signature and local receipt;
+it confers no evidence verification, readiness, or company-side authority.
+
+Persistent replay checks cover normal restart and concurrent delivery on the
+same journal. Independently anchored journal restoration, production key
+custody and revocation, privacy-reviewed authenticated channels, receipt
+recovery and protocol review remain open.

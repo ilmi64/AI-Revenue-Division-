@@ -1,0 +1,257 @@
+"""Synthetic offline Ed25519 OCC reporting, with no company action authority."""
+
+from collections.abc import Mapping
+from contextlib import closing
+from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
+from hashlib import sha256
+import json
+from pathlib import Path
+import re
+import sqlite3
+
+from cryptography.exceptions import InvalidSignature
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
+
+from jsonschema import Draft202012Validator, FormatChecker
+
+from occ_company_visibility import _aevora_operations_view, _snapshot_view
+from occ_readonly import MAX_FIXTURE_BYTES, _enforce_json_resource_limits, _strict_object
+from validate_m2_schema import EXPECTED_BLOB_SHAS, github_blob_sha1
+
+
+AUDIENCE = "daivora.occ/offline-fixtures"
+_DOMAIN = b"daivora.occ.visibility/synthetic-v1\x00"
+_COMPANIES = ("ai_revenue", "trading_technology")
+_TYPES = {"ai_revenue": "aevora_operations", "trading_technology": "m2_snapshot"}
+_MAX_WIRE = 65536
+_MAX_AGE = timedelta(minutes=5)
+_SAFE_INTEGER = (1 << 53) - 1
+_CLAIM_FIELDS = {
+    "protocol_version", "audience", "report_type", "company_id", "publisher_id",
+    "key_id", "source_revision", "sequence", "issued_at", "expires_at", "payload_sha256",
+    "snapshot_id", "payload",
+}
+
+
+@dataclass(frozen=True)
+class PublisherTrust:
+    company_id: str
+    publisher_id: str
+    key_id: str
+    public_key: bytes
+    source_revision: str
+    valid_from: datetime
+    valid_until: datetime
+    revoked: bool = False
+    payload_source_revision: str | None = None
+
+
+def _utc(value):
+    if not isinstance(value, datetime) or value.utcoffset() != timedelta(0):
+        raise ValueError("clock must be an aware UTC datetime")
+    return value
+
+
+def _timestamp(value):
+    value = _utc(value)
+    if value.microsecond:
+        raise ValueError("signed timestamps require whole seconds")
+    return value.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _parse_timestamp(value):
+    return datetime.strptime(value, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+
+
+def _signed_integer(raw):
+    value = int(raw)
+    if abs(value) > _SAFE_INTEGER:
+        raise ValueError("integer is outside the signed protocol range")
+    return value
+
+
+def _reject_number(_):
+    raise ValueError("signed protocol allows integer numbers only")
+
+
+def _canonical(value):
+    return json.dumps(value, ensure_ascii=True, sort_keys=True, separators=(",", ":"),
+                      allow_nan=False).encode("ascii")
+
+
+def sign_fixture(payload, *, trust, sequence, issued_at, expires_at, private_key):
+    """Sign an offline fixture with a caller-owned synthetic private key."""
+    claims = {
+        "protocol_version": 1,
+        "audience": AUDIENCE,
+        "company_id": trust.company_id,
+        "publisher_id": trust.publisher_id,
+        "key_id": trust.key_id,
+        "source_revision": trust.source_revision,
+        "report_type": _TYPES[trust.company_id],
+        "sequence": sequence,
+        "issued_at": _timestamp(issued_at),
+        "expires_at": _timestamp(expires_at),
+        "payload_sha256": sha256(_canonical(payload)).hexdigest(),
+        "snapshot_id": (
+            payload.get("snapshot_id") if trust.company_id == "trading_technology"
+            else f"aevora-operations-{sequence}"
+        ),
+        "payload": payload,
+    }
+    signature = private_key.sign(_DOMAIN + _canonical(claims))
+    return _canonical({"claims": claims, "signature_hex": signature.hex()})
+
+
+@dataclass(frozen=True)
+class ReceiptJournal:
+    path: Path
+
+    @classmethod
+    def initialize(cls, path):
+        """Explicitly create a new offline journal. Never overwrite existing state."""
+        journal = cls(Path(path))
+        journal.path.touch(mode=0o600, exist_ok=False)
+        with closing(journal._connect()) as db, db:
+            db.execute("""
+                CREATE TABLE receipt (
+                    company_id TEXT NOT NULL, publisher_id TEXT NOT NULL, key_id TEXT NOT NULL,
+                    sequence INTEGER NOT NULL, snapshot_id TEXT NOT NULL, digest TEXT NOT NULL,
+                    PRIMARY KEY (company_id, publisher_id, key_id, sequence),
+                    UNIQUE (company_id, snapshot_id)
+                )
+            """)
+        return journal
+
+    def _connect(self):
+        return sqlite3.connect(f"{Path(self.path).resolve().as_uri()}?mode=rw", uri=True, timeout=1)
+
+    def _accept(self, claims, wire):
+        with closing(self._connect()) as db, db:
+            db.execute("BEGIN IMMEDIATE")
+            key = (claims["company_id"], claims["publisher_id"], claims["key_id"])
+            latest = db.execute(
+                "SELECT MAX(sequence) FROM receipt WHERE company_id=? AND publisher_id=? AND key_id=?",
+                key,
+            ).fetchone()[0]
+            if latest is not None and claims["sequence"] <= latest:
+                raise ValueError("receipt is not newer")
+            db.execute("INSERT INTO receipt VALUES (?, ?, ?, ?, ?, ?)", (
+                *key, claims["sequence"], claims["snapshot_id"], sha256(wire).hexdigest(),
+            ))
+
+
+def _trust_matches_company(trust, company_id, now):
+    if (
+        not isinstance(trust, PublisherTrust) or trust.company_id != company_id
+        or trust.revoked is not False
+        or not isinstance(trust.public_key, bytes) or len(trust.public_key) != 32
+        or not all(re.fullmatch(r"[a-zA-Z0-9._-]{1,80}", name) for name in (trust.publisher_id, trust.key_id))
+        or not re.fullmatch(r"[0-9a-f]{40}", trust.source_revision)
+        or not _utc(trust.valid_from) <= now < _utc(trust.valid_until)
+    ):
+        raise ValueError("publisher trust unavailable")
+
+
+def _verify_m2_schema(payload):
+    relative = "schema/records.schema.json"
+    path = Path(__file__).resolve().parents[1] / relative
+    with path.open("rb") as file:
+        raw = file.read(MAX_FIXTURE_BYTES + 1)
+    if len(raw) > MAX_FIXTURE_BYTES or github_blob_sha1(raw) != EXPECTED_BLOB_SHAS[relative]:
+        raise ValueError("pinned M2 schema is unavailable")
+    schema = json.loads(raw)
+    snapshot_schema = {
+        "$schema": schema["$schema"], "$defs": schema["$defs"], "$ref": "#/$defs/snapshot",
+    }
+    if not Draft202012Validator(snapshot_schema, format_checker=FormatChecker()).is_valid(payload):
+        raise ValueError("snapshot failed pinned M2 schema validation")
+
+
+def _verify(wire, trust, company_id, now):
+    _trust_matches_company(trust, company_id, now)
+    if not isinstance(wire, bytes) or not 0 < len(wire) <= _MAX_WIRE:
+        raise ValueError("wire size is invalid")
+    record = json.loads(wire.decode("ascii"), object_pairs_hook=_strict_object,
+                        parse_int=_signed_integer, parse_float=_reject_number,
+                        parse_constant=_reject_number)
+    _enforce_json_resource_limits(record)
+    if not isinstance(record, dict) or set(record) != {"claims", "signature_hex"} or wire != _canonical(record):
+        raise ValueError("wire shape or canonical representation is invalid")
+    claims, signature = record["claims"], record["signature_hex"]
+    if not isinstance(claims, dict) or set(claims) != _CLAIM_FIELDS:
+        raise ValueError("signed claims are invalid")
+    if (
+        type(claims["protocol_version"]) is not int or claims["protocol_version"] != 1
+        or claims["audience"] != AUDIENCE or claims["report_type"] != _TYPES[company_id]
+        or claims["company_id"] != company_id or claims["publisher_id"] != trust.publisher_id
+        or claims["key_id"] != trust.key_id or claims["source_revision"] != trust.source_revision
+        or type(claims["sequence"]) is not int or claims["sequence"] < 1
+        or not re.fullmatch(r"[0-9a-f]{128}", signature)
+    ):
+        raise ValueError("unregistered signed scope")
+    Ed25519PublicKey.from_public_bytes(trust.public_key).verify(
+        bytes.fromhex(signature), _DOMAIN + _canonical(claims),
+    )
+    payload = claims["payload"]
+    if not isinstance(payload, dict) or claims["payload_sha256"] != sha256(_canonical(payload)).hexdigest():
+        raise ValueError("payload digest mismatch")
+    issued, expires = (_parse_timestamp(claims[field]) for field in ("issued_at", "expires_at"))
+    if (
+        not trust.valid_from <= issued <= now < expires <= trust.valid_until
+        or expires - issued > _MAX_AGE
+        or any(_timestamp(value) != claims[field]
+               for field, value in (("issued_at", issued), ("expires_at", expires)))
+    ):
+        raise ValueError("report is outside its freshness window")
+    if company_id == "ai_revenue":
+        view = _aevora_operations_view(payload)
+        if claims["snapshot_id"] != f'aevora-operations-{claims["sequence"]}':
+            raise ValueError("invalid aggregate snapshot ID")
+    else:
+        _verify_m2_schema(payload)
+        view = _snapshot_view(payload, company_id, now)
+        view.pop("trust", None)
+        if (
+            not re.fullmatch(r"[a-zA-Z0-9._-]{1,100}", claims["snapshot_id"])
+            or claims["snapshot_id"] != payload.get("snapshot_id")
+            or payload.get("source_revision") != (trust.payload_source_revision or trust.source_revision)
+        ):
+            raise ValueError("snapshot pin mismatch")
+        publication = _utc(datetime.fromisoformat(payload["published_at"]))
+        if not issued - _MAX_AGE <= publication <= issued:
+            raise ValueError("snapshot publication is outside the signed window")
+    if view["input_status"] in {"REJECTED", "STALE"}:
+        raise ValueError("report failed view checks")
+    return claims, view
+
+
+def build_authenticated_visibility(
+    *, ai_revenue_wire=None, trading_wire=None, trust_by_company, journal, now,
+):
+    """Verify and consume separate synthetic feeds; no unsigned fallback."""
+    _utc(now)
+    companies = {}
+    if not isinstance(trust_by_company, Mapping):
+        trust_by_company = {}
+    for company_id, wire in zip(_COMPANIES, (ai_revenue_wire, trading_wire), strict=True):
+        if wire is None:
+            companies[company_id] = {"input_status": "MISSING", "authentication": "UNVERIFIED"}
+            continue
+        trust = trust_by_company.get(company_id)
+        peer = trust_by_company.get(next(name for name in _COMPANIES if name != company_id))
+        try:
+            if isinstance(trust, PublisherTrust) and isinstance(peer, PublisherTrust) and (
+                trust.public_key == peer.public_key or trust.publisher_id == peer.publisher_id
+            ):
+                raise ValueError("trust roots are not company-separated")
+            if not isinstance(journal, ReceiptJournal):
+                raise ValueError("receipt journal is unavailable")
+            claims, view = _verify(wire, trust, company_id, now)
+            journal._accept(claims, wire)
+        except (InvalidSignature, ValueError, TypeError, KeyError, RecursionError, OverflowError, OSError, sqlite3.Error):
+            companies[company_id] = {"input_status": "REJECTED", "authentication": "UNVERIFIED"}
+            continue
+        companies[company_id] = {**view, "authentication": "AUTHENTICATED_OFFLINE"}
+    return {"mode": "offline_read_only", "operational_claim": False, "companies": companies}
