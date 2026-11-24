@@ -145,13 +145,19 @@ def main():
     parser.add_argument("--ai-revenue-snapshot", type=Path)
     parser.add_argument("--trading-snapshot", type=Path)
     parser.add_argument("--aevora-operations", type=Path)
+    parser.add_argument("--format", choices=("json", "mobile-html"), default="json")
     args = parser.parse_args()
     report = build_company_visibility(
         ai_revenue_snapshot=_read_optional(args.ai_revenue_snapshot),
         trading_snapshot=_read_optional(args.trading_snapshot),
         aevora_operations=_read_optional(args.aevora_operations),
     )
-    print(json.dumps(report, indent=2, sort_keys=True))
+    if args.format == "mobile-html":
+        from occ_mobile_visibility import render_mobile_visibility
+
+        print(render_mobile_visibility(report))
+    else:
+        print(json.dumps(report, indent=2, sort_keys=True))
 
 
 if __name__ == "__main__":
