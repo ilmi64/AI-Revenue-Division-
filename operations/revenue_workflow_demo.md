@@ -36,6 +36,30 @@ the run before dispatch. Invalid tickets, failed or malformed outputs, QA
 mismatch and missing anchor block a receipt. Only aggregate status counters
 appear in the separate OCC view.
 
+## Role-separated local runtime
+
+The fixture delegates through `ar_product_delivery` to the fixed
+`ar_engineering_worker`. The worker's exact output and source digest are
+retained before a separate `ar_qa_reviewer` checks the canonical artifact
+and handoff. The anchored verifier receives only the same reviewed bytes
+and the corresponding private test log. That log includes delegation,
+attempts and synthetic QA evidence.
+
+Only an unavailable read-only fixture worker may retry under the same
+ticket, with a maximum of two total attempts. Invalid work and failed
+known-answer results stop immediately. QA and anchor operations have no
+automatic retry. An exhausted or failed phase records a supervisor hold for
+`ar_cto` in the private audit. It does not invoke a supervisor tool or grant
+automatic resume. Even a successful internal receipt leaves production
+commissioning on hold and changes no company approval state.
+
+Local dependency inspection found x86_64 Linux, Python 3.12.14,
+Node.js 24.22.3, pnpm 11.25.0, glibc 2.41 and a Codex executable.
+Paperclip, Ruflo, Ollama, Claude and the other inspected model commands
+were absent from PATH. These observations are availability checks only.
+No native adapter, model account or local inference runtime was invoked,
+installed or provisioned.
+
 ## Workforce compatibility boundary
 
 The governing [adapter contract][adapter], [technical assessment][technical]
@@ -60,8 +84,8 @@ approval are still open gates. No external contact, delivery, spending,
 deployment, publishing or real commercial transactions occur.
 
 ```sh
-python -m unittest -v test_revenue_fixture_dispatch test_revenue_workflow_demo
-python -m unittest -v test_revenue_fixture_dispatch test_revenue_workflow_demo test_revenue_intake_sandbox test_revenue_delivery_plan test_revenue_agent_queue test_revenue_proposal_draft test_revenue_task_evidence test_anchored_delivery_rehearsal
+python -m unittest -v test_revenue_runtime_mediation test_revenue_fixture_dispatch test_revenue_workflow_demo
+python -m unittest -v test_revenue_runtime_mediation test_revenue_fixture_dispatch test_revenue_workflow_demo test_revenue_intake_sandbox test_revenue_delivery_plan test_revenue_agent_queue test_revenue_proposal_draft test_revenue_task_evidence test_anchored_delivery_rehearsal
 python -m unittest discover -v
 ```
 

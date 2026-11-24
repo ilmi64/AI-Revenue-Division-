@@ -79,7 +79,7 @@ class RevenueFixtureDispatchTests(unittest.TestCase):
         ):
             with self.subTest(reason=reason), patch(
                 "revenue_fixture_dispatch._WORKERS", MappingProxyType({"coding": worker}),
-            ), patch("revenue_workflow_demo._verify_anchored_fixture") as anchor:
+            ), patch("revenue_runtime_mediation._verify_anchored_fixture") as anchor:
                 report = run_demo(mode="anchored", service="coding")
                 anchor.assert_not_called()
                 self.assertIsNone(report["receipt"])

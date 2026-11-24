@@ -51,7 +51,7 @@ class RevenueWorkflowDemoTests(unittest.TestCase):
 
     def test_intake_hold_or_reject_never_runs_delivery_helper(self):
         for scenario, status in (("missing_scope", "HOLD"), ("paid_dependency", "REJECT")):
-            with self.subTest(scenario=scenario), patch("revenue_workflow_demo.dispatch_fixture") as run:
+            with self.subTest(scenario=scenario), patch("revenue_runtime_mediation.dispatch_fixture") as run:
                 report = run_demo(mode="anchored", scenario=scenario)
                 run.assert_not_called()
                 self.assertEqual(report["intake"]["status"], status)
@@ -88,8 +88,8 @@ class RevenueWorkflowDemoTests(unittest.TestCase):
                 def wrong_evidence(item, evidence):
                     return review_evidence(item, replace(evidence, **change))
 
-                with patch("revenue_workflow_demo.review_evidence", side_effect=wrong_evidence):
-                    with patch("revenue_workflow_demo._verify_anchored_fixture") as anchor:
+                with patch("revenue_runtime_mediation.review_evidence", side_effect=wrong_evidence):
+                    with patch("revenue_runtime_mediation._verify_anchored_fixture") as anchor:
                         report = run_demo(mode="anchored")
                         anchor.assert_not_called()
                 self.assertIn(reason, report["private_task_review"]["reasons"])

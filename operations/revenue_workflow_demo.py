@@ -3,15 +3,14 @@ import argparse
 from dataclasses import asdict, replace
 import json
 
-from anchored_delivery_rehearsal import _verify_anchored_fixture
 from evidence_verifier import VerificationBlocked
 from occ_summary import summarize
 from revenue_agent_queue import prepare_queue
 from revenue_delivery_plan import plan_delivery
-from revenue_fixture_dispatch import PROFILES, canonical as _canonical, dispatch_fixture, fixture_ticket
+from revenue_fixture_dispatch import PROFILES, canonical as _canonical, fixture_ticket
 from revenue_intake_sandbox import Opportunity, qualify
 from revenue_proposal_draft import draft_proposal
-from revenue_task_evidence import TaskEvidence, review_evidence
+from revenue_runtime_mediation import FixtureDelegation, FixtureMediation
 from synthetic_delivery_rehearsal import _sha
 
 
@@ -80,12 +79,24 @@ def run_demo(*, mode: str, scenario: str = "baseline", service: str = "app_build
         "agent_execution_authorized": False,
         "customer_contact_authorized": False,
         "spending_authorized": False,
+        "private_runtime": {
+            "state": "NOT_DELEGATED",
+            "commissioning": {
+                "status": "HOLD",
+                "blockers": [
+                    "native_runtime_unverified", "production_custody_unverified",
+                    "operational_independent_review_pending", "owner_signoff_pending",
+                ],
+            },
+            "supervisor_escalation": None,
+        },
     }
     if intake.status != "REVIEW_READY":
         report["occ"] = summarize([{"status": {"HOLD": "hold", "REJECT": "rejected"}[intake.status]}])
         return report
 
     public_status = "blocked"
+    mediation = None
     try:
         plan = plan_delivery(item)
         queue = prepare_queue(plan)
@@ -94,7 +105,9 @@ def run_demo(*, mode: str, scenario: str = "baseline", service: str = "app_build
         if len(queue) != 4 or len(build_tasks) != 1 or proposal.status != "INTERNAL_DRAFT":
             raise VerificationBlocked("offline_plan_or_proposal_blocked")
         build_task = build_tasks[0]
-        outcome, log, source_digest = dispatch_fixture(fixture_ticket(service, build_task), build_task)
+        mediation = FixtureMediation(FixtureDelegation(fixture_ticket(service, build_task)), build_task)
+        report["private_audit"] = mediation.events
+        outcome, source_digest = mediation.run_worker()
         artifact = _canonical({
             "classification": report["classification"],
             "reference": item.reference,
@@ -108,33 +121,26 @@ def run_demo(*, mode: str, scenario: str = "baseline", service: str = "app_build
         events = report["private_audit"]
         artifact_digest = _sha(artifact)
         report["private_artifact"] = {"contents": json.loads(artifact), "sha256": artifact_digest}
-        review = review_evidence(build_task, TaskEvidence(
-            task_id=build_task.task_id,
-            artifact_sha256=artifact_digest,
-            artifact_bytes=artifact,
-            author_role=build_task.role,
-            reviewer_role="quality",
-            reviewer_attested=True,
-        ))
+        review = mediation.review_artifact(artifact)
         report["private_task_review"] = asdict(review)
         if review.task_id != build_task.task_id or review.status != "EVIDENCE_REVIEWED":
             raise VerificationBlocked("offline_task_evidence_review_blocked")
-        report["private_test_log"] = {**log, "task_evidence_review": asdict(review)}
-        log = _canonical(report["private_test_log"])
+        report["private_test_log"] = mediation.test_log
         events.append({"stage": "known_answer_checked", "artifact_sha256": artifact_digest,
-                       "test_log_sha256": _sha(log)})
-        anchored_scenario = "missing_anchor" if scenario == "missing_anchor" else "baseline"
-        receipt = _verify_anchored_fixture(
-            anchored_scenario, artifact, log, events,
-            opportunity_id=item.reference, producer_id="fixture-engineering-builder",
-        )
-        if receipt["release_authorized"] is not False:
-            raise VerificationBlocked("offline_receipt_grants_release")
+                       "test_log_sha256": _sha(_canonical(report["private_test_log"]))})
+        receipt = mediation.anchor(anchor_available=scenario != "missing_anchor")
+        report["private_runtime"]["state"] = "REVIEW_READY"
         report["receipt"] = receipt
         public_status = "checklist_complete_unverified"
     except VerificationBlocked as exc:
+        report["private_runtime"]["state"] = "HOLD"
+        if mediation is not None:
+            report["private_runtime"]["supervisor_escalation"] = mediation.escalate(str(exc))
         report["private_audit"].append({"stage": "evidence_review_blocked", "reason": str(exc)})
     except (TypeError, ValueError):
+        report["private_runtime"]["state"] = "HOLD"
+        if mediation is not None:
+            report["private_runtime"]["supervisor_escalation"] = mediation.escalate("offline_plan_or_evidence_invalid")
         report["private_audit"].append({"stage": "evidence_review_blocked", "reason": "offline_plan_or_evidence_invalid"})
     report["occ"] = summarize([{"status": public_status}])
     return report

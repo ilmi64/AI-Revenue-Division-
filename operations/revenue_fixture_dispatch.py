@@ -167,8 +167,8 @@ def _known_answer(service: str, output: object) -> tuple[str, ...]:
     raise VerificationBlocked("offline_worker_known_answer_failed")
 
 
-def dispatch_fixture(ticket: FixtureTicket, task: QueueItem) -> tuple[dict, dict, str]:
-    """Execute one known local fixture. Reject all other scopes and routes."""
+def validate_fixture_scope(ticket: FixtureTicket, task: QueueItem) -> None:
+    """Reject all non-fixture scopes and assignments before a worker can run."""
     if not isinstance(ticket, FixtureTicket) or not isinstance(task, QueueItem):
         raise VerificationBlocked("missing_or_malformed_fixture_ticket")
     if not isinstance(ticket.service, str) or ticket.service not in PROFILES:
@@ -186,6 +186,11 @@ def dispatch_fixture(ticket: FixtureTicket, task: QueueItem) -> tuple[dict, dict
         or task.spending_authorized is not False
     ):
         raise VerificationBlocked("fixture_assignment_mismatch")
+
+
+def dispatch_fixture(ticket: FixtureTicket, task: QueueItem) -> tuple[dict, dict, str]:
+    """Execute one known local fixture after deterministic scope validation."""
+    validate_fixture_scope(ticket, task)
     try:
         output, runtime_observation, source_digest = _WORKERS[ticket.service]()
         if (
