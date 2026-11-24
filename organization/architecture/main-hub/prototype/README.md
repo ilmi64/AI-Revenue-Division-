@@ -153,3 +153,25 @@ must continue with fresh IDs even if its key-local sequence could restart.
 Rolling back the authority and journals together remains outside this local
 fixture threat model. Production key custody, protected independent storage,
 recovery drills, and owner authorization remain separate requirements.
+
+### Company-scoped divisional telemetry
+
+A company publisher can opt in through its approved
+`PublisherTrust(divisional_telemetry=True, ...)` custody configuration and
+company-anchored journal. The extended signed report wraps the existing
+company report in `report` and adds `divisional_telemetry`. Its
+`company_totals` and each named row in `divisions` carry exactly
+`open_incident_count`, `pending_approval_count`, and `blocker_count`.
+
+Report counts by primary division without duplication. The sum of disclosed
+division counts cannot exceed the company totals. An omitted division has
+unknown counts. A reported zero applies only to that named scope. Trading's
+company incident and blocker totals must agree with its pinned M2 snapshot.
+Aevora's operations queue statuses and pending approval count are distinct
+reporting dimensions. OCC does not infer one from the other.
+
+Invalid, stale, replayed, or quarantined data exposes no new counts. Previously
+approved basic-only custody and wire formats remain valid for their original
+scope. An extended publisher cannot switch its approved custody by changing
+the signed report type. Authentication does not establish operational
+readiness or approve any pending action.

@@ -16,6 +16,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 from jsonschema import Draft202012Validator, FormatChecker
 
 from occ_company_visibility import _aevora_operations_view, _snapshot_view
+from occ_divisional_telemetry import split_divisional_report
 from occ_receipt_anchor import ReceiptAnchor, ReceiptCheckpoint, custody_digest
 from occ_readonly import MAX_FIXTURE_BYTES, _enforce_json_resource_limits, _strict_object
 from validate_m2_schema import EXPECTED_BLOB_SHAS, github_blob_sha1
@@ -46,6 +47,7 @@ class PublisherTrust:
     valid_until: datetime
     revoked: bool = False
     payload_source_revision: str | None = None
+    divisional_telemetry: bool = False
 
 
 def _utc(value):
@@ -81,8 +83,14 @@ def _canonical(value):
                       allow_nan=False).encode("ascii")
 
 
+def _report_type(trust):
+    base = _TYPES[trust.company_id]
+    return base + "_with_divisions" if trust.divisional_telemetry else base
+
+
 def sign_fixture(payload, *, trust, sequence, issued_at, expires_at, private_key):
     """Sign an offline fixture with a caller-owned synthetic private key."""
+    report = payload["report"] if trust.divisional_telemetry else payload
     claims = {
         "protocol_version": 1,
         "audience": AUDIENCE,
@@ -90,13 +98,13 @@ def sign_fixture(payload, *, trust, sequence, issued_at, expires_at, private_key
         "publisher_id": trust.publisher_id,
         "key_id": trust.key_id,
         "source_revision": trust.source_revision,
-        "report_type": _TYPES[trust.company_id],
+        "report_type": _report_type(trust),
         "sequence": sequence,
         "issued_at": _timestamp(issued_at),
         "expires_at": _timestamp(expires_at),
         "payload_sha256": sha256(_canonical(payload)).hexdigest(),
         "snapshot_id": (
-            payload.get("snapshot_id") if trust.company_id == "trading_technology"
+            report.get("snapshot_id") if trust.company_id == "trading_technology"
             else f"aevora-operations-{sequence}"
         ),
         "payload": payload,
@@ -286,6 +294,7 @@ def _trust_matches_company(trust, company_id, now):
     if (
         not isinstance(trust, PublisherTrust) or trust.company_id != company_id
         or trust.revoked is not False
+        or type(trust.divisional_telemetry) is not bool
         or not isinstance(trust.public_key, bytes) or len(trust.public_key) != 32
         or not all(re.fullmatch(r"[a-zA-Z0-9._-]{1,80}", name) for name in (trust.publisher_id, trust.key_id))
         or not re.fullmatch(r"[0-9a-f]{40}", trust.source_revision)
@@ -324,7 +333,7 @@ def _verify(wire, trust, company_id, now):
         raise ValueError("signed claims are invalid")
     if (
         type(claims["protocol_version"]) is not int or claims["protocol_version"] != 1
-        or claims["audience"] != AUDIENCE or claims["report_type"] != _TYPES[company_id]
+        or claims["audience"] != AUDIENCE or claims["report_type"] != _report_type(trust)
         or claims["company_id"] != company_id or claims["publisher_id"] != trust.publisher_id
         or claims["key_id"] != trust.key_id or claims["source_revision"] != trust.source_revision
         or type(claims["sequence"]) is not int or claims["sequence"] < 1
@@ -345,12 +354,22 @@ def _verify(wire, trust, company_id, now):
                for field, value in (("issued_at", issued), ("expires_at", expires)))
     ):
         raise ValueError("report is outside its freshness window")
+    telemetry = None
+    if trust.divisional_telemetry:
+        payload, telemetry = split_divisional_report(payload, company_id)
     if company_id == "ai_revenue":
         view = _aevora_operations_view(payload)
         if claims["snapshot_id"] != f'aevora-operations-{claims["sequence"]}':
             raise ValueError("invalid aggregate snapshot ID")
     else:
         _verify_m2_schema(payload)
+        if telemetry is not None:
+            totals = telemetry["company_totals"]
+            if (
+                totals["open_incident_count"] != payload["incident_summary"]["open_count"]
+                or totals["blocker_count"] != len(payload["blockers"])
+            ):
+                raise ValueError("divisional company totals differ from the pinned snapshot")
         view = _snapshot_view(payload, company_id, now)
         view.pop("trust", None)
         if (
@@ -364,6 +383,8 @@ def _verify(wire, trust, company_id, now):
             raise ValueError("snapshot publication is outside the signed window")
     if view["input_status"] in {"REJECTED", "STALE"}:
         raise ValueError("report failed view checks")
+    if telemetry is not None and view["input_status"] != "QUARANTINED":
+        view["reported_divisional_telemetry"] = telemetry
     return claims, view
 
 
@@ -398,6 +419,10 @@ def build_authenticated_visibility(
             if isolated and receipt_journal.company_id != company_id:
                 raise ValueError("receipt journal is not company-scoped")
             claims, view = _verify(wire, trust, company_id, now)
+            if trust.divisional_telemetry and (
+                receipt_journal.company_id != company_id or receipt_journal.anchor is None
+            ):
+                raise ValueError("divisional telemetry requires company-anchored custody")
             receipt_journal._accept(claims, wire, trust=trust)
         except (InvalidSignature, ValueError, TypeError, KeyError, RecursionError, OverflowError, OSError, sqlite3.Error):
             companies[company_id] = {"input_status": "REJECTED", "authentication": "UNVERIFIED"}

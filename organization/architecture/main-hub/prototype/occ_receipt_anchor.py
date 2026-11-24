@@ -18,11 +18,14 @@ def _digest(value):
 
 def custody_digest(trust):
     """Bind the exact company-approved publisher configuration."""
-    return _digest([
+    binding = [
         "custody", trust.company_id, trust.publisher_id, trust.key_id, trust.public_key.hex(),
         trust.source_revision, trust.payload_source_revision, trust.valid_from.isoformat(),
         trust.valid_until.isoformat(), trust.revoked,
-    ])
+    ]
+    if trust.divisional_telemetry:
+        binding.append("divisional_telemetry_v1")
+    return _digest(binding)
 
 
 @dataclass(frozen=True)
