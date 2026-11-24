@@ -16,6 +16,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 from jsonschema import Draft202012Validator, FormatChecker
 
 from occ_company_visibility import _aevora_operations_view, _snapshot_view
+from occ_receipt_anchor import ReceiptAnchor, ReceiptCheckpoint, custody_digest
 from occ_readonly import MAX_FIXTURE_BYTES, _enforce_json_resource_limits, _strict_object
 from validate_m2_schema import EXPECTED_BLOB_SHAS, github_blob_sha1
 
@@ -108,13 +109,22 @@ def sign_fixture(payload, *, trust, sequence, issued_at, expires_at, private_key
 class ReceiptJournal:
     path: Path
     company_id: str | None = None
+    anchor: ReceiptAnchor | None = None
 
     @classmethod
-    def initialize(cls, path, *, company_id=None):
+    def initialize(cls, path, *, company_id=None, anchor=None):
         """Provision an offline journal without overwriting existing state."""
         if company_id is not None and company_id not in _COMPANIES:
             raise ValueError("unknown receipt journal company")
-        journal = cls(Path(path), company_id)
+        journal = cls(Path(path), company_id, anchor)
+        checkpoint = None
+        if anchor is not None:
+            checkpoint = journal._read_checkpoint()
+            genesis = ReceiptCheckpoint.genesis(
+                checkpoint.company_id, checkpoint.journal_id, checkpoint.custody_sha256,
+            )
+            if checkpoint != genesis:
+                raise ValueError("cannot reprovision an advanced anchored journal")
         journal.path.touch(mode=0o600, exist_ok=False)
         with closing(journal._connect()) as db, db:
             db.execute("BEGIN IMMEDIATE")
@@ -134,12 +144,72 @@ class ReceiptJournal:
                     )
                 """)
                 db.execute("INSERT INTO receipt_binding VALUES (1, ?)", (company_id,))
+            if checkpoint is not None:
+                db.execute("""
+                    CREATE TABLE receipt_anchor (
+                        singleton INTEGER PRIMARY KEY CHECK(singleton = 1),
+                        journal_id TEXT NOT NULL,
+                        custody_sha256 TEXT NOT NULL
+                    )
+                """)
+                db.execute("INSERT INTO receipt_anchor VALUES (1, ?, ?)",
+                           (checkpoint.journal_id, checkpoint.custody_sha256))
         return journal
+
+    def _read_checkpoint(self):
+        if self.company_id not in _COMPANIES:
+            raise ValueError("anchored receipt journal must be company-scoped")
+        try:
+            checkpoint = self.anchor.read(self.company_id)
+        except Exception as exc:
+            raise ValueError("independent receipt checkpoint is unavailable") from exc
+        if not isinstance(checkpoint, ReceiptCheckpoint) or checkpoint.company_id != self.company_id:
+            raise ValueError("independent receipt checkpoint is outside company scope")
+        return checkpoint
+
+    def _verify_anchor(self, db, trust):
+        table = db.execute(
+            "SELECT 1 FROM sqlite_schema WHERE type='table' AND name='receipt_anchor'",
+        ).fetchone()
+        if bool(table) != (self.anchor is not None):
+            raise ValueError("receipt anchor binding mode does not match")
+        if self.anchor is None:
+            return None
+        checkpoint = self._read_checkpoint()
+        binding = db.execute(
+            "SELECT journal_id, custody_sha256 FROM receipt_anchor WHERE singleton=1",
+        ).fetchone()
+        if (
+            binding != (checkpoint.journal_id, checkpoint.custody_sha256)
+            or custody_digest(trust) != checkpoint.custody_sha256
+        ):
+            raise ValueError("receipt anchor and publisher custody do not match")
+        local = ReceiptCheckpoint.genesis(
+            checkpoint.company_id, checkpoint.journal_id, checkpoint.custody_sha256,
+        )
+        for row in db.execute(
+            "SELECT company_id, publisher_id, key_id, sequence, snapshot_id, digest FROM receipt ORDER BY rowid",
+        ):
+            if local.count >= checkpoint.count:
+                raise ValueError("local receipt state is ahead of the independent checkpoint")
+            local = local.append(row)
+        if local != checkpoint:
+            raise ValueError("local receipt state does not match the independent checkpoint")
+        return checkpoint
+
+    def _advance_anchor(self, checkpoint, row):
+        successor = checkpoint.append(row)
+        try:
+            self.anchor.advance(checkpoint, successor)
+        except Exception as exc:
+            raise ValueError("independent receipt checkpoint advance is uncertain") from exc
+        if self._read_checkpoint() != successor:
+            raise ValueError("independent receipt checkpoint did not confirm the update")
 
     def _connect(self):
         return sqlite3.connect(f"{Path(self.path).resolve().as_uri()}?mode=rw", uri=True, timeout=1)
 
-    def _accept(self, claims, wire):
+    def _accept(self, claims, wire, *, trust):
         with closing(self._connect()) as db, db:
             db.execute("PRAGMA trusted_schema=OFF")
             db.execute("BEGIN IMMEDIATE")
@@ -152,6 +222,7 @@ class ReceiptJournal:
                 binding = db.execute("SELECT company_id FROM receipt_binding WHERE singleton=1").fetchone()
                 if binding != (self.company_id,) or claims["company_id"] != self.company_id:
                     raise ValueError("receipt journal company does not match")
+            checkpoint = self._verify_anchor(db, trust)
             key = (claims["company_id"], claims["publisher_id"], claims["key_id"])
             latest = db.execute(
                 "SELECT MAX(sequence) FROM receipt WHERE company_id=? AND publisher_id=? AND key_id=?",
@@ -159,9 +230,12 @@ class ReceiptJournal:
             ).fetchone()[0]
             if latest is not None and claims["sequence"] <= latest:
                 raise ValueError("receipt is not newer")
-            db.execute("INSERT INTO receipt VALUES (?, ?, ?, ?, ?, ?)", (
-                *key, claims["sequence"], claims["snapshot_id"], sha256(wire).hexdigest(),
-            ))
+            row = (*key, claims["sequence"], claims["snapshot_id"], sha256(wire).hexdigest())
+            db.execute("INSERT INTO receipt VALUES (?, ?, ?, ?, ?, ?)", row)
+            if checkpoint is not None:
+                # An advance before the local commit makes an uncertain crash
+                # fail closed. Reconcile to the exact anchored image offline.
+                self._advance_anchor(checkpoint, row)
 
 
 def _trust_matches_company(trust, company_id, now):
@@ -280,7 +354,7 @@ def build_authenticated_visibility(
             if isolated and receipt_journal.company_id != company_id:
                 raise ValueError("receipt journal is not company-scoped")
             claims, view = _verify(wire, trust, company_id, now)
-            receipt_journal._accept(claims, wire)
+            receipt_journal._accept(claims, wire, trust=trust)
         except (InvalidSignature, ValueError, TypeError, KeyError, RecursionError, OverflowError, OSError, sqlite3.Error):
             companies[company_id] = {"input_status": "REJECTED", "authentication": "UNVERIFIED"}
             continue

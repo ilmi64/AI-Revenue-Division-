@@ -106,7 +106,27 @@ unavailable state for one company rejects its receipt while the peer still uses
 its own journal. Shared-journal mode remains available for earlier offline
 fixtures. An isolated call never falls back to it.
 
-Persistent replay checks cover normal restart and concurrent delivery on the
-same journal. Independently anchored journal restoration, production key
-custody and revocation, privacy-reviewed authenticated channels, receipt
-recovery and protocol review remain open.
+For an anchored offline rehearsal, give `FixtureReceiptAnchor` a mapping from
+company ID to `(journal_id, PublisherTrust)` and keep it separate from the
+journal files. Initialize each journal with
+`ReceiptJournal.initialize(path, company_id=company, anchor=authority)` and
+reopen it with `ReceiptJournal(path, company, authority)`. Use the same
+independent authority across journal reopen or replacement. The trusted
+custody pin covers the company, publisher, key ID and public key, valid dates,
+revocation flag, and source revision pins. The authority retains a checkpoint
+over the ordered receipt digests for each company.
+
+An anchored journal rejects replays, wrong scope, custody changes, lost
+authority, and local history that differs from the independent checkpoint.
+Restoring an exact checkpoint-aligned journal resumes normal verification.
+When the authority advances and the local write cannot be confirmed, suspend
+that company's feed until its exact anchored state is recovered. The peer
+retains its own verification path. No private report body, publisher key
+material, or authority is included in the output.
+
+The in-memory authority is a fixture implementing the `ReceiptAnchor`
+interface. It does not survive process loss and must not be reconstructed
+from a restored journal to approve a rollback. Production custody, key
+transitions, an independently durable authority, a crash reconciliation
+runbook, privacy-reviewed authenticated channels and protocol review remain
+open.
