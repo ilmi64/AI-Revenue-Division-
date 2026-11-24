@@ -27,8 +27,11 @@ def _provision(path: Path, schema: str, insert: str, values: tuple) -> None:
         db.execute(insert, values)
 
 
-def _verify_anchored_fixture(scenario, artifact, test_log, events):
-    scope = _FIXTURE_SCOPE
+def _verify_anchored_fixture(
+    scenario, artifact, test_log, events, *, opportunity_id=_FIXTURE_SCOPE.opportunity_id,
+    producer_id=_FIXTURE_SCOPE.producer_id,
+):
+    scope = replace(_FIXTURE_SCOPE, opportunity_id=opportunity_id, producer_id=producer_id)
     manifest_scope = replace(scope, **{
         "wrong_company": {"company_id": "wrong-fixture-company"},
         "wrong_recipient": {"recipient": "wrong-fixture-recipient"},
