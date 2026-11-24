@@ -43,3 +43,25 @@ The default fixture directory is the sibling `../fixtures` directory. The progra
 2. Execute `python validate_m2_schema.py` against the exact pinned schema/fixture blobs, using the already available `jsonschema` package and date-time format assertion. The script is authored; execution and evidence recording remain pending.
 3. Design authenticated, company-owned publishers and freshness/replay protections before accepting any non-synthetic data.
 4. Keep company data stores and decision authority separate.
+
+### Unified company visibility (offline)
+
+Run the aggregate viewer with independently assigned synthetic inputs:
+
+```sh
+python occ_company_visibility.py \
+  --ai-revenue-snapshot ../fixtures/ai-revenue.snapshot.example.json \
+  --trading-snapshot ../fixtures/trading-technology.snapshot.example.json
+```
+
+The optional `--aevora-operations` path accepts the redacted output of
+Aevora AI's `revenue_workflow_demo --mode anchored --view occ`. That
+aggregate contains no publication timestamp or publisher authentication, so
+its counters are labeled `UNVERIFIED_UNTIMED`.
+
+The viewer displays allowlisted subsystem states and aggregate counts by
+company. Missing data stays unknown. A rejected, stale, or quarantined company
+snapshot contributes no counts, and each other input is evaluated independently.
+Synthetic and unauthenticated inputs never establish operational readiness. The
+viewer writes only to stdout and does not expose evidence references, raw
+identifiers, descriptions, approvals, or action controls.

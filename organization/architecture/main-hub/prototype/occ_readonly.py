@@ -244,37 +244,43 @@ def assess_snapshot(snapshot: dict[str, Any], expected_company: str,
     }
 
 
-def build_report(fixtures_dir: Path, now: datetime | None = None) -> dict[str, Any]:
-    companies = []
-    for company_id, filename in EXPECTED.items():
-        path = fixtures_dir / filename
-        try:
-            with path.open("rb") as handle:
-                raw = handle.read(MAX_FIXTURE_BYTES + 1)
-            if len(raw) > MAX_FIXTURE_BYTES:
-                raise SnapshotError(
-                    f"fixture exceeds maximum file size ({MAX_FIXTURE_BYTES} bytes)"
-                )
-            decoded = raw.decode("utf-8")
-            snapshot = json.loads(
-                decoded,
-                object_pairs_hook=_strict_object,
-                parse_constant=_reject_json_constant,
-            )
-            _enforce_json_resource_limits(snapshot)
-        except SnapshotError as exc:
-            raise SnapshotError(f"fixture {filename} failed strict JSON parsing: {exc}") from exc
-        except OSError as exc:
-            raise SnapshotError(f"cannot read fixture {filename}: {exc.strerror or exc}") from exc
-        except UnicodeDecodeError as exc:
-            raise SnapshotError(f"fixture {filename} is not valid UTF-8") from exc
-        except json.JSONDecodeError as exc:
+def read_fixture(path: Path) -> Any:
+    """Decode one bounded local fixture, preserving strict JSON errors."""
+    filename = path.name
+    try:
+        with path.open("rb") as handle:
+            raw = handle.read(MAX_FIXTURE_BYTES + 1)
+        if len(raw) > MAX_FIXTURE_BYTES:
             raise SnapshotError(
-                f"fixture {filename} contains invalid JSON at line {exc.lineno}, column {exc.colno}"
-            ) from exc
-        except RecursionError as exc:
-            raise SnapshotError(f"fixture {filename} exceeds parser nesting limits") from exc
-        companies.append(assess_snapshot(snapshot, company_id, now=now))
+                f"fixture exceeds maximum file size ({MAX_FIXTURE_BYTES} bytes)"
+            )
+        decoded = raw.decode("utf-8")
+        snapshot = json.loads(
+            decoded,
+            object_pairs_hook=_strict_object,
+            parse_constant=_reject_json_constant,
+        )
+        _enforce_json_resource_limits(snapshot)
+    except SnapshotError as exc:
+        raise SnapshotError(f"fixture {filename} failed strict JSON parsing: {exc}") from exc
+    except OSError as exc:
+        raise SnapshotError(f"cannot read fixture {filename}: {exc.strerror or exc}") from exc
+    except UnicodeDecodeError as exc:
+        raise SnapshotError(f"fixture {filename} is not valid UTF-8") from exc
+    except json.JSONDecodeError as exc:
+        raise SnapshotError(
+            f"fixture {filename} contains invalid JSON at line {exc.lineno}, column {exc.colno}"
+        ) from exc
+    except RecursionError as exc:
+        raise SnapshotError(f"fixture {filename} exceeds parser nesting limits") from exc
+    return snapshot
+
+
+def build_report(fixtures_dir: Path, now: datetime | None = None) -> dict[str, Any]:
+    companies = [
+        assess_snapshot(read_fixture(fixtures_dir / filename), company_id, now=now)
+        for company_id, filename in EXPECTED.items()
+    ]
     return {
         "product": "Main Hub / OCC read-only prototype",
         "version": "0.1",
