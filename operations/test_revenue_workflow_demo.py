@@ -51,7 +51,7 @@ class RevenueWorkflowDemoTests(unittest.TestCase):
 
     def test_intake_hold_or_reject_never_runs_delivery_helper(self):
         for scenario, status in (("missing_scope", "HOLD"), ("paid_dependency", "REJECT")):
-            with self.subTest(scenario=scenario), patch("revenue_workflow_demo._listing_fixture_report") as run:
+            with self.subTest(scenario=scenario), patch("revenue_workflow_demo.dispatch_fixture") as run:
                 report = run_demo(mode="anchored", scenario=scenario)
                 run.assert_not_called()
                 self.assertEqual(report["intake"]["status"], status)

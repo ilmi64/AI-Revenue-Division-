@@ -1,17 +1,14 @@
-"""Run Aevora AI's fixed, fictional listing-preflight workflow offline."""
+"""Run one allowlisted Aevora AI fictional workforce workflow offline."""
 import argparse
 from dataclasses import asdict, replace
 import json
-from pathlib import Path
-import subprocess
-import sys
-from tempfile import TemporaryDirectory
 
 from anchored_delivery_rehearsal import _verify_anchored_fixture
 from evidence_verifier import VerificationBlocked
 from occ_summary import summarize
 from revenue_agent_queue import prepare_queue
 from revenue_delivery_plan import plan_delivery
+from revenue_fixture_dispatch import PROFILES, canonical as _canonical, dispatch_fixture, fixture_ticket
 from revenue_intake_sandbox import Opportunity, qualify
 from revenue_proposal_draft import draft_proposal
 from revenue_task_evidence import TaskEvidence, review_evidence
@@ -19,12 +16,8 @@ from synthetic_delivery_rehearsal import _sha
 
 
 SCENARIOS = ("baseline", "missing_scope", "paid_dependency", "missing_anchor")
-_SOURCE = b"""sku,title,price,quantity,shipping
-FIX-001,Fictional notebook,12.00,3,2.00
-FIX-001,Fictional duplicate,15.00,2.5,2.00
-"""
 _FIXTURE = Opportunity(
-    reference="synthetic_catalogue_preflight",
+    reference=PROFILES["app_build"].reference,
     kind="app_build",
     country="CA",
     expected_revenue_cad=300,
@@ -35,84 +28,49 @@ _FIXTURE = Opportunity(
     customer_contact_allowed=True,
 )
 _CHARTER_BY_ROLE = {
-    "product": ("fixture-product-planner", "Technology & Infrastructure"),
-    "engineering": ("fixture-engineering-builder", "Technology & Infrastructure"),
-    "quality": ("fixture-risk-reviewer", "Risk & Recovery"),
+    "product": ("fixture-product-planner", "Technology & Infrastructure", "ar_product_delivery"),
+    "engineering": ("fixture-engineering-builder", "Technology & Infrastructure", "ar_engineering_worker"),
+    "quality": ("fixture-risk-reviewer", "Risk & Recovery", "ar_qa_reviewer"),
+    "security": ("fixture-security-reviewer", "Risk & Recovery", "ar_security_analyst"),
 }
-_LISTING_PREFLIGHT = (
-    Path(__file__).resolve().parents[1] / "portfolio" / "listing-preflight" / "listing_preflight.py"
-)
 
 
-def _canonical(value: dict) -> bytes:
-    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode("ascii")
-
-
-def _listing_fixture_report() -> tuple[dict, bytes]:
-    """Exercise the existing read-only CLI on two invented catalogue rows."""
-    try:
-        validator_sha256 = _sha(_LISTING_PREFLIGHT.read_bytes())
-        with TemporaryDirectory() as directory:
-            fixture = Path(directory) / "synthetic-listings.csv"
-            fixture.write_bytes(_SOURCE)
-            run = subprocess.run(
-                [sys.executable, str(_LISTING_PREFLIGHT), str(fixture), "--json"],
-                capture_output=True, timeout=10, check=False,
-            )
-        result = json.loads(run.stdout)
-        if not isinstance(result, dict) or not isinstance(result["findings"], list):
-            raise VerificationBlocked("offline_preflight_report_invalid")
-        findings = [(finding["row"], finding["field"], finding["severity"])
-                    for finding in result["findings"]]
-        if (
-            run.returncode != 1 or run.stderr or result["valid"] is not False
-            or result["file"] != "synthetic-listings.csv" or result["finding_count"] != 2
-            or findings != [(3, "sku", "error"), (3, "quantity", "error")]
-        ):
-            raise VerificationBlocked("offline_preflight_known_answer_failed")
-    except (OSError, subprocess.TimeoutExpired, TypeError, KeyError, ValueError) as exc:
-        if isinstance(exc, VerificationBlocked):
-            raise
-        raise VerificationBlocked("offline_preflight_evidence_unavailable") from exc
-    return result, _canonical({
-        "classification": "SYNTHETIC",
-        "command": "python listing_preflight.py synthetic-listings.csv --json",
-        "observed_exit_code": run.returncode,
-        "validator_sha256": validator_sha256,
-        "stdout_sha256": _sha(run.stdout),
-        "passed_checks": ["duplicate_sku_on_row_3", "fractional_quantity_on_row_3", "two_findings"],
-    })
-
-
-def _assignment(task) -> dict:
-    agent, division = _CHARTER_BY_ROLE[task.role]
+def _assignment(task, profile) -> dict:
+    agent, division, role_id = _CHARTER_BY_ROLE[task.role]
     return {
         **asdict(task),
         "proposed_owner": agent,
         "charter_division": division,
-        "source_fixture": "synthetic-listings.csv",
-        "tools_scope": "local_read_only_preflight",
+        "role_id": role_id,
+        "source_fixture": profile.fixture_id,
+        "tools_scope": "local_read_only_fixture",
         "verification": "check_against_fixed_fixture",
         "human_review_required": True,
     }
 
 
-def run_demo(*, mode: str, scenario: str = "baseline") -> dict:
-    """Prepare private review evidence from a fixed fixture with no dispatch."""
+def run_demo(*, mode: str, scenario: str = "baseline", service: str = "app_build") -> dict:
+    """Prepare private evidence by running one fixed synthetic fixture worker."""
     if mode != "anchored":
         raise ValueError("explicit anchored mode required")
     if scenario not in SCENARIOS:
         raise ValueError("unknown demo scenario")
+    if not isinstance(service, str) or service not in PROFILES:
+        raise ValueError("service must select an allowlisted fixture")
+    profile = PROFILES[service]
     changes = {
         "missing_scope": {"authorization_evidence": False},
         "paid_dependency": {"upfront_cost_cad": 1},
     }
-    item = replace(_FIXTURE, **changes.get(scenario, {}))
+    item = replace(_FIXTURE, reference=profile.reference, kind=service, country=profile.country,
+                   **changes.get(scenario, {}))
     intake = qualify(item)
     report = {
         "company": "Aevora AI",
         "classification": "SYNTHETIC_INTERNAL_ONLY",
         "scenario": scenario,
+        "service": service,
+        "fixture_country": profile.country,
         "intake": asdict(intake),
         "private_artifact": None,
         "private_audit": [],
@@ -127,29 +85,29 @@ def run_demo(*, mode: str, scenario: str = "baseline") -> dict:
         report["occ"] = summarize([{"status": {"HOLD": "hold", "REJECT": "rejected"}[intake.status]}])
         return report
 
-    plan = plan_delivery(item)
-    queue = prepare_queue(plan)
-    proposal = draft_proposal(item)
     public_status = "blocked"
     try:
-        build_tasks = [task for task in queue if task.task == "build_offline_demo"]
+        plan = plan_delivery(item)
+        queue = prepare_queue(plan)
+        proposal = draft_proposal(item)
+        build_tasks = [task for task in queue if task.task == profile.task]
         if len(queue) != 4 or len(build_tasks) != 1 or proposal.status != "INTERNAL_DRAFT":
             raise VerificationBlocked("offline_plan_or_proposal_blocked")
-        preflight, log = _listing_fixture_report()
+        build_task = build_tasks[0]
+        outcome, log, source_digest = dispatch_fixture(fixture_ticket(service, build_task), build_task)
         artifact = _canonical({
             "classification": report["classification"],
             "reference": item.reference,
-            "synthetic_source_sha256": _sha(_SOURCE),
+            "synthetic_source_sha256": source_digest,
             "intake": asdict(intake),
             "delivery_plan": asdict(plan),
-            "assignments": [_assignment(task) for task in queue],
+            "assignments": [_assignment(task, profile) for task in queue],
             "proposal": {**asdict(proposal), "markdown": "SYNTHETIC INTERNAL DRAFT\n\n" + proposal.markdown},
-            "deliverable": preflight,
+            "deliverable": outcome,
         })
         events = report["private_audit"]
         artifact_digest = _sha(artifact)
         report["private_artifact"] = {"contents": json.loads(artifact), "sha256": artifact_digest}
-        build_task = build_tasks[0]
         review = review_evidence(build_task, TaskEvidence(
             task_id=build_task.task_id,
             artifact_sha256=artifact_digest,
@@ -161,7 +119,7 @@ def run_demo(*, mode: str, scenario: str = "baseline") -> dict:
         report["private_task_review"] = asdict(review)
         if review.task_id != build_task.task_id or review.status != "EVIDENCE_REVIEWED":
             raise VerificationBlocked("offline_task_evidence_review_blocked")
-        report["private_test_log"] = {**json.loads(log), "task_evidence_review": asdict(review)}
+        report["private_test_log"] = {**log, "task_evidence_review": asdict(review)}
         log = _canonical(report["private_test_log"])
         events.append({"stage": "known_answer_checked", "artifact_sha256": artifact_digest,
                        "test_log_sha256": _sha(log)})
@@ -176,6 +134,8 @@ def run_demo(*, mode: str, scenario: str = "baseline") -> dict:
         public_status = "checklist_complete_unverified"
     except VerificationBlocked as exc:
         report["private_audit"].append({"stage": "evidence_review_blocked", "reason": str(exc)})
+    except (TypeError, ValueError):
+        report["private_audit"].append({"stage": "evidence_review_blocked", "reason": "offline_plan_or_evidence_invalid"})
     report["occ"] = summarize([{"status": public_status}])
     return report
 
@@ -183,10 +143,11 @@ def run_demo(*, mode: str, scenario: str = "baseline") -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--mode", required=True, choices=("anchored",))
+    parser.add_argument("--service", choices=tuple(PROFILES), default="app_build")
     parser.add_argument("--scenario", choices=SCENARIOS, default="baseline")
     parser.add_argument("--view", choices=("private", "occ"), default="private")
     args = parser.parse_args()
-    report = run_demo(mode=args.mode, scenario=args.scenario)
+    report = run_demo(mode=args.mode, scenario=args.scenario, service=args.service)
     print(json.dumps(report if args.view == "private" else report["occ"], indent=2, sort_keys=True))
 
 
