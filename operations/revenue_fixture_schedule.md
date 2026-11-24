@@ -22,9 +22,9 @@ with TemporaryDirectory() as temp:
     with closing(sqlite3.connect(path)) as connection, connection:
         connection.executescript(Path("revenue_fixture_schedule.sql").read_text())
     scheduler = FixtureScheduler(database=path, clock=lambda: 100)
-    request = ScheduledRequest("local-coding-example", fixed_review_scope("coding"), 130)
+    request = ScheduledRequest("local-coding-example", fixed_review_scope("coding"), 130, priority=2)
     scheduler.schedule(request)           # QUEUED
-    result = scheduler.run_one(request.request_id)  # REVIEW_READY for internal review
+    result = scheduler.run_next()        # REVIEW_READY for internal review
     private = scheduler.private_result(request.request_id)
     assert result.release_authorized is False
 ```
@@ -36,6 +36,15 @@ fixture clock. The persistent clock rejects backwards observations. The
 request ID is idempotent for the exact canonical payload. Reuse with another
 payload blocks. A `BEGIN IMMEDIATE` transaction persists and checks one
 claim before the existing anchored-only worker can run.
+
+Queue order is lower integer priority first (0 to 9, default 5), then
+earliest expiry, then lexical request ID. Priority is part of the exact
+idempotent payload. It never changes cost, review or approval rules.
+`run_next()` selects and claims the next eligible work in the same SQLite
+transaction. `run_one(request_id)` only claims that request when it is next
+in order. An occupied worker slot leaves other requests queued; no worker
+is spawned in the background. The cap is one reserved worker per fixture
+database, including across concurrent scheduler handles.
 
 The claim closes after at most 30 seconds and never later than the request
 expiry. Worker failure or late output becomes a terminal `SUPERVISOR_HOLD`.
@@ -49,8 +58,21 @@ scheduler.recover_interrupted(request.request_id, supervisor_role="ar_cto")
 This fixture label is not real authenticated role authority. There is no
 automatic restart, retry, publication or release. Retrying `run_one` after a
 claim returns its persisted state and never starts a second work attempt.
-Late output cannot overwrite a supervisor hold. The existing worker's
-bounded local retries remain inside its single scheduled claim.
+Late output cannot overwrite a supervisor hold. A hold from an interrupted
+claim retains the reservation until the original worker actually returns.
+An unknown worker outcome can block the queue indefinitely. The fixture
+has no control to clear a reservation by assertion. This avoids starting a
+second worker while the original is unaccounted for. Recovering a genuinely
+lost process requires separately reviewed proof and procedures beyond this
+fixture. The existing worker's bounded local retries remain inside its
+single scheduled claim.
+
+Create new databases with `revenue_fixture_schedule.sql`. With all clients
+stopped, apply `revenue_fixture_schedule_v2.sql` once to a previously
+provisioned v1 fixture database. Existing request bytes retain exact
+idempotency under default priority 5. Legacy running claims and interrupted
+holds preserve a reservation rather than assuming their worker stopped.
+This single-database guarantee does not cover parallel copies or rollback.
 
 Successful private results retain the canonical report, anchored receipt
 and exact report digest. Readback checks the digest, scope and no-release
@@ -67,6 +89,6 @@ custody. A native worker runtime must prove identity, scope and tool
 isolation independently. No operational approval is granted by the fixture.
 
 ```sh
-python -m unittest -v test_revenue_fixture_schedule
+python -m unittest -v test_revenue_priority_schedule test_revenue_fixture_schedule
 python -m unittest discover -v
 ```

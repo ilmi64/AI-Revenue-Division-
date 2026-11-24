@@ -25,6 +25,7 @@ class ScheduledRequest:
     request_id: str
     scope: CommercialReviewScope
     expires_at: int
+    priority: int = 5
 
 
 @dataclass(frozen=True)
@@ -33,6 +34,7 @@ class ScheduleStatus:
     state: str
     reason: str | None
     result_sha256: str | None
+    worker_reserved: bool = False
     release_authorized: bool = False
     external_execution_authorized: bool = False
 
@@ -46,6 +48,7 @@ def _request_bytes(request: ScheduledRequest) -> bytes:
         not isinstance(request, ScheduledRequest) or not _valid_id(request.request_id)
         or not isinstance(request.scope, CommercialReviewScope)
         or type(request.expires_at) is not int or not 0 < request.expires_at <= 2**63 - 1
+        or type(request.priority) is not int or not 0 <= request.priority <= 9
     ):
         raise VerificationBlocked("invalid_fixture_schedule_request")
     validate_review_scope(request.scope, request.scope.service)
@@ -55,8 +58,16 @@ def _request_bytes(request: ScheduledRequest) -> bytes:
 def _decode_request(raw: bytes) -> ScheduledRequest:
     try:
         item = json.loads(raw)
-        request = ScheduledRequest(item["request_id"], CommercialReviewScope(**item["scope"]), item["expires_at"])
-        if _request_bytes(request) != raw:
+        request = ScheduledRequest(
+            item["request_id"], CommercialReviewScope(**item["scope"]), item["expires_at"],
+            item.get("priority", 5),
+        )
+        expected = _request_bytes(request)
+        if "priority" not in item:
+            legacy = asdict(request)
+            del legacy["priority"]
+            expected = canonical(legacy)
+        if expected != raw:
             raise VerificationBlocked("invalid_scheduled_payload")
         return request
     except (ValueError, KeyError, TypeError) as exc:
@@ -102,7 +113,9 @@ class FixtureScheduler:
 
     @staticmethod
     def _status(row) -> ScheduleStatus:
-        return ScheduleStatus(row["request_id"], row["state"], row["reason"], row["result_sha256"])
+        return ScheduleStatus(
+            row["request_id"], row["state"], row["reason"], row["result_sha256"], bool(row["worker_reserved"]),
+        )
 
     def schedule(self, request: ScheduledRequest) -> ScheduleStatus:
         data = _request_bytes(request)
@@ -111,14 +124,14 @@ class FixtureScheduler:
                 "SELECT * FROM scheduled_fixture WHERE request_id=?", (request.request_id,),
             ).fetchone()
             if row is not None:
-                if row["request_bytes"] != data:
+                if _decode_request(row["request_bytes"]) != request or row["priority"] != request.priority:
                     raise VerificationBlocked("fixture_schedule_idempotency_conflict")
                 return self._status(row)
             if not 0 < request.expires_at - now <= _MAX_WINDOW_SECONDS:
                 raise VerificationBlocked("fixture_schedule_expiry_not_allowed")
             db.execute(
-                "INSERT INTO scheduled_fixture (request_id, request_bytes, expires_at, state) VALUES (?, ?, ?, 'QUEUED')",
-                (request.request_id, data, request.expires_at),
+                "INSERT INTO scheduled_fixture (request_id, request_bytes, expires_at, priority, state) "
+                "VALUES (?, ?, ?, ?, 'QUEUED')", (request.request_id, data, request.expires_at, request.priority),
             )
             return self._status(self._row(db, request.request_id))
 
@@ -126,29 +139,38 @@ class FixtureScheduler:
         with self._transaction() as (db, _):
             return self._status(self._row(db, request_id))
 
-    def _claim(self, request_id: str) -> tuple[ScheduledRequest | None, ScheduleStatus]:
+    def _claim(self, request_id: str | None) -> tuple[ScheduledRequest | None, ScheduleStatus | None]:
         with self._transaction() as (db, now):
-            row = self._row(db, request_id)
-            if row["state"] != "QUEUED":
-                return None, self._status(row)
+            db.execute(
+                "UPDATE scheduled_fixture SET state='SUPERVISOR_HOLD', reason='expired_before_claim' "
+                "WHERE state='QUEUED' AND expires_at<=?", (now,),
+            )
+            requested = self._row(db, request_id) if request_id is not None else None
+            if requested is not None and requested["state"] != "QUEUED":
+                return None, self._status(requested)
+            if db.execute("SELECT 1 FROM scheduled_fixture WHERE state='RUNNING' OR worker_reserved=1 LIMIT 1").fetchone():
+                return None, self._status(requested) if requested is not None else None
+            row = db.execute(
+                "SELECT * FROM scheduled_fixture WHERE state='QUEUED' AND expires_at>? "
+                "ORDER BY priority, expires_at, request_id LIMIT 1", (now,),
+            ).fetchone()
+            if row is None or (requested is not None and row["request_id"] != requested["request_id"]):
+                return None, self._status(requested) if requested is not None else None
             request = _decode_request(row["request_bytes"])
-            if request.request_id != row["request_id"] or request.expires_at != row["expires_at"]:
+            if (
+                request.request_id != row["request_id"] or request.expires_at != row["expires_at"]
+                or request.priority != row["priority"]
+            ):
                 raise VerificationBlocked("invalid_scheduled_payload")
-            if now >= request.expires_at:
-                db.execute(
-                    "UPDATE scheduled_fixture SET state='SUPERVISOR_HOLD', reason='expired_before_claim' WHERE request_id=?",
-                    (request_id,),
-                )
-                return None, self._status(self._row(db, request_id))
             claim_until = min(request.expires_at, now + _CLAIM_WINDOW_SECONDS)
             changed = db.execute(
-                "UPDATE scheduled_fixture SET state='RUNNING', claim_until=? WHERE request_id=? AND state='QUEUED'",
-                (claim_until, request_id),
+                "UPDATE scheduled_fixture SET state='RUNNING', claim_until=?, worker_reserved=1 "
+                "WHERE request_id=? AND state='QUEUED'", (claim_until, request.request_id),
             )
-            claimed = self._row(db, request_id)
+            claimed = self._row(db, request.request_id)
             if (
                 changed.rowcount != 1 or claimed["state"] != "RUNNING" or claimed["claim_until"] != claim_until
-                or claimed["request_bytes"] != row["request_bytes"]
+                or claimed["request_bytes"] != row["request_bytes"] or claimed["worker_reserved"] != 1
             ):
                 raise VerificationBlocked("fixture_claim_not_persisted")
             return request, self._status(claimed)
@@ -190,37 +212,53 @@ class FixtureScheduler:
     def _finish(self, request_id: str, result: bytes | None, reason: str | None) -> ScheduleStatus:
         with self._transaction() as (db, now):
             row = self._row(db, request_id)
-            if row["state"] != "RUNNING":
-                return self._status(row)
+            if row["state"] == "SUPERVISOR_HOLD" and row["worker_reserved"] == 1:
+                # The original worker returned after a supervisor hold. It
+                # may free the slot, but its late result remains discarded.
+                db.execute("UPDATE scheduled_fixture SET worker_reserved=0 WHERE request_id=?", (request_id,))
+                return self._status(self._row(db, request_id))
+            if row["state"] != "RUNNING" or row["worker_reserved"] != 1:
+                raise VerificationBlocked("fixture_completion_without_reservation")
             if now >= row["claim_until"]:
                 result, reason = None, "expired_or_late_worker_result"
             state = "REVIEW_READY" if result is not None else "SUPERVISOR_HOLD"
             digest = _sha(result) if result is not None else None
             changed = db.execute(
-                "UPDATE scheduled_fixture SET state=?, reason=?, result=?, result_sha256=? WHERE request_id=? AND state='RUNNING'",
+                "UPDATE scheduled_fixture SET state=?, reason=?, result=?, result_sha256=?, worker_reserved=0 "
+                "WHERE request_id=? AND state='RUNNING' AND worker_reserved=1",
                 (state, reason, result, digest, request_id),
             )
             updated = self._row(db, request_id)
             if (
                 changed.rowcount != 1 or updated["state"] != state or updated["reason"] != reason
-                or updated["result"] != result or updated["result_sha256"] != digest
+                or updated["result"] != result or updated["result_sha256"] != digest or updated["worker_reserved"] != 0
             ):
                 raise VerificationBlocked("fixture_result_not_persisted")
             return self._status(updated)
 
     def run_one(self, request_id: str) -> ScheduleStatus:
-        """Claim before executing the fixed demo. Repeated calls never reexecute a claim."""
+        """Run the requested fixture only when it is the next eligible one."""
+        if not _valid_id(request_id):
+            raise VerificationBlocked("invalid_fixture_schedule_request")
         request, status = self._claim(request_id)
         if request is None:
             return status
+        return self._run_claimed(request)
+
+    def run_next(self) -> ScheduleStatus | None:
+        """Atomically choose and run the next eligible fixture, if a slot is free."""
+        request, _ = self._claim(None)
+        return None if request is None else self._run_claimed(request)
+
+    def _run_claimed(self, request: ScheduledRequest) -> ScheduleStatus:
         try:
             report = run_demo(mode="anchored", service=request.scope.service, commercial_scope=request.scope)
             reviewed = self._review_bytes(request, report)
         except VerificationBlocked as exc:
-            return self._finish(request_id, None, str(exc))
-        except (OSError, ValueError, TypeError, RuntimeError) as exc:
-            return self._finish(request_id, None, "scheduled_fixture_execution_failed")
-        return self._finish(request_id, reviewed, None)
+            return self._finish(request.request_id, None, str(exc))
+        except (OSError, ValueError, TypeError, RuntimeError):
+            return self._finish(request.request_id, None, "scheduled_fixture_execution_failed")
+        return self._finish(request.request_id, reviewed, None)
 
     def recover_interrupted(self, request_id: str, *, supervisor_role: str) -> ScheduleStatus:
         """Record a terminal supervisor hold for an expired claim. No retry or release."""
