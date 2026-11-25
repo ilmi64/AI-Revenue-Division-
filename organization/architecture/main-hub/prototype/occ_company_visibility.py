@@ -57,6 +57,9 @@ def _snapshot_view(snapshot, company_id, now):
             name: snapshot["subsystems"].get(name, "UNKNOWN")
             for name in allowed
         },
+        "reported_commissioning_status": next(
+            (gate["status"] for gate in gates if gate["gate_id"] == "operational_readiness"), "UNKNOWN",
+        ),
         "reported_gate_counts": {
             status: sum(gate["status"] == status for gate in gates)
             for status in sorted(VALID_GATE)

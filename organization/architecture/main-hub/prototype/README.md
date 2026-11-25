@@ -175,3 +175,12 @@ approved basic-only custody and wire formats remain valid for their original
 scope. An extended publisher cannot switch its approved custody by changing
 the signed report type. Authentication does not establish operational
 readiness or approve any pending action.
+
+The mobile export shows the named commissioning gate when a validated M2
+snapshot includes it. For signed, available reports with divisional
+telemetry, it also displays company totals and expandable division counts
+for open incidents, pending approvals and unresolved blockers. Missing
+divisions display Unknown. Export the unsigned fixture view with
+`occ_company_visibility.py --format mobile-html`, or pass the verified
+in-process report to `occ_mobile_visibility.render_mobile_visibility`.
+The HTML uses embedded styling and exposes no external resources or actions.

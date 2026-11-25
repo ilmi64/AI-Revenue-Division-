@@ -3,6 +3,7 @@
 from html import escape
 
 from occ_company_visibility import AEVORA_COUNTS, COMMON_SUBSYSTEMS, COMPANY_SUBSYSTEMS
+from occ_divisional_telemetry import COUNTER_FIELDS, DIVISIONS
 from occ_readonly import VALID_GATE, VALID_SUBSYSTEM
 
 
@@ -27,6 +28,11 @@ _INPUT_LABELS = {
     "UNVERIFIED_UNTIMED": "Evidence time unverified",
 }
 _UNAVAILABLE = {"MISSING", "REJECTED", "QUARANTINED", "STALE"}
+_COUNT_LABELS = {
+    "open_incident_count": "Open incidents",
+    "pending_approval_count": "Pending approvals",
+    "blocker_count": "Unresolved blockers",
+}
 
 # Palette and scorecard styling from the existing offline OCC dashboard.
 _STYLE = """
@@ -53,6 +59,7 @@ dt,dd { overflow-wrap:anywhere; }
 dd { margin:0; text-align:right; font-weight:600; }
 details { margin-top:0.6rem; padding:0.65rem; border-radius:0.5rem; background:var(--panel2); }
 summary { cursor:pointer; }
+details h3 { margin-top:0.75rem; }
 summary:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
 @media(max-width:44rem) { .company-grid { grid-template-columns:minmax(0,1fr); } }
 """
@@ -76,23 +83,42 @@ def _facts(values):
     return "<dl>" + rows + "</dl>"
 
 
+def _divisional_counts(company, telemetry):
+    totals = _map(telemetry.get("company_totals"))
+    divisions = _map(telemetry.get("divisions"))
+    counts = _facts((_COUNT_LABELS[field], _count(totals.get(field))) for field in COUNTER_FIELDS)
+    sections = []
+    for name in DIVISIONS[company]:
+        data = _map(divisions.get(name))
+        entries = _facts((_COUNT_LABELS[field], _count(data.get(field))) for field in COUNTER_FIELDS)
+        sections.append(f'<h3>{escape(_SUBSYSTEM_LABELS[name])}</h3>{entries}')
+    return counts + "<details><summary>Division counts</summary>" + "".join(sections) + "</details>"
+
+
 def _panel(company, heading, view):
     raw_input = view.get("input_status")
     status = raw_input if isinstance(raw_input, str) and raw_input in _INPUT_LABELS else "MISSING"
     show_counts = status not in _UNAVAILABLE
     verified = view.get("authentication") == "AUTHENTICATED_OFFLINE" and show_counts
+    telemetry = _map(view.get("reported_divisional_telemetry")) if verified else {}
     content = _facts((
         ("Input status", _INPUT_LABELS[status]),
         ("Publisher", "Offline signature verified" if verified else "Unverified"),
+        ("Reported commissioning",
+         _text(view.get("reported_commissioning_status"), VALID_GATE) if show_counts else "Unknown"),
     ))
+    if telemetry:
+        content += _divisional_counts(company, telemetry)
     if show_counts and (company == "trading_technology" or heading == "Snapshot"):
         subsystems = _map(view.get("reported_subsystem_statuses"))
         gates = _map(view.get("reported_gate_counts"))
-        content += _facts((
+        counts = [
             ("Blocked gates", _count(gates.get("BLOCKED"))),
             ("Unresolved critical gates", _count(view.get("reported_critical_gates_not_passed"))),
-            ("Reported incidents", _count(view.get("reported_incident_count"))),
-        ))
+        ]
+        if not telemetry:
+            counts.append(("Reported incidents", _count(view.get("reported_incident_count"))))
+        content += _facts(counts)
         content += "<details><summary>Reported subsystems</summary>" + _facts(
             (_SUBSYSTEM_LABELS[key], _text(subsystems.get(key), VALID_SUBSYSTEM))
             for key in COMMON_SUBSYSTEMS + COMPANY_SUBSYSTEMS[company]
