@@ -215,3 +215,16 @@ For signed in-process exports, pass the same verifier clock reading to
 `render_mobile_visibility(report, assessed_at=now)` that was supplied to
 `build_authenticated_visibility`. Saved HTML shows the historical assessment
 time. The timestamp does not promote untimed evidence or grant release.
+
+Witnessed enrollment also requires a separate company custodian witness for
+single-receipt repair. Call `pending_repair_checkpoints` with the still-valid
+signed wire to preview the current local checkpoint, advanced independent
+checkpoint, and wire SHA-256. The call is read-only. The custodian signs
+`pending_repair_bytes` over that exact tuple and a short UTC window. Supply
+the resulting `CustodyAuthorization` to `reconcile_pending_receipt`, which
+rechecks current scope and state before writing the missing local row.
+
+This repair does not advance the authority, return a company view, grant
+release, or approve a new receipt. Missing, expired, wrong-scope, and stale
+witnesses fail closed. An unavailable witness verifier does not permit legacy
+repair in a witnessed journal.

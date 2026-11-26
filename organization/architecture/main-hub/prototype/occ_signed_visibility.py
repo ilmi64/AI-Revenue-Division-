@@ -131,7 +131,7 @@ class ReceiptJournal:
             genesis = ReceiptCheckpoint.genesis(
                 checkpoint.company_id, checkpoint.journal_id, checkpoint.custody_sha256,
             )
-            if checkpoint != genesis:
+            if checkpoint != replace(genesis, witnessed_enrollment_sha256=checkpoint.witnessed_enrollment_sha256):
                 raise ValueError("cannot reprovision an advanced anchored journal")
         journal.path.touch(mode=0o600, exist_ok=False)
         with closing(journal._connect()) as db, db:
@@ -162,6 +162,15 @@ class ReceiptJournal:
                 """)
                 db.execute("INSERT INTO receipt_anchor VALUES (1, ?, ?)",
                            (checkpoint.journal_id, checkpoint.custody_sha256))
+                if checkpoint.witnessed_enrollment_sha256 is not None:
+                    db.execute("""
+                        CREATE TABLE receipt_witness_binding (
+                            singleton INTEGER PRIMARY KEY CHECK(singleton=1),
+                            enrollment_sha256 TEXT NOT NULL
+                        )
+                    """)
+                    db.execute("INSERT INTO receipt_witness_binding VALUES (1, ?)",
+                               (checkpoint.witnessed_enrollment_sha256,))
         return journal
 
     def _read_checkpoint(self):
@@ -184,6 +193,14 @@ class ReceiptJournal:
         if self.anchor is None:
             return None, None
         checkpoint = self._read_checkpoint()
+        if db.execute(
+            "SELECT 1 FROM sqlite_schema WHERE type='table' AND name='receipt_witness_binding'",
+        ).fetchone():
+            witness_binding = db.execute(
+                "SELECT enrollment_sha256 FROM receipt_witness_binding WHERE singleton=1",
+            ).fetchone()
+            if witness_binding != (checkpoint.witnessed_enrollment_sha256,):
+                raise ValueError("receipt recovery witness binding does not match")
         binding = db.execute(
             "SELECT journal_id, custody_sha256 FROM receipt_anchor WHERE singleton=1",
         ).fetchone()
@@ -201,7 +218,7 @@ class ReceiptJournal:
             if local.count >= checkpoint.count:
                 raise ValueError("local receipt state is ahead of the independent checkpoint")
             local = local.append(row)
-        return replace(local, custody_sha256=checkpoint.custody_sha256), checkpoint
+        return replace(checkpoint, count=local.count, head_sha256=local.head_sha256), checkpoint
 
     def _verify_anchor(self, db, trust):
         local, checkpoint = self._anchor_checkpoints(db, trust)
@@ -255,18 +272,42 @@ class ReceiptJournal:
                 # An uncertain advance leaves the feed suspended until exact repair.
                 self._advance_anchor(checkpoint, row)
 
-    def reconcile_pending_receipt(self, wire, *, trust, now):
-        """Repair exactly one missing anchored receipt; produce no view or new receipt."""
+    def _pending_repair(self, db, claims, wire, trust):
+        self._verify_local_scope(db, claims["company_id"])
+        local, checkpoint = self._anchor_checkpoints(db, trust)
+        row = self._pending_row(db, claims, wire)
+        if local is None or local.append(row) != checkpoint or self._read_checkpoint() != checkpoint:
+            raise ValueError("receipt does not match the single anchored interruption")
+        return local, checkpoint, row
+
+    def pending_repair_checkpoints(self, wire, *, trust, now):
+        """Read the exact checkpoints and wire digest for a repair witness."""
         claims, _ = _verify(wire, trust, self.company_id, _utc(now))
+        with closing(self._connect()) as db, db:
+            db.execute("PRAGMA trusted_schema=OFF")
+            db.execute("PRAGMA query_only=ON")
+            db.execute("BEGIN")
+            local, checkpoint, row = self._pending_repair(db, claims, wire, trust)
+        return local, checkpoint, row[-1]
+
+    def reconcile_pending_receipt(self, wire, *, trust, now, authorization=None):
+        """Repair exactly one missing anchored receipt without granting visibility."""
+        now = _utc(now)
+        claims, _ = _verify(wire, trust, self.company_id, now)
         with closing(self._connect()) as db, db:
             db.execute("PRAGMA trusted_schema=OFF")
             db.execute("PRAGMA synchronous=FULL")
             db.execute("BEGIN IMMEDIATE")
-            self._verify_local_scope(db, claims["company_id"])
-            local, checkpoint = self._anchor_checkpoints(db, trust)
-            row = self._pending_row(db, claims, wire)
-            if local is None or local.append(row) != checkpoint or self._read_checkpoint() != checkpoint:
-                raise ValueError("receipt does not match the single anchored interruption")
+            local, checkpoint, row = self._pending_repair(db, claims, wire, trust)
+            if checkpoint.witnessed_enrollment_sha256 is not None:
+                witness = getattr(self.anchor, "verify_pending_repair", None)
+                if witness is None:
+                    raise ValueError("independent repair witness authority is unavailable")
+                witness(local, checkpoint, row[-1], authorization, now=now)
+                if self._read_checkpoint() != checkpoint:
+                    raise ValueError("independent repair checkpoint changed")
+            elif authorization is not None:
+                raise ValueError("independent repair witness needs witnessed enrollment")
             db.execute("INSERT INTO receipt VALUES (?, ?, ?, ?, ?, ?)", row)
 
     def transition_custody(self, current, replacement, authorization, *, now):

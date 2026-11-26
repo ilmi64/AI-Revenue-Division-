@@ -1,6 +1,6 @@
 """Independent checkpoint fixture for replay custody in offline OCC rehearsals."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from hashlib import sha256
 import json
 import re
@@ -35,6 +35,7 @@ class ReceiptCheckpoint:
     custody_sha256: str
     count: int
     head_sha256: str
+    witnessed_enrollment_sha256: str | None = None
 
     def __post_init__(self):
         if (
@@ -43,6 +44,8 @@ class ReceiptCheckpoint:
             or not all(re.fullmatch(r"[0-9a-f]{64}", digest)
                        for digest in (self.custody_sha256, self.head_sha256))
             or type(self.count) is not int or self.count < 0
+            or self.witnessed_enrollment_sha256 is not None
+            and not re.fullmatch(r"[0-9a-f]{64}", self.witnessed_enrollment_sha256)
         ):
             raise ValueError("invalid receipt checkpoint")
 
@@ -60,10 +63,8 @@ class ReceiptCheckpoint:
             or not re.fullmatch(r"[0-9a-f]{64}", digest)
         ):
             raise ValueError("invalid row in anchored receipt history")
-        return ReceiptCheckpoint(
-            company_id, self.journal_id, self.custody_sha256, self.count + 1,
-            _digest(["receipt", self.head_sha256, list(row)]),
-        )
+        return replace(self, count=self.count + 1,
+                       head_sha256=_digest(["receipt", self.head_sha256, list(row)]))
 
 
 class ReceiptAnchor(Protocol):

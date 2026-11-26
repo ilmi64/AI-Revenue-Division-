@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from hashlib import sha256
 import hmac
 import json
+import re
 from pathlib import Path
 import sqlite3
 
@@ -19,6 +20,8 @@ from occ_receipt_anchor import ReceiptCheckpoint, custody_digest
 
 _APPROVAL_DOMAIN = b"daivora.occ.custody-transition/synthetic-v1\x00"
 _MAX_APPROVAL_TTL = timedelta(minutes=10)
+_REPAIR_DOMAIN = b"daivora.occ.pending-receipt-repair/synthetic-v1\x00"
+_MAX_REPAIR_TTL = timedelta(minutes=5)
 
 
 def _utc(value):
@@ -34,13 +37,33 @@ class CustodyAuthorization:
     signature: bytes
 
 
+def _checkpoint_fields(checkpoint):
+    fields = astuple(checkpoint)
+    return fields[:-1] if checkpoint.witnessed_enrollment_sha256 is None else fields
+
+
+def pending_repair_bytes(local, anchored, wire_sha256, *, issued_at, expires_at):
+    """Bind independent permission to repair one exact missing local receipt."""
+    issued, expires = _utc(issued_at), _utc(expires_at)
+    if (
+        not timedelta(0) < expires - issued <= _MAX_REPAIR_TTL
+        or not isinstance(wire_sha256, str) or not re.fullmatch(r"[0-9a-f]{64}", wire_sha256)
+        or anchored.witnessed_enrollment_sha256 is None
+        or anchored.count != local.count + 1
+        or replace(local, count=anchored.count, head_sha256=anchored.head_sha256) != anchored
+    ):
+        raise ValueError("witnessed repair scope or approval window is invalid")
+    record = [astuple(local), astuple(anchored), wire_sha256, issued.isoformat(), expires.isoformat()]
+    return _REPAIR_DOMAIN + json.dumps(record, ensure_ascii=True, separators=(",", ":")).encode("ascii")
+
+
 def custody_transition_bytes(expected, replacement, *, issued_at, expires_at):
     """Bind approval to the exact current checkpoint, replacement and window."""
     issued, expires = _utc(issued_at), _utc(expires_at)
     if not timedelta(0) < expires - issued <= _MAX_APPROVAL_TTL:
         raise ValueError("invalid custody approval window")
     encoded = json.dumps([
-        *astuple(expected), custody_digest(replacement), issued.isoformat(), expires.isoformat(),
+        *_checkpoint_fields(expected), custody_digest(replacement), issued.isoformat(), expires.isoformat(),
     ], ensure_ascii=True, separators=(",", ":")).encode("ascii")
     return _APPROVAL_DOMAIN + encoded
 
@@ -72,7 +95,7 @@ class DurableReceiptAnchor:
             ):
                 raise ValueError("publisher and custodian identities must be separate")
             checkpoint = ReceiptCheckpoint.genesis(company, journal_id, custody_digest(trust))
-            checkpoints.append((*astuple(checkpoint), sha256(authority_public_keys[company]).hexdigest()))
+            checkpoints.append((*_checkpoint_fields(checkpoint), sha256(authority_public_keys[company]).hexdigest()))
             if enrollment_pins is not None:
                 challenge, enrollment = enrollments[company]
                 enrollment_pins[company] = verify_publisher_enrollment(
@@ -127,14 +150,14 @@ class DurableReceiptAnchor:
             or not hmac.compare_digest(row[5], sha256(key).hexdigest())
         ):
             raise ValueError("independent custody authority is unavailable for this company")
-        self._verify_enrollment(db, company)
+        enrollment = self._verify_enrollment(db, company)
         count = db.execute(
             "SELECT COUNT(*) FROM custody_history WHERE company_id=? AND custody_sha256=?",
             (company, row[2]),
         ).fetchone()[0]
         if count != 1:
             raise ValueError("checkpoint custody is outside recorded history")
-        return ReceiptCheckpoint(*row[:5])
+        return ReceiptCheckpoint(*row[:5], witnessed_enrollment_sha256=enrollment)
 
     def _verify_enrollment(self, db, company):
         table = db.execute(
@@ -149,6 +172,8 @@ class DurableReceiptAnchor:
             pin = self.enrollment_pins.get(company)
             if row is None or not isinstance(pin, str) or not hmac.compare_digest(row[0], pin):
                 raise ValueError("witnessed enrollment pin is unavailable or changed")
+            return pin
+        return None
 
     def read(self, company_id):
         with closing(self._connect()) as db:
@@ -159,8 +184,7 @@ class DurableReceiptAnchor:
             db.execute("BEGIN IMMEDIATE")
             if (
                 self._read(db, expected.company_id) != expected
-                or (successor.company_id, successor.journal_id, successor.custody_sha256)
-                   != (expected.company_id, expected.journal_id, expected.custody_sha256)
+                or replace(successor, count=expected.count, head_sha256=expected.head_sha256) != expected
                 or successor.count != expected.count + 1
                 or successor.head_sha256 == expected.head_sha256
             ):
@@ -169,6 +193,28 @@ class DurableReceiptAnchor:
                 "UPDATE checkpoint SET receipt_count=?, head_sha256=? WHERE company_id=?",
                 (successor.count, successor.head_sha256, successor.company_id),
             )
+
+    def verify_pending_repair(self, local, anchored, wire_sha256, authorization, *, now):
+        company = anchored.company_id
+        now = _utc(now)
+        if (
+            not isinstance(authorization, CustodyAuthorization)
+            or not _utc(authorization.issued_at) <= now < _utc(authorization.expires_at)
+        ):
+            raise ValueError("independent repair witness is missing or expired")
+        approval = pending_repair_bytes(
+            local, anchored, wire_sha256,
+            issued_at=authorization.issued_at, expires_at=authorization.expires_at,
+        )
+        with closing(self._connect()) as db:
+            if self._read(db, company) != anchored:
+                raise ValueError("independent repair checkpoint changed")
+            try:
+                Ed25519PublicKey.from_public_bytes(self.authority_public_keys[company]).verify(
+                    authorization.signature, approval,
+                )
+            except InvalidSignature as exc:
+                raise ValueError("independent repair witness did not verify") from exc
 
     def transition(self, expected, replacement, authorization, *, now):
         company = expected.company_id
