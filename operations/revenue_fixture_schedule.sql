@@ -26,3 +26,9 @@ CREATE TABLE scheduled_fixture (
         OR (state != 'REVIEW_READY' AND result IS NULL AND result_sha256 IS NULL)
     )
 );
+
+CREATE TABLE fixture_claim_owner (
+    request_id TEXT PRIMARY KEY NOT NULL REFERENCES scheduled_fixture(request_id),
+    process_identity BLOB NOT NULL,
+    recovery_custody BLOB
+);

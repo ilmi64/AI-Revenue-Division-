@@ -10,6 +10,10 @@ from typing import Callable
 from evidence_verifier import VerificationBlocked
 from revenue_commercial_scope import CommercialReviewScope, validate_review_scope
 from revenue_fixture_dispatch import canonical
+from revenue_fixture_reservation_recovery import (
+    ProcessIdentity, RecoveryAuthority, RecoveryAuthorization, ReservationClaim,
+    capture_process_identity, in_process_recovery_allowed, verify_recovery,
+)
 from revenue_workflow_demo import run_demo
 from synthetic_delivery_rehearsal import _sha
 
@@ -77,9 +81,13 @@ def _decode_request(raw: bytes) -> ScheduledRequest:
 class FixtureScheduler:
     """Persist one-shot dispatch state. No scheduler daemon, external queue or runtime authority."""
 
-    def __init__(self, *, database: Path, clock: Callable[[], int]):
+    def __init__(
+        self, *, database: Path, clock: Callable[[], int],
+        recovery_authority: RecoveryAuthority | None = None,
+    ):
         self._database = database
         self._clock = clock
+        self._recovery_authority = recovery_authority
 
     @contextmanager
     def _transaction(self):
@@ -173,6 +181,26 @@ class FixtureScheduler:
                 or claimed["request_bytes"] != row["request_bytes"] or claimed["worker_reserved"] != 1
             ):
                 raise VerificationBlocked("fixture_claim_not_persisted")
+            if db.execute(
+                "SELECT 1 FROM sqlite_master WHERE type='table' AND name='fixture_claim_owner'",
+            ).fetchone() is not None:
+                try:
+                    owner = capture_process_identity()
+                except VerificationBlocked:
+                    # This fixture may run on another platform, but an
+                    # interrupted untracked claim cannot release capacity.
+                    owner = None
+                if owner is not None:
+                    identity = canonical(asdict(owner))
+                    change = db.execute(
+                        "INSERT INTO fixture_claim_owner (request_id, process_identity) VALUES (?, ?)",
+                        (request.request_id, identity),
+                    )
+                    recorded = db.execute(
+                        "SELECT process_identity FROM fixture_claim_owner WHERE request_id=?", (request.request_id,),
+                    ).fetchone()
+                    if change.rowcount != 1 or recorded is None or recorded[0] != identity:
+                        raise VerificationBlocked("fixture_claim_owner_not_persisted")
             return request, self._status(claimed)
 
     @staticmethod
@@ -272,6 +300,73 @@ class FixtureScheduler:
                     (request_id,),
                 )
             return self._status(self._row(db, request_id))
+
+    def _held_claim(self, db, request_id: str) -> tuple[ReservationClaim, sqlite3.Row]:
+        row = self._row(db, request_id)
+        if row["state"] != "SUPERVISOR_HOLD" or row["reason"] != "interrupted_claim" or row["worker_reserved"] != 1:
+            raise VerificationBlocked("fixture_held_reservation_not_recoverable")
+        request = _decode_request(row["request_bytes"])
+        if (
+            request.request_id != request_id or request.expires_at != row["expires_at"]
+            or request.priority != row["priority"] or type(row["claim_until"]) is not int
+        ):
+            raise VerificationBlocked("invalid_scheduled_payload")
+        if not in_process_recovery_allowed(request.scope.service):
+            raise VerificationBlocked("fixture_descendant_custody_required")
+        owned = db.execute(
+            "SELECT process_identity, recovery_custody FROM fixture_claim_owner WHERE request_id=?", (request_id,),
+        ).fetchone()
+        if owned is None or owned["recovery_custody"] is not None:
+            raise VerificationBlocked("fixture_claim_owner_untracked")
+        raw = owned["process_identity"]
+        try:
+            owner = ProcessIdentity(**json.loads(raw))
+            if canonical(asdict(owner)) != raw:
+                raise VerificationBlocked("fixture_claim_owner_invalid")
+        except (ValueError, TypeError) as exc:
+            raise VerificationBlocked("fixture_claim_owner_invalid") from exc
+        return ReservationClaim(_COMPANY, request_id, _sha(row["request_bytes"]), row["claim_until"], owner), row
+
+    def reservation_claim(self, request_id: str) -> ReservationClaim:
+        """Read company-private claim bytes for separate recovery review."""
+        with self._transaction() as (db, _):
+            claim, _ = self._held_claim(db, request_id)
+            return claim
+
+    def release_interrupted_reservation(self, authorization: RecoveryAuthorization) -> ScheduleStatus:
+        """Free a proven dead worker's slot without changing its terminal hold."""
+        if not isinstance(authorization, RecoveryAuthorization) or not isinstance(authorization.claim, ReservationClaim):
+            raise VerificationBlocked("invalid_fixture_recovery_authorization")
+        request_id = authorization.claim.request_id
+        with self._transaction() as (db, now):
+            claim, row = self._held_claim(db, request_id)
+            record = verify_recovery(authorization, claim, self._recovery_authority, now)
+            checked_at = self._clock()
+            if type(checked_at) is not int or not now <= checked_at < authorization.expires_at:
+                raise VerificationBlocked("fixture_recovery_expired_before_record")
+            db.execute("UPDATE fixture_scheduler_clock SET last_seen=?", (checked_at,))
+            custody = canonical({**record, "verified_at": checked_at})
+            stored = db.execute(
+                "UPDATE fixture_claim_owner SET recovery_custody=? WHERE request_id=? "
+                "AND process_identity=? AND recovery_custody IS NULL",
+                (custody, request_id, canonical(asdict(claim.owner))),
+            )
+            moved = db.execute(
+                "UPDATE scheduled_fixture SET worker_reserved=0 WHERE request_id=? AND state='SUPERVISOR_HOLD' "
+                "AND reason='interrupted_claim' AND worker_reserved=1 AND claim_until=? AND request_bytes=?",
+                (request_id, claim.claim_until, row["request_bytes"]),
+            )
+            updated = self._row(db, request_id)
+            written = db.execute(
+                "SELECT recovery_custody FROM fixture_claim_owner WHERE request_id=?", (request_id,),
+            ).fetchone()
+            if (
+                stored.rowcount != 1 or moved.rowcount != 1 or updated["state"] != "SUPERVISOR_HOLD"
+                or updated["reason"] != "interrupted_claim" or updated["worker_reserved"] != 0
+                or written is None or written[0] != custody
+            ):
+                raise VerificationBlocked("fixture_recovery_claim_changed")
+            return self._status(updated)
 
     def private_result(self, request_id: str) -> bytes:
         """Read the exact private result bytes. These are never OCC input."""

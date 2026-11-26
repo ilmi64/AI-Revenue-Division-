@@ -62,10 +62,8 @@ Late output cannot overwrite a supervisor hold. A hold from an interrupted
 claim retains the reservation until the original worker actually returns.
 An unknown worker outcome can block the queue indefinitely. The fixture
 has no control to clear a reservation by assertion. This avoids starting a
-second worker while the original is unaccounted for. Recovering a genuinely
-lost process requires separately reviewed proof and procedures beyond this
-fixture. The existing worker's bounded local retries remain inside its
-single scheduled claim.
+second worker while the original is unaccounted for. The existing worker's
+bounded local retries remain inside its single scheduled claim.
 
 Create new databases with `revenue_fixture_schedule.sql`. With all clients
 stopped, apply `revenue_fixture_schedule_v2.sql` once to a previously
@@ -73,6 +71,42 @@ provisioned v1 fixture database. Existing request bytes retain exact
 idempotency under default priority 5. Legacy running claims and interrupted
 holds preserve a reservation rather than assuming their worker stopped.
 This single-database guarantee does not cover parallel copies or rollback.
+
+## Authenticated recovery seam for in-process fixtures
+
+A new claim records the Linux boot, process namespace, effective UID, PID
+and start ticks with the reservation. With an independently provisioned
+current `RecoveryAuthority`, `reservation_claim(request_id)` reads the
+company-private held claim. Separate supervisor `ar_cto` and Security &
+Recovery `sr_backup_recovery` principals sign `RecoveryAuthorization`
+through the canonical `recovery_payload`, using distinct Ed25519 keys.
+Signatures bind the exact company, request digest, deadline, process
+identity, trust epoch and short validity window. Real provisioning,
+revocation and independent authority remain commissioning requirements.
+
+`release_interrupted_reservation(authorization)` checks current trust,
+signatures and actual Linux process identity before atomically recording
+private recovery custody and freeing the slot. The original request
+remains terminal `SUPERVISOR_HOLD`. It cannot run again or produce a
+delivery receipt. A later separate queued request may use the free slot.
+Same-boot, namespace and UID checks are required. A kernel signal-0
+existence check delivers no signal. A present original claimant, ambiguous
+PID observation, expired/changed trust, mismatch or failed atomic write
+leaves the reservation in place. Clock rollback or uncertainty blocks.
+
+Only the coding, AI workflow and static fictional terms fixtures qualify
+because their selected workers execute in-process. The app fixture can
+spawn a child. A parent exit cannot establish custody of that descendant,
+so its interrupted reservation remains blocked. Legacy untracked claims,
+reboot/cross-namespace recovery, production process proof, remote work and
+snapshot rollback are outside the supported boundary. The external trust
+provider must maintain a genuinely current authority. SQLite compare-and-set
+does not make external revocation atomic with local commit.
+
+New fixture schemas include process ownership. For an existing v2 fixture
+database, stop all scheduler clients and apply
+`revenue_fixture_schedule_v3.sql` once. For v1, apply v2 first. No process
+ownership is synthesized for an existing claim.
 
 Successful private results retain the canonical report, anchored receipt
 and exact report digest. Readback checks the digest, scope and no-release
@@ -89,6 +123,6 @@ custody. A native worker runtime must prove identity, scope and tool
 isolation independently. No operational approval is granted by the fixture.
 
 ```sh
-python -m unittest -v test_revenue_priority_schedule test_revenue_fixture_schedule
+python -m unittest -v test_revenue_reservation_recovery test_revenue_priority_schedule test_revenue_fixture_schedule
 python -m unittest discover -v
 ```
