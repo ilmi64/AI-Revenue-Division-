@@ -96,6 +96,23 @@ def _divisional_counts(company, telemetry):
     return counts + "<details><summary>Division counts</summary>" + "".join(sections) + "</details>"
 
 
+def _receipt_window_facts(value):
+    window = _map(value)
+    if set(window) != {"issued_at_utc", "expires_at_utc"}:
+        return ""
+    try:
+        issued = datetime.strptime(window["issued_at_utc"], "%Y-%m-%dT%H:%M:%SZ")
+        expires = datetime.strptime(window["expires_at_utc"], "%Y-%m-%dT%H:%M:%SZ")
+    except (TypeError, ValueError):
+        return ""
+    if issued >= expires:
+        return ""
+    return _facts((
+        ("Signed receipt issued", issued.isoformat(sep=" ", timespec="seconds") + " UTC"),
+        ("Signed receipt expires", expires.isoformat(sep=" ", timespec="seconds") + " UTC"),
+    ))
+
+
 def _panel(company, heading, view):
     raw_input = view.get("input_status")
     status = raw_input if isinstance(raw_input, str) and raw_input in _INPUT_LABELS else "MISSING"
@@ -108,6 +125,8 @@ def _panel(company, heading, view):
         ("Reported commissioning",
          _text(view.get("reported_commissioning_status"), VALID_GATE) if show_counts else "Unknown"),
     ))
+    if verified:
+        content += _receipt_window_facts(view.get("verified_receipt_window"))
     if telemetry:
         content += _divisional_counts(company, telemetry)
     if show_counts and (company == "trading_technology" or heading == "Snapshot"):

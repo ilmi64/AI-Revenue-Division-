@@ -431,10 +431,12 @@ def _verify(wire, trust, company_id, now):
 
 def build_authenticated_visibility(
     *, ai_revenue_wire=None, trading_wire=None, trust_by_company, journal=None,
-    journal_by_company=None, now,
+    journal_by_company=None, now, include_receipt_window=False,
 ):
-    """Verify and consume separate synthetic feeds; no unsigned fallback."""
+    """Verify scoped feeds and optionally expose an accepted receipt's time window."""
     _utc(now)
+    if type(include_receipt_window) is not bool:
+        raise ValueError("include_receipt_window must be boolean")
     if journal is not None and journal_by_company is not None:
         raise ValueError("provide one receipt journal configuration")
     isolated = journal_by_company is not None
@@ -468,5 +470,9 @@ def build_authenticated_visibility(
         except (InvalidSignature, ValueError, TypeError, KeyError, RecursionError, OverflowError, OSError, sqlite3.Error):
             companies[company_id] = {"input_status": "REJECTED", "authentication": "UNVERIFIED"}
             continue
+        if include_receipt_window and view["input_status"] != "QUARANTINED":
+            view["verified_receipt_window"] = {
+                "issued_at_utc": claims["issued_at"], "expires_at_utc": claims["expires_at"],
+            }
         companies[company_id] = {**view, "authentication": "AUTHENTICATED_OFFLINE"}
     return {"mode": "offline_read_only", "operational_claim": False, "companies": companies}

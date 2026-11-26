@@ -184,3 +184,26 @@ class SignedVisibilityTests(unittest.TestCase):
         self.assertEqual(legacy_attempt["companies"][AI]["input_status"], "REJECTED")
         report = self.report(ai_revenue_wire=self.signed(AI), journal=None, journal_by_company={AI: ai})
         self.assertEqual(report["companies"][AI]["authentication"], "AUTHENTICATED_OFFLINE")
+
+    def test_opt_in_timing_returns_only_exact_accepted_receipt_window(self):
+        wire = self.signed(AI, issued_at=NOW - timedelta(seconds=2))
+        result = self.report(ai_revenue_wire=wire, include_receipt_window=True)
+        self.assertEqual(result["companies"][AI]["verified_receipt_window"], {
+            "issued_at_utc": "2026-11-20T12:00:00Z",
+            "expires_at_utc": "2026-11-20T12:00:32Z",
+        })
+        self.assertNotIn("verified_receipt_window", result["companies"][TRADING])
+        replay = self.report(ai_revenue_wire=wire, include_receipt_window=True)
+        self.assertNotIn("verified_receipt_window", replay["companies"][AI])
+
+    def test_legacy_mode_and_failed_or_quarantined_feeds_emit_no_timing(self):
+        report = self.report(ai_revenue_wire=self.signed(AI))
+        self.assertNotIn("verified_receipt_window", report["companies"][AI])
+        self.trading["incident_summary"] = {"open_count": 1, "highest_severity": "high", "quarantined": True}
+        report = self.report(
+            ai_revenue_wire=self.signed(AI, sequence=2, expires_at=NOW),
+            trading_wire=self.signed(TRADING), include_receipt_window=True,
+        )
+        self.assertEqual(report["companies"][TRADING]["input_status"], "QUARANTINED")
+        for company in (AI, TRADING):
+            self.assertNotIn("verified_receipt_window", report["companies"][company])

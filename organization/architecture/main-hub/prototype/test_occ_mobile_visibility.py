@@ -126,3 +126,24 @@ class MobileVisibilityTests(unittest.TestCase):
         self.assertIn("Assessment time unknown", page)
         with self.assertRaisesRegex(ValueError, "timezone-aware"):
             render_mobile_visibility(projection({}, {}), assessed_at=datetime(2026, 11, 26))
+
+    def test_verified_receipt_window_is_separate_from_untimed_evidence_and_assessment(self):
+        window = {"issued_at_utc": "2026-11-26T12:00:00Z", "expires_at_utc": "2026-11-26T12:01:00Z"}
+        ai = {"authentication": "AUTHENTICATED_OFFLINE", "input_status": "UNVERIFIED_UNTIMED",
+              "verified_receipt_window": window}
+        trading = {"input_status": "REJECTED", "verified_receipt_window": window}
+        report = projection(ai, trading)
+        html = render_mobile_visibility(report, assessed_at=datetime.fromisoformat("2026-11-26T12:00:30Z"))
+        self.assertEqual(html.count("Signed receipt issued"), 1)
+        self.assertEqual(html.count("Signed receipt expires"), 1)
+        self.assertIn("Evidence time unverified", html)
+        self.assertIn("2026-11-26 12:00:30 UTC", html)
+        self.assertIn("2026-11-26 12:01:00 UTC", html)
+
+    def test_bad_receipt_window_never_reaches_export(self):
+        window = {"issued_at_utc": "2026-11-26T12:00:00Z", "expires_at_utc": "<img src=https://invalid>"}
+        ai = {"authentication": "AUTHENTICATED_OFFLINE", "input_status": "UNVERIFIED_UNTIMED",
+              "verified_receipt_window": window}
+        html = render_mobile_visibility(projection(ai, {"input_status": "MISSING"}))
+        self.assertNotIn("Signed receipt expires", html)
+        self.assertNotIn("https://invalid", html)
