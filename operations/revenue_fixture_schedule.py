@@ -368,17 +368,24 @@ class FixtureScheduler:
                 raise VerificationBlocked("fixture_recovery_claim_changed")
             return self._status(updated)
 
+    @staticmethod
+    def _verified_private_result(row) -> bytes:
+        data = row["result"]
+        if row["state"] != "REVIEW_READY" or not isinstance(data, bytes) or _sha(data) != row["result_sha256"]:
+            raise VerificationBlocked("scheduled_fixture_private_result_unavailable")
+        request = _decode_request(row["request_bytes"])
+        try:
+            if (
+                request.request_id != row["request_id"] or request.expires_at != row["expires_at"]
+                or request.priority != row["priority"]
+                or FixtureScheduler._review_bytes(request, json.loads(data)) != data
+            ):
+                raise VerificationBlocked("scheduled_fixture_private_result_invalid")
+        except (ValueError, TypeError, KeyError) as exc:
+            raise VerificationBlocked("scheduled_fixture_private_result_invalid") from exc
+        return data
+
     def private_result(self, request_id: str) -> bytes:
         """Read the exact private result bytes. These are never OCC input."""
         with self._transaction() as (db, _):
-            row = self._row(db, request_id)
-            data = row["result"]
-            if row["state"] != "REVIEW_READY" or not isinstance(data, bytes) or _sha(data) != row["result_sha256"]:
-                raise VerificationBlocked("scheduled_fixture_private_result_unavailable")
-            request = _decode_request(row["request_bytes"])
-            try:
-                if self._review_bytes(request, json.loads(data)) != data:
-                    raise VerificationBlocked("scheduled_fixture_private_result_invalid")
-            except (ValueError, TypeError, KeyError) as exc:
-                raise VerificationBlocked("scheduled_fixture_private_result_invalid") from exc
-            return data
+            return self._verified_private_result(self._row(db, request_id))

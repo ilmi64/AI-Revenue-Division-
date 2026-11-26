@@ -18,8 +18,12 @@ def build_internal_review_bundle(scheduler: FixtureScheduler, request_id: str) -
     """Return a deterministic ZIP after the scheduler's scope and digest checks."""
     if not isinstance(scheduler, FixtureScheduler):
         raise TypeError("a company-local fixture scheduler is required")
+    return _bundle_from_verified_result(json.loads(scheduler.private_result(request_id)))
+
+
+def _bundle_from_verified_result(reviewed: dict) -> bytes:
+    """Package only an already verified company-local scheduler result."""
     try:
-        reviewed = json.loads(scheduler.private_result(request_id))
         artifact = reviewed["private_artifact"]["contents"]
         evidence = reviewed["private_test_log"]
         receipt = reviewed["receipt"]
