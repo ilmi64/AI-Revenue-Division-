@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "status": "CANDIDATES_PENDING_APPROVAL",
+  "platform": "linux-x86_64",
+  "host_requirements": {
+    "node_minimum": "24.11.0",
+    "pnpm_minimum": "9.15.0",
+    "glibc_minimum": "2.39",
+    "pilot_budget": {"cpu_threads": 2, "context_tokens": 2048, "ram_gib": 8, "free_storage_gib": 5}
+  },
+  "artifacts": [
+    {
+      "name": "paperclipai",
+      "version": "2026.1106.0",
+      "source_revision": "d69631b01b9c658f80bf8bed389863dce82643e1",
+      "license": "MIT",
+      "file": "paperclipai-2026.1106.0.tgz",
+      "source": "https://registry.npmjs.org/paperclipai/-/paperclipai-2026.1106.0.tgz",
+      "integrity": "sha512-jcZrSB5DItxeDJGO7TccI0WcYca2IbBJxpbaKZN6kZp+isNIbVF2AgmfFQq394mjXD+TTHwS5P3AT6jjpqXbng==",
+      "attestation": "https://registry.npmjs.org/-/npm/v1/attestations/paperclipai@2026.1106.0"
+    },
+    {
+      "name": "@paperclipai/server",
+      "version": "2026.1106.0",
+      "source_revision": "d69631b01b9c658f80bf8bed389863dce82643e1",
+      "license": "MIT",
+      "file": "paperclipai-server-2026.1106.0.tgz",
+      "source": "https://registry.npmjs.org/@paperclipai/server/-/server-2026.1106.0.tgz",
+      "integrity": "sha512-OqG0qydn5Pky3iHmTgL3fvAh47m77CYgkuM3CgV6ciw6tY/AmBgkO3greyr0LinLFk7x1FdLkF1sfVVukZo/YA==",
+      "attestation": "https://registry.npmjs.org/-/npm/v1/attestations/@paperclipai%2fserver@2026.1106.0"
+    },
+    {
+      "name": "ruflo",
+      "version": "3.79.0",
+      "source_revision": "861179f6210d7d934ea7283fd33fb433ca8cdd29",
+      "license": "MIT",
+      "file": "ruflo-3.79.0.tgz",
+      "source": "https://registry.npmjs.org/ruflo/-/ruflo-3.79.0.tgz",
+      "integrity": "sha512-v+l/6paOXpohmx1/shIDNTMj2gaef3qZbh0UgOymtfa4lG5wUnorxLVGx4FC66Fgzl9GiKoHV41QPed7Fq/ubQ==",
+      "attestation": "https://registry.npmjs.org/-/npm/v1/attestations/ruflo@3.79.0"
+    },
+    {
+      "name": "@claude-flow/cli",
+      "version": "3.79.0",
+      "source_revision": "861179f6210d7d934ea7283fd33fb433ca8cdd29",
+      "license": "MIT",
+      "file": "claude-flow-cli-3.79.0.tgz",
+      "source": "https://registry.npmjs.org/@claude-flow/cli/-/cli-3.79.0.tgz",
+      "integrity": "sha512-xQKrppgwMB2UC29BAnhHKPFZUGJlBFOwVkkWa2Rb1inTpE7TOnTVceQ9T3qVluQRfi7uWlpP1VKDriVnQo9gyA==",
+      "attestation": "https://registry.npmjs.org/-/npm/v1/attestations/@claude-flow%2fcli@3.79.0"
+    },
+    {
+      "name": "llama.cpp",
+      "version": "b12644",
+      "source_revision": "94f3af3d09e74a0fb35f703194318d3b4037714a",
+      "license": "MIT",
+      "file": "llama-b12644-bin-ubuntu-x64.tar.gz",
+      "source": "https://github.com/ggml-org/llama.cpp/releases/download/b12644/llama-b12644-bin-ubuntu-x64.tar.gz",
+      "integrity": "sha256:7cff30bdd348bd2cf1b999e9323c97491d77dab4f5ce129629f590d75f9e6756",
+      "size_bytes": 23299158,
+      "attestation": "https://github.com/ggml-org/llama.cpp/attestations/70906782"
+    },
+    {
+      "name": "Qwen2.5-Coder-1.5B-Instruct Q4_K_M",
+      "version": "2.5-1.5B-Instruct-Q4_K_M",
+      "source_revision": "f86cb2c1fa58255f8052cc32aeede1b7482d4361",
+      "license": "Apache-2.0",
+      "file": "qwen2.5-coder-1.5b-instruct-q4_k_m.gguf",
+      "source": "https://huggingface.co/Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF/resolve/f86cb2c1fa58255f8052cc32aeede1b7482d4361/qwen2.5-coder-1.5b-instruct-q4_k_m.gguf",
+      "integrity": "sha256:cc324af070c2ecbfd324a30884d2f951a7ff756aba85cb811a6ec436933bb046",
+      "size_bytes": 1117320768
+    }
+  ]
+}
