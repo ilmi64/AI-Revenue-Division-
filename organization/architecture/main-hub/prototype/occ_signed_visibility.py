@@ -193,9 +193,12 @@ class ReceiptJournal:
         if self.anchor is None:
             return None, None
         checkpoint = self._read_checkpoint()
-        if db.execute(
+        witness_table = db.execute(
             "SELECT 1 FROM sqlite_schema WHERE type='table' AND name='receipt_witness_binding'",
-        ).fetchone():
+        ).fetchone()
+        if bool(witness_table) != (checkpoint.witnessed_enrollment_sha256 is not None):
+            raise ValueError("receipt recovery witness binding does not match")
+        if witness_table:
             witness_binding = db.execute(
                 "SELECT enrollment_sha256 FROM receipt_witness_binding WHERE singleton=1",
             ).fetchone()
@@ -259,13 +262,17 @@ class ReceiptJournal:
             raise ValueError("receipt is not newer")
         return (*key, claims["sequence"], claims["snapshot_id"], sha256(wire).hexdigest())
 
-    def _accept(self, claims, wire, *, trust):
+    def _accept(self, claims, wire, *, trust, expected_enrollment=None):
         with closing(self._connect()) as db, db:
             db.execute("PRAGMA trusted_schema=OFF")
             db.execute("PRAGMA synchronous=FULL")
             db.execute("BEGIN IMMEDIATE")
             self._verify_local_scope(db, claims["company_id"])
             checkpoint = self._verify_anchor(db, trust)
+            if expected_enrollment is not None and (
+                checkpoint is None or checkpoint.witnessed_enrollment_sha256 != expected_enrollment
+            ):
+                raise ValueError("receipt checkpoint does not match independently retained enrollment")
             row = self._pending_row(db, claims, wire)
             db.execute("INSERT INTO receipt VALUES (?, ?, ?, ?, ?, ?)", row)
             if checkpoint is not None:
@@ -431,15 +438,20 @@ def _verify(wire, trust, company_id, now):
 
 def build_authenticated_visibility(
     *, ai_revenue_wire=None, trading_wire=None, trust_by_company, journal=None,
-    journal_by_company=None, now, include_receipt_window=False,
+    journal_by_company=None, now, include_receipt_window=False, witnessed_enrollment_pins=None,
 ):
-    """Verify scoped feeds and optionally expose an accepted receipt's time window."""
+    """Verify scoped feeds, optionally requiring independently retained enrollment pins."""
     _utc(now)
     if type(include_receipt_window) is not bool:
         raise ValueError("include_receipt_window must be boolean")
     if journal is not None and journal_by_company is not None:
         raise ValueError("provide one receipt journal configuration")
     isolated = journal_by_company is not None
+    if witnessed_enrollment_pins is not None and (
+        not isolated or not isinstance(witnessed_enrollment_pins, Mapping)
+        or set(witnessed_enrollment_pins) - set(_COMPANIES)
+    ):
+        raise ValueError("witnessed reporting requires company-scoped journals and enrollment pins")
     if isolated and not isinstance(journal_by_company, Mapping):
         journal_by_company = {}
     companies = {}
@@ -452,6 +464,11 @@ def build_authenticated_visibility(
         trust = trust_by_company.get(company_id)
         peer = trust_by_company.get(next(name for name in _COMPANIES if name != company_id))
         try:
+            expected_enrollment = None
+            if witnessed_enrollment_pins is not None:
+                expected_enrollment = witnessed_enrollment_pins.get(company_id)
+                if not isinstance(expected_enrollment, str) or not re.fullmatch(r"[0-9a-f]{64}", expected_enrollment):
+                    raise ValueError("independently retained enrollment is unavailable for this company")
             if isinstance(trust, PublisherTrust) and isinstance(peer, PublisherTrust) and (
                 trust.public_key == peer.public_key or trust.publisher_id == peer.publisher_id
             ):
@@ -466,10 +483,12 @@ def build_authenticated_visibility(
                 receipt_journal.company_id != company_id or receipt_journal.anchor is None
             ):
                 raise ValueError("divisional telemetry requires company-anchored custody")
-            receipt_journal._accept(claims, wire, trust=trust)
+            receipt_journal._accept(claims, wire, trust=trust, expected_enrollment=expected_enrollment)
         except (InvalidSignature, ValueError, TypeError, KeyError, RecursionError, OverflowError, OSError, sqlite3.Error):
             companies[company_id] = {"input_status": "REJECTED", "authentication": "UNVERIFIED"}
             continue
+        if expected_enrollment is not None and view["input_status"] != "QUARANTINED":
+            view["verified_witnessed_enrollment"] = True
         if include_receipt_window and view["input_status"] != "QUARANTINED":
             view["verified_receipt_window"] = {
                 "issued_at_utc": claims["issued_at"], "expires_at_utc": claims["expires_at"],

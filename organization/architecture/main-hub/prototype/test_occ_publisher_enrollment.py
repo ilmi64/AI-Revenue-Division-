@@ -7,10 +7,11 @@ import unittest
 
 import test_occ_durable_receipt_anchor as fixture
 from occ_durable_receipt_anchor import DurableReceiptAnchor
+from occ_mobile_visibility import render_mobile_visibility
 from occ_publisher_enrollment import (
     PublisherEnrollment, publisher_enrollment_bytes, witness_enrollment_bytes,
 )
-from occ_signed_visibility import ReceiptJournal
+from occ_signed_visibility import ReceiptJournal, build_authenticated_visibility
 
 
 AI, TRADING, NOW = fixture.AI, fixture.TRADING, fixture.NOW
@@ -105,3 +106,49 @@ class PublisherEnrollmentTests(unittest.TestCase):
                            journal_by_company=journals)
         self.assertEqual(result[AI]["input_status"], "REJECTED")
         self.assertEqual(result[TRADING]["authentication"], "AUTHENTICATED_OFFLINE")
+
+    def test_missing_local_witness_binding_rejects_even_with_correct_independent_pin(self):
+        anchor = self.initialize()
+        journals = {
+            company: ReceiptJournal.initialize(self.path / f"{company}-binding.sqlite",
+                                                company_id=company, anchor=anchor)
+            for company in self.scopes
+        }
+        with sqlite3.connect(journals[AI].path) as db:
+            db.execute("DROP TABLE receipt_witness_binding")
+        view = self.view(ai_revenue_wire=self.sign(AI, 1), trading_wire=self.sign(TRADING, 1),
+                         journal_by_company=journals, witnessed_enrollment_pins=anchor.enrollment_pins)
+        self.assertEqual(view[AI]["input_status"], "REJECTED")
+        self.assertEqual(anchor.read(AI).count, 0)
+        self.assertTrue(view[TRADING]["verified_witnessed_enrollment"])
+        self.assertEqual(anchor.read(TRADING).count, 1)
+
+    def test_witnessed_reporting_rejects_downgraded_journal_and_missing_or_wrong_pin(self):
+        anchor = self.initialize()
+        journals = {
+            company: ReceiptJournal.initialize(self.path / f"{company}-strict.sqlite",
+                                                company_id=company, anchor=anchor)
+            for company in self.scopes
+        }
+        fallback = ReceiptJournal.initialize(self.path / "fallback.sqlite", company_id=AI)
+        for journal, pins in (
+            (fallback, anchor.enrollment_pins),
+            (journals[AI], {TRADING: anchor.enrollment_pins[TRADING]}),
+            (journals[AI], {**anchor.enrollment_pins, AI: "0" * 64}),
+        ):
+            with self.subTest(journal=journal.path.name, pins=pins):
+                view = self.view(ai_revenue_wire=self.sign(AI, 1),
+                                 journal_by_company={**journals, AI: journal},
+                                 witnessed_enrollment_pins=pins)
+                self.assertEqual(view[AI]["input_status"], "REJECTED")
+        self.assertEqual(anchor.read(AI).count, 0)
+        report = build_authenticated_visibility(
+            ai_revenue_wire=self.sign(AI, 1), trading_wire=self.sign(TRADING, 1),
+            trust_by_company=self.trust, journal_by_company=journals,
+            witnessed_enrollment_pins=anchor.enrollment_pins, now=NOW,
+        )
+        self.assertFalse(report["operational_claim"])
+        html = render_mobile_visibility(report, assessed_at=NOW)
+        self.assertEqual(html.count("Witnessed enrollment matched"), 2)
+        for pin in anchor.enrollment_pins.values():
+            self.assertNotIn(pin, html)

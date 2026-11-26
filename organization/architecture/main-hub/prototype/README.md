@@ -228,3 +228,40 @@ This repair does not advance the authority, return a company view, grant
 release, or approve a new receipt. Missing, expired, wrong-scope, and stale
 witnesses fail closed. An unavailable witness verifier does not permit legacy
 repair in a witnessed journal.
+
+### Company commissioning procedure
+
+1. Security & Recovery supplies a new company-scoped challenge and records
+   the intended publisher ID, journal ID, source pin, validity window,
+   custodian public key and expected company. Trading and Revenue each have
+   separate publisher and custodian principals. Keep private keys out of
+   OCC and give each company an independently protected store and backup.
+2. The publisher signs the exact enrollment binding. The company custodian
+   verifies publisher identity and possession and witnesses those bytes.
+   Provision each company's anchor and journal separately. Retain the
+   resulting enrollment digest outside both SQLite files in protected
+   company-specific verifier configuration, with the approving custodian
+   and an audit reference. Store signed enrollment and recovery evidence
+   in that company's restricted custody, separate from the dashboard.
+3. Open the isolated journals with their respective anchors. Supply
+   `witnessed_enrollment_pins={company_id: retained_digest, ...}` to
+   `build_authenticated_visibility` alongside `journal_by_company`. In this
+   configuration a missing or incorrect company pin, an unanchored journal,
+   or a missing local witness binding rejects that feed without consuming
+   its receipt. The other enrolled feed is checked independently. A
+   verified view shows only a redacted witnessed-enrollment status.
+4. Exercise restart, stale and replayed input, wrong trust, unavailable
+   custody, publisher revocation or replacement, and one-company recovery
+   while the peer continues. Compare the exact anchored and local states
+   before witnessed repair. Obtain a fresh exact recovery signature and
+   retain the authorization and readback privately. Do not restore both
+   copies to a common older checkpoint or recreate a missing anchor.
+5. Require the company operator and independent custodian to attest
+   observed evidence and custody separation before the company owner
+   decides commissioning. The shared hub records status and unresolved
+   signoffs through the existing redacted reporting contract.
+
+Local tests and SQLite exercise the protocol. Production still requires
+a trusted clock, independent custody with anti-rollback controls and
+company-controlled publisher provisioning. The compatible fixture call
+without separately retained pins is for the offline fixture path.

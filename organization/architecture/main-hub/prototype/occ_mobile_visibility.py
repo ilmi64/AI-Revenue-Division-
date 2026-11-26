@@ -126,6 +126,8 @@ def _panel(company, heading, view):
          _text(view.get("reported_commissioning_status"), VALID_GATE) if show_counts else "Unknown"),
     ))
     if verified:
+        if view.get("verified_witnessed_enrollment") is True:
+            content += _facts((("Journal custody", "Witnessed enrollment matched"),))
         content += _receipt_window_facts(view.get("verified_receipt_window"))
     if telemetry:
         content += _divisional_counts(company, telemetry)
