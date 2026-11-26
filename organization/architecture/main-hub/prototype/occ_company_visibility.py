@@ -150,7 +150,9 @@ def main():
     parser.add_argument("--aevora-operations", type=Path)
     parser.add_argument("--format", choices=("json", "mobile-html"), default="json")
     args = parser.parse_args()
+    assessed_at = datetime.now(timezone.utc)
     report = build_company_visibility(
+        now=assessed_at,
         ai_revenue_snapshot=_read_optional(args.ai_revenue_snapshot),
         trading_snapshot=_read_optional(args.trading_snapshot),
         aevora_operations=_read_optional(args.aevora_operations),
@@ -158,7 +160,7 @@ def main():
     if args.format == "mobile-html":
         from occ_mobile_visibility import render_mobile_visibility
 
-        print(render_mobile_visibility(report))
+        print(render_mobile_visibility(report, assessed_at=assessed_at))
     else:
         print(json.dumps(report, indent=2, sort_keys=True))
 

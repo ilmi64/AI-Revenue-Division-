@@ -114,3 +114,15 @@ class MobileVisibilityTests(unittest.TestCase):
         report = build_company_visibility(trading_snapshot=snapshot, now=now)
         page = render_mobile_visibility(report)
         self.assertIn("Reported commissioning</dt><dd>Not run", page)
+
+    def test_checkpoint_display_uses_verifier_assessment_time_in_utc(self):
+        timestamp = datetime.fromisoformat("2026-11-26T08:30:45-05:00")
+        page = render_mobile_visibility(projection({}, {}), assessed_at=timestamp)
+        self.assertIn('<time datetime="2026-11-26T13:30:45Z">2026-11-26 13:30:45 UTC</time>', page)
+        self.assertNotIn("Evidence time verified", page)
+
+    def test_legacy_report_has_unknown_assessment_time_and_rejects_naive_values(self):
+        page = render_mobile_visibility(projection({}, {}))
+        self.assertIn("Assessment time unknown", page)
+        with self.assertRaisesRegex(ValueError, "timezone-aware"):
+            render_mobile_visibility(projection({}, {}), assessed_at=datetime(2026, 11, 26))

@@ -1,5 +1,6 @@
 """Render Main Hub's redacted offline projection as a portable executive view."""
 
+from datetime import datetime, timezone
 from html import escape
 
 from occ_company_visibility import AEVORA_COUNTS, COMMON_SUBSYSTEMS, COMPANY_SUBSYSTEMS
@@ -135,8 +136,19 @@ def _panel(company, heading, view):
     return f'<section class="panel"><h3>{heading}</h3>{content}</section>'
 
 
-def render_mobile_visibility(report):
-    """Render output from the in-process OCC visibility builders."""
+def _assessment_caption(assessed_at):
+    if assessed_at is None:
+        return "<p>Assessment time unknown</p>"
+    if not isinstance(assessed_at, datetime) or assessed_at.utcoffset() is None:
+        raise ValueError("assessment time must be a timezone-aware datetime")
+    instant = assessed_at.astimezone(timezone.utc).isoformat(timespec="seconds")
+    timestamp = instant.replace("+00:00", "Z")
+    label = instant.removesuffix("+00:00").replace("T", " ") + " UTC"
+    return f'<p>Assessed <time datetime="{escape(timestamp)}">{escape(label)}</time></p>'
+
+
+def render_mobile_visibility(report, *, assessed_at=None):
+    """Render separate company views and optional verifier assessment time."""
     if not isinstance(report, dict) or report.get("mode") != "offline_read_only" or report.get("operational_claim") is not False:
         raise ValueError("offline read-only visibility report required")
     reports = _map(report.get("companies"))
@@ -165,7 +177,7 @@ def render_mobile_visibility(report):
 <style>{_STYLE}</style>
 </head>
 <body>
-<header><div><h1>Main Hub / OCC</h1><p>Offline, read-only · Operational readiness unverified</p></div></header>
+<header><div><h1>Main Hub / OCC</h1><p>Offline, read-only · Operational readiness unverified</p>{_assessment_caption(assessed_at)}</div></header>
 <main class="company-grid" aria-label="Separate company reports">{''.join(cards)}</main>
 </body>
 </html>"""

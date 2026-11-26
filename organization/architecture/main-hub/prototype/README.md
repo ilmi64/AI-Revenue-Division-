@@ -209,3 +209,9 @@ for a newly provisioned authority, with synthetic keys. Subsequent custody
 transitions retain their separate exact-approval gate. Production key
 provisioning, independently protected configuration, and recovery review
 remain separate requirements.
+
+The mobile export records the UTC time used to assess the source reports.
+For signed in-process exports, pass the same verifier clock reading to
+`render_mobile_visibility(report, assessed_at=now)` that was supplied to
+`build_authenticated_visibility`. Saved HTML shows the historical assessment
+time. The timestamp does not promote untimed evidence or grant release.
