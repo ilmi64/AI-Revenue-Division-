@@ -13,6 +13,7 @@ import sqlite3
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
+from occ_publisher_enrollment import verify_publisher_enrollment
 from occ_receipt_anchor import ReceiptCheckpoint, custody_digest
 
 
@@ -48,16 +49,22 @@ def custody_transition_bytes(expected, replacement, *, issued_at, expires_at):
 class DurableReceiptAnchor:
     path: Path
     authority_public_keys: Mapping[str, bytes]
+    enrollment_pins: Mapping[str, str] | None = None
 
     @classmethod
-    def initialize(cls, path, scopes, *, authority_public_keys):
+    def initialize(cls, path, scopes, *, authority_public_keys, enrollments=None, now=None):
         """Provision known offline custodian keys without recreating an existing store."""
         if not scopes or set(authority_public_keys) != set(scopes):
             raise ValueError("each company requires a separate custody authorization key")
         keys = tuple(authority_public_keys.values())
         if any(not isinstance(key, bytes) or len(key) != 32 for key in keys) or len(set(keys)) != len(keys):
             raise ValueError("custody authorization keys must be distinct Ed25519 public keys")
+        if enrollments is not None and (
+            not isinstance(enrollments, Mapping) or set(enrollments) != set(scopes)
+        ):
+            raise ValueError("witnessed enrollment is required for every configured company")
         checkpoints = []
+        enrollment_pins = None if enrollments is None else {}
         for company, (journal_id, trust) in scopes.items():
             if (
                 trust.company_id != company or trust.revoked is not False
@@ -66,7 +73,13 @@ class DurableReceiptAnchor:
                 raise ValueError("publisher and custodian identities must be separate")
             checkpoint = ReceiptCheckpoint.genesis(company, journal_id, custody_digest(trust))
             checkpoints.append((*astuple(checkpoint), sha256(authority_public_keys[company]).hexdigest()))
-        anchor = cls(Path(path), dict(authority_public_keys))
+            if enrollment_pins is not None:
+                challenge, enrollment = enrollments[company]
+                enrollment_pins[company] = verify_publisher_enrollment(
+                    trust, journal_id, authority_public_keys[company], expected_challenge=challenge,
+                    enrollment=enrollment, now=now,
+                )
+        anchor = cls(Path(path), dict(authority_public_keys), enrollment_pins)
         anchor.path.touch(mode=0o600, exist_ok=False)
         with closing(anchor._connect()) as db, db:
             db.execute("BEGIN IMMEDIATE")
@@ -87,6 +100,13 @@ class DurableReceiptAnchor:
             db.executemany("INSERT INTO checkpoint VALUES (?, ?, ?, ?, ?, ?)", checkpoints)
             db.executemany("INSERT INTO custody_history VALUES (?, ?, NULL)",
                            ((row[0], row[2]) for row in checkpoints))
+            if enrollment_pins is not None:
+                db.execute("""
+                    CREATE TABLE publisher_enrollment (
+                        company_id TEXT PRIMARY KEY, proof_sha256 TEXT NOT NULL
+                    )
+                """)
+                db.executemany("INSERT INTO publisher_enrollment VALUES (?, ?)", enrollment_pins.items())
         return anchor
 
     def _connect(self):
@@ -107,6 +127,7 @@ class DurableReceiptAnchor:
             or not hmac.compare_digest(row[5], sha256(key).hexdigest())
         ):
             raise ValueError("independent custody authority is unavailable for this company")
+        self._verify_enrollment(db, company)
         count = db.execute(
             "SELECT COUNT(*) FROM custody_history WHERE company_id=? AND custody_sha256=?",
             (company, row[2]),
@@ -114,6 +135,20 @@ class DurableReceiptAnchor:
         if count != 1:
             raise ValueError("checkpoint custody is outside recorded history")
         return ReceiptCheckpoint(*row[:5])
+
+    def _verify_enrollment(self, db, company):
+        table = db.execute(
+            "SELECT 1 FROM sqlite_schema WHERE type='table' AND name='publisher_enrollment'",
+        ).fetchone()
+        if bool(table) != (self.enrollment_pins is not None):
+            raise ValueError("witnessed enrollment binding mode does not match")
+        if table:
+            row = db.execute(
+                "SELECT proof_sha256 FROM publisher_enrollment WHERE company_id=?", (company,),
+            ).fetchone()
+            pin = self.enrollment_pins.get(company)
+            if row is None or not isinstance(pin, str) or not hmac.compare_digest(row[0], pin):
+                raise ValueError("witnessed enrollment pin is unavailable or changed")
 
     def read(self, company_id):
         with closing(self._connect()) as db:

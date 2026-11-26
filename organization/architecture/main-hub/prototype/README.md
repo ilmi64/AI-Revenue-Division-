@@ -184,3 +184,28 @@ divisions display Unknown. Export the unsigned fixture view with
 `occ_company_visibility.py --format mobile-html`, or pass the verified
 in-process report to `occ_mobile_visibility.render_mobile_visibility`.
 The HTML uses embedded styling and exposes no external resources or actions.
+
+### Witnessed publisher enrollment
+
+A new durable offline authority can require a possession proof from the
+publisher and a witness signature from the separately configured company
+custodian. The operator supplies a fresh external challenge, the expected
+journal ID and pinned publisher custody. Those values, the custodian's public
+key, and a short UTC validity interval bind both signatures. The witness
+signs the publisher's exact proof as well as its binding.
+
+Pass `enrollments={company: (expected_challenge, proof)}` and a trusted
+`now` to `DurableReceiptAnchor.initialize`. Check every configured scope
+before creating a file. Retain the returned `enrollment_pins` in independent
+fixture configuration with the original custodian public keys. Reopen with
+`DurableReceiptAnchor(path, authority_public_keys, enrollment_pins)`.
+Missing or changed proof pins fail closed for the affected company. Proof
+signatures, challenges, private keys and evidence digests do not appear in a
+company view.
+
+Earlier un-witnessed fixtures remain available as legacy mode. A witnessed
+authority cannot reopen in that mode. This is an offline enrollment check
+for a newly provisioned authority, with synthetic keys. Subsequent custody
+transitions retain their separate exact-approval gate. Production key
+provisioning, independently protected configuration, and recovery review
+remain separate requirements.
