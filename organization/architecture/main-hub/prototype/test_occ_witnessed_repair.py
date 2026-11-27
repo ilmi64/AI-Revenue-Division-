@@ -10,7 +10,7 @@ import unittest
 import test_occ_publisher_enrollment as enrollment
 import test_occ_receipt_anchor as anchor_fixture
 from occ_durable_receipt_anchor import (
-    CustodyAuthorization, DurableReceiptAnchor, pending_repair_bytes,
+    CustodyAuthorization, DurableReceiptAnchor, custody_transition_bytes, pending_repair_bytes,
 )
 from occ_signed_visibility import ReceiptJournal
 
@@ -131,3 +131,36 @@ class WitnessedRepairTests(unittest.TestCase):
             self.assertCountEqual(pool.map(attempt, range(2)), (True, False))
         self.assertEqual(self.count(), 1)
         self.assertEqual(self.anchor.read(AI).count, 1)
+
+    def test_retained_pin_refuses_repair_when_both_presentations_lose_the_witness(self):
+        wire, journal = self.interrupt()
+        with sqlite3.connect(journal.path) as db:
+            db.execute("DROP TABLE receipt_witness_binding")
+        stripped = ReceiptJournal(journal.path, AI, StrippedWitness(self.anchor))
+        for operation in (stripped.pending_repair_checkpoints, stripped.reconcile_pending_receipt):
+            with self.subTest(operation=operation.__name__):
+                with self.assertRaisesRegex(ValueError, "independently retained enrollment"):
+                    operation(wire, trust=self.trust[AI], now=NOW,
+                              expected_enrollment=self.anchor.enrollment_pins[AI])
+        self.assertEqual(self.count(), 0)
+        self.assertEqual(self.anchor.read(AI).count, 1)
+        self.assertEqual(self.view(trading_wire=self.sign(TRADING, 2))[TRADING]["authentication"],
+                         "AUTHENTICATED_OFFLINE")
+
+    def test_rotation_rejects_peer_pin_and_keeps_exact_pin_on_valid_transition(self):
+        current = self.anchor.read(AI)
+        peer = self.anchor.read(TRADING)
+        replacement = replace(self.trust[AI], source_revision="e" * 40)
+        expires = NOW + timedelta(seconds=30)
+        binding = custody_transition_bytes(current, replacement, issued_at=NOW, expires_at=expires)
+        approval = CustodyAuthorization(NOW, expires, self.custodians[AI].sign(binding))
+        for pin in (True, self.anchor.enrollment_pins[TRADING]):
+            with self.subTest(pin=pin), self.assertRaisesRegex(ValueError, "independently retained enrollment"):
+                self.journals[AI].transition_custody(self.trust[AI], replacement, approval, now=NOW,
+                                                    expected_enrollment=pin)
+        self.assertEqual(self.anchor.read(AI), current)
+        self.journals[AI].transition_custody(self.trust[AI], replacement, approval, now=NOW,
+                                            expected_enrollment=self.anchor.enrollment_pins[AI])
+        self.assertNotEqual(self.anchor.read(AI).custody_sha256, current.custody_sha256)
+        self.assertEqual(self.anchor.read(AI).witnessed_enrollment_sha256, current.witnessed_enrollment_sha256)
+        self.assertEqual(self.anchor.read(TRADING), peer)

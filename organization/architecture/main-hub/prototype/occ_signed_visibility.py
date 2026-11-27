@@ -229,6 +229,16 @@ class ReceiptJournal:
             raise ValueError("local receipt state does not match the independent checkpoint")
         return checkpoint
 
+    @staticmethod
+    def _require_enrollment(checkpoint, expected_enrollment):
+        if expected_enrollment is not None and (
+            not isinstance(expected_enrollment, str)
+            or not re.fullmatch(r"[0-9a-f]{64}", expected_enrollment)
+            or checkpoint is None
+            or checkpoint.witnessed_enrollment_sha256 != expected_enrollment
+        ):
+            raise ValueError("receipt checkpoint does not match independently retained enrollment")
+
     def _advance_anchor(self, checkpoint, row):
         successor = checkpoint.append(row)
         try:
@@ -269,35 +279,33 @@ class ReceiptJournal:
             db.execute("BEGIN IMMEDIATE")
             self._verify_local_scope(db, claims["company_id"])
             checkpoint = self._verify_anchor(db, trust)
-            if expected_enrollment is not None and (
-                checkpoint is None or checkpoint.witnessed_enrollment_sha256 != expected_enrollment
-            ):
-                raise ValueError("receipt checkpoint does not match independently retained enrollment")
+            self._require_enrollment(checkpoint, expected_enrollment)
             row = self._pending_row(db, claims, wire)
             db.execute("INSERT INTO receipt VALUES (?, ?, ?, ?, ?, ?)", row)
             if checkpoint is not None:
                 # An uncertain advance leaves the feed suspended until exact repair.
                 self._advance_anchor(checkpoint, row)
 
-    def _pending_repair(self, db, claims, wire, trust):
+    def _pending_repair(self, db, claims, wire, trust, expected_enrollment):
         self._verify_local_scope(db, claims["company_id"])
         local, checkpoint = self._anchor_checkpoints(db, trust)
+        self._require_enrollment(checkpoint, expected_enrollment)
         row = self._pending_row(db, claims, wire)
         if local is None or local.append(row) != checkpoint or self._read_checkpoint() != checkpoint:
             raise ValueError("receipt does not match the single anchored interruption")
         return local, checkpoint, row
 
-    def pending_repair_checkpoints(self, wire, *, trust, now):
+    def pending_repair_checkpoints(self, wire, *, trust, now, expected_enrollment=None):
         """Read the exact checkpoints and wire digest for a repair witness."""
         claims, _ = _verify(wire, trust, self.company_id, _utc(now))
         with closing(self._connect()) as db, db:
             db.execute("PRAGMA trusted_schema=OFF")
             db.execute("PRAGMA query_only=ON")
             db.execute("BEGIN")
-            local, checkpoint, row = self._pending_repair(db, claims, wire, trust)
+            local, checkpoint, row = self._pending_repair(db, claims, wire, trust, expected_enrollment)
         return local, checkpoint, row[-1]
 
-    def reconcile_pending_receipt(self, wire, *, trust, now, authorization=None):
+    def reconcile_pending_receipt(self, wire, *, trust, now, authorization=None, expected_enrollment=None):
         """Repair exactly one missing anchored receipt without granting visibility."""
         now = _utc(now)
         claims, _ = _verify(wire, trust, self.company_id, now)
@@ -305,7 +313,7 @@ class ReceiptJournal:
             db.execute("PRAGMA trusted_schema=OFF")
             db.execute("PRAGMA synchronous=FULL")
             db.execute("BEGIN IMMEDIATE")
-            local, checkpoint, row = self._pending_repair(db, claims, wire, trust)
+            local, checkpoint, row = self._pending_repair(db, claims, wire, trust, expected_enrollment)
             if checkpoint.witnessed_enrollment_sha256 is not None:
                 witness = getattr(self.anchor, "verify_pending_repair", None)
                 if witness is None:
@@ -317,7 +325,7 @@ class ReceiptJournal:
                 raise ValueError("independent repair witness needs witnessed enrollment")
             db.execute("INSERT INTO receipt VALUES (?, ?, ?, ?, ?, ?)", row)
 
-    def transition_custody(self, current, replacement, authorization, *, now):
+    def transition_custody(self, current, replacement, authorization, *, now, expected_enrollment=None):
         """Apply an explicitly authorized replacement only from aligned local history."""
         now = _utc(now)
         _trust_matches_company(replacement, self.company_id, now)
@@ -333,7 +341,9 @@ class ReceiptJournal:
             db.execute("BEGIN IMMEDIATE")
             self._verify_local_scope(db, self.company_id)
             checkpoint = self._verify_anchor(db, current)
+            self._require_enrollment(checkpoint, expected_enrollment)
             successor = transition(checkpoint, replacement, authorization, now=now)
+            self._require_enrollment(successor, expected_enrollment)
             if self._read_checkpoint() != successor:
                 raise ValueError("custody transition could not be confirmed")
 

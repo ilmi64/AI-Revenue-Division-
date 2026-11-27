@@ -253,7 +253,11 @@ repair in a witnessed journal.
 4. Exercise restart, stale and replayed input, wrong trust, unavailable
    custody, publisher revocation or replacement, and one-company recovery
    while the peer continues. Compare the exact anchored and local states
-   before witnessed repair. Obtain a fresh exact recovery signature and
+   before witnessed repair. Pass the same protected company digest as
+   `expected_enrollment` to `pending_repair_checkpoints`,
+   `reconcile_pending_receipt` and `transition_custody`. A mismatched
+   digest blocks the operation before mutation even if both presented
+   stores omit their witness state. Obtain a fresh exact recovery signature and
    retain the authorization and readback privately. Do not restore both
    copies to a common older checkpoint or recreate a missing anchor.
 5. Require the company operator and independent custodian to attest
