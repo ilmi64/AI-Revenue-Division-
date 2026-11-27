@@ -92,3 +92,7 @@ criteria. The reviewer records model failures, instruction-following and
 limits. A successful output remains a model-quality observation. The
 separate commercial workflow and native workforce identity and approval
 controls still govern the next stage.
+
+The [rootless CPU request](revenue_rootless_pilot_approval.md) records
+the verified inert alternative and remaining workload approval
+conditions on the managed host.
