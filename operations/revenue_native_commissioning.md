@@ -110,3 +110,21 @@ Verify the build lock against that source when reviewing the candidate.
 Record a separate, platform-specific offline install lock for the actual
 distribution graph, including optional dependencies needed by the chosen
 runner.
+
+The pilot manifest now pins the Paperclip and Ruflo upstream source
+build locks by Git blob and SHA-256. During staging review, check the
+candidate archive directory and the separately staged source lock files.
+
+```sh
+python operations/check_revenue_native_artifacts.py \
+  "$candidate_archive_directory" --source-lock-directory "$source_lock_directory"
+```
+
+Archive byte matches and source build lock matches are reported separately.
+The build locks cover upstream source workspaces. Commissioning still needs
+the published-distribution dependency closure for the exact execution
+profile and approval for any required lifecycle script. If a publisher
+attestation names a different source revision from the approved manifest,
+remove that archive from the candidate execution set and retain it in
+restricted evidence custody. Resolve the difference against independently
+approved source and build provenance before promotion.

@@ -25,6 +25,7 @@
       "source_revision": "d69631b01b9c658f80bf8bed389863dce82643e1",
       "license": "MIT",
       "file": "paperclipai-server-2026.1106.0.tgz",
+      "size_bytes": 103454431,
       "source": "https://registry.npmjs.org/@paperclipai/server/-/server-2026.1106.0.tgz",
       "integrity": "sha512-OqG0qydn5Pky3iHmTgL3fvAh47m77CYgkuM3CgV6ciw6tY/AmBgkO3greyr0LinLFk7x1FdLkF1sfVVukZo/YA==",
       "attestation": "https://registry.npmjs.org/-/npm/v1/attestations/@paperclipai%2fserver@2026.1106.0"
@@ -69,6 +70,22 @@
       "source": "https://huggingface.co/Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF/resolve/f86cb2c1fa58255f8052cc32aeede1b7482d4361/qwen2.5-coder-1.5b-instruct-q4_k_m.gguf",
       "integrity": "sha256:cc324af070c2ecbfd324a30884d2f951a7ff756aba85cb811a6ec436933bb046",
       "size_bytes": 1117320768
+    }
+  ],
+  "source_locks": [
+    {
+      "file": "paperclip-source-pnpm-lock.yaml",
+      "source": "https://raw.githubusercontent.com/paperclipai/paperclip/d69631b01b9c658f80bf8bed389863dce82643e1/pnpm-lock.yaml",
+      "git_blob": "95c28f080c25654038e6e4ed641a017835f7eea4",
+      "size_bytes": 627762,
+      "integrity": "sha256:342a01e487a68d0ad9cb8d8852a0ffed4dd7b0fa58e2e047d1064e9340fe6f57"
+    },
+    {
+      "file": "ruflo-source-pnpm-lock.yaml",
+      "source": "https://raw.githubusercontent.com/ruvnet/ruflo/861179f6210d7d934ea7283fd33fb433ca8cdd29/pnpm-lock.yaml",
+      "git_blob": "29e493fb6174a9aa076b01f61cd6e77e9664c4d6",
+      "size_bytes": 239281,
+      "integrity": "sha256:41258ae5d4a47f5df7629259cda80aae4a0c9dbd05fd2425d1c599d921db61b3"
     }
   ]
 }

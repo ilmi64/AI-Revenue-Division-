@@ -55,16 +55,26 @@ def _verify(root_fd, item):
         return "MATCH" if hmac.compare_digest(result.digest(), digest) else "DIGEST_MISMATCH"
 
 
-def verify_staged(directory, manifest):
-    """Compare staged bytes without extracting archives, resolving dependencies or running code."""
+def _verify_inventory(directory, inventory):
     fd = os.open(directory, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
     try:
-        result = {item["file"]: _verify(fd, item) for item in manifest["artifacts"]}
+        return {item["file"]: _verify(fd, item) for item in inventory}
     finally:
         os.close(fd)
+
+
+def verify_staged(directory, manifest, *, source_lock_directory=None):
+    """Compare staged bytes without extracting archives, resolving dependencies or running code."""
+    result = _verify_inventory(directory, manifest["artifacts"])
+    source_locks = None
+    if source_lock_directory is not None:
+        source_locks = _verify_inventory(source_lock_directory, manifest["source_locks"])
     return {
         "artifact_checks": result,
         "all_candidate_bytes_match": bool(result) and all(status == "MATCH" for status in result.values()),
+        "source_lock_checks": source_locks,
+        "all_source_lock_bytes_match": bool(source_locks) and all(status == "MATCH" for status in source_locks.values()),
+        "distribution_dependency_closure_verified": False,
         "installation_authorized": False,
         "native_execution_verified": False,
         "release_authorized": False,
@@ -74,13 +84,18 @@ def verify_staged(directory, manifest):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("staged_directory", type=Path)
+    parser.add_argument("--source-lock-directory", type=Path, help="also check the pinned upstream build lockfiles")
     args = parser.parse_args()
     try:
-        result = verify_staged(args.staged_directory, json.loads(_MANIFEST.read_bytes()))
+        result = verify_staged(args.staged_directory, json.loads(_MANIFEST.read_bytes()),
+                               source_lock_directory=args.source_lock_directory)
     except (OSError, ValueError) as exc:
         parser.exit(2, f"Artifact check unavailable: {exc}\n")
     print(json.dumps(result, indent=2, sort_keys=True))
-    return 0 if result["all_candidate_bytes_match"] else 1
+    matches = result["all_candidate_bytes_match"]
+    if args.source_lock_directory is not None:
+        matches = matches and result["all_source_lock_bytes_match"]
+    return 0 if matches else 1
 
 
 if __name__ == "__main__":

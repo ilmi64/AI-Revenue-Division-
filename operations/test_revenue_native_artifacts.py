@@ -50,3 +50,22 @@ class NativeArtifactPreflightTests(unittest.TestCase):
         self.assertEqual(sized["weights.gguf"], "SIZE_MISMATCH")
         with self.assertRaisesRegex(ValueError, "basename"):
             verify_staged(self.stage, {"artifacts": [{"file": "../weights.gguf", "integrity": pin}]})
+
+    def test_verified_source_locks_do_not_certify_the_distribution_graph(self):
+        lock_dir = self.stage / "locks"
+        lock_dir.mkdir()
+        lock = lock_dir / "source-lock.yaml"
+        lock.write_bytes(b"data")
+        manifest = {
+            "artifacts": [],
+            "source_locks": [{"file": lock.name, "integrity": "sha256:" + sha256(b"data").hexdigest()}],
+        }
+        result = verify_staged(self.stage, manifest, source_lock_directory=lock_dir)
+        self.assertEqual(result["source_lock_checks"], {lock.name: "MATCH"})
+        self.assertTrue(result["all_source_lock_bytes_match"])
+        self.assertFalse(result["distribution_dependency_closure_verified"])
+        self.assertFalse(result["installation_authorized"])
+        lock.write_bytes(b"fake")
+        result = verify_staged(self.stage, manifest, source_lock_directory=lock_dir)
+        self.assertEqual(result["source_lock_checks"], {lock.name: "DIGEST_MISMATCH"})
+        self.assertFalse(result["all_source_lock_bytes_match"])
