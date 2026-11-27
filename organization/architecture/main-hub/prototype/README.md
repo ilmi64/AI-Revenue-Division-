@@ -304,3 +304,16 @@ deny replay, and retain the separately witnessed record. A failed or
 changing preflight stops that company for review. Real key provision,
 separate storage and staffed authorization still require operational
 verification.
+
+For commissioning against already enrolled and operator-provisioned local
+state, `preflight_protected_custody` adds file-protection checks to the existing
+witnessed checkpoint preflight. Supply independently retained enrollment and
+publisher trust, a trusted UTC clock, and the explicitly configured OS owner
+UID of each database. The receipt and authority must occupy distinct private
+directories and owner-private unaliased SQLite files. Keep both quiescent.
+The check rejects SQLite sidecars and WAL-format files before opening SQLite
+in read-only mode. It returns only redacted verification status.
+
+This verifies local file protections and existing custody alignment. Distinct
+administrators, independent restore domains, protected external enrollment
+configuration, and production key ceremonies require operator evidence.

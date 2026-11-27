@@ -132,11 +132,15 @@ class DurableReceiptAnchor:
                 db.executemany("INSERT INTO publisher_enrollment VALUES (?, ?)", enrollment_pins.items())
         return anchor
 
-    def _connect(self):
-        db = sqlite3.connect(f"{Path(self.path).resolve().as_uri()}?mode=rw", uri=True, timeout=1)
+    def _connect(self, *, read_only=False):
+        mode = "ro" if read_only else "rw"
+        db = sqlite3.connect(f"{Path(self.path).resolve().as_uri()}?mode={mode}", uri=True, timeout=1)
         try:
             db.execute("PRAGMA trusted_schema=OFF")
-            db.execute("PRAGMA synchronous=FULL")
+            if read_only:
+                db.execute("PRAGMA query_only=ON")
+            else:
+                db.execute("PRAGMA synchronous=FULL")
         except BaseException:
             db.close()
             raise
@@ -176,7 +180,8 @@ class DurableReceiptAnchor:
         return None
 
     def read(self, company_id):
-        with closing(self._connect()) as db:
+        with closing(self._connect(read_only=True)) as db, db:
+            db.execute("BEGIN")
             return self._read(db, company_id)
 
     def advance(self, expected, successor):
