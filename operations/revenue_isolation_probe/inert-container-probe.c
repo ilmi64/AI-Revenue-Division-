@@ -58,6 +58,22 @@ int main(int argc, char **argv) {
     }
     freeifaddrs(addresses);
     puts("PASS unprivileged identity, read-only input and root, invisible host canary and daemon, writable scratch, loopback only, cleared proxies, bounded files");
+    if (argc == 3 && strcmp(argv[2], "test-timeout-cleanup") == 0) {
+        int ready[2];
+        if (pipe(ready) != 0) fail("child handshake pipe");
+        pid_t child = fork();
+        if (child < 0) fail("spawn inert child");
+        if (child == 0) {
+            close(ready[0]);
+            if (setsid() == -1 || write(ready[1], "R", 1) != 1) _exit(3);
+            for (;;) pause();
+        }
+        close(ready[1]);
+        if (read(ready[0], &c, 1) != 1 || c != 'R') fail("independent child process group");
+        puts("PASS inert process tree ready, including child in separate session");
+        fflush(stdout);
+        for (;;) pause();
+    }
     if (argc == 3) {
         const rlim_t six_gib = 6ULL * 1024 * 1024 * 1024;
         struct rlimit memory = {six_gib, six_gib};

@@ -1,0 +1,1 @@
+Synthetic coding check. Return only a Python function named add that takes two integers and returns their sum. Do not use imports, tools, file access, or network access.

@@ -26,8 +26,8 @@ approved source or certify the published runtime graph. [Publisher run](https://
   `cc324af070c2ecbfd324a30884d2f951a7ff756aba85cb811a6ec436933bb046`.
   The publisher LFS pin is at `f86cb2c1fa58255f8052cc32aeede1b7482d4361`.
 - Maximum expenditure CAD $0. One unprivileged process tree, two CPU
-  threads, zero GPU layers, 6 GiB memory, at most 32 tasks, 120 seconds
-  with a 5-second termination grace, 2,048 context tokens, up to 256
+  threads, zero GPU layers, 6 GiB memory, at most 32 tasks, 120 seconds with a
+  separate bounded cleanup verification, 2,048 context tokens, up to 256
   new tokens and a 64 KiB output file. Record exit code, content hash,
   elapsed time and peak memory. Keep all output company-local.
 - No model tools, network, writable host mounts, process spawning from
@@ -44,55 +44,23 @@ approved source or certify the published runtime graph. [Publisher run](https://
 
 ## Commands for the approved host
 
-First run the local byte check. Its success does not authorize a run.
+Complete static byte verification first.
 
 ```sh
 python operations/check_revenue_native_artifacts.py "$verified_stage" --cpu-model-smoke
 ```
 
-After separate authorization, extract only the bound archive as an
-unprivileged user into a fresh directory. Inspect and retain the member
-and library inventory. Keep the original archive and model read-only.
-The checked host image must contain its own verified loader and system
-libraries. Mount no account home directories or other company files.
+After separate authorization, extract the bound archive offline as an
+unprivileged user into an empty private directory with an independently
+reviewed member inventory.
 
 ```sh
 tar --no-same-owner --no-same-permissions --keep-old-files \
   -xzf "$verified_stage/llama-b12644-bin-ubuntu-x64.tar.gz" -C "$fresh_unpack"
 ```
 
-With the independent boundary checks already passed, use a host with a
-cgroup manager supporting the shown limits. The only additional inputs
-are the read-only approved host root, exact unpacked directory,
-pinned model file and one hash-pinned synthetic prompt. Save stdout and
-stderr to the private evidence path outside the child.
-
-```sh
-systemd-run --user --wait --pipe --collect \
-  -p MemoryMax=6G -p CPUQuota=200% -p TasksMax=32 -p RuntimeMaxSec=125 \
-  timeout --kill-after=5s 120s prlimit --fsize=65536:65536 --nofile=64:64 --core=0:0 -- \
-  bwrap --unshare-all --disable-userns --die-with-parent --new-session --clearenv \
-  --ro-bind "$approved_host_root" / \
-  --ro-bind "$fresh_unpack/llama-b12644" /pilot/runtime \
-  --ro-bind "$verified_stage/qwen2.5-coder-1.5b-instruct-q4_k_m.gguf" /pilot/model.gguf \
-  --ro-bind "$approved_prompt" /pilot/prompt.txt \
-  --proc /proc --dev /dev --size 67108864 --tmpfs /tmp --chdir /tmp \
-  --setenv HOME /tmp --setenv LD_LIBRARY_PATH /pilot/runtime \
-  -- /pilot/runtime/llama-cli --single-turn --simple-io --no-display-prompt \
-  -m /pilot/model.gguf -f /pilot/prompt.txt -ngl 0 -t 2 -c 2048 -n 256 --seed 42 \
-  > "$private_evidence/output.txt" 2> "$private_evidence/runner.log"
-```
-
-Before model execution, run a vetted harmless probe with the same mount,
-namespace and resource configuration. It must verify denial of IPv4,
-IPv6, access to host and other-company paths, writes outside scratch and
-attempts to reach host credentials. Confirm process cleanup after timeout.
-The company chooses a bounded synthetic coding prompt with acceptance
-criteria. The reviewer records model failures, instruction-following and
-limits. A successful output remains a model-quality observation. The
-separate commercial workflow and native workforce identity and approval
-controls still govern the next stage.
-
-The [rootless CPU request](revenue_rootless_pilot_approval.md) records
-the verified inert alternative and remaining workload approval
-conditions on the managed host.
+The [rootless CPU request](revenue_rootless_pilot_approval.md) specifies
+the aggregate host proof, exact launcher and prompt, inner and outer
+deadlines and mandatory process-tree cleanup. Each gate must be
+satisfied before execution. The current managed host fails aggregate
+qualification.

@@ -1,99 +1,129 @@
-# Rootless CPU pilot and Ruflo security disposition
+# Rootless CPU inference approval
 
-Docker 29.9.2 rootless with gVisor runsc systrap passed an inert local
-probe. The probe compiled its own canary, pulled no image and used no
-staged executable or model. It checked UID/GID 65534, read-only root
-and input, disposable scratch, absent host workspace and Docker socket,
-cleared proxies, loopback-only interfaces and file and core limits.
-A process-limit check refused an over-limit mapping under a 6 GiB address
-space cap and blocked a fourth child in a four-task sandbox. The exact
-local `prlimit` wrapper and its three host libraries were also separately
-hashed and verified to preserve the address-space, 32-task and CPU-time
-limits across an exec of the inert canary.
+The managed rootless Docker 29.9.2 service with gVisor runsc systrap
+passed namespace, inherited process limit and forced-removal probes.
+The test image contained only locally compiled inert code and, for
+the inheritance check, the trusted local `prlimit` and its libraries.
 
 ```sh
 bash operations/revenue_isolation_probe/probe-rootless-docker.sh runsc test-inherited-limits
+bash operations/revenue_isolation_probe/probe-rootless-docker.sh runsc test-timeout-cleanup
 ```
 
-The managed daemon reports cgroup driver `none` and no container CPU,
-memory or PID controller. Docker configuration fields alone do not
-establish enforcement. The inert probe qualifies the namespace and
-per-process mechanisms for review. Require a separately verified
-cgroup-enabled existing host if approval calls for aggregate container
-limits. Bubblewrap and Landlock remain unavailable on this host.
+The probe read UID/GID 65534, a read-only root and input, loopback-only
+networking, absent host paths and daemon socket, cleared proxies and
+bounded file descriptors and output. It denied an over-limit mapping
+and verified a reduced process cap in a separate test. The timeout
+probe created a waiting child in a separate session, observed it ready,
+killed the attachment at three seconds, force-removed the container,
+and confirmed its ID disappeared. No staged component ran.
 
-## Approve one exact passive workload
+## Mandatory aggregate host qualification
 
-Maximum expenditure CAD $0. The two artifact hashes, synthetic input
-and acceptance conditions are in [the CPU pilot request](revenue_native_pilot_approval.md).
-Re-run the inert probe and recheck both staged hashes before approving
-any execution. The approved assembly record must pin the minimal local
-root image, independently reviewed `prlimit` and its dependencies,
-signed runner archive and extracted native library inventory. Use the
-exact local image digest and `--pull=never`. Keep the model and prompt
-out of the image. Approval must explicitly accept the verified
-per-process scope and the absence of a container cgroup controller.
+The managed daemon reports cgroup driver `none` with memory, swap,
+PID and CPU quota support disabled. The workspace mount is read-only
+cgroup v2 with two CPUs, 8 GiB and no PID cap for the workspace as a
+whole. Its user systemd bus is absent. Container configuration flags
+and process limits give no per-workload aggregate guarantee here. The
+launcher and in-image guard fail closed on this host. Host selection or
+controller delegation requires infrastructure owner approval and a
+rehearsal on an existing no-cost system.
 
-After separate approval, use the independently witnessed local image
-and the exact staged model and synthetic prompt. The command below is
-the candidate replacement for the prior Bubblewrap recipe.
+On the proposed host, require successful rootless daemon preflight
+and a same-profile inert probe before signing the run record.
 
 ```sh
-d() {
-  env -u DOCKER_HOST -u DOCKER_CONTEXT -u DOCKER_TLS -u DOCKER_TLS_VERIFY \
-    -u DOCKER_CERT_PATH docker --host=unix:///var/run/docker.sock "$@"
-}
-id=$(d create --runtime runsc --pull=never \
-  --read-only --network=none --log-driver=none --cap-drop=ALL --security-opt=no-new-privileges \
-  --user=65534:65534 --ulimit fsize=65536:65536 --ulimit nofile=64:64 --ulimit core=0:0 \
-  --tmpfs /tmp:rw,noexec,nosuid,nodev,size=67108864,mode=1777 \
-  --mount "type=bind,src=$verified_model,dst=/pilot/model.gguf,readonly" \
-  --mount "type=bind,src=$verified_prompt,dst=/pilot/prompt.txt,readonly" \
-  --env HOME=/tmp --env LD_LIBRARY_PATH=/pilot/runtime \
-  --env HTTP_PROXY= --env HTTPS_PROXY= --env ALL_PROXY= --env NO_PROXY= \
-  --env http_proxy= --env https_proxy= --env all_proxy= --env no_proxy= \
-  --entrypoint /usr/bin/prlimit "$approved_local_image_id" \
-  --as=6442450944:6442450944 --nproc=32:32 --cpu=240:240 -- \
-  /pilot/runtime/llama-cli --single-turn --simple-io --no-display-prompt \
-  -m /pilot/model.gguf -f /pilot/prompt.txt -ngl 0 -t 2 -c 2048 -n 256 --seed 42)
-cleanup() { d rm -f "$id" >/dev/null; }
-trap cleanup EXIT
-timeout --kill-after=5s 120s prlimit --fsize=65536:65536 -- \
-  env -u DOCKER_HOST -u DOCKER_CONTEXT -u DOCKER_TLS \
-  -u DOCKER_TLS_VERIFY -u DOCKER_CERT_PATH docker --host=unix:///var/run/docker.sock \
-  start -a "$id" > "$private_evidence/output.txt" 2> "$private_evidence/runner.log"
-test "$(d inspect -f '{{.State.ExitCode}}' "$id")" = 0
+bash operations/revenue_isolation_probe/run-approved-native-pilot.sh --preflight
+bash operations/revenue_isolation_probe/probe-rootless-docker.sh runsc test-aggregate-controls
+bash operations/revenue_isolation_probe/probe-rootless-docker.sh runsc test-timeout-cleanup
 ```
 
-Repeat the inherited-limit test against the exact approved wrapper and
-minimal root image, then verify the supervisor bounds the captured
-stdout and stderr as well as the container's writable files.
-Scope is one passive process, two compute threads, a pinned synthetic
-prompt and private output. Deny tool authority, credentials, customer
-input, repository mounts and cross-company paths. Measure elapsed time,
-observed memory, exact output digest and cleanup. Keep the original
-native workforce and independent commercial release requirements.
+The aggregate probe checks both the inner private cgroup view and
+kernel readback from the container's host PID. Require
+`cpu.max=200000 100000`, `memory.max=6442450944`,
+`memory.swap.max=0` and `pids.max=32`. Stop if either view lacks
+these limits or the host cannot prove the mapping. Independently
+review the exact no-network image, cap drops, namespace and filesystem
+inputs with Security & Recovery. Preserve an operator-owned, out-of-band
+stop procedure. Per-process address space, task, CPU-time and file
+limits provide a second layer.
 
-## Published Ruflo review
+## Exact candidate
 
-The staged wrapper and CLI are both 3.79.0 with verified publisher
-attestations on their exact bytes. The attested source's
-`v3/package-lock.json` at `861179f6210d7d934ea7283fd33fb433ca8cdd29`
-instead locks a linked CLI workspace version of 3.32.2. The archives
-supply no published runtime lock. After npm's optional dependency
-override, the shipped CLI declares 30 required direct edges. The
-source lock offers 16 compatible version entries, 13 incompatible
-entries and one missing entry. Two of 16 optional version entries
-match. None of three peer entries matches. The archived CLI postinstall
-reads AgentDB paths and contains local file writes.
+Maximum expenditure CAD $0. The approved assembly must pin the
+verified archive and GGUF from [the CPU pilot request](revenue_native_pilot_approval.md),
+the unpacked executable and library inventory, trusted GNU
+`timeout` and `prlimit` with their loader and libraries, and the
+locally compiled `require-aggregate-cgroup.c` binary. Build the latter
+from the approved source using the already approved local compiler.
 
-Keep Ruflo blocked pending an exact Linux x86-64 distribution lock,
-transitive license and advisory review, and independent lifecycle
-approval. Earlier advisory evidence qualifies source graph candidates
-only. Keep the Paperclip archives quarantined. The passive CPU request
-covers only llama.cpp and Qwen.
+```sh
+gcc -std=c11 -O2 -Wall -Wextra -Werror -static \
+  operations/revenue_isolation_probe/require-aggregate-cgroup.c \
+  -o "$approved_root/pilot/require-aggregate-cgroup"
+```
 
-The first fixed-scope coding review needs verified inbound authority,
-exact written scope, reproducible permitted checks and independent
-acceptance of the exact deliverable. Commercial release and billing
-remain separate owner decisions. [Service commissioning](revenue_fixed_scope_service_commissioning.md)
+The prepared root places `llama-cli` and its reviewed libraries under
+`/pilot/runtime` and the two trusted utilities under `/usr/bin`.
+Pin the exact local image ID, with no inherited image volumes. The
+synthetic prompt is `operations/fixtures/native-pilot-prompt.txt`
+at SHA-256 `05e35b5b43dbda72f293b70b796878d169f3e5f64187d7f59eb72d56ac471e42`.
+
+Only after owner approval to assemble and execute and independent
+Security & Recovery signoff, run the pinned capsule on the qualified
+host. Pass a fresh owner-private evidence parent with mode 0700.
+
+```sh
+python operations/check_revenue_native_artifacts.py "$verified_stage" --cpu-model-smoke
+bash operations/revenue_isolation_probe/run-approved-native-pilot.sh \
+  "$approved_local_image_id" "$verified_stage" "$private_evidence_parent"
+```
+
+The launcher uses the local Unix socket, `--pull=never`, runsc,
+a read-only root, no network or shared IPC, a 64 MiB temporary
+filesystem, no privileges, no health check and no restart.
+Only the pinned prompt and GGUF are mounted read-only. Keep the
+approved paths owner-controlled and stable through the run. Deny
+credentials, repository paths, customer content and cross-company
+data. The in-image guard checks all four aggregate values before
+invoking `timeout` and then the passive model process. It has an
+inner SIGKILL deadline of 115 seconds and an outer SIGKILL deadline
+of 120 seconds. There are two CPU threads, no GPU layers, context
+2,048, up to 256 generated tokens and seed 42. File output is
+bounded to 64 KiB per stream. Forced container removal clears the
+whole PID namespace even when a child changed process group. The
+launcher records elapsed time, output hashes, exit status and
+verified removal. The witness retains host memory peak and cgroup
+observations separately. A nonzero exit, timeout, missing evidence
+or unconfirmed cleanup invalidates the run. Suspend the approved
+host if the daemon cannot acknowledge removal. Security & Recovery
+must use its local runtime controls to terminate the named capsule
+and confirm that the exact scope is empty before another run.
+
+The fixture expects one simple Python `add` function. Review the
+output as text, without executing generated code. Record scope, exit,
+quality, containment and independent approval. Keep all output inside
+Revenue. First-service acceptance, external delivery and billing
+remain independently gated.
+
+## Ruflo and Paperclip
+
+The company-held Ruflo wrapper and CLI both attest to version 3.79.0
+and source `861179f6210d7d934ea7283fd33fb433ca8cdd29`. The source's
+`v3/package-lock.json` links CLI version 3.32.2. The shipped archives
+supply no published runtime lock. Of 30 required direct edges after npm's
+optional override, 16 match the source lock, 13 are incompatible and
+one is absent. Two of 16 optional and zero of three peer edges match.
+The published CLI bundles `@claude-flow/codex` 3.0.8,
+`@claude-flow/mcp` 3.1.8, `@claude-flow/plugin-agent-federation` 1.0.7
+and `@claude-flow/security` 3.0.8. The bundled security manifest
+still declares `zod ^4.6.7`; four embedded packages do not close the
+distribution graph. The CLI postinstall reads AgentDB paths and writes files. Retain the
+installation block until the exact published Linux x86-64 closure,
+advisory applicability, licenses and lifecycle scripts are reviewed
+independently. Keep both Paperclip archives quarantined.
+
+The first fixed-scope coding review still needs verified inbound
+authority, exact written scope, reproducible permitted checks and
+independent acceptance of the exact deliverable. Commercial release and
+billing remain separate owner decisions. [Service commissioning](revenue_fixed_scope_service_commissioning.md)
