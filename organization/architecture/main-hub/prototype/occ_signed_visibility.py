@@ -297,7 +297,7 @@ class ReceiptJournal:
 
     def pending_repair_checkpoints(self, wire, *, trust, now, expected_enrollment=None):
         """Read the exact checkpoints and wire digest for a repair witness."""
-        claims, _ = _verify(wire, trust, self.company_id, _utc(now))
+        claims, _ = _verify(wire, trust, self.company_id, _utc(now), expected_enrollment=expected_enrollment)
         with closing(self._connect()) as db, db:
             db.execute("PRAGMA trusted_schema=OFF")
             db.execute("PRAGMA query_only=ON")
@@ -308,7 +308,7 @@ class ReceiptJournal:
     def reconcile_pending_receipt(self, wire, *, trust, now, authorization=None, expected_enrollment=None):
         """Repair exactly one missing anchored receipt without granting visibility."""
         now = _utc(now)
-        claims, _ = _verify(wire, trust, self.company_id, now)
+        claims, _ = _verify(wire, trust, self.company_id, now, expected_enrollment=expected_enrollment)
         with closing(self._connect()) as db, db:
             db.execute("PRAGMA trusted_schema=OFF")
             db.execute("PRAGMA synchronous=FULL")
@@ -376,7 +376,7 @@ def _verify_m2_schema(payload):
         raise ValueError("snapshot failed pinned M2 schema validation")
 
 
-def _verify(wire, trust, company_id, now):
+def _verify(wire, trust, company_id, now, *, expected_enrollment=None):
     _trust_matches_company(trust, company_id, now)
     if not isinstance(wire, bytes) or not 0 < len(wire) <= _MAX_WIRE:
         raise ValueError("wire size is invalid")
@@ -415,6 +415,8 @@ def _verify(wire, trust, company_id, now):
     telemetry = None
     if trust.divisional_telemetry:
         payload, telemetry = split_divisional_report(payload, company_id)
+        if "resource_qualification" in telemetry and expected_enrollment is None:
+            raise ValueError("resource qualification requires independently retained witnessed enrollment")
     if company_id == "ai_revenue":
         view = _aevora_operations_view(payload)
         if claims["snapshot_id"] != f'aevora-operations-{claims["sequence"]}':
@@ -488,7 +490,7 @@ def build_authenticated_visibility(
                 raise ValueError("receipt journal is unavailable")
             if isolated and receipt_journal.company_id != company_id:
                 raise ValueError("receipt journal is not company-scoped")
-            claims, view = _verify(wire, trust, company_id, now)
+            claims, view = _verify(wire, trust, company_id, now, expected_enrollment=expected_enrollment)
             if trust.divisional_telemetry and (
                 receipt_journal.company_id != company_id or receipt_journal.anchor is None
             ):

@@ -11,7 +11,7 @@ from occ_mobile_visibility import render_mobile_visibility
 from occ_publisher_enrollment import (
     PublisherEnrollment, publisher_enrollment_bytes, witness_enrollment_bytes,
 )
-from occ_signed_visibility import ReceiptJournal, build_authenticated_visibility
+from occ_signed_visibility import ReceiptJournal, build_authenticated_visibility, sign_fixture
 
 
 AI, TRADING, NOW = fixture.AI, fixture.TRADING, fixture.NOW
@@ -152,3 +152,47 @@ class PublisherEnrollmentTests(unittest.TestCase):
         self.assertEqual(html.count("Witnessed enrollment matched"), 2)
         for pin in anchor.enrollment_pins.values():
             self.assertNotIn(pin, html)
+
+    def test_company_resource_qualification_requires_witnessed_enrollment_and_stays_scoped(self):
+        self.trust = {company: replace(trust, divisional_telemetry=True) for company, trust in self.trust.items()}
+        self.scopes = {company: (journal_id, self.trust[company])
+                       for company, (journal_id, _) in self.scopes.items()}
+        proofs = {company: (challenge, self.prove(company)) for company, challenge in self.challenges.items()}
+        anchor = self.initialize(enrollments=proofs)
+        journals = {
+            company: ReceiptJournal.initialize(self.path / f"{company}-resource.sqlite",
+                                                company_id=company, anchor=anchor)
+            for company in self.scopes
+        }
+
+        def wire(company, resources):
+            incidents = {"open_incident_count": 0, "pending_approval_count": 1,
+                         "blocker_count": 0 if company == AI else len(self.trading["blockers"])}
+            payload = {"report": self.ai if company == AI else self.trading, "divisional_telemetry": {
+                "company_totals": incidents, "divisions": {}, "resource_qualification": resources,
+            }}
+            return sign_fixture(payload, trust=self.trust[company], sequence=1, issued_at=NOW,
+                                expires_at=NOW + timedelta(seconds=30), private_key=self.keys[company])
+
+        ai_wire = wire(AI, {"native_workforce": "BLOCKED"})
+        trading_wire = wire(TRADING, {"historical_data": "STAGED_FOR_REVIEW"})
+        common = {"trust_by_company": self.trust, "journal_by_company": journals, "now": NOW}
+        missing_pin = build_authenticated_visibility(ai_revenue_wire=ai_wire, **common)
+        self.assertEqual(missing_pin["companies"][AI]["input_status"], "REJECTED")
+
+        strict = {**common, "witnessed_enrollment_pins": anchor.enrollment_pins}
+        for bad in ({"historical_data": "BLOCKED"}, {"native_workforce": "RELEASED"},
+                    {"native_workforce": {"secret_path": "private"}}, {}):
+            with self.subTest(bad=bad):
+                rejected = build_authenticated_visibility(ai_revenue_wire=wire(AI, bad), **strict)
+                self.assertEqual(rejected["companies"][AI]["input_status"], "REJECTED")
+                self.assertEqual(anchor.read(AI).count, 0)
+        result = build_authenticated_visibility(ai_revenue_wire=ai_wire, trading_wire=trading_wire, **strict)
+        ai_card, trading_card = render_mobile_visibility(result).split('<article aria-labelledby="trading_technology">')
+        self.assertIn("Native workforce</dt><dd>Blocked", ai_card)
+        self.assertNotIn("Historical data", ai_card)
+        self.assertIn("Historical data</dt><dd>Staged for review", trading_card)
+        self.assertNotIn("Native workforce", trading_card)
+        self.assertFalse(result["operational_claim"])
+        self.assertEqual(anchor.read(AI).count, 1)
+        self.assertEqual(anchor.read(TRADING).count, 1)

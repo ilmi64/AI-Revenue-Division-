@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from html import escape
 
 from occ_company_visibility import AEVORA_COUNTS, COMMON_SUBSYSTEMS, COMPANY_SUBSYSTEMS
-from occ_divisional_telemetry import COUNTER_FIELDS, DIVISIONS
+from occ_divisional_telemetry import COUNTER_FIELDS, DIVISIONS, RESOURCE_FIELDS, RESOURCE_STATUSES
 from occ_readonly import VALID_GATE, VALID_SUBSYSTEM
 
 
@@ -33,6 +33,13 @@ _COUNT_LABELS = {
     "open_incident_count": "Open incidents",
     "pending_approval_count": "Pending approvals",
     "blocker_count": "Unresolved blockers",
+}
+_RESOURCE_LABELS = {
+    "native_workforce": "Native workforce",
+    "coding_service": "Coding service",
+    "historical_data": "Historical data",
+    "paper_operations": "Paper operations",
+    "publisher_custody": "Publisher custody",
 }
 
 # Palette and scorecard styling from the existing offline OCC dashboard.
@@ -131,6 +138,12 @@ def _panel(company, heading, view):
         content += _receipt_window_facts(view.get("verified_receipt_window"))
     if telemetry:
         content += _divisional_counts(company, telemetry)
+        resources = _map(telemetry.get("resource_qualification"))
+        if resources and view.get("verified_witnessed_enrollment") is True:
+            content += "<h3>Reported resource qualification</h3>" + _facts(
+                (_RESOURCE_LABELS[key], _text(resources.get(key), RESOURCE_STATUSES))
+                for key in RESOURCE_FIELDS[company]
+            )
     if show_counts and (company == "trading_technology" or heading == "Snapshot"):
         subsystems = _map(view.get("reported_subsystem_statuses"))
         gates = _map(view.get("reported_gate_counts"))

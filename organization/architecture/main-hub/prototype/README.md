@@ -269,3 +269,15 @@ Local tests and SQLite exercise the protocol. Production still requires
 a trusted clock, independent custody with anti-rollback controls and
 company-controlled publisher provisioning. The compatible fixture call
 without separately retained pins is for the offline fixture path.
+
+Company-scoped resource qualification can be included in a signed
+`divisional_telemetry.resource_qualification` object. Revenue can report
+`native_workforce`, `coding_service` and `publisher_custody`. Trading can
+report `historical_data`, `paper_operations` and `publisher_custody`.
+The permitted values are `BLOCKED`, `STAGED_FOR_REVIEW`,
+`APPROVAL_REQUIRED` and `NOT_VERIFIED`. Missing items remain unknown.
+The verifier requires the company's separately retained witnessed
+enrollment pin before accepting a signed report containing these fields.
+The mobile view shows the bounded company statuses. Keep artifact paths,
+credentials, digests, dataset rows and release decisions in each company's
+private operating record.
