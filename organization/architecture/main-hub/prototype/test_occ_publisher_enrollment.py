@@ -63,6 +63,34 @@ class PublisherEnrollmentTests(unittest.TestCase):
         self.assertEqual(reopened.read(AI).count, 1)
         self.assertEqual(reopened.read(TRADING).count, 1)
 
+    def test_custody_preflight_is_read_only_and_detects_rollback_without_consuming_receipt(self):
+        anchor = self.initialize()
+        journal_path = self.path / "preflight.sqlite"
+        journal = ReceiptJournal.initialize(journal_path, company_id=AI, anchor=anchor)
+        anchor_before, journal_before = anchor.path.read_bytes(), journal_path.read_bytes()
+        options = {"trust": self.trust[AI], "now": NOW, "expected_enrollment": anchor.enrollment_pins[AI]}
+        self.assertEqual(journal.preflight_witnessed_custody(**options), {
+            "company_id": AI, "checkpoints_aligned": True,
+            "witnessed_enrollment_verified": True, "operational_claim": False,
+        })
+        for wrong in (None, anchor.enrollment_pins[TRADING], True):
+            with self.subTest(wrong=wrong), self.assertRaisesRegex(ValueError, "independently retained enrollment"):
+                journal.preflight_witnessed_custody(**{**options, "expected_enrollment": wrong})
+        self.assertEqual(anchor.path.read_bytes(), anchor_before)
+        self.assertEqual(journal_path.read_bytes(), journal_before)
+        report = build_authenticated_visibility(
+            ai_revenue_wire=self.sign(AI, 1), trust_by_company=self.trust,
+            journal_by_company={AI: journal}, witnessed_enrollment_pins=anchor.enrollment_pins, now=NOW,
+        )
+        self.assertEqual(report["companies"][AI]["authentication"], "AUTHENTICATED_OFFLINE")
+        rolled_path = self.path / "rolled.sqlite"
+        rolled_path.write_bytes(journal_before)
+        rolled = ReceiptJournal(rolled_path, AI, anchor)
+        with self.assertRaisesRegex(ValueError, "does not match the independent checkpoint"):
+            rolled.preflight_witnessed_custody(**options)
+        self.assertEqual(rolled_path.read_bytes(), journal_before)
+        self.assertEqual(anchor.read(TRADING).count, 0)
+
     def test_wrong_signer_or_witness_leaves_authority_unprovisioned(self):
         for proof in (self.prove(AI, signing_company=TRADING),
                       self.prove(AI, witness_company=TRADING),

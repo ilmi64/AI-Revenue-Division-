@@ -281,3 +281,26 @@ enrollment pin before accepting a signed report containing these fields.
 The mobile view shows the bounded company statuses. Keep artifact paths,
 credentials, digests, dataset rows and release decisions in each company's
 private operating record.
+
+### Operator enrollment and recovery preflight
+
+The company custodian retains the enrollment digest independently of
+both stores. After provisioning, the verifier calls
+`journal.preflight_witnessed_custody(trust=company_trust, now=trusted_utc,
+expected_enrollment=retained_digest)` before a witnessed test receipt or
+after exact witnessed repair. It reads the local journal in SQLite
+read-only mode, verifies company and publisher scope, compares the
+independently retained enrollment, and checks that local and independent
+checkpoint histories agree. It returns a company-scoped status without
+receipt details, key material, sequence counters or release authority.
+
+Assign a company publisher, independent custodian, verifier operator
+and witness before the exercise. Keep the private enrollment packet
+and source evidence company-local. Take a scoped baseline, interrupt
+only the designated journal with an approved synthetic receipt,
+confirm the peer continues to report, and perform exact witnessed
+repair through the existing recovery path. Recheck custody alignment,
+deny replay, and retain the separately witnessed record. A failed or
+changing preflight stops that company for review. Real key provision,
+separate storage and staffed authorization still require operational
+verification.

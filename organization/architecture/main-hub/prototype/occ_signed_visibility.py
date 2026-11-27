@@ -248,8 +248,26 @@ class ReceiptJournal:
         if self._read_checkpoint() != successor:
             raise ValueError("independent receipt checkpoint did not confirm the update")
 
-    def _connect(self):
-        return sqlite3.connect(f"{Path(self.path).resolve().as_uri()}?mode=rw", uri=True, timeout=1)
+    def _connect(self, *, read_only=False):
+        mode = "ro" if read_only else "rw"
+        return sqlite3.connect(f"{Path(self.path).resolve().as_uri()}?mode={mode}", uri=True, timeout=1)
+
+    def preflight_witnessed_custody(self, *, trust, now, expected_enrollment):
+        """Check the enrolled publisher and aligned custody without consuming a receipt."""
+        if expected_enrollment is None:
+            raise ValueError("independently retained enrollment is required for custody preflight")
+        _trust_matches_company(trust, self.company_id, _utc(now))
+        with closing(self._connect(read_only=True)) as db, db:
+            db.execute("PRAGMA trusted_schema=OFF")
+            db.execute("PRAGMA query_only=ON")
+            db.execute("BEGIN")
+            self._verify_local_scope(db, self.company_id)
+            checkpoint = self._verify_anchor(db, trust)
+            self._require_enrollment(checkpoint, expected_enrollment)
+            if self._read_checkpoint() != checkpoint:
+                raise ValueError("independent receipt checkpoint changed during preflight")
+        return {"company_id": self.company_id, "checkpoints_aligned": True,
+                "witnessed_enrollment_verified": True, "operational_claim": False}
 
     def _verify_local_scope(self, db, expected_company):
         bound_journal = db.execute(
