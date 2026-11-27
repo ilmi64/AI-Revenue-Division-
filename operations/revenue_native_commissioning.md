@@ -128,3 +128,8 @@ attestation names a different source revision from the approved manifest,
 remove that archive from the candidate execution set and retain it in
 restricted evidence custody. Resolve the difference against independently
 approved source and build provenance before promotion.
+
+See [the bounded CPU inference approval request](revenue_native_pilot_approval.md)
+for the exact candidate setup and isolation criteria, and
+[fixed-scope coding review commissioning](revenue_fixed_scope_service_commissioning.md)
+for the first commercial operator workflow.

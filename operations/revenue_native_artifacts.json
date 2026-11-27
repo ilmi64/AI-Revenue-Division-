@@ -2,6 +2,10 @@
   "schema_version": 1,
   "status": "CANDIDATES_PENDING_APPROVAL",
   "platform": "linux-x86_64",
+  "cpu_smoke_files": [
+    "llama-b12644-bin-ubuntu-x64.tar.gz",
+    "qwen2.5-coder-1.5b-instruct-q4_k_m.gguf"
+  ],
   "host_requirements": {
     "node_minimum": "24.11.0",
     "pnpm_minimum": "9.15.0",

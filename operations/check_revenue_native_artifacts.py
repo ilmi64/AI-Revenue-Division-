@@ -63,14 +63,21 @@ def _verify_inventory(directory, inventory):
         os.close(fd)
 
 
-def verify_staged(directory, manifest, *, source_lock_directory=None):
+def verify_staged(directory, manifest, *, source_lock_directory=None, cpu_model_smoke=False):
     """Compare staged bytes without extracting archives, resolving dependencies or running code."""
-    result = _verify_inventory(directory, manifest["artifacts"])
+    inventory = manifest["artifacts"]
+    if cpu_model_smoke:
+        selected_files = set(manifest["cpu_smoke_files"])
+        inventory = [item for item in inventory if item["file"] in selected_files]
+        if len(selected_files) != 2 or len(inventory) != 2 or {item["file"] for item in inventory} != selected_files:
+            raise ValueError("CPU model smoke requires the exact two pinned candidates")
+    result = _verify_inventory(directory, inventory)
     source_locks = None
     if source_lock_directory is not None:
         source_locks = _verify_inventory(source_lock_directory, manifest["source_locks"])
     return {
         "artifact_checks": result,
+        "candidate_scope": "CPU_MODEL_SMOKE" if cpu_model_smoke else "FULL_WORKFORCE_CANDIDATES",
         "all_candidate_bytes_match": bool(result) and all(status == "MATCH" for status in result.values()),
         "source_lock_checks": source_locks,
         "all_source_lock_bytes_match": bool(source_locks) and all(status == "MATCH" for status in source_locks.values()),
@@ -85,10 +92,11 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("staged_directory", type=Path)
     parser.add_argument("--source-lock-directory", type=Path, help="also check the pinned upstream build lockfiles")
+    parser.add_argument("--cpu-model-smoke", action="store_true", help="check only the two pinned CPU inference artifacts")
     args = parser.parse_args()
     try:
         result = verify_staged(args.staged_directory, json.loads(_MANIFEST.read_bytes()),
-                               source_lock_directory=args.source_lock_directory)
+                               source_lock_directory=args.source_lock_directory, cpu_model_smoke=args.cpu_model_smoke)
     except (OSError, ValueError) as exc:
         parser.exit(2, f"Artifact check unavailable: {exc}\n")
     print(json.dumps(result, indent=2, sort_keys=True))

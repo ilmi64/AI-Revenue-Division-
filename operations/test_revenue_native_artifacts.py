@@ -69,3 +69,21 @@ class NativeArtifactPreflightTests(unittest.TestCase):
         result = verify_staged(self.stage, manifest, source_lock_directory=lock_dir)
         self.assertEqual(result["source_lock_checks"], {lock.name: "DIGEST_MISMATCH"})
         self.assertFalse(result["all_source_lock_bytes_match"])
+
+    def test_cpu_smoke_checks_only_selected_files_and_grants_no_authority(self):
+        for path in ("runner.tar.gz", "model.gguf"):
+            (self.stage / path).write_bytes(b"data")
+        manifest = {
+            "cpu_smoke_files": ["runner.tar.gz", "model.gguf"],
+            "artifacts": [{"file": path, "integrity": "sha256:" + sha256(b"data").hexdigest()}
+                          for path in ("runner.tar.gz", "model.gguf", "quarantined.tgz")],
+        }
+        full = verify_staged(self.stage, manifest)
+        self.assertEqual(full["artifact_checks"]["quarantined.tgz"], "MISSING")
+        smoke = verify_staged(self.stage, manifest, cpu_model_smoke=True)
+        self.assertEqual(smoke["artifact_checks"], {"runner.tar.gz": "MATCH", "model.gguf": "MATCH"})
+        self.assertEqual(smoke["candidate_scope"], "CPU_MODEL_SMOKE")
+        self.assertTrue(smoke["all_candidate_bytes_match"])
+        self.assertIs(smoke["installation_authorized"], False)
+        self.assertIs(smoke["native_execution_verified"], False)
+        self.assertIs(smoke["release_authorized"], False)
